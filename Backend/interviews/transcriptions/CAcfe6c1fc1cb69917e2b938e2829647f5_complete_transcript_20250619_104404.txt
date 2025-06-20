@@ -1,0 +1,48 @@
+ONELAB VENTURES - INTERVIEW WITH REAL-TIME VALIDATION
+==========================================================
+Call ID: CAcfe6c1fc1cb69917e2b938e2829647f5
+Date: 20250619_104404
+Company: Onelab Ventures
+Interviewer: AI Assistant with Validation
+Total Questions: 7
+==========================================================
+
+VALIDATION RESULTS:
+
+INTERVIEW QUESTIONS & ANSWERS:
+
+QUESTION 1: Introduce yourself.
+ANSWER 1: Transcription timeout
+----------------------------------------------------------------------
+
+QUESTION 2: What are your key skills for this role?
+ANSWER 2: I think uh my key skills are Python, Java, C++, React, and JavaScript.
+----------------------------------------------------------------------
+
+QUESTION 3: Are you open to relocation or looking for remote work?
+ANSWER 3: Uh, I'm available for relocation as well. I can, uh, Relocate to your office in on-site Pune. OK, so yeah.
+----------------------------------------------------------------------
+
+QUESTION 4: The first interview round will be on-site. Can you attend in person?
+ANSWER 4: Yes, I can attend the first interview round which will be on site in Pune Hijayawadi. I will be available for the on-site round as well.
+----------------------------------------------------------------------
+
+QUESTION 5: What is your current notice period?
+ANSWER 5: Uh, my current notice period is around 30 days. And yeah, it is 30 days only.
+----------------------------------------------------------------------
+
+QUESTION 6: What is your current CTC and expected salary?
+ANSWER 6: My current CDC is around 7 LPA, but I expect it around 30 LPA 10 LPA. I expect it around. N LPA.
+----------------------------------------------------------------------
+
+QUESTION 7: If selected, how soon can you join?
+ANSWER 7: Transcription timeout
+----------------------------------------------------------------------
+
+==========================================================
+END OF INTERVIEW
+Company: Onelab Ventures
+Interview Duration: 7 questions completed out of 7
+Status: COMPLETED
+Validation: PASSED ALL
+==========================================================

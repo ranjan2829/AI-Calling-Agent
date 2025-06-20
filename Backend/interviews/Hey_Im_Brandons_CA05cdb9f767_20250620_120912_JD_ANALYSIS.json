@@ -1,0 +1,57 @@
+{
+  "call_id": "CA05cdb9f767c656f7e51d108b0e5f8eea",
+  "candidate_name": "Hey_Im_Brandons",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python",
+      "java",
+      "C++",
+      "React",
+      "javascript"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [
+      "java"
+    ],
+    "missing_skills": [
+      "python",
+      "C++",
+      "React",
+      "javascript"
+    ],
+    "skills_match_percentage": 20.0,
+    "experience_match_percentage": 50,
+    "overall_score": 26.0,
+    "comprehensive_score": 26.0,
+    "priority_score": 1,
+    "recommendation": "LOW MATCH",
+    "analysis_date": "2025-06-20 12:09:12",
+    "skill_mentions": {
+      "java": 8
+    },
+    "experience_data": {
+      "years_mentioned": [],
+      "experience_score": 0
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "unknown",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [
+      "java"
+    ],
+    "skills_found_count": 1,
+    "total_required_skills": 5,
+    "phone_number": "unknown"
+  },
+  "interview_summary": {
+    "questions_answered": 7,
+    "total_questions": 5,
+    "completion_rate": "7/5"
+  },
+  "analysis_created": "2025-06-20 12:09:12"
+}

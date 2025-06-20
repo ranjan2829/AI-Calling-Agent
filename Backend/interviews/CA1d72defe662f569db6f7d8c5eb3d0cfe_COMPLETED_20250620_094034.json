@@ -1,0 +1,94 @@
+{
+  "interview_id": "CA1d72defe662f569db6f7d8c5eb3d0cfe",
+  "current_question": 8,
+  "responses": [
+    {
+      "question": "Introduce yourself.",
+      "answer": "Ohh. Hey, my name is Angela Dolan. I'm returning a engineer graduate from University with CBR 4.9.  And I'm currently looking at 11, she has an associate SD.",
+      "confidence": 0.5760671,
+      "timestamp": "2025-06-20T09:38:14.224747",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "Mike, he's going to stop biting Java C, plus plus react and JavaScript and type script. And the state of the school in addition, dog. Ohh for deployment.",
+      "confidence": 0.6289512,
+      "timestamp": "2025-06-20T09:38:40.996437",
+      "question_number": 2
+    },
+    {
+      "question": "Are you open to relocation or looking for remote work?",
+      "answer": "Well, I'm open to relocation but welcome home would be also better idea relocation. I'm open to it.",
+      "confidence": 0.6529557,
+      "timestamp": "2025-06-20T09:39:06.791698",
+      "question_number": 3
+    },
+    {
+      "question": "The first interview round will be on-site. Can you attend in person?",
+      "answer": "Yes, I good. I've been been boson. I can come to a location in attending.",
+      "confidence": 0.6047188,
+      "timestamp": "2025-06-20T09:39:30.282754",
+      "question_number": 4
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "What am I going to do this? But it is around 0 days. I don't have any notice period.",
+      "confidence": 0.67878103,
+      "timestamp": "2025-06-20T09:39:51.735030",
+      "question_number": 5
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "When'd, emergency disease the LPN, my expectations of 0.",
+      "confidence": 0.6112032,
+      "timestamp": "2025-06-20T09:40:13.889166",
+      "question_number": 6
+    },
+    {
+      "question": "If selected, how soon can you join?",
+      "answer": "I've been doing quickly and as soon as possible,",
+      "confidence": 0.6662636,
+      "timestamp": "2025-06-20T09:40:34.598160",
+      "question_number": 7
+    }
+  ],
+  "silence_prompts": 0,
+  "start_time": "2025-06-20T09:37:39.526875",
+  "validation_results": {
+    "2": {
+      "step": 2,
+      "passed": true,
+      "reason": "",
+      "skills_match": true,
+      "found_skills": [
+        "java",
+        "React",
+        "javascript"
+      ],
+      "match_percentage": 60.0
+    },
+    "3": {
+      "step": 3,
+      "passed": true,
+      "reason": "",
+      "relocation_willing": true
+    },
+    "4": {
+      "step": 4,
+      "passed": true,
+      "reason": "",
+      "onsite_available": true
+    },
+    "5": {
+      "step": 5,
+      "passed": true,
+      "reason": "",
+      "notice_acceptable": true,
+      "notice_days": 15
+    }
+  },
+  "status": "COMPLETED",
+  "last_activity": "2025-06-20T09:40:34.598176",
+  "end_time": "2025-06-20T09:40:34.599854",
+  "completion_time": "2025-06-20T09:40:34.599860"
+}

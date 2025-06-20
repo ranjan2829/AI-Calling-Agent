@@ -1,0 +1,9 @@
+INTERVIEW QUESTION 1
+Timestamp: 20250617_133151
+Call ID: CA20286871355bbb72b3841af4307d396f
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Question: Hello! I'm Sarah, your AI interviewer. Could you please tell me your name and briefly describe your professional background?
+
+Candidate Answer:
+Uh, yeah, well, I'm Ranjan.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

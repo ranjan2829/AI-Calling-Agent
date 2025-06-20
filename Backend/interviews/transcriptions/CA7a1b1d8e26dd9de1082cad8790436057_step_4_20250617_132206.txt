@@ -1,0 +1,6 @@
+Interview Step 4
+Timestamp: 20250617_132206
+Call SID: CA7a1b1d8e26dd9de1082cad8790436057
+Question: Excellent technical background! Now for a behavioral question: Can you tell me about a time when you had to work with a difficult team member or handle a challenging interpersonal situation? How did you approach it?
+Candidate Response: Transcription error: Parameter validation failed:
+Invalid value for parameter Settings.MaxSpeakerLabels, value: 1, valid min value: 2

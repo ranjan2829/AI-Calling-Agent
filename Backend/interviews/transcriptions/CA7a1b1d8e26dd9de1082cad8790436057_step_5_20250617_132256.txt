@@ -1,0 +1,6 @@
+Interview Step 5
+Timestamp: 20250617_132256
+Call SID: CA7a1b1d8e26dd9de1082cad8790436057
+Question: I appreciate that thoughtful response! Here's a problem-solving scenario: Imagine you're given a project with a tight deadline, but halfway through, the requirements change significantly. How would you handle this situation?
+Candidate Response: Transcription error: Parameter validation failed:
+Invalid value for parameter Settings.MaxSpeakerLabels, value: 1, valid min value: 2

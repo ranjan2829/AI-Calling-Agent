@@ -1,0 +1,6 @@
+Interview Step 2
+Timestamp: 20250617_132120
+Call SID: CA7a1b1d8e26dd9de1082cad8790436057
+Question: Great to meet you! Now, I'd love to hear more about your current role. What are your main responsibilities, and what do you enjoy most about your work?
+Candidate Response: Transcription error: Parameter validation failed:
+Invalid value for parameter Settings.MaxSpeakerLabels, value: 1, valid min value: 2

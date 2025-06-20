@@ -1,0 +1,6 @@
+Interview Step 1
+Timestamp: 20250617_132101
+Call SID: CA7a1b1d8e26dd9de1082cad8790436057
+Question: Hello! I'm Sarah, your AI interviewer today. I'm excited to learn about you! Could you start by telling me your name and giving me a brief overview of your professional background?
+Candidate Response: Transcription error: Parameter validation failed:
+Invalid value for parameter Settings.MaxSpeakerLabels, value: 1, valid min value: 2

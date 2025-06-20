@@ -1,0 +1,48 @@
+ONELAB VENTURES - INTERVIEW WITH REAL-TIME VALIDATION
+==========================================================
+Call ID: CA07c14fb164cc7b1b697c33d1b95bd802
+Date: 20250618_160314
+Company: Onelab Ventures
+Interviewer: AI Assistant with Validation
+Total Questions: 7
+==========================================================
+
+VALIDATION RESULTS:
+
+INTERVIEW QUESTIONS & ANSWERS:
+
+QUESTION 1: Introduce yourself.
+ANSWER 1: My name is Ruhaan. I have total 3 years of experience in tech development and I'm currently working with XYZ company.
+----------------------------------------------------------------------
+
+QUESTION 2: What are your key skills for this role?
+ANSWER 2: Mm, JavaScript, React, AWS, Python, and GCP. OK, not
+----------------------------------------------------------------------
+
+QUESTION 3: Are you open to relocation or looking for remote work?
+ANSWER 3: Yes. Yes.
+----------------------------------------------------------------------
+
+QUESTION 4: The first interview round will be on-site. Can you attend in person?
+ANSWER 4: Yes.
+----------------------------------------------------------------------
+
+QUESTION 5: What is your current notice period?
+ANSWER 5: My current notice period is 30 days.
+----------------------------------------------------------------------
+
+QUESTION 6: What is your current CTC and expected salary?
+ANSWER 6: My current CDC is 8.4 LPA and I am expecting 14 LPA.
+----------------------------------------------------------------------
+
+QUESTION 7: If selected, how soon can you join?
+ANSWER 7: Within one week.
+----------------------------------------------------------------------
+
+==========================================================
+END OF INTERVIEW
+Company: Onelab Ventures
+Interview Duration: 7 questions completed out of 7
+Status: COMPLETED
+Validation: PASSED ALL
+==========================================================

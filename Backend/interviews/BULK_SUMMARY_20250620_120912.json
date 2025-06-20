@@ -1,0 +1,47 @@
+{
+  "total_candidates": 3,
+  "analysis_date": "2025-06-20 12:09:12",
+  "candidates": [
+    {
+      "name": "My_Name",
+      "call_id": "CA9098a3881ffce99918c042d70efb5abf",
+      "overall_score": 58.0,
+      "recommendation": "GOOD MATCH",
+      "matched_skills": [
+        "java",
+        "React",
+        "javascript"
+      ],
+      "analysis_file": "interviews/My_Name_CA9098a3881f_20250620_103337_JD_ANALYSIS.json"
+    },
+    {
+      "name": "Ohh_Hey_My",
+      "call_id": "CA1d72defe662f569db6f7d8c5eb3d0cfe",
+      "overall_score": 58.0,
+      "recommendation": "GOOD MATCH",
+      "matched_skills": [
+        "java",
+        "React",
+        "javascript"
+      ],
+      "analysis_file": "interviews/Ohh_Hey_My_CA1d72defe66_20250620_103337_JD_ANALYSIS.json"
+    },
+    {
+      "name": "Hey_Im_Brandons",
+      "call_id": "CA05cdb9f767c656f7e51d108b0e5f8eea",
+      "overall_score": 26.0,
+      "recommendation": "LOW MATCH",
+      "matched_skills": [
+        "java"
+      ],
+      "analysis_file": "interviews/Hey_Im_Brandons_CA05cdb9f767_20250620_120912_JD_ANALYSIS.json"
+    }
+  ],
+  "statistics": {
+    "excellent_match": 0,
+    "strong_match": 0,
+    "good_match": 2,
+    "moderate_match": 0,
+    "low_match": 1
+  }
+}

@@ -1,0 +1,6 @@
+Interview Step 3
+Timestamp: 20250617_132143
+Call SID: CA7a1b1d8e26dd9de1082cad8790436057
+Question: That sounds fascinating! Let's talk about your technical skills. What technologies, tools, or methodologies are you most proficient in, and which ones do you enjoy working with?
+Candidate Response: Transcription error: Parameter validation failed:
+Invalid value for parameter Settings.MaxSpeakerLabels, value: 1, valid min value: 2

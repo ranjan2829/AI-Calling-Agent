@@ -1,0 +1,95 @@
+{
+  "interview_id": "CA05cdb9f767c656f7e51d108b0e5f8eea",
+  "current_question": 8,
+  "responses": [
+    {
+      "question": "Introduce yourself.",
+      "answer": "Hey, I'm Brandon's Italy. I'm Tom winning. And I've, there's bad weather doesn't a year engineer from University, would see if you'd be up 8.9. My current extras working with Am motors, addendums and billing and vision systems.",
+      "confidence": 0.617505,
+      "timestamp": "2025-06-20T10:47:44.438243",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "Mike, he's going to bison, Java C plus, plus 4 x and Java Script type script and it'll be returned to finish. Talk about the gram, Advanced Micro services",
+      "confidence": 0.5670437,
+      "timestamp": "2025-06-20T10:48:13.537829",
+      "question_number": 2
+    },
+    {
+      "question": "Are you open to relocation or looking for remote work?",
+      "answer": "I'm open to relocation as well but my mom would be better. But yeah, I relocation, I'm open to it.",
+      "confidence": 0.6767375,
+      "timestamp": "2025-06-20T10:48:38.401351",
+      "question_number": 3
+    },
+    {
+      "question": "The first interview round will be on-site. Can you attend in person?",
+      "answer": "Yes, I good afternoon Devotion to be around on site.  What is the time in the meeting? Just a reward credit rating.  leaving a ninja Me by default am th s tomboys and then next person with Erica because a 5 Second 7  just rated R.  15 seconds of recording time, that would recording and monitoring.",
+      "confidence": 0.6820705,
+      "timestamp": "2025-06-20T10:49:45.069669",
+      "question_number": 4
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "Yes, I good afternoon Devotion to be around on site.  What is the time in the meeting? Just a reward credit rating.  leaving a ninja Me by default am th s tomboys and then next person with Erica because a 5 Second 7  just rated R.  15 seconds of recording time, that would recording and monitoring.",
+      "confidence": 0.6820705,
+      "timestamp": "2025-06-20T12:09:11.136336",
+      "question_number": 5
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "Yes, I good afternoon Devotion to be around on site.  What is the time in the meeting? Just a reward credit rating.  leaving a ninja Me by default am th s tomboys and then next person with Erica because a 5 Second 7  just rated R.  15 seconds of recording time, that would recording and monitoring.",
+      "confidence": 0.6820705,
+      "timestamp": "2025-06-20T12:09:11.904201",
+      "question_number": 6
+    },
+    {
+      "question": "If selected, how soon can you join?",
+      "answer": "Yes, I good afternoon Devotion to be around on site.  What is the time in the meeting? Just a reward credit rating.  leaving a ninja Me by default am th s tomboys and then next person with Erica because a 5 Second 7  just rated R.  15 seconds of recording time, that would recording and monitoring.",
+      "confidence": 0.6820705,
+      "timestamp": "2025-06-20T12:09:12.164585",
+      "question_number": 7
+    }
+  ],
+  "silence_prompts": 0,
+  "start_time": "2025-06-20T10:47:07.272027",
+  "validation_results": {
+    "2": {
+      "step": 2,
+      "passed": true,
+      "reason": "",
+      "skills_match": true,
+      "found_skills": [
+        "java"
+      ],
+      "match_percentage": 20.0
+    },
+    "3": {
+      "step": 3,
+      "passed": true,
+      "reason": "",
+      "relocation_willing": true
+    },
+    "4": {
+      "step": 4,
+      "passed": false,
+      "reason": "Cannot attend onsite interview",
+      "onsite_available": false
+    },
+    "5": {
+      "step": 5,
+      "passed": true,
+      "reason": "",
+      "notice_acceptable": true,
+      "notice_days": 15
+    }
+  },
+  "status": "COMPLETED",
+  "last_activity": "2025-06-20T12:09:12.164593",
+  "termination_reason": "onsite_no",
+  "end_time": "2025-06-20T12:09:12.165166",
+  "completion_time": "2025-06-20T12:09:12.165182",
+  "phone_number": "unknown",
+  "twilio_number": "+14067601762"
+}
