@@ -1,0 +1,102 @@
+{
+  "CAc36008e3b96a5b5159d9958002764c76": {
+    "candidate_name": "John Doe",
+    "candidate_phone": "917387792437",
+    "candidate_data": "Senior Python Developer with 5 years experience in web development",
+    "bulk_call_id": "bulk_1750656997",
+    "is_bulk_call": true,
+    "contact_index": 0
+  },
+  "CAab223cd08833a2e8471ec3ebd26e2203": {
+    "candidate_name": "John Doe",
+    "candidate_phone": "917387792437",
+    "candidate_data": "Senior Python Developer with 5 years experience in web development",
+    "bulk_call_id": "bulk_1750657234",
+    "is_bulk_call": true,
+    "contact_index": 0
+  },
+  "CA7216a86283ff5165574329b2e57a026f": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  },
+  "CAc9d1da4defe3a87d8150c37d2a86686c": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  },
+  "CA440fca7cf8c3914e415285fc3188af10": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  },
+  "CAa26e885284d808385af64a93c5ff9039": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  },
+  "CAb62f6ec6b265ad5c0c3c68369cf7cf6d": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  },
+  "CA2a0521d6c18d040ad955d98ae05e248b": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  },
+  "CAc5d9e6adccecf193f1224a876b1c190f": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  },
+  "CA31ed220ddbdab8a51422108c70bdd31d": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  },
+  "CA3aaf01357ac4e73be71a00802a9c8942": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  },
+  "CAfc9b8ee2ea69c81667797b4074603562": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  },
+  "CAe7179a1114cfb27499393549ca11088f": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  },
+  "CA45edae94ff1d977e63b3ce2bf7c1e9f5": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  },
+  "CA00999354943757061a2128b766d68727": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  },
+  "CAa5f1fc4c097879beb20e8c83217e898f": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true
+  }
+}

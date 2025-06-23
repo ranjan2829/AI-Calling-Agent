@@ -4,6 +4,7 @@ import os
 import json
 import boto3
 import time
+import requests
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from twilio.rest import Client
@@ -68,7 +69,6 @@ INTERVIEW_QUESTIONS = {
     6: "What is your current CTC and expected salary?",
     7: "If selected, how soon can you join?"}
 def load_jd_skills():
-    """Load skills from job description JSON file"""
     try:
         config_files = ["current_jd.json", "config/job_description.json"]
         for jd_file_path in config_files:
@@ -253,20 +253,21 @@ def ask_next_question_immediately(call_sid: str, question_index: int):
             return complete_interview(call_sid)      
         question = INTERVIEW_QUESTIONS[question_index]     
         resp = VoiceResponse()
-        
         if question_index > 1:
-            resp.say("Next question:", voice='Polly.Amy', rate='medium')
-            resp.pause(length=0.2)  # Reduced from 0.3
-        
-        resp.say(question, voice='Polly.Amy', rate='medium')
-        
+            resp.say("Next question:", voice='Polly.Aditi', rate='medium')
+            resp.pause(length=0.2)
+        resp.say(question, voice='Polly.Aditi', rate='medium')
         gather = resp.gather(
             input='speech',
             action=f'{WEBHOOK_BASE_URL}/voice/speech/{call_sid}',
             method='POST',
-            speechTimeout='8',  # Reduced from 10
-            timeout='4',        # Reduced from 5
-            language='en-US')
+            speechTimeout='auto',
+            timeout='6',         
+            language='en-IN',      
+            enhanced=True,         
+            profanityFilter=False,
+            speechModel='experimental_conversations'
+        )
         resp.redirect(f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}')      
         
         return str(resp)      
@@ -284,7 +285,7 @@ def handle_no_response(call_sid: str):
         
         if silence_prompts >= 1:
             resp = VoiceResponse()
-            resp.say("Thank you for your time. We'll be in touch soon.", voice='Polly.Amy')
+            resp.say("Thank you for your time. We'll be in touch soon.", voice='Polly.Aditi')  # Changed to Polly.Aditi
             resp.hangup()           
             
             interview_data['status'] = 'INCOMPLETE_SILENCE'
@@ -297,98 +298,29 @@ def handle_no_response(call_sid: str):
         save_interview_session(call_sid, interview_data)      
         
         resp = VoiceResponse()
-        resp.say("Please respond to the question.", voice='Polly.Amy', rate='medium')
+        resp.say("Please respond to the question.", voice='Polly.Aditi', rate='medium')  # Changed to Polly.Aditi
         
         if current_question_index <= len(INTERVIEW_QUESTIONS):
-            resp.pause(length=0.3)  # Reduced from 0.5
-            resp.say(INTERVIEW_QUESTIONS[current_question_index], voice='Polly.Amy', rate='medium')
+            resp.pause(length=0.3)
+            resp.say(INTERVIEW_QUESTIONS[current_question_index], voice='Polly.Aditi', rate='medium')  # Changed to Polly.Aditi
             
+            # Enhanced speech gathering with Indian English
             gather = resp.gather(
                 input='speech',
                 action=f'{WEBHOOK_BASE_URL}/voice/speech/{call_sid}',
                 method='POST',
-                speechTimeout='6',  # Reduced from 8
-                timeout='3',        # Reduced from 4
-                language='en-US'
+                speechTimeout='auto',
+                timeout='6',
+                language='en-IN',  # Changed to Indian English
+                enhanced=True,
+                profanityFilter=False,
+                speechModel='experimental_conversations'
             )           
             resp.redirect(f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}')        
         
         return str(resp)      
     except Exception as e:
         return handle_error("Technical difficulty occurred.")
-@app.post("/voice")
-async def voice_response(request: Request):
-    try:
-        form_data = await request.form()
-        call_sid = form_data.get("CallSid")
-        caller_phone = form_data.get("From")  # Get the phone number being called
-        called_phone = form_data.get("To")    # Get our Twilio number
-        
-        interview_data = {
-            "interview_id": call_sid,
-            "current_question": 1,
-            "responses": [],
-            "silence_prompts": 0,
-            "start_time": datetime.now().isoformat(),
-            "validation_results": {},
-            "status": "IN_PROGRESS",
-            "phone_number": caller_phone,  # Store the caller's phone number
-            "twilio_number": called_phone  # Store our Twilio number
-        }
-        save_interview_session(call_sid, interview_data)    
-        
-        resp = VoiceResponse()
-        resp.pause(length=0.3)  # Reduced from 0.5
-        resp.say("Hello! I'm your AI interviewer from Onelab Ventures.", voice='Polly.Amy', rate='medium')
-        resp.pause(length=0.2)  # Reduced from 0.5
-        resp.say("Let's begin.", voice='Polly.Amy', rate='medium')
-        resp.pause(length=0.2)  # Reduced from 0.3
-        resp.say(INTERVIEW_QUESTIONS[1], voice='Polly.Amy', rate='medium')
-        
-        gather = resp.gather(
-            input='speech',
-            action=f'{WEBHOOK_BASE_URL}/voice/speech/{call_sid}',
-            method='POST',
-            speechTimeout='8',  # Reduced from 10
-            timeout='4',        # Reduced from 5
-            language='en-US')
-        resp.redirect(f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}')
-        
-        return Response(str(resp), media_type="application/xml")      
-    except Exception as e:
-        print(f"[ERROR] Voice response error: {e}")
-        return Response(handle_error("Sorry, there was an error starting the interview."), media_type="application/xml")
-@app.post("/voice/speech/{call_sid}")
-async def speech_handler(call_sid: str, request: Request):
-    try:
-        form_data = await request.form()
-        speech_result = form_data.get('SpeechResult', '').strip()
-        confidence = float(form_data.get('Confidence', 0.0))
-        print(f"[SPEECH HANDLER] Call {call_sid}: '{speech_result}' (confidence: {confidence})")
-        if speech_result.lower() in ['skip', 'next', 'pass', 'move on', 'next question']:
-            print(f"[SKIP] User requested to skip question for {call_sid}")
-            interview_data = load_interview_session(call_sid)
-            if interview_data:
-                current_question_index = interview_data.get('current_question', 1)
-                response_data = {
-                    'question': INTERVIEW_QUESTIONS.get(current_question_index, ''),
-                    'answer': '[SKIPPED]',
-                    'confidence': 1.0,
-                    'timestamp': datetime.now().isoformat(),
-                    'question_number': current_question_index
-                }              
-                interview_data['responses'].append(response_data)
-                interview_data['current_question'] = current_question_index + 1
-                interview_data['silence_prompts'] = 0
-                save_interview_session(call_sid, interview_data)
-                if current_question_index >= len(INTERVIEW_QUESTIONS):
-                    return Response(complete_interview(call_sid), media_type="application/xml")
-                else:
-                    return Response(ask_next_question_immediately(call_sid, current_question_index + 1), media_type="application/xml")
-        return Response(handle_speech(call_sid, speech_result, confidence), media_type="application/xml")     
-    except Exception as e:
-        print(f"[ERROR] Speech handler error for {call_sid}: {e}")
-        return Response(handle_error("Sorry, there was an error processing your response."), media_type="application/xml")
 def complete_interview(call_sid):
     """Complete the interview and save results"""
     try:
@@ -436,24 +368,24 @@ def complete_interview(call_sid):
             print(f"[ERROR] Failed to cleanup session file: {e}")
         conversation_state.pop(call_sid, None)
         response = VoiceResponse()
-        response.say("Thank you for your time! Your interview has been completed successfully. We will review your responses and get back to you soon. Have a great day!")
+        response.say("Thank you for your time! Your interview has been completed successfully. We will review your responses and get back to you soon. Have a great day!", voice='Polly.Aditi')  # Changed to Polly.Aditi
         response.hangup()
         return str(response)
     except Exception as e:
         print(f"[ERROR] Error completing interview for {call_sid}: {e}")
         response = VoiceResponse()
-        response.say("Thank you for your time! We'll be in touch soon. Have a great day!")
+        response.say("Thank you for your time! We'll be in touch soon. Have a great day!", voice='Polly.Aditi')  # Changed to Polly.Aditi
         response.hangup()
         return str(response)
 def handle_error(message):
     try:
         response = VoiceResponse()
-        response.say(message)
+        response.say(message, voice='Polly.Aditi')  # Changed to Polly.Aditi
         response.hangup()
         return str(response)
     except Exception as e:
         print(f"[ERROR] Error in handle_error: {e}")
-        return '<?xml version="1.0" encoding="UTF-8"?><Response><Say>Sorry, there was an error. Goodbye.</Say><Hangup/>'
+        return '<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="Polly.Aditi">Sorry, there was an error. Goodbye.</Say><Hangup/>'
 def create_error_response(message):
     try:
         response = VoiceResponse()
@@ -866,28 +798,93 @@ async def process_bulk_calls(bulk_call_id: str, contacts: List[dict]):
     try:
         session = bulk_call_sessions[bulk_call_id]
         session["status"] = "IN_PROGRESS"      
+        
         for index, contact in enumerate(contacts):
             if session["status"] == "STOPPED":
                 break      
+            
             session["current_index"] = index
             print(f"Starting call {index + 1}/{len(contacts)} to {contact['name']} at {contact['phone']}")         
+            
             try:
+                # Store contact mapping locally before making call
+                call_contact_mapping = {
+                    "candidate_name": contact['name'],
+                    "candidate_phone": contact['phone'],
+                    "candidate_data": contact.get('data', ''),
+                    "bulk_call_id": bulk_call_id,
+                    "is_bulk_call": True,
+                    "contact_index": index
+                }
+                
+                # Simple Twilio call without URL parameters
                 call = client.calls.create(
                     url=f"{WEBHOOK_BASE_URL}/voice",
                     to=contact["phone"],
                     from_="+14067601762"
                 )              
+                
+                # Store the mapping for this call_sid
+                contact_mappings_file = "contact_mappings.json"
+                try:
+                    if os.path.exists(contact_mappings_file):
+                        with open(contact_mappings_file, 'r') as f:
+                            all_mappings = json.load(f)
+                    else:
+                        all_mappings = {}
+                    
+                    all_mappings[call.sid] = call_contact_mapping
+                    
+                    with open(contact_mappings_file, 'w') as f:
+                        json.dump(all_mappings, f, indent=2)
+                        
+                    print(f"Stored contact mapping for {call.sid}: {contact['name']}")
+                except Exception as mapping_error:
+                    print(f"Error storing contact mapping: {mapping_error}")
+                
                 print(f"Call initiated: {call.sid}")
                 call_completed = False
                 timeout_seconds = 300
                 check_interval = 10               
+                
                 for _ in range(timeout_seconds // check_interval):
                     try:
                         updated_call = client.calls(call.sid).fetch()
                         call_status = updated_call.status
                         print(f"Call {call.sid} status: {call_status}")                      
+                        
                         if call_status in ['completed', 'busy', 'failed', 'no-answer', 'canceled']:
                             call_completed = True
+                            
+                            # Update interview data with contact info when call completes
+                            try:
+                                session_file = f"interviews/session_{call.sid}.json"
+                                if os.path.exists(session_file):
+                                    session_data = load_interview_session(call.sid)
+                                    if session_data:
+                                        # Add contact info to session data
+                                        session_data["candidate_name"] = contact['name']
+                                        session_data["candidate_phone"] = contact['phone']
+                                        session_data["candidate_data"] = contact.get('data', '')
+                                        session_data["bulk_call_id"] = bulk_call_id
+                                        session_data["is_bulk_call"] = True
+                                        session_data["status"] = "COMPLETED" if call_status == 'completed' else "TERMINATED"
+                                        session_data["end_time"] = datetime.now().isoformat()
+                                        session_data["completion_time"] = datetime.now().isoformat()
+                                        
+                                        # Save as completed interview
+                                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                                        safe_name = contact['name'].replace(' ', '_').replace('/', '_')
+                                        final_filename = f"interviews/{call.sid}_BULK_{safe_name}_{timestamp}.json"
+                                        with open(final_filename, 'w') as f:
+                                            json.dump(session_data, f, indent=2)
+                                        
+                                        # Remove session file
+                                        os.remove(session_file)
+                                        print(f"[CLEANUP] Saved and removed session for {call.sid}")
+                            except Exception as cleanup_error:
+                                print(f"Error cleaning up session {call.sid}: {cleanup_error}")
+                            
                             if call_status == 'completed':
                                 result = {
                                     "contact": contact,
@@ -909,6 +906,7 @@ async def process_bulk_calls(bulk_call_id: str, contacts: List[dict]):
                             break                          
                     except Exception as status_error:
                         print(f"Error checking call status: {status_error}")                   
+                    
                     await asyncio.sleep(check_interval)               
                 if not call_completed:
                     try:
@@ -1052,7 +1050,7 @@ def terminate_interview(call_sid: str, reason_code: str, reason_message: str):
         resp = VoiceResponse()
         resp.say(
             "Thank you so much for taking the time to speak with us today. We really appreciate your interest. We'll review everything and get back to you soon. Have a wonderful day!",
-            voice='Polly.Amy', rate='medium')
+            voice='Polly.Aditi', rate='medium')  # Changed to Polly.Aditi
         resp.hangup()
         interview_data = load_interview_session(call_sid)
         if interview_data:
@@ -1071,36 +1069,417 @@ async def make_call(request: Request):
     try:
         data = await request.json()
         phone_number = data.get("phone_number")
+        candidate_name = data.get("name", "Test Candidate")
+        
         if not phone_number:
             return {"error": "Phone number is required"}
         call = client.calls.create(
             url=f"{WEBHOOK_BASE_URL}/voice",
             to=phone_number,
-            from_="+14067601762"
+            from_="+14067601762",
+            record=True,
+            recording_channels="dual",
+            recording_status_callback=f"{WEBHOOK_BASE_URL}/recording-status"
         )
-        print(f"Call initiated: {call.sid} to {phone_number}")
-        call_mapping = {
-            "call_sid": call.sid,
-            "phone_number": phone_number,
-            "initiated_time": datetime.now().isoformat(),
-            "status": "initiated"}
+        print(f"Call initiated with recording: {call.sid} to {phone_number}")
+        contact_mappings_file = "contact_mappings.json"
         try:
-            mapping_file = "call_phone_mapping.json"
-            if os.path.exists(mapping_file):
-                with open(mapping_file, 'r') as f:
-                    mappings = json.load(f)
+            if os.path.exists(contact_mappings_file):
+                with open(contact_mappings_file, 'r') as f:
+                    all_mappings = json.load(f)
             else:
-                mappings = {}
-            mappings[call.sid] = call_mapping
-            with open(mapping_file, 'w') as f:
-                json.dump(mappings, f, indent=2)
-        except Exception as e:
-            print(f"Error saving call mapping: {e}")
+                all_mappings = {}
+            all_mappings[call.sid] = {
+                "candidate_name": candidate_name,
+                "candidate_phone": phone_number,
+                "is_bulk_call": False,
+                "recording_enabled": True
+            }
+            with open(contact_mappings_file, 'w') as f:
+                json.dump(all_mappings, f, indent=2)
+        except Exception as mapping_error:
+            print(f"Error storing contact mapping: {mapping_error}")
         return {
             "success": True,
             "call_sid": call.sid,
             "status": call.status,
             "phone_number": phone_number,
-            "message": f"Call initiated to {phone_number}"}
+            "candidate_name": candidate_name,
+            "recording_enabled": True,
+            "message": f"Call initiated to {phone_number} with high-accuracy recording enabled"
+        }
     except Exception as e:
         return {"error": f"Failed to make call: {str(e)}"}
+@app.post("/recording-status")
+async def recording_status(request: Request):
+    try:
+        form_data = await request.form()
+        call_sid = form_data.get("CallSid")
+        recording_status = form_data.get("RecordingStatus")
+        print(f"[RECORDING STATUS] Call {call_sid}: {recording_status}")
+        return Response("", media_type="application/xml")
+    except Exception as e:
+        print(f"[ERROR] Recording status error: {e}")
+        return Response("", media_type="application/xml")
+@app.post("/recording/{call_sid}")
+async def handle_recording(call_sid: str, request: Request):
+    try:
+        form_data = await request.form()
+        recording_url = form_data.get('RecordingUrl')
+        recording_sid = form_data.get('RecordingSid')
+        recording_duration = form_data.get('RecordingDuration', '0')
+        
+        print(f"[RECORDING] Call {call_sid}: Recording available at {recording_url}")
+        
+        if recording_url:
+            # Download and save the recording immediately in background
+            executor.submit(download_and_save_recording, call_sid, recording_url, recording_sid, recording_duration)
+        
+        # Return empty response to Twilio
+        return Response("", media_type="application/xml")
+    except Exception as e:
+        print(f"[ERROR] Recording handler error for {call_sid}: {e}")
+        return Response("", media_type="application/xml")
+
+def download_and_save_recording(call_sid: str, recording_url: str, recording_sid: str, duration: str):
+    """Download and save recording audio file with AWS S3 storage"""
+    try:
+        import requests
+        import time
+        
+        max_wait_attempts = 12
+        wait_interval = 10
+        
+        for attempt in range(max_wait_attempts):
+            try:
+                download_urls = [
+                    f"{recording_url}.wav",
+                    f"{recording_url}.mp3",
+                    recording_url,
+                    f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Recordings/{recording_sid}.wav",
+                    f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Recordings/{recording_sid}.mp3"
+                ]
+                
+                recording_downloaded = False
+                final_audio_filename = None
+                
+                for url_attempt, download_url in enumerate(download_urls):
+                    try:
+                        response = requests.get(
+                            download_url, 
+                            auth=(account_sid, auth_token),
+                            timeout=30,
+                            headers={
+                                'User-Agent': 'AI-Interviewer/1.0',
+                                'Accept': 'audio/*'
+                            }
+                        )
+                        
+                        if response.status_code == 200 and len(response.content) > 1000:
+                            content_type = response.headers.get('content-type', '').lower()
+                            if 'wav' in content_type or download_url.endswith('.wav'):
+                                extension = '.wav'
+                            elif 'mp3' in content_type or download_url.endswith('.mp3'):
+                                extension = '.mp3'
+                            else:
+                                extension = '.wav'
+                            
+                            # Save locally
+                            audio_filename = f"interviews/audio_recordings/{call_sid}_{recording_sid}{extension}"
+                            os.makedirs("interviews/audio_recordings", exist_ok=True)
+                            
+                            with open(audio_filename, 'wb') as f:
+                                f.write(response.content)
+                            
+                            final_audio_filename = audio_filename
+                            recording_downloaded = True
+                            break
+                            
+                        elif response.status_code == 404:
+                            continue
+                        else:
+                            continue
+                            
+                    except requests.RequestException:
+                        continue
+                
+                if recording_downloaded and final_audio_filename:
+                    try:
+                        # Upload to AWS S3 using existing credentials
+                        s3_key = f"recordings/{call_sid}_{recording_sid}{os.path.splitext(final_audio_filename)[1]}"
+                        s3_client.upload_file(final_audio_filename, S3_BUCKET, s3_key)
+                        start_transcription_job_indian(call_sid, s3_key, recording_sid)
+                        
+                    except Exception:
+                        pass
+                        
+                    try:
+                        interview_data = load_interview_session(call_sid)
+                        if interview_data:
+                            interview_data['recording_url'] = recording_url
+                            interview_data['recording_sid'] = recording_sid
+                            interview_data['recording_duration'] = duration
+                            interview_data['audio_file'] = final_audio_filename
+                            interview_data['s3_key'] = s3_key if 's3_key' in locals() else None
+                            interview_data['recording_status'] = 'downloaded_successfully'
+                            save_interview_session(call_sid, interview_data)
+                    except Exception:
+                        pass
+                    
+                    return
+                    
+                else:
+                    if attempt < max_wait_attempts - 1:
+                        time.sleep(wait_interval)
+                    
+            except Exception:
+                if attempt < max_wait_attempts - 1:
+                    time.sleep(wait_interval)
+                continue
+                
+        try:
+            interview_data = load_interview_session(call_sid)
+            if interview_data:
+                interview_data['recording_url'] = recording_url
+                interview_data['recording_sid'] = recording_sid
+                interview_data['recording_duration'] = duration
+                interview_data['recording_status'] = 'download_failed'
+                interview_data['recording_error'] = 'Failed to download after multiple attempts'
+                save_interview_session(call_sid, interview_data)
+        except Exception:
+            pass
+            
+    except Exception:
+        pass
+
+def start_transcription_job_indian(call_sid: str, s3_key: str, recording_sid: str):
+    try:
+        job_name = f"interview-{call_sid}-{recording_sid}-{int(time.time())}"
+        job_uri = f"s3://{S3_BUCKET}/{s3_key}"
+        file_extension = os.path.splitext(s3_key)[1].lower()
+        
+        if file_extension == '.wav':
+            media_format = 'wav'
+        elif file_extension == '.mp3':
+            media_format = 'mp3'
+        elif file_extension == '.mp4':
+            media_format = 'mp4'
+        else:
+            media_format = 'wav'
+            
+        transcribe_response = transcribe_client.start_transcription_job(
+            TranscriptionJobName=job_name,
+            Media={'MediaFileUri': job_uri},
+            MediaFormat=media_format,
+            LanguageCode='en-IN',
+            OutputBucketName=S3_BUCKET,
+            OutputKey=f"transcripts/{call_sid}_aws_transcript.json",
+            Settings={
+                'VocabularyFilterName': None,
+                'ShowSpeakerLabels': True,
+                'MaxSpeakerLabels': 2,
+                'ChannelIdentification': False,
+                'ShowAlternatives': True,
+                'MaxAlternatives': 5,
+                'VocabularyFilterMethod': 'remove'
+            }
+        )
+        
+        executor.submit(poll_transcription_job_fast_indian, call_sid, job_name, recording_sid)
+
+    except Exception:
+        pass
+
+def poll_transcription_job_fast_indian(call_sid: str, job_name: str, recording_sid: str):
+    """Poll AWS Transcribe job and save locally"""
+    try:
+        max_attempts = 120
+        for attempt in range(max_attempts):
+            time.sleep(5)
+            
+            try:
+                response = transcribe_client.get_transcription_job(TranscriptionJobName=job_name)
+                status = response['TranscriptionJob']['TranscriptionJobStatus']
+                
+                if status == 'COMPLETED':
+                    transcript_uri = response['TranscriptionJob']['Transcript']['TranscriptFileUri']
+                    
+                    import requests
+                    transcript_response = requests.get(transcript_uri, timeout=30)
+                    if transcript_response.status_code == 200:
+                        transcript_data = transcript_response.json()
+                        full_transcript = transcript_data['results']['transcripts'][0]['transcript']
+                        
+                        # Save transcript locally
+                        transcript_filename = f"interviews/transcriptions/{call_sid}_{recording_sid}_aws_indian_transcript.txt"
+                        os.makedirs("interviews/transcriptions", exist_ok=True)
+                        
+                        with open(transcript_filename, 'w', encoding='utf-8') as f:
+                            f.write(f"Call ID: {call_sid}\n")
+                            f.write(f"Recording SID: {recording_sid}\n")
+                            f.write(f"AWS Transcribe Job: {job_name}\n")
+                            f.write(f"Language: Indian English (en-IN)\n")
+                            f.write(f"Completion Date: {datetime.now().isoformat()}\n")
+                            f.write(f"\n--- HIGH-ACCURACY INDIAN ENGLISH TRANSCRIPT ---\n")
+                            f.write(full_transcript)
+                            f.write(f"\n\n--- RAW JSON DATA ---\n")
+                            f.write(json.dumps(transcript_data, indent=2, ensure_ascii=False))
+                        
+                        # Update interview data
+                        interview_data = load_interview_session(call_sid)
+                        if interview_data:
+                            interview_data['aws_transcript'] = full_transcript
+                            interview_data['aws_transcript_file'] = transcript_filename
+                            interview_data['transcription_completed'] = datetime.now().isoformat()
+                            save_interview_session(call_sid, interview_data)
+                        
+                    break
+                    
+                elif status == 'FAILED':
+                    break
+                    
+            except Exception:
+                continue
+                
+    except Exception:
+        pass
+
+@app.post("/transcription/{call_sid}")
+async def handle_transcription(call_sid: str, request: Request):
+    try:
+        form_data = await request.form()
+        transcription_text = form_data.get('TranscriptionText', '')
+        transcription_status = form_data.get('TranscriptionStatus', '')
+        confidence = form_data.get('TranscriptionConfidence', '0.0')
+        
+        print(f"[TWILIO TRANSCRIPTION] Call {call_sid}: Status={transcription_status}, Confidence={confidence}")
+        
+        if transcription_text and transcription_status == 'completed':
+            # Save Twilio transcription as backup
+            transcript_filename = f"interviews/transcriptions/{call_sid}_twilio_backup_transcript.txt"
+            os.makedirs("interviews/transcriptions", exist_ok=True)
+            
+            with open(transcript_filename, 'w', encoding='utf-8') as f:
+                f.write(f"Call ID: {call_sid}\n")
+                f.write(f"Transcription Date: {datetime.now().isoformat()}\n")
+                f.write(f"Status: {transcription_status}\n")
+                f.write(f"Confidence: {confidence}\n")
+                f.write(f"Source: Twilio (Backup)\n")
+                f.write(f"\n--- TWILIO BACKUP TRANSCRIPT ---\n")
+                f.write(transcription_text)
+            
+            print(f"[TWILIO TRANSCRIPT SAVED] {transcript_filename}")
+        
+        return Response("", media_type="application/xml")
+    except Exception as e:
+        print(f"[ERROR] Transcription handler error for {call_sid}: {e}")
+        return Response("", media_type="application/xml")
+
+@app.post("/voice")
+async def handle_voice_call(request: Request):
+    try:
+        form_data = await request.form()
+        call_sid = form_data.get('CallSid')
+        from_number = form_data.get('From', 'unknown')
+        to_number = form_data.get('To', '+14067601762')
+        
+        print(f"[VOICE] Incoming call {call_sid} from {from_number}")
+        
+        # Load contact mapping if available
+        contact_info = None
+        try:
+            contact_mappings_file = "contact_mappings.json"
+            if os.path.exists(contact_mappings_file):
+                with open(contact_mappings_file, 'r') as f:
+                    all_mappings = json.load(f)
+                contact_info = all_mappings.get(call_sid, {})
+        except Exception as e:
+            print(f"Error loading contact mapping: {e}")
+        
+        # Initialize interview session
+        interview_data = {
+            'call_sid': call_sid,
+            'phone_number': from_number,
+            'twilio_number': to_number,
+            'start_time': datetime.now().isoformat(),
+            'status': 'IN_PROGRESS',
+            'current_question': 1,
+            'responses': [],
+            'validation_results': {},
+            'silence_prompts': 0,
+            'last_activity': datetime.now().isoformat()
+        }
+        
+        # Add contact info if available
+        if contact_info:
+            interview_data.update({
+                'candidate_name': contact_info.get('candidate_name', 'Unknown'),
+                'candidate_phone': contact_info.get('candidate_phone', from_number),
+                'candidate_data': contact_info.get('candidate_data', ''),
+                'bulk_call_id': contact_info.get('bulk_call_id'),
+                'is_bulk_call': contact_info.get('is_bulk_call', False)
+            })
+        
+        save_interview_session(call_sid, interview_data)
+        conversation_state[call_sid] = interview_data
+        
+        print(f"[VOICE] Interview session created for {call_sid}")
+        
+        # Start with first question
+        resp = VoiceResponse()
+        resp.say("Hello! Thank you for calling. I'm your AI interviewer today. Let's begin with our interview.", 
+                voice='Polly.Aditi', rate='medium')
+        resp.pause(length=0.5)
+        resp.say(INTERVIEW_QUESTIONS[1], voice='Polly.Aditi', rate='medium')
+        
+        gather = resp.gather(
+            input='speech',
+            action=f'{WEBHOOK_BASE_URL}/voice/speech/{call_sid}',
+            method='POST',
+            speechTimeout='auto',
+            timeout='6',
+            language='en-IN',
+            enhanced=True,
+            profanityFilter=False,
+            speechModel='experimental_conversations'
+        )
+        
+        resp.redirect(f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}')
+        
+        return Response(str(resp), media_type="application/xml")
+        
+    except Exception as e:
+        print(f"[ERROR] Voice call handler error: {e}")
+        resp = VoiceResponse()
+        resp.say("Sorry, there was an error. Please try again later.", voice='Polly.Aditi')
+        resp.hangup()
+        return Response(str(resp), media_type="application/xml")
+
+@app.post("/voice/speech/{call_sid}")
+async def handle_voice_speech(call_sid: str, request: Request):
+    try:
+        form_data = await request.form()
+        speech_result = form_data.get('SpeechResult', '')
+        confidence = float(form_data.get('Confidence', '0.0'))
+        
+        print(f"[SPEECH] Call {call_sid}: '{speech_result}' (confidence: {confidence})")
+        
+        response_xml = handle_speech(call_sid, speech_result, confidence)
+        return Response(response_xml, media_type="application/xml")
+        
+    except Exception as e:
+        print(f"[ERROR] Speech handler error for {call_sid}: {e}")
+        return Response(handle_error("Sorry, there was an error processing your response."), 
+                       media_type="application/xml")
+
+@app.post("/voice/no-response/{call_sid}")
+async def handle_voice_no_response(call_sid: str, request: Request):
+    try:
+        print(f"[NO RESPONSE] Call {call_sid}")
+        response_xml = handle_no_response(call_sid)
+        return Response(response_xml, media_type="application/xml")
+        
+    except Exception as e:
+        print(f"[ERROR] No response handler error for {call_sid}: {e}")
+        return Response(handle_error("Sorry, there was an error."), 
+                       media_type="application/xml")

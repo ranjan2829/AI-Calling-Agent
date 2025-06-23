@@ -4,6 +4,7 @@ import os
 import glob
 import csv
 from datetime import datetime
+
 def load_job_description():
     try:
         jd_file_path = "current_jd.json"     
@@ -15,6 +16,7 @@ def load_job_description():
             return {"error": "current_jd.json file not found"}        
     except Exception as e:
         return {"error": f"Failed to load JD: {str(e)}"}
+
 def extract_candidate_info_from_csv(call_sid):
     try:
         csv_mapping_file = "bulk_call_mapping.json"
@@ -37,6 +39,7 @@ def extract_candidate_info_from_csv(call_sid):
         return None
     except Exception as e:
         return None
+
 def extract_candidate_name(responses, call_sid=None):
     if call_sid:
         csv_info = extract_candidate_info_from_csv(call_sid)
@@ -60,31 +63,47 @@ def extract_candidate_name(responses, call_sid=None):
         return "_".join(name_words)
     else:
         return f"Candidate_{call_sid[:8]}" if call_sid else "Unknown"
+
 def get_candidate_metadata(call_sid):
     metadata = {'source': 'voice_call', 'phone': None, 'email': None, 'csv_data': None}
     csv_info = extract_candidate_info_from_csv(call_sid)
     if csv_info:
         metadata.update(csv_info)
     return metadata
+
 def save_unique_match_report(report, call_sid, candidate_name):
     try:
         os.makedirs("interviews", exist_ok=True)
-        safe_name = re.sub(r'[^\w\-_]', '_', candidate_name)
-        safe_name = safe_name[:30]
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"interviews/{safe_name}_{call_sid[:12]}_{timestamp}_JD_ANALYSIS.json"
-        existing_pattern = f"interviews/*{call_sid[:12]}*JD_ANALYSIS.json"
+        filename = f"interviews/{call_sid}_JD_ANALYSIS.json"  
+        report["candidate_name"] = candidate_name
+        try:
+            contact_mappings_file = "contact_mappings.json"
+            if os.path.exists(contact_mappings_file):
+                with open(contact_mappings_file, 'r') as f:
+                    all_mappings = json.load(f)
+                if call_sid in all_mappings:
+                    report["candidate_phone"] = all_mappings[call_sid].get("candidate_phone", "Not provided")
+                    report["candidate_data"] = all_mappings[call_sid].get("candidate_data", "")
+                else:
+                    report["candidate_phone"] = "Not provided"
+        except:
+            report["candidate_phone"] = "Not provided"
+        existing_pattern = f"interviews/{call_sid}_*_JD_ANALYSIS.json"
         existing_files = glob.glob(existing_pattern)
         for old_file in existing_files:
             if old_file != filename:
                 try:
                     os.remove(old_file)
+                    print(f"Removed old file: {old_file}")
                 except:
                     pass
+        report["analysis_created"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         with open(filename, 'w') as f:
             json.dump(report, f, indent=2)
+        print(f"Saved report: {filename}")
         return filename
     except Exception as e:
+        print(f"Error saving report: {e}")
         return None
 
 def create_bulk_call_summary():
@@ -120,6 +139,7 @@ def create_bulk_call_summary():
         return bulk_summary
     except Exception as e:
         return {"error": str(e)}
+
 def analyze_candidate_responses(responses, call_id="unknown"):
     jd_data = load_job_description()
     if "error" in jd_data:
@@ -171,7 +191,7 @@ def analyze_candidate_responses(responses, call_id="unknown"):
         "found_skills": matched_skills,
         "skills_found_count": len(matched_skills),
         "total_required_skills": len(jd_required_skills),
-        "phone_number": candidate_metadata.get("phone", "unknown")  # Include phone number
+        "phone_number": candidate_metadata.get("phone", "unknown")
     }
 
 def get_phone_from_interview_data(call_sid):
@@ -187,6 +207,12 @@ def get_phone_from_interview_data(call_sid):
             with open(files[0], 'r') as f:
                 interview_data = json.load(f)
                 return interview_data.get("phone_number")
+        # Also check for regular interview files
+        pattern = f"interviews/interview_{call_sid}.json"
+        if os.path.exists(pattern):
+            with open(pattern, 'r') as f:
+                interview_data = json.load(f)
+                return interview_data.get("phone_number")
         mapping_file = "call_phone_mapping.json"
         if os.path.exists(mapping_file):
             with open(mapping_file, 'r') as f:
@@ -197,6 +223,7 @@ def get_phone_from_interview_data(call_sid):
     except Exception as e:
         print(f"Error getting phone from interview data: {e}")
         return None
+
 def extract_skills_mentioned_by_candidate(text, jd_skills):
     text_lower = text.lower()
     mentioned_skills = []
@@ -230,6 +257,7 @@ def extract_experience_level(text):
             else:
                 years_mentioned.append(match)
     return {"years_mentioned": years_mentioned, "experience_score": len(years_mentioned) * 2}
+
 def calculate_match_score(matched_skills, total_required_skills, experience_data, jd_experience_required):
     skills_match_percent = (len(matched_skills) / max(total_required_skills, 1)) * 100
     experience_match = 50
@@ -245,58 +273,161 @@ def calculate_match_score(matched_skills, total_required_skills, experience_data
             experience_match = 50
     overall_score = (skills_match_percent * 0.8) + (experience_match * 0.2)
     return {"skills_match_percent": round(skills_match_percent, 1), "experience_match_percent": round(experience_match, 1), "overall_score": round(overall_score, 1)}
-def analyze_all_completed_interviews():
+
+def analyze_all_available_interviews():
+    """
+    Analyze ALL interview files, not just completed ones
+    """
     try:
-        pattern = "interviews/*_COMPLETED_*.json"
-        interview_files = glob.glob(pattern)
-        if not interview_files:
-            return {"error": "No completed interviews found"}
+        # Find ALL interview files with different patterns
+        all_patterns = [
+            "interviews/*_COMPLETED_*.json",      # Completed interviews
+            "interviews/interview_*.json",        # Regular interview files
+            "interviews/session_*.json",          # Session files
+            "interviews/*_transcript_*.json",     # Transcript files
+            "interviews/call_*.json"              # Call files
+        ]
+        
+        all_interview_files = []
+        processed_call_sids = set()
+        
+        for pattern in all_patterns:
+            files = glob.glob(pattern)
+            for file_path in files:
+                # Extract call_sid from filename
+                filename = os.path.basename(file_path)
+                
+                # Try different extraction methods
+                call_sid = None
+                if "_COMPLETED_" in filename:
+                    call_sid = filename.split("_COMPLETED_")[0]
+                elif "interview_" in filename:
+                    call_sid = filename.replace("interview_", "").replace(".json", "")
+                elif "session_" in filename:
+                    call_sid = filename.replace("session_", "").replace(".json", "")
+                elif "_transcript_" in filename:
+                    call_sid = filename.split("_transcript_")[0]
+                elif "call_" in filename:
+                    call_sid = filename.replace("call_", "").replace(".json", "")
+                
+                if call_sid and call_sid not in processed_call_sids:
+                    all_interview_files.append((file_path, call_sid))
+                    processed_call_sids.add(call_sid)
+        
+        if not all_interview_files:
+            return {"error": "No interview files found"}
+        
+        print(f"Found {len(all_interview_files)} unique interview files to analyze")
         results = []
-        for interview_file in interview_files:
-            interview_data = load_interview_data(interview_file)
-            if not interview_data:
+        
+        for file_path, call_sid in all_interview_files:
+            try:
+                interview_data = load_interview_data(file_path)
+                if not interview_data:
+                    print(f"Could not load data from {file_path}")
+                    continue
+                
+                # Extract call_sid from data if not from filename
+                if not call_sid:
+                    call_sid = interview_data.get("interview_id") or interview_data.get("call_sid") or interview_data.get("call_id") or "unknown"
+                
+                # Get responses from different possible keys
+                responses = (
+                    interview_data.get("responses") or 
+                    interview_data.get("transcript") or 
+                    interview_data.get("conversation") or 
+                    interview_data.get("qa_pairs") or
+                    []
+                )
+                
+                # If responses is not a list, try to convert it
+                if not isinstance(responses, list):
+                    if isinstance(responses, dict):
+                        # Try to extract Q&A pairs
+                        responses = []
+                        for key, value in responses.items():
+                            if isinstance(value, str):
+                                responses.append({"question": key, "answer": value})
+                    else:
+                        print(f"Skipping {file_path}: No valid responses found")
+                        continue
+                
+                if not responses:
+                    print(f"Skipping {file_path}: No responses found")
+                    continue
+                
+                # Check if analysis already exists
+                existing_file = f"interviews/{call_sid}_JD_ANALYSIS.json"
+                if os.path.exists(existing_file):
+                    try:
+                        with open(existing_file, 'r') as f:
+                            existing_report = json.load(f)
+                            results.append(existing_report)
+                            print(f"Loaded existing analysis for {call_sid}")
+                    except:
+                        pass
+                    continue
+                
+                print(f"Creating new analysis for {call_sid} from {file_path}")
+                candidate_name = extract_candidate_name(responses, call_sid)
+                analysis = analyze_candidate_responses(responses, call_sid)
+                
+                if "error" in analysis:
+                    print(f"Analysis error for {call_sid}: {analysis['error']}")
+                    continue
+                
+                report = {
+                    "call_id": call_sid,
+                    "candidate_name": candidate_name,
+                    "candidate_analysis": analysis,
+                    "interview_summary": {
+                        "questions_answered": len(responses),
+                        "total_questions": interview_data.get("total_questions", len(responses)),
+                        "completion_rate": f"{len(responses)}/{interview_data.get('total_questions', len(responses))}"
+                    },
+                    "source_file": file_path
+                }
+                
+                save_unique_match_report(report, call_sid, candidate_name)
+                results.append(report)
+                
+            except Exception as e:
+                print(f"Error processing {file_path}: {e}")
                 continue
-            call_sid = interview_data.get("interview_id", "unknown")
-            responses = interview_data.get("responses", [])
-            if not responses:
-                continue
-            existing_pattern = f"interviews/*{call_sid[:12]}*JD_ANALYSIS.json"
-            existing_files = glob.glob(existing_pattern)
-            if existing_files:
-                try:
-                    with open(existing_files[0], 'r') as f:
-                        existing_report = json.load(f)
-                        results.append(existing_report)
-                except:
-                    pass
-                continue
-            candidate_name = extract_candidate_name(responses, call_sid)
-            analysis = analyze_candidate_responses(responses, call_sid)
-            if "error" in analysis:
-                continue
-            report = {"call_id": call_sid, "candidate_name": candidate_name, "candidate_analysis": analysis, "interview_summary": {"questions_answered": len(responses), "total_questions": interview_data.get("total_questions", 5), "completion_rate": f"{len(responses)}/{interview_data.get('total_questions', 5)}"}, "analysis_created": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-            save_unique_match_report(report, call_sid, candidate_name)
-            results.append(report)
-        if len(results) > 1:
-            bulk_summary = create_bulk_call_summary()
+        print(f"Analysis complete. Processed {len(results)} candidates")
         return {"success": True, "analyzed": len(results), "results": results}
+        
     except Exception as e:
+        print(f"Error in analyze_all_available_interviews: {e}")
         return {"error": str(e)}
 def load_interview_data(file_path):
     try:
         with open(file_path, 'r') as f:
             return json.load(f)
-    except:
+    except Exception as e:
+        print(f"Error loading {file_path}: {e}")
         return None
+
 def get_latest_interview_file():
     try:
-        pattern = "interviews/*_COMPLETED_*.json"
-        files = glob.glob(pattern)
-        if not files:
+        # Check multiple patterns
+        patterns = [
+            "interviews/*_COMPLETED_*.json",
+            "interviews/interview_*.json",
+            "interviews/session_*.json"
+        ]
+        
+        all_files = []
+        for pattern in patterns:
+            files = glob.glob(pattern)
+            all_files.extend(files)
+            
+        if not all_files:
             return None
-        return max(files, key=os.path.getmtime)
+        return max(all_files, key=os.path.getmtime)
     except:
         return None
+
 def generate_match_report_from_file(file_path=None):
     if not file_path:
         file_path = get_latest_interview_file()
@@ -309,11 +440,10 @@ def generate_match_report_from_file(file_path=None):
     responses = interview_data.get("responses", [])
     if not responses:
         return {"error": "No responses found"}
-    existing_pattern = f"interviews/*{call_sid[:12]}*JD_ANALYSIS.json"
-    existing_files = glob.glob(existing_pattern)
-    if existing_files:
+    existing_file = f"interviews/{call_sid}_JD_ANALYSIS.json"
+    if os.path.exists(existing_file):
         try:
-            with open(existing_files[0], 'r') as f:
+            with open(existing_file, 'r') as f:
                 return json.load(f)
         except:
             pass
@@ -321,18 +451,41 @@ def generate_match_report_from_file(file_path=None):
     analysis = analyze_candidate_responses(responses, call_sid)
     if "error" in analysis:
         return analysis
-    report = {"call_id": call_sid, "candidate_name": candidate_name, "candidate_analysis": analysis, "interview_summary": {"questions_answered": len(responses), "total_questions": interview_data.get("total_questions", 5), "completion_rate": f"{len(responses)}/{interview_data.get('total_questions', 5)}"}, "analysis_created": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+    report = {
+        "call_id": call_sid,
+        "candidate_name": candidate_name,
+        "candidate_analysis": analysis,
+        "interview_summary": {
+            "questions_answered": len(responses),
+            "total_questions": interview_data.get("total_questions", 5),
+            "completion_rate": f"{len(responses)}/{interview_data.get('total_questions', 5)}"
+        }
+    }
     save_unique_match_report(report, call_sid, candidate_name)
     return report
+
 def run_jd_analysis():
-    result = analyze_all_completed_interviews()
+    # Use the new function that analyzes ALL available interviews
+    result = analyze_all_available_interviews()
     if "error" not in result:
-        if result['results']:
-            return result['results'][-1]
-    return {"error": result.get("error", "Analysis failed")}
+        return {
+            "success": True,
+            "message": f"Analysis completed successfully for {result['analyzed']} candidates",
+            "total_analyzed": result["analyzed"],
+            "results": result['results']
+        }
+    else:
+        print(f"Analysis failed: {result.get('error', 'Unknown error')}")
+        return {"error": result.get("error", "Analysis failed")}
+
+# Keep the old function for backward compatibility
+def analyze_all_completed_interviews():
+    return analyze_all_available_interviews()
+
 if __name__ == "__main__":
     result = run_jd_analysis()
     if "error" in result:
         print(f"Error: {result['error']}")
     else:
         print("Analysis completed successfully!")
+        print(f"Total candidates analyzed: {result.get('total_analyzed', 0)}")

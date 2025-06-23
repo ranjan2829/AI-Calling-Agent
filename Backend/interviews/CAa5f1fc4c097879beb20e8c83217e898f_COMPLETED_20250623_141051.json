@@ -1,0 +1,102 @@
+{
+  "call_sid": "CAa5f1fc4c097879beb20e8c83217e898f",
+  "phone_number": "+14067601762",
+  "twilio_number": "+917387792437",
+  "start_time": "2025-06-23T14:09:15.445776",
+  "status": "COMPLETED",
+  "current_question": 8,
+  "responses": [
+    {
+      "question": "Introduce yourself.",
+      "answer": "Hello, I am Ranjan shitole. I am currently in a engineering from Pune University of 8.9 and currently working in a engineering + cloud and deployment.",
+      "confidence": 0.75561833,
+      "timestamp": "2025-06-23T14:09:39.257462",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "When it skills are Python Java C plus plus react and JavaScript and typescript?",
+      "confidence": 0.74591225,
+      "timestamp": "2025-06-23T14:09:53.126279",
+      "question_number": 2
+    },
+    {
+      "question": "Are you open to relocation or looking for remote work?",
+      "answer": "Yes, I am open to relocation as well.",
+      "confidence": 0.7988503,
+      "timestamp": "2025-06-23T14:10:03.868417",
+      "question_number": 3
+    },
+    {
+      "question": "The first interview round will be on-site. Can you attend in person?",
+      "answer": "IAS I can understand the first interview round which will be on site I can attend that.",
+      "confidence": 0.79154897,
+      "timestamp": "2025-06-23T14:10:18.278578",
+      "question_number": 4
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "when my current notification",
+      "confidence": 0.6682992,
+      "timestamp": "2025-06-23T14:10:28.575508",
+      "question_number": 5
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "when my current CTC is zero and my expectations are zero",
+      "confidence": 0.8451259,
+      "timestamp": "2025-06-23T14:10:40.326136",
+      "question_number": 6
+    },
+    {
+      "question": "If selected, how soon can you join?",
+      "answer": "I can join quickly as possible within 5 days.",
+      "confidence": 0.9309226,
+      "timestamp": "2025-06-23T14:10:51.497911",
+      "question_number": 7
+    }
+  ],
+  "validation_results": {
+    "2": {
+      "step": 2,
+      "passed": true,
+      "reason": "",
+      "skills_match": true,
+      "found_skills": [
+        "python",
+        "java",
+        "React",
+        "javascript"
+      ],
+      "match_percentage": 80.0
+    },
+    "3": {
+      "step": 3,
+      "passed": true,
+      "reason": "",
+      "relocation_willing": true
+    },
+    "4": {
+      "step": 4,
+      "passed": true,
+      "reason": "",
+      "onsite_available": true
+    },
+    "5": {
+      "step": 5,
+      "passed": true,
+      "reason": "",
+      "notice_acceptable": true,
+      "notice_days": 15
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-06-23T14:10:51.497926",
+  "candidate_name": "Test Candidate",
+  "candidate_phone": "+917387792437",
+  "candidate_data": "",
+  "bulk_call_id": null,
+  "is_bulk_call": false,
+  "end_time": "2025-06-23T14:10:51.498423",
+  "completion_time": "2025-06-23T14:10:51.498436"
+}

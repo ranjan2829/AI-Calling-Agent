@@ -1,0 +1,109 @@
+#heading {
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 30vh;
+}
+
+#fileinput {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 40px;
+}
+
+#uploadbtn{
+    margin: 40px;
+    width: 50vh;
+    background-color: blue;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    height: 6vh;
+    cursor: pointer;
+}
+
+#uploadbtn:hover {
+    background-color: darkblue;
+}
+
+#container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 90vh;
+}
+
+#question-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    height: 150px;
+    background-color: white;
+    color: black;
+    border: 2px solid black;
+    text-align: center;
+    font-size: 20px;
+    font-weight: lighter;
+    border-radius: 20px;
+    margin-bottom: 40px;
+}
+
+#recordbtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+    border: none;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+    font-size: 12px;
+    padding: 10px;
+    outline: none;
+}
+
+#recordbtn:hover {
+    background-color: #0056b3; /* Darker blue */
+    transform: scale(1.1);
+}
+
+/* Adjust text visibility */
+#recordbtn span {
+    font-size: 15px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* Icon size fix */
+#recordbtn svg {
+    width: 25px;
+    height: 25px;
+    fill: white;
+}
+
+#backbtn {
+    background-color: #007bff; /* Blue color */
+    color: white; /* White text */
+    padding: 10px 20px; /* Padding for better size */
+    font-size: 16px; /* Readable font size */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Change cursor to pointer on hover */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+#backbtn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+

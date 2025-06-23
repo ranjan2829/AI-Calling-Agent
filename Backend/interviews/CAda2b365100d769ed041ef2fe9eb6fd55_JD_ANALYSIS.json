@@ -1,0 +1,60 @@
+{
+  "call_id": "CAda2b365100d769ed041ef2fe9eb6fd55",
+  "candidate_name": "So_Hey_Im",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python",
+      "java",
+      "C++",
+      "React",
+      "javascript"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [
+      "java",
+      "javascript"
+    ],
+    "missing_skills": [
+      "python",
+      "C++",
+      "React"
+    ],
+    "skills_match_percentage": 40.0,
+    "experience_match_percentage": 50,
+    "overall_score": 42.0,
+    "comprehensive_score": 42.0,
+    "priority_score": 2,
+    "recommendation": "MODERATE MATCH",
+    "analysis_date": "2025-06-23 14:35:03",
+    "skill_mentions": {
+      "java": 8,
+      "javascript": 4
+    },
+    "experience_data": {
+      "years_mentioned": [],
+      "experience_score": 0
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+14067601762",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [
+      "java",
+      "javascript"
+    ],
+    "skills_found_count": 2,
+    "total_required_skills": 5,
+    "phone_number": "+14067601762"
+  },
+  "interview_summary": {
+    "questions_answered": 7,
+    "total_questions": 5,
+    "completion_rate": "7/5"
+  },
+  "candidate_phone": "Not provided",
+  "analysis_created": "2025-06-23 14:35:03"
+}
