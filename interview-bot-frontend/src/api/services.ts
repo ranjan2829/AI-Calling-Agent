@@ -1,5 +1,5 @@
 import axios from 'axios';
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://13.204.76.229:8000';
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
