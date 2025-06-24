@@ -93,6 +93,29 @@ export const InterviewResults: React.FC = () => {
     loadInterviewData();
   }, []);
 
+  const extractSkillsFromText = (text: string): string[] => {
+    const skillKeywords = [
+      'python', 'java', 'javascript', 'typescript', 'react', 'node.js', 'nodejs',
+      'angular', 'vue', 'html', 'css', 'sql', 'mongodb', 'mysql', 'postgresql',
+      'docker', 'kubernetes', 'aws', 'azure', 'gcp', 'git', 'jenkins',
+      'machine learning', 'deep learning', 'data science', 'artificial intelligence',
+      'pandas', 'numpy', 'tensorflow', 'pytorch', 'scikit-learn',
+      'spring', 'django', 'flask', 'express', 'restapi', 'graphql',
+      'microservices', 'devops', 'ci/cd', 'linux', 'bash'
+    ];
+    
+    const foundSkills: string[] = [];
+    const lowerText = text.toLowerCase();
+    
+    skillKeywords.forEach(skill => {
+      if (lowerText.includes(skill.toLowerCase())) {
+        foundSkills.push(skill);
+      }
+    });
+    
+    return [...new Set(foundSkills)]; // Remove duplicates
+  };
+
   const loadInterviewData = async () => {
     try {
       setLoading(true);
@@ -102,15 +125,37 @@ export const InterviewResults: React.FC = () => {
       const interviewsResponse = await callsApi.getAllInterviewsDetailed();
       const allInterviews = interviewsResponse.data.interviews || [];
       
-      console.log('📋 All interviews loaded:', allInterviews.length, 'interviews');
+      console.log('📋 Raw interviews loaded:', allInterviews.length, 'interviews');
+      console.log('📊 Sample interview data:', allInterviews[0]);
+      
+      // Filter out invalid interviews and process valid ones
+      const validInterviews = allInterviews.filter((interview: InterviewData) => {
+        // Skip test/invalid candidates
+        const skipPatterns = ['My_Name', 'Test Candidate', 'Unknown', 'Ohh', 'BULK'];
+        const candidateName = interview.candidate_name || '';
+        
+        if (skipPatterns.some(pattern => candidateName.includes(pattern))) {
+          return false;
+        }
+        
+        // Must have responses and valid call_sid
+        return interview.responses && 
+               interview.responses.length > 0 && 
+               interview.call_sid && 
+               interview.status === 'COMPLETED';
+      });
+      
+      console.log('✅ Valid interviews after filtering:', validInterviews.length);
       
       // Process each interview to extract meaningful data
-      const processedInterviews = allInterviews.map((interview: InterviewData) => {
-        // Safe data extraction with defaults
+      const processedInterviews = validInterviews.map((interview: InterviewData) => {
+        console.log('🔍 Processing interview:', interview.call_sid);
+        
+        // Safe data extraction with proper fallbacks
         const safeInterview = {
           call_sid: interview.call_sid || 'unknown',
-          phone_number: interview.phone_number || 'unknown',
-          candidate_name: interview.candidate_name || interview.phone_number || 'Unknown Candidate',
+          phone_number: interview.phone_number || interview.candidate_phone || 'Unknown',
+          candidate_name: interview.candidate_name || 'Unknown Candidate',
           candidate_phone: interview.candidate_phone || interview.phone_number || 'Unknown',
           twilio_number: interview.twilio_number || 'Unknown',
           start_time: interview.start_time || new Date().toISOString(),
@@ -122,16 +167,38 @@ export const InterviewResults: React.FC = () => {
           ...interview
         };
 
+        // Extract all text from responses for skills analysis
+        const allResponseText = safeInterview.responses
+          .map(r => r.answer || '')
+          .join(' ');
+        
+        // Use skills detection from validation results OR extract from text
+        let found_skills: string[] = [];
+        let skills_percentage = 0;
+        
+        // First try to get from validation results
+        const skillsValidation = safeInterview.validation_results?.["2"];
+        if (skillsValidation && skillsValidation.found_skills) {
+          found_skills = skillsValidation.found_skills;
+          skills_percentage = skillsValidation.match_percentage || 0;
+        } else {
+          // Fallback: extract skills from response text
+          found_skills = extractSkillsFromText(allResponseText);
+          // Calculate percentage based on job requirements (assume python is required)
+          const requiredSkills = ['python']; // You can make this dynamic
+          skills_percentage = requiredSkills.length > 0 
+            ? (found_skills.filter(skill => requiredSkills.includes(skill.toLowerCase())).length / requiredSkills.length) * 100
+            : 0;
+        }
+
         // Calculate overall score based on validation results
         const validationResults = Object.values(safeInterview.validation_results || {});
         const passedValidations = validationResults.filter(v => v?.passed).length;
-        const totalValidations = validationResults.length;
-        const overall_score = totalValidations > 0 ? Math.round((passedValidations / totalValidations) * 100) : 0;
+        const totalValidations = Math.max(validationResults.length, 1);
+        const validation_score = Math.round((passedValidations / totalValidations) * 100);
         
-        // Extract skills data
-        const skillsValidation = safeInterview.validation_results?.["2"];
-        const skills_percentage = skillsValidation?.match_percentage || 0;
-        const found_skills = skillsValidation?.found_skills || [];
+        // Combine validation score with skills percentage for overall score
+        const overall_score = Math.round((validation_score * 0.6) + (skills_percentage * 0.4));
         
         // Calculate interview duration
         const startTime = new Date(safeInterview.start_time);
@@ -139,27 +206,31 @@ export const InterviewResults: React.FC = () => {
         const durationMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
         const interview_duration = `${Math.max(0, durationMinutes)} min`;
         
-        // Calculate completion rate
+        // Calculate completion rate based on actual responses
         const totalQuestions = 7;
-        const answeredQuestions = Math.max(0, (safeInterview.current_question || 1) - 1);
+        const answeredQuestions = safeInterview.responses.length;
         const completion_rate = `${Math.round((answeredQuestions / totalQuestions) * 100)}%`;
         
-        // Generate recommendation
+        // Generate recommendation based on scores and skills
         let recommendation = 'NEEDS REVIEW';
-        if (overall_score >= 80 && skills_percentage >= 80) {
+        if (overall_score >= 80 && skills_percentage >= 70) {
           recommendation = 'EXCELLENT FIT';
-        } else if (overall_score >= 70 && skills_percentage >= 70) {
+        } else if (overall_score >= 70 && skills_percentage >= 60) {
           recommendation = 'STRONG CANDIDATE';
-        } else if (overall_score >= 60 && skills_percentage >= 60) {
+        } else if (overall_score >= 60 && skills_percentage >= 50) {
           recommendation = 'GOOD CANDIDATE';
         } else if (overall_score >= 50) {
           recommendation = 'MODERATE FIT';
         }
         
         console.log(`📊 Processed interview for ${safeInterview.candidate_name}:`, {
+          call_sid: safeInterview.call_sid,
           overall_score,
           skills_percentage,
-          found_skills: found_skills.length,
+          found_skills,
+          validation_score,
+          passedValidations,
+          totalValidations,
           recommendation
         });
         
@@ -206,6 +277,7 @@ export const InterviewResults: React.FC = () => {
         toast.success('Interview Analysis completed successfully!');
         console.log('✅ Interview Analysis completed, refreshing data...');
         
+        // Refresh data after analysis
         setTimeout(() => {
           loadInterviewData();
         }, 2000);
@@ -353,7 +425,7 @@ export const InterviewResults: React.FC = () => {
                     // Extra safety for rendering
                     const safeCallSid = interview.call_sid || `unknown_${index}`;
                     const safeCandidateName = interview.candidate_name || 'Unknown Candidate';
-                    const safeCandidatePhone = interview.candidate_phone || 'Unknown';
+                    const safeCandidatePhone = interview.candidate_phone || interview.phone_number || 'Unknown';
                     
                     return (
                       <React.Fragment key={safeCallSid}>
@@ -372,7 +444,7 @@ export const InterviewResults: React.FC = () => {
                                 {safeCandidatePhone}
                               </Typography>
                               <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
-                                ID: {(safeCallSid).slice(-8)}
+                                ID: {safeCallSid.slice(-8)}
                               </Typography>
                               <br />
                               <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
@@ -424,7 +496,7 @@ export const InterviewResults: React.FC = () => {
                                 value={interview.skills_percentage}
                                 size={30}
                                 sx={{ mr: 1 }}
-                                color="info"
+                                color={interview.skills_percentage >= 70 ? 'success' : interview.skills_percentage >= 50 ? 'info' : 'warning'}
                               />
                               <Box>
                                 <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
@@ -443,7 +515,7 @@ export const InterviewResults: React.FC = () => {
                                 {interview.interview_duration}
                               </Typography>
                               <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                Questions: {Math.max(0, (interview.current_question || 1) - 1)}/7
+                                Questions: {interview.responses?.length || 0}/7
                               </Typography>
                             </Box>
                           </TableCell>
@@ -545,22 +617,28 @@ export const InterviewResults: React.FC = () => {
                                       <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
                                         ✅ Validation Results
                                       </Typography>
-                                      {Object.entries(interview.validation_results || {}).map(([key, validation]) => (
-                                        <Box key={key} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                          {getValidationIcon(validation?.passed || false)}
-                                          <Typography variant="body2" sx={{ ml: 1 }}>
-                                            Step {validation?.step || 'N/A'}: {validation?.passed ? 'Passed' : 'Failed'}
-                                          </Typography>
-                                          {validation?.match_percentage && (
-                                            <Chip 
-                                              label={`${validation.match_percentage}%`} 
-                                              size="small" 
-                                              sx={{ ml: 1 }}
-                                              color="info"
-                                            />
-                                          )}
-                                        </Box>
-                                      ))}
+                                      {Object.entries(interview.validation_results || {}).length === 0 ? (
+                                        <Typography variant="body2" color="text.secondary">
+                                          No validation results available
+                                        </Typography>
+                                      ) : (
+                                        Object.entries(interview.validation_results || {}).map(([key, validation]) => (
+                                          <Box key={key} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                            {getValidationIcon(validation?.passed || false)}
+                                            <Typography variant="body2" sx={{ ml: 1 }}>
+                                              Step {validation?.step || key}: {validation?.passed ? 'Passed' : 'Failed'}
+                                            </Typography>
+                                            {validation?.match_percentage && (
+                                              <Chip 
+                                                label={`${validation.match_percentage}%`} 
+                                                size="small" 
+                                                sx={{ ml: 1 }}
+                                                color="info"
+                                              />
+                                            )}
+                                          </Box>
+                                        ))
+                                      )}
                                     </CardContent>
                                   </Card>
 
