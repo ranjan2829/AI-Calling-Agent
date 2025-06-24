@@ -78,7 +78,7 @@ interface BulkCallSession {
 }
 const initiateCall = async (phoneNumber: string) => {
   try {
-    const response = await fetch('http://localhost:8000/make-call', {
+    const response = await fetch('http://13.204.76.229:8000/make-call', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -244,7 +244,7 @@ export const CallDashboard: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch('http://localhost:8000/upload-csv', {
+      const response = await fetch('http://13.204.76.229:8000/upload-csv', {
         method: 'POST',
         body: formData,
       });
@@ -270,7 +270,7 @@ export const CallDashboard: React.FC = () => {
     setIsBulkCalling(true);
     
     try {
-      const response = await fetch('http://localhost:8000/bulk-call', {
+      const response = await fetch('http://13.204.76.229:8000/bulk-call', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -306,7 +306,7 @@ export const CallDashboard: React.FC = () => {
   const pollBulkCallStatus = async (bulkCallId: string) => {
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(`http://localhost:8000/bulk-call-status/${bulkCallId}`);
+        const response = await fetch(`http://13.204.76.229:8000/bulk-call-status/${bulkCallId}`);
         const status = await response.json();
         
         if (!status.error) {
@@ -330,7 +330,7 @@ export const CallDashboard: React.FC = () => {
   const stopBulkCalling = async () => {
     if (!bulkCallSession) return;
     try {
-      const response = await fetch(`http://localhost:8000/stop-bulk-call/${bulkCallSession.bulk_call_id}`, {
+      const response = await fetch(`http://13.204.76.229:8000/stop-bulk-call/${bulkCallSession.bulk_call_id}`, {
         method: 'POST',
       });
       const result = await response.json();
