@@ -1,0 +1,51 @@
+{
+  "call_id": "CAdf8242e470e2ed5fae4b70bb6fe79b36",
+  "candidate_name": "My_Name_Is",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [
+      "python"
+    ],
+    "missing_skills": [],
+    "skills_match_percentage": 100.0,
+    "experience_match_percentage": 50,
+    "overall_score": 90.0,
+    "comprehensive_score": 90.0,
+    "priority_score": 5,
+    "recommendation": "EXCELLENT MATCH",
+    "analysis_date": "2025-06-23 20:32:31",
+    "skill_mentions": {
+      "python": 4
+    },
+    "experience_data": {
+      "years_mentioned": [],
+      "experience_score": 0
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+14067601762",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [
+      "python"
+    ],
+    "skills_found_count": 1,
+    "total_required_skills": 1,
+    "phone_number": "+14067601762"
+  },
+  "interview_summary": {
+    "questions_answered": 7,
+    "total_questions": 7,
+    "completion_rate": "7/7"
+  },
+  "source_file": "interviews/CAdf8242e470e2ed5fae4b70bb6fe79b36_COMPLETED_20250623_203231.json",
+  "candidate_phone": "+916006656596",
+  "candidate_data": "",
+  "analysis_created": "2025-06-23 20:32:31"
+}

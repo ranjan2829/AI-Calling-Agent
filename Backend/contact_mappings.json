@@ -98,5 +98,11 @@
     "candidate_phone": "+917387792437",
     "is_bulk_call": false,
     "recording_enabled": true
+  },
+  "CAdf8242e470e2ed5fae4b70bb6fe79b36": {
+    "candidate_name": "Test Candidate",
+    "candidate_phone": "+916006656596",
+    "is_bulk_call": false,
+    "recording_enabled": true
   }
 }
