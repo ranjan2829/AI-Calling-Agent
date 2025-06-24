@@ -1384,8 +1384,6 @@ async def handle_voice_call(request: Request):
         to_number = form_data.get('To', '+14787807480')
         
         print(f"[VOICE] Incoming call {call_sid} from {from_number}")
-        
-        # Load contact mapping if available
         contact_info = None
         try:
             contact_mappings_file = "contact_mappings.json"
@@ -1395,8 +1393,6 @@ async def handle_voice_call(request: Request):
                 contact_info = all_mappings.get(call_sid, {})
         except Exception as e:
             print(f"Error loading contact mapping: {e}")
-        
-        # Initialize interview session
         interview_data = {
             'call_sid': call_sid,
             'phone_number': from_number,
@@ -1409,8 +1405,6 @@ async def handle_voice_call(request: Request):
             'silence_prompts': 0,
             'last_activity': datetime.now().isoformat()
         }
-        
-        # Add contact info if available
         if contact_info:
             interview_data.update({
                 'candidate_name': contact_info.get('candidate_name', 'Unknown'),
@@ -1424,14 +1418,11 @@ async def handle_voice_call(request: Request):
         conversation_state[call_sid] = interview_data
         
         print(f"[VOICE] Interview session created for {call_sid}")
-        
-        # Start with first question
         resp = VoiceResponse()
         resp.say("Hello! Thank you for calling. I'm your AI interviewer today. Let's begin with our interview.", 
                 voice='Polly.Aditi', rate='medium')
         resp.pause(length=0.5)
         resp.say(INTERVIEW_QUESTIONS[1], voice='Polly.Aditi', rate='medium')
-        
         gather = resp.gather(
             input='speech',
             action=f'{WEBHOOK_BASE_URL}/voice/speech/{call_sid}',
@@ -1445,9 +1436,7 @@ async def handle_voice_call(request: Request):
         )
         
         resp.redirect(f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}')
-        
         return Response(str(resp), media_type="application/xml")
-        
     except Exception as e:
         print(f"[ERROR] Voice call handler error: {e}")
         resp = VoiceResponse()
