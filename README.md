@@ -418,7 +418,7 @@ const calculateOverallScore = (interview: InterviewData) => {
 ### 📞 Interview Process Flow
 ```mermaid
 graph TD
-    A[User clicks 'Start Call'] --> [FastAPI receives request]
+    A[User clicks 'Start Call'] --> B[FastAPI receives request]
     B --> C[Twilio initiates call]
     C --> D[Candidate answers]
     D --> E[asks questions]
