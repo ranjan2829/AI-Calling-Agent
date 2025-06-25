@@ -477,24 +477,13 @@ sudo yum update -y
 sudo yum install python3 python3-pip -y
 
 # Deploy application
-git clone <repository>
 cd AI-Calling-Agent/Backend
 pip3 install -r requirements.txt
 
-# Run with systemd service
-sudo systemctl enable ai-calling-agent
-sudo systemctl start ai-calling-agent
 ```
 
 TWILIO_ACCOUNT_SID=prod_account_sid
 TWILIO_AUTH_TOKEN=prod_auth_token
-
-# Database
-DATABASE_URL=postgresql://user:pass@host:5432/dbname
-
-# Monitoring
-SENTRY_DSN=your-sentry-dsn
-LOG_LEVEL=INFO
 ```
 
 ## 🐛 Troubleshooting
