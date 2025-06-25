@@ -512,7 +512,7 @@ from twilio.rest import Client
 client = Client('your_sid', 'your_token')
 print(client.api.accounts.list())
 "
-```
+
 # Test phone number format
 # ✅ Correct: +91.........
 app.add_middleware(
