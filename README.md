@@ -421,12 +421,14 @@ graph TD
     A[User clicks 'Start Call'] --> B[FastAPI receives request]
     B --> C[Twilio initiates call]
     C --> D[Candidate answers]
-    D --> E[asks questions]
+    D --> E[Asks questions]
     E --> F[Audio recorded to S3]
     F --> G[AWS Transcribe processes]
+    G --> H[Transcript ready]
     H --> I[Next question or end]
     I --> J[Final analysis & scoring]
     J --> K[Results displayed in UI]
+
 ```
 ## ⚙️ Configuration
 ### 📋 Job Description Setup
