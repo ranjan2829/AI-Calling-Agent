@@ -405,20 +405,16 @@ const calculateOverallScore = (interview: InterviewData) => {
 - 🚀 Batch call initiation with delays
 - 📊 Real-time progress monitoring
 - ⏸️ Individual call pause/resume
-- 📈 Bulk operation analytics
 
 ### 📋 InterviewDetails Component  
 **Purpose**: Deep-dive analysis of individual interviews
-
 **Features**:
 - 🗣️ Question-by-question breakdown
 - 📊 Confidence scoring visualization
 - 🎯 Skills gap analysis
 - 💰 Salary recommendation (INR)
 - 📝 Detailed feedback notes
-
 ## 🔄 Data Flow
-
 ### 📞 Interview Process Flow
 ```mermaid
 graph TD
@@ -432,9 +428,7 @@ graph TD
     I --> J[Final analysis & scoring]
     J --> K[Results displayed in UI]
 ```
-
 ## ⚙️ Configuration
-
 ### 📋 Job Description Setup
 Edit `Backend/config/job_description.json`:
 ```json
@@ -453,7 +447,6 @@ Edit `Backend/config/job_description.json`:
 
 
 ### ☁️ AWS Deployment
-
 **Backend on EC2**:
 ```bash
 # Launch EC2 instance (t3.medium recommended)
