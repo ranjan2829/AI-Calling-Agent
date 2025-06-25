@@ -1,4 +1,4 @@
-# 🇮🇳 AI Calling Agent - Comprehensive Documentation
+# 🇮🇳Calling Agent - Comprehensive Documentation
 
 ## 📋 Table of Contents
 1. [Project Overview](#project-overview)
