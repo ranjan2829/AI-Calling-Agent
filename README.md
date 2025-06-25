@@ -433,21 +433,6 @@ graph TD
     J --> K[Results displayed in UI]
 ```
 
-### 🤖 AI Analysis Pipeline
-```mermaid
-graph LR
-    A[Raw Audio] --> B[AWS Transcribe]
-    B --> C[Text Preprocessing]
-    C --> D[Skills Extraction]
-    C --> E[Experience Analysis]
-    C --> F[Cultural Fit Assessment]
-    D --> G[Analysis]
-    E --> G
-    F --> G
-    G --> H[Composite Scoring]
-    H --> I[Recommendation Engine]
-    I --> J[Final Report Generation]
-```
 ## ⚙️ Configuration
 
 ### 📋 Job Description Setup
