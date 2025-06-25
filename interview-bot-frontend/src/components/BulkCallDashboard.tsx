@@ -110,7 +110,7 @@ export const BulkCallDashboard: React.FC = () => {
     setIsCalling(true);
     
     try {
-      const response = await fetch('http://localhost:8000/bulk-call', {
+      const response = await fetch('http://13.204.76.229:8000/bulk-call', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,7 +147,7 @@ export const BulkCallDashboard: React.FC = () => {
   const pollBulkCallStatus = async (bulkCallId: string) => {
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(`http://localhost:8000/bulk-call-status/${bulkCallId}`);
+        const response = await fetch(`http://13.204.76.229:8000/bulk-call-status/${bulkCallId}`);
         const status = await response.json();
         
         if (!status.error) {
@@ -174,7 +174,7 @@ export const BulkCallDashboard: React.FC = () => {
     if (!bulkCallSession) return;
     
     try {
-      const response = await fetch(`http://localhost:8000/stop-bulk-call/${bulkCallSession.bulk_call_id}`, {
+      const response = await fetch(`http://13.204.76.229:8000/stop-bulk-call/${bulkCallSession.bulk_call_id}`, {
         method: 'POST',
       });
       
