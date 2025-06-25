@@ -236,121 +236,84 @@ POST /end-call/{call_sid}
 // 🔄 Handle Twilio Webhooks
 POST /webhook
 ```
-
 #### Interview Data & Analysis
 ```typescript
-// 📋 Get All Interviews
 GET /get-all-interviews-detailed
 Response: {
   "interviews": [InterviewData[]],
   "total_count": number,
   "completed_count": number
 }
-
-// 📄 Get Specific Interview
 GET /interview/{interview_id}
-
-// 🤖 Run AI Analysis
 POST /run-jd-analysis
 Body: { "interview_ids": ["id1", "id2"] }
-
-// 📊 Download JD Report
 GET /jd-report/{interview_id}
 ```
-
 #### Bulk Operations
 ```typescript
-// 📁 Upload Contact CSV
 POST /upload-contacts
 Content-Type: multipart/form-data
 Body: FormData with CSV file
-
-// 🚀 Start Bulk Calling
 POST /start-bulk-calling
 {
   "contact_ids": ["id1", "id2", "id3"],
   "delay_between_calls": 30,
   "max_concurrent_calls": 3
 }
-
-// 📈 Get Bulk Call Status
 GET /bulk-call-status/{bulk_id}
 ```
-
 ### 📊 Data Models
-
 #### Interview Response Structure
 ```typescript
 interface InterviewData {
-  // Call Information
   call_sid: string;
   phone_number: string;
   candidate_name: string;
   status: 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'NO_ANSWER';
-  
-  // Timing
   start_time: string;
   end_time?: string;
   duration_minutes: number;
-  
-  // Responses
   responses: Array<{
     question: string;
     answer: string;
-    confidence: number;        // 0.0 - 1.0
+    confidence: number;  
     timestamp: string;
     question_number: number;
     audio_url?: string;
   }>;
-  
-  // AI Analysis Results
   validation_results: {
     [step: string]: {
       step: number;
       passed: boolean;
       reason: string;
       confidence: number;
-      
-      // Skills Analysis
       skills_match?: boolean;
       found_skills?: string[];
       match_percentage?: number;
-      
-      // Experience Assessment
       experience_years?: number;
       experience_level?: 'junior' | 'mid' | 'senior';
-      
-      // Cultural Fit
       relocation_willing?: boolean;
       onsite_available?: boolean;
       notice_period_days?: number;
-      
-      // Compensation
       current_ctc_inr?: number;
       expected_ctc_inr?: number;
       negotiable?: boolean;
     };
   };
-  
-  // Metadata
   silence_prompts: number;
   last_activity: string;
   is_bulk_call: boolean;
   bulk_call_id?: string;
 }
 ```
-
 ## 🎯 Frontend Components
-
 ### 📞 CallDashboard Component
 **Purpose**: Main interface for initiating individual interviews
-
 **Features**:
 - 🔢 Phone number input with +91 validation
 - ⏱️ Real-time call status monitoring  
 - 📝 Live transcription display
 - 🎛️ Call controls (start/end/pause)
-
 **Usage**:
 ```tsx
 import { CallDashboard } from './components/CallDashboard';
@@ -359,10 +322,8 @@ function App() {
   return <CallDashboard />;
 }
 ```
-
 ### 📊 InterviewResults Component  
 **Purpose**: Comprehensive candidate analysis and ranking
-
 **Features**:
 - 🏆 Sortable candidate leaderboard
 - 📈 Skills analysis with visual charts
@@ -372,7 +333,6 @@ function App() {
 
 **Key Functions**:
 ```tsx
-// Skills detection from interview text
 const extractSkillsFromText = (text: string): string[] => {
   const skillKeywords = [
     'python', 'java', 'javascript', 'react', 'node.js',
@@ -382,8 +342,6 @@ const extractSkillsFromText = (text: string): string[] => {
     text.toLowerCase().includes(skill)
   );
 };
-
-// Composite scoring algorithm
 const calculateOverallScore = (interview: InterviewData) => {
   const skillsScore = interview.skills_percentage;
   const experienceScore = interview.experience_match;
