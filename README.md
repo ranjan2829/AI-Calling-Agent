@@ -18,38 +18,26 @@
 
 ## Project Overview
 
-The **AI Calling Agent** is an intelligent interview automation platform developed by **Onelab Ventures** that conducts phone interviews using AI, transcribes responses in real-time, and provides comprehensive candidate analysis. Built specifically for the Indian market with cultural intelligence and local optimizations.
+The **AI Calling Agent** is an intelligent interview automation platform developed by **Onelab Ventures** that conducts phone interviews, transcribes responses in real-time, and provides comprehensive candidate analysis. Built specifically for the Indian market with cultural intelligence and local optimizations.
 
 ### 🎯 Key Capabilities
 - 📞 **Automated Phone Interviews** - AI-powered structured interviews via Twilio
 - 🎙️ **Real-time Transcription** - Live speech-to-text using AWS Transcribe
-- 🤖 **Intelligent Analysis** - OpenAI GPT-powered response evaluation
-- 📊 **Indian Market Focus** - INR salary insights, cultural context, local phone formats
-- 📱 **Modern Dashboard** - React-based interface with Material-UI
 - 🔄 **Bulk Processing** - Handle multiple candidates simultaneously
 
 ## 🌟 Features
 
 ### 🚀 Core Capabilities
 - **FastAPI Framework**: High-performance async API with auto-documentation
-- **Indian Telephony Services**: Twilio integration with +91 number validation
-- **Multi-language Support**: English with Indian accent optimization
+- **language Support**: English with Indian accent optimization
 - **Cultural Intelligence**: Questions tailored for Indian workplace dynamics
 - **Comprehensive Reports**: Detailed analysis with INR-based salary recommendations
 
-### 🇮🇳 Indian Market Optimizations
-- **Local Phone Format**: +91 mobile number validation and formatting
-- **Cultural Context**: Interview questions adapted for Indian work culture
-- **Salary Insights**: INR-based compensation analysis and recommendations
-- **Work Culture Focus**: Remote work preferences, time zones, client interaction skills
-- **Regional Considerations**: Relocation willingness, notice periods, visa status
-
 ### 📊 Advanced Analytics
-- **Skills Detection**: Automatic identification of technical and soft skills
+- **Skills Detection**: Automatic identification of technical 
 - **Experience Mapping**: Years of experience validation and assessment
 - **JD Matching**: Job description compatibility scoring
-- **Confidence Analysis**: Response quality and candidate confidence evaluation
-- **Recommendation Engine**: Hire/reject recommendations with detailed reasoning
+
 
 ## 🛠️ Technology Stack
 
@@ -73,7 +61,6 @@ The **AI Calling Agent** is an intelligent interview automation platform develop
 - **Twilio** - Voice calls and telephony
 - **AWS Transcribe** - Speech-to-text conversion
 - **AWS S3** - Audio file storage
-- **OpenAI GPT** - AI-powered text analysis
 
 ## 🏗️ Architecture
 
@@ -88,7 +75,7 @@ The **AI Calling Agent** is an intelligent interview automation platform develop
          │                       │                       │
          ▼                       ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Material-UI   │    │   AWS Services  │    │   OpenAI GPT    │
+│   Material-UI   │    │   AWS Services  │    │   Backend.      │
 │   Components    │    │ • Transcribe    │    │ • Analysis      │
 │                 │    │ • S3 Storage    │    │ • Skills Match  │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
@@ -154,8 +141,6 @@ cd ../interview-bot-frontend
 npm install && npm run dev
 ```
 
-Visit `http://localhost:3000` - Your AI interviewer is ready! 🎉
-
 ## 🔧 Installation & Setup
 
 ### 📋 Prerequisites
@@ -164,7 +149,6 @@ Visit `http://localhost:3000` - Your AI interviewer is ready! 🎉
 ✅ Node.js 18+
 ✅ Twilio Account
 ✅ AWS Account (for Transcribe & S3)
-✅ OpenAI API Key
 ```
 
 ### 🐍 Backend Setup
@@ -241,7 +225,6 @@ npm run dev
 POST /make-call
 {
   "phone_number": "+919876543210",
-  "candidate_name": "Rahul Sharma"
 }
 
 // 📊 Get Call Status
@@ -384,7 +367,7 @@ function App() {
 - 🏆 Sortable candidate leaderboard
 - 📈 Skills analysis with visual charts
 - 🔍 Expandable detailed interview views
-- 📄 PDF/JSON report downloads
+- 📄 JSON report downloads
 - 🎯 JD matching scores
 
 **Key Functions**:
@@ -393,7 +376,7 @@ function App() {
 const extractSkillsFromText = (text: string): string[] => {
   const skillKeywords = [
     'python', 'java', 'javascript', 'react', 'node.js',
-    'machine learning', 'data science', 'aws', 'docker'
+    'aws'
   ];
   return skillKeywords.filter(skill => 
     text.toLowerCase().includes(skill)
@@ -442,10 +425,9 @@ graph TD
     A[User clicks 'Start Call'] --> B[FastAPI receives request]
     B --> C[Twilio initiates call]
     C --> D[Candidate answers]
-    D --> E[AI asks questions]
+    D --> E[asks questions]
     E --> F[Audio recorded to S3]
     F --> G[AWS Transcribe processes]
-    G --> H[OpenAI analyzes response]
     H --> I[Next question or end]
     I --> J[Final analysis & scoring]
     J --> K[Results displayed in UI]
@@ -459,41 +441,13 @@ graph LR
     C --> D[Skills Extraction]
     C --> E[Experience Analysis]
     C --> F[Cultural Fit Assessment]
-    D --> G[OpenAI GPT Analysis]
+    D --> G[Analysis]
     E --> G
     F --> G
     G --> H[Composite Scoring]
     H --> I[Recommendation Engine]
     I --> J[Final Report Generation]
 ```
-
-### 📊 Scoring Algorithm
-```python
-def calculate_final_score(interview_data):
-    # Skills matching (40% weight)
-    skills_score = len(found_skills) / len(required_skills) * 100
-    
-    # Experience relevance (30% weight)  
-    exp_score = min(experience_years / required_years, 1.0) * 100
-    
-    # Response quality (30% weight)
-    quality_score = sum(confidence_scores) / len(responses) * 100
-    
-    # Cultural fit bonus/penalty
-    cultural_bonus = 0
-    if relocation_willing: cultural_bonus += 5
-    if notice_period <= 30: cultural_bonus += 5
-    
-    final_score = (
-        skills_score * 0.4 + 
-        exp_score * 0.3 + 
-        quality_score * 0.3 + 
-        cultural_bonus
-    )
-    
-    return min(final_score, 100)
-```
-
 ## ⚙️ Configuration
 
 ### 📋 Job Description Setup
@@ -502,175 +456,16 @@ Edit `Backend/config/job_description.json`:
 {
   "job_title": "Senior Python Developer",
   "company": "Onelab Ventures",
-  "location": "Bangalore, India",
-  "job_type": "Full-time",
   "experience_required": "3-5 years",
   
   "required_skills": [
     "python", "django", "fastapi", "postgresql", 
     "docker", "aws", "git", "rest apis"
   ],
-  "preferred_skills": [
-    "machine learning", "data science", "kubernetes", 
-    "microservices", "redis", "elasticsearch"
-  ],
-  
-  "responsibilities": [
-    "Develop scalable web applications",
-    "Design and implement REST APIs", 
-    "Collaborate with cross-functional teams",
-    "Mentor junior developers"
-  ],
-  
-  "compensation": {
-    "min_ctc_inr": 1200000,
-    "max_ctc_inr": 2500000,
-    "currency": "INR",
-    "benefits": ["Health insurance", "WFH", "Learning budget"]
-  },
-  
-  "cultural_preferences": {
-    "remote_work": true,
-    "relocation_required": false,
-    "max_notice_period": 60,
-    "interview_rounds": 3
-  }
 }
 ```
 
-### 🎤 Interview Questions Customization
-Modify questions in `Backend/main.py`:
-```python
-def get_interview_questions():
-    return [
-        {
-            "id": 1,
-            "question": "नमस्ते! Please introduce yourself and tell me about your background.",
-            "type": "introduction",
-            "max_duration": 120
-        },
-        {
-            "id": 2, 
-            "question": "What are your key technical skills relevant to this Python developer role?",
-            "type": "skills_assessment",
-            "max_duration": 180
-        },
-        {
-            "id": 3,
-            "question": "Are you open to relocation to Bangalore, or do you prefer remote work?",
-            "type": "location_preference", 
-            "max_duration": 60
-        },
-        {
-            "id": 4,
-            "question": "What is your current CTC and salary expectations in INR?",
-            "type": "compensation",
-            "max_duration": 90
-        },
-        {
-            "id": 5,
-            "question": "How many years of Python development experience do you have?",
-            "type": "experience_validation",
-            "max_duration": 120
-        },
-        {
-            "id": 6,
-            "question": "What is your current notice period?",
-            "type": "availability",
-            "max_duration": 30
-        },
-        {
-            "id": 7,
-            "question": "Do you have any questions about the role or our company?",
-            "type": "candidate_questions",
-            "max_duration": 120
-        }
-    ]
-```
 
-### 🎯 Scoring Configuration
-Customize scoring weights in `Backend/summary.py`:
-```python
-SCORING_CONFIG = {
-    "weights": {
-        "skills_match": 0.35,
-        "experience_relevance": 0.25, 
-        "communication_quality": 0.20,
-        "cultural_fit": 0.15,
-        "salary_expectation": 0.05
-    },
-    
-    "thresholds": {
-        "excellent": 85,
-        "good": 70,
-        "average": 55,
-        "below_average": 40
-    },
-    
-    "bonuses": {
-        "immediate_joiner": 5,
-        "flexible_salary": 3,
-        "relevant_domain": 5,
-        "good_english": 3
-    }
-}
-```
-
-## 🚀 Deployment
-
-### 🐳 Docker Deployment
-
-**Backend Dockerfile**:
-```dockerfile
-FROM python:3.12-slim
-
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-EXPOSE 8000
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-**Frontend Dockerfile**:
-```dockerfile
-FROM node:18-alpine as build
-
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-
-COPY . .
-RUN npm run build
-
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
-```
-
-**Docker Compose**:
-```yaml
-version: '3.8'
-services:
-  backend:
-    build: ./Backend
-    ports:
-      - "8000:8000"
-    environment:
-      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-    volumes:
-      - ./Backend/interviews:/app/interviews
-
-  frontend:
-    build: ./interview-bot-frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-```
 
 ### ☁️ AWS Deployment
 
@@ -691,28 +486,8 @@ sudo systemctl enable ai-calling-agent
 sudo systemctl start ai-calling-agent
 ```
 
-**Frontend on S3 + CloudFront**:
-```bash
-# Build and upload
-npm run build
-aws s3 sync dist/ s3://your-frontend-bucket/
-aws cloudfront create-invalidation --distribution-id YOUR_ID --paths "/*"
-```
-
-### 🔧 Production Environment Variables
-```bash
-# Production .env file
-ENVIRONMENT=production
-DEBUG=false
-
-# Security
-SECRET_KEY=your-super-secret-key
-ALLOWED_HOSTS=your-domain.com,api.your-domain.com
-
-# External Services
 TWILIO_ACCOUNT_SID=prod_account_sid
 TWILIO_AUTH_TOKEN=prod_auth_token
-OPENAI_API_KEY=prod_openai_key
 
 # Database
 DATABASE_URL=postgresql://user:pass@host:5432/dbname
@@ -737,41 +512,9 @@ from twilio.rest import Client
 client = Client('your_sid', 'your_token')
 print(client.api.accounts.list())
 "
-
+```
 # Test phone number format
-# ✅ Correct: +919876543210
-# ❌ Wrong: 9876543210, +91 9876543210
-```
-
-#### 2. 🎙️ AWS Transcription Issues
-```python
-# Test AWS credentials
-import boto3
-client = boto3.client('transcribe', region_name='us-east-1')
-try:
-    response = client.list_transcription_jobs()
-    print("✅ AWS credentials working")
-except Exception as e:
-    print(f"❌ AWS Error: {e}")
-
-# Check S3 bucket permissions
-aws s3 ls s3://your-bucket-name/
-aws s3 cp test-file.txt s3://your-bucket-name/
-```
-
-#### 3. 🌐 CORS & API Issues
-```typescript
-// Frontend: Check API connection
-const testAPI = async () => {
-  try {
-    const response = await fetch('http://localhost:8000/health');
-    console.log('✅ Backend connected:', response.status);
-  } catch (error) {
-    console.error('❌ Backend connection failed:', error);
-  }
-};
-
-// Backend: Update CORS settings
+# ✅ Correct: +91.........
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "https://your-domain.com"],
@@ -781,114 +524,6 @@ app.add_middleware(
 )
 ```
 
-#### 4. 💾 File Storage Issues
-```bash
-# Check directory permissions
-ls -la Backend/interviews/
-chmod -R 755 Backend/interviews/
-
-# Verify storage space
-df -h
-du -sh Backend/interviews/
-
-# Clean old recordings (optional)
-find Backend/interviews/audio_recordings/ -type f -mtime +30 -delete
-```
-
-#### 5. 🤖 OpenAI API Errors
-```python
-# Test OpenAI connection
-import openai
-openai.api_key = "your-api-key"
-
-try:
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": "Hello"}],
-        max_tokens=50
-    )
-    print("✅ OpenAI working")
-except Exception as e:
-    print(f"❌ OpenAI Error: {e}")
-```
-
-### 📊 Health Check Endpoints
-```bash
-# Backend health check
-curl http://localhost:8000/health
-# Expected: {"status": "healthy", "timestamp": "2024-01-01T00:00:00Z"}
-
-# Database connection check  
-curl http://localhost:8000/health/db
-# Expected: {"database": "connected", "interviews_count": 42}
-
-# External services check
-curl http://localhost:8000/health/services
-# Expected: {"twilio": "ok", "aws": "ok", "openai": "ok"}
-```
-
-### 🔍 Debug Mode
-Enable detailed logging:
-```python
-# In main.py
-import logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-
-# Enable Twilio debug logs
-from twilio.http.http_client import TwilioHttpClient
-client = Client(username, password, http_client=TwilioHttpClient(logger=logging.getLogger()))
-```
-
-### 📱 Mobile Testing
-Test with various Indian mobile networks:
-```bash
-# Test numbers (replace with real numbers)
-+919876543210  # Airtel
-+918765432109  # Jio  
-+917654321098  # Vi/Vodafone
-+919123456789  # BSNL
-```
-
-## 🤝 Contributing
-
-### 🛠️ Development Setup
-1. **Fork the repository**
-2. **Create feature branch**: `git checkout -b feature/indian-language-support`
-3. **Make changes with tests**
-4. **Follow code style**: `black Backend/` and `prettier --write frontend/`
-5. **Commit**: `git commit -m "feat: add Hindi language support"`
-6. **Push**: `git push origin feature/indian-language-support`
-7. **Create Pull Request**
-
-### 📋 Code Standards
-```bash
-# Python formatting
-black Backend/ --line-length 88
-isort Backend/ --profile black
-
-# TypeScript formatting
-cd interview-bot-frontend
-npm run lint
-npm run format
-
-# Type checking
-npm run type-check
-```
-
-### 🧪 Testing
-```bash
-# Backend tests
-cd Backend
-pytest tests/ -v --cov=.
-
-# Frontend tests  
-cd interview-bot-frontend
-npm run test
-npm run test:coverage
-```
 
 ## 📄 License
 
@@ -898,5 +533,3 @@ This project is developed by **Onelab Ventures**. All rights reserved.
 
 - **🏢 Company**: Onelab Ventures
 - **🌐 Website**: [onelab.ventures](https://onelab.ventures)
-- **📧 Email**: support@onelab.ventures
-- **📱 Phone**: +
