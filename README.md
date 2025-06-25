@@ -1,5 +1,4 @@
 # 🇮🇳Calling Agent - Comprehensive Documentation
-
 ## 📋 Table of Contents
 1. [Project Overview](#project-overview)
 2. [🌟 Features](#-features)
@@ -15,32 +14,23 @@
 12. [🚀 Deployment](#-deployment)
 13. [🐛 Troubleshooting](#-troubleshooting)
 14. [🤝 Contributing](#-contributing)
-
 ## Project Overview
-
 The **AI Calling Agent** is an intelligent interview automation platform developed by **Onelab Ventures** that conducts phone interviews, transcribes responses in real-time, and provides comprehensive candidate analysis. Built specifically for the Indian market with cultural intelligence and local optimizations.
-
 ### 🎯 Key Capabilities
 - 📞 **Automated Phone Interviews** - AI-powered structured interviews via Twilio
 - 🎙️ **Real-time Transcription** - Live speech-to-text using AWS Transcribe
 - 🔄 **Bulk Processing** - Handle multiple candidates simultaneously
-
 ## 🌟 Features
-
 ### 🚀 Core Capabilities
 - **FastAPI Framework**: High-performance async API with auto-documentation
 - **language Support**: English with Indian accent optimization
 - **Cultural Intelligence**: Questions tailored for Indian workplace dynamics
 - **Comprehensive Reports**: Detailed analysis with INR-based salary recommendations
-
 ### 📊 Advanced Analytics
 - **Skills Detection**: Automatic identification of technical 
 - **Experience Mapping**: Years of experience validation and assessment
 - **JD Matching**: Job description compatibility scoring
-
-
 ## 🛠️ Technology Stack
-
 ### Frontend Stack
 - **React 18** - Modern React with hooks and TypeScript
 - **Material-UI (MUI)** - Professional component library
