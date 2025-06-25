@@ -84,7 +84,7 @@ export const BulkCallDashboard: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch('http://localhost:8000/upload-csv', {
+      const response = await fetch('http://13.204.76.229:8000/upload-csv', {
         method: 'POST',
         body: formData,
       });
