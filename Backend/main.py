@@ -1497,6 +1497,8 @@ async def handle_transcription(call_sid: str, request: Request):
             print(f"[TWILIO TRANSCRIPT SAVED] {transcript_filename}")
         
         return Response("", media_type="application/xml")
+        
+    except Exception as e:  # ADD THIS MISSING EXCEPT BLOCK
         print(f"[ERROR] Transcription handler error for {call_sid}: {e}")
         return Response("", media_type="application/xml")
 
