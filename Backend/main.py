@@ -328,7 +328,7 @@ def check_ai_ml_experience(transcript_text):
     return (has_ai_experience, has_genai_experience, has_framework_experience, 
             has_deep_learning_experience, total_ai_skills)
 
-# Update the validation function to handle new questions
+# Fixed validation function
 def validate_response_selected_questions(call_sid: str, step: int, transcription: str):
     try:
         interview_data = load_interview_session(call_sid)
@@ -338,7 +338,7 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
         validation_result = {"step": step, "passed": True, "reason": ""}
         
         if step == 2:
-            # Skills validation
+            # Skills validation - FIXED
             has_skills, found_skills, match_percentage = check_skills_match(transcription)
             validation_result["skills_match"] = has_skills
             validation_result["found_skills"] = found_skills
@@ -354,7 +354,7 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
                 return False, "no_skills", "No relevant skills found"
                 
         elif step == 3:
-            # Notice period validation
+            # Notice period validation - FIXED
             notice_acceptable, notice_days, _ = check_notice_period(transcription)
             validation_result["notice_acceptable"] = notice_acceptable
             validation_result["notice_days"] = notice_days
@@ -808,7 +808,8 @@ async def get_all_interviews():
                         "completion_time": interview_data.get("completion_time", ""),
                         "all_validations_passed": interview_data.get("all_validations_passed", False),
                         "termination_reason": interview_data.get("termination_reason", None),
-                        "responses": responses}
+                        "responses": responses
+                    }
                     all_interviews.append(interview_summary)
                 except Exception as e:
                     print(f"Error reading {file_path}: {e}")
@@ -1046,7 +1047,7 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
         validation_result = {"step": step, "passed": True, "reason": ""}
         
         if step == 2:
-            # Skills validation
+            # Skills validation - FIXED
             has_skills, found_skills, match_percentage = check_skills_match(transcription)
             validation_result["skills_match"] = has_skills
             validation_result["found_skills"] = found_skills
@@ -1062,7 +1063,7 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
                 return False, "no_skills", "No relevant skills found"
                 
         elif step == 3:
-            # Notice period validation
+            # Notice period validation - FIXED
             notice_acceptable, notice_days, _ = check_notice_period(transcription)
             validation_result["notice_acceptable"] = notice_acceptable
             validation_result["notice_days"] = notice_days
@@ -1496,7 +1497,6 @@ async def handle_transcription(call_sid: str, request: Request):
             print(f"[TWILIO TRANSCRIPT SAVED] {transcript_filename}")
         
         return Response("", media_type="application/xml")
-    except Exception as e:
         print(f"[ERROR] Transcription handler error for {call_sid}: {e}")
         return Response("", media_type="application/xml")
 
