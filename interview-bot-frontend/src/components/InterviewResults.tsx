@@ -128,40 +128,51 @@ export const InterviewResults: React.FC = () => {
       console.log('📋 Raw interviews loaded:', allInterviews.length, 'interviews');
       console.log('📊 Sample interview data:', allInterviews[0]);
       
-      // Filter out invalid interviews and process valid ones
-      const validInterviews = allInterviews.filter((interview: InterviewData) => {
-        // Skip test/invalid candidates
-        const skipPatterns = ['My_Name', 'Test Candidate', 'Unknown', 'Ohh', 'BULK'];
-        const candidateName = interview.candidate_name || '';
+      // Debug: Check the actual data structure
+      if (allInterviews.length > 0) {
+        console.log('🔍 Available fields in first interview:', Object.keys(allInterviews[0]));
+      }
+      
+      // More lenient filtering - accept interviews with data
+      const validInterviews = allInterviews.filter((interview: any) => {
+        // Use interview_id as fallback for call_sid
+        const callId = interview.call_sid || interview.interview_id;
+        const candidateName = interview.candidate_name || interview.name || 'Unknown';
+        const responses = interview.responses || [];
+        const status = interview.status || 'COMPLETED';
         
-        if (skipPatterns.some(pattern => candidateName.includes(pattern))) {
-          return false;
-        }
+        console.log(`🔍 Checking interview: ${callId}, name: ${candidateName}, responses: ${responses.length}, status: ${status}`);
         
-        // Must have responses and valid call_sid
-        return interview.responses && 
-               interview.responses.length > 0 && 
-               interview.call_sid && 
-               interview.status === 'COMPLETED';
+        // Less strict filtering - just need basic data
+        const hasBasicData = callId && responses.length > 0;
+        const isNotTestData = !candidateName.includes('Test') && candidateName !== 'Unknown';
+        
+        console.log(`✅ Basic data: ${hasBasicData}, Not test: ${isNotTestData}`);
+        
+        return hasBasicData; // Remove the test data filter for now to see all data
       });
       
       console.log('✅ Valid interviews after filtering:', validInterviews.length);
       
-      // Process each interview to extract meaningful data
-      const processedInterviews = validInterviews.map((interview: InterviewData) => {
-        console.log('🔍 Processing interview:', interview.call_sid);
+      const processedInterviews = validInterviews.map((interview: any) => {
+        console.log('🔍 Processing interview:', interview.interview_id || interview.call_sid);
+        
+        // Handle both call_sid and interview_id
+        const callId = interview.call_sid || interview.interview_id || 'unknown';
+        const candidateName = interview.candidate_name || interview.name || 'Unknown Candidate';
+        const phoneNumber = interview.candidate_phone || interview.phone_number || 'Unknown';
         
         // Safe data extraction with proper fallbacks
         const safeInterview = {
-          call_sid: interview.call_sid || 'unknown',
-          phone_number: interview.phone_number || interview.candidate_phone || 'Unknown',
-          candidate_name: interview.candidate_name || 'Unknown Candidate',
-          candidate_phone: interview.candidate_phone || interview.phone_number || 'Unknown',
-          twilio_number: interview.twilio_number || 'Unknown',
+          call_sid: callId,
+          phone_number: phoneNumber,
+          candidate_name: candidateName,
+          candidate_phone: phoneNumber,
+          twilio_number: interview.twilio_number || '+14787807480',
           start_time: interview.start_time || new Date().toISOString(),
           end_time: interview.end_time,
-          status: interview.status || 'Unknown',
-          current_question: interview.current_question || 1,
+          status: interview.status || 'COMPLETED',
+          current_question: interview.current_question || interview.questions_answered || 7,
           responses: interview.responses || [],
           validation_results: interview.validation_results || {},
           ...interview
@@ -169,13 +180,15 @@ export const InterviewResults: React.FC = () => {
 
         // Extract all text from responses for skills analysis
         const allResponseText = safeInterview.responses
-          .map(r => r.answer || '')
+          .map((r: any) => r.answer || '')
           .join(' ');
-        
+      
+        console.log(`📝 Response text for ${candidateName}: "${allResponseText.substring(0, 100)}..."`);
+      
         // Use skills detection from validation results OR extract from text
         let found_skills: string[] = [];
         let skills_percentage = 0;
-        
+      
         // First try to get from validation results
         const skillsValidation = safeInterview.validation_results?.["2"];
         if (skillsValidation && skillsValidation.found_skills) {
@@ -184,33 +197,39 @@ export const InterviewResults: React.FC = () => {
         } else {
           // Fallback: extract skills from response text
           found_skills = extractSkillsFromText(allResponseText);
-          // Calculate percentage based on job requirements (assume python is required)
-          const requiredSkills = ['python']; // You can make this dynamic
-          skills_percentage = requiredSkills.length > 0 
-            ? (found_skills.filter(skill => requiredSkills.includes(skill.toLowerCase())).length / requiredSkills.length) * 100
-            : 0;
+          // Calculate percentage based on common job requirements
+          const commonRequiredSkills = ['python', 'javascript', 'java', 'react', 'node'];
+          skills_percentage = commonRequiredSkills.length > 0 
+            ? (found_skills.filter(skill => 
+                commonRequiredSkills.some(req => 
+                  req.toLowerCase().includes(skill.toLowerCase()) || 
+                  skill.toLowerCase().includes(req.toLowerCase())
+                )).length / commonRequiredSkills.length) * 100
+            : found_skills.length > 0 ? 50 : 0; // Give at least 50% if any skills found
         }
 
         // Calculate overall score based on validation results
         const validationResults = Object.values(safeInterview.validation_results || {});
-        const passedValidations = validationResults.filter(v => v?.passed).length;
+        const passedValidations = validationResults.filter((v: any) => v?.passed).length;
         const totalValidations = Math.max(validationResults.length, 1);
         const validation_score = Math.round((passedValidations / totalValidations) * 100);
-        
+      
         // Combine validation score with skills percentage for overall score
-        const overall_score = Math.round((validation_score * 0.6) + (skills_percentage * 0.4));
-        
+        const overall_score = validationResults.length > 0 
+          ? Math.round((validation_score * 0.6) + (skills_percentage * 0.4))
+          : Math.round(skills_percentage); // If no validation, use just skills
+      
         // Calculate interview duration
         const startTime = new Date(safeInterview.start_time);
         const endTime = safeInterview.end_time ? new Date(safeInterview.end_time) : new Date();
         const durationMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
         const interview_duration = `${Math.max(0, durationMinutes)} min`;
-        
+      
         // Calculate completion rate based on actual responses
         const totalQuestions = 7;
         const answeredQuestions = safeInterview.responses.length;
         const completion_rate = `${Math.round((answeredQuestions / totalQuestions) * 100)}%`;
-        
+      
         // Generate recommendation based on scores and skills
         let recommendation = 'NEEDS REVIEW';
         if (overall_score >= 80 && skills_percentage >= 70) {
@@ -219,21 +238,22 @@ export const InterviewResults: React.FC = () => {
           recommendation = 'STRONG CANDIDATE';
         } else if (overall_score >= 60 && skills_percentage >= 50) {
           recommendation = 'GOOD CANDIDATE';
-        } else if (overall_score >= 50) {
+        } else if (overall_score >= 40 || skills_percentage >= 30) {
           recommendation = 'MODERATE FIT';
         }
-        
-        console.log(`📊 Processed interview for ${safeInterview.candidate_name}:`, {
-          call_sid: safeInterview.call_sid,
+      
+        console.log(`📊 Processed interview for ${candidateName}:`, {
+          call_sid: callId,
           overall_score,
           skills_percentage,
           found_skills,
           validation_score,
           passedValidations,
           totalValidations,
-          recommendation
+          recommendation,
+          responses_count: safeInterview.responses.length
         });
-        
+      
         return {
           ...safeInterview,
           overall_score,
@@ -244,7 +264,7 @@ export const InterviewResults: React.FC = () => {
           completion_rate
         };
       });
-      
+    
       // Sort by overall score first, then skills percentage (highest first)
       const sortedInterviews = processedInterviews.sort((a, b) => {
         if (a.overall_score !== b.overall_score) {
@@ -252,10 +272,10 @@ export const InterviewResults: React.FC = () => {
         }
         return b.skills_percentage - a.skills_percentage;
       });
-      
+    
       console.log('✅ Final sorted interviews:', sortedInterviews);
       setInterviews(sortedInterviews);
-      
+    
     } catch (error) {
       console.error('❌ Error loading interview data:', error);
       toast.error('Failed to load interview data');
