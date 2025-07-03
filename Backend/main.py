@@ -61,6 +61,7 @@ except Exception as e:
     print(f"Error initializing AWS clients: {e}")
 conversation_state = {}
 INTERVIEW_QUESTIONS = {
+    0: "Is this a good time to speak for a 3-4 minute interview?",
     1: "Introduce yourself.",
     2: "What are your key skills for this role?",
     3: "What is your current notice period?",
@@ -154,84 +155,94 @@ def load_interview_session(call_sid: str):
         print(f"Error loading session {call_sid}: {e}")
         return None
 def check_api_experience(transcript_text):
-    """Check if candidate has API development experience - SIMPLIFIED"""
     text_lower = transcript_text.lower()
-    
-    # Simple API keywords - just check if they mention any API-related term
     api_keywords = [
         "api", "rest", "json", "http", "get", "post", "put", "delete",
         "endpoints", "postman", "flask", "django", "express", "fastapi"
     ]
-    
-    # Simple check - if any keyword found, they have experience
     has_api_experience = any(keyword in text_lower for keyword in api_keywords)
     found_skills = [keyword for keyword in api_keywords if keyword in text_lower]
-    
     return has_api_experience, found_skills, has_api_experience
 
 def check_cloud_platforms_experience(transcript_text):
-    """Check cloud platforms experience - SIMPLIFIED"""
     text_lower = transcript_text.lower()
-    
-    # Simple cloud keywords
     cloud_keywords = [
         "aws", "azure", "gcp", "google cloud", "amazon web services",
         "cloud", "docker", "kubernetes", "devops"
     ]
-    
-    # Simple check - if any keyword found, they have experience
     has_cloud_experience = any(keyword in text_lower for keyword in cloud_keywords)
     found_skills = [keyword for keyword in cloud_keywords if keyword in text_lower]
-    
     return has_cloud_experience, {"cloud": found_skills}, found_skills, 1 if has_cloud_experience else 0
-
 def check_deployment_docker_kubernetes_experience(transcript_text):
-    """Check deployment experience - SIMPLIFIED"""
     text_lower = transcript_text.lower()
-    
-    # Simple deployment keywords
     deployment_keywords = [
         "deployment", "deploy", "docker", "kubernetes", "ci/cd", "devops", "build"
     ]
-    
-    # Simple check - if any keyword found, they have experience
     has_experience = any(keyword in text_lower for keyword in deployment_keywords)
     found_skills = [keyword for keyword in deployment_keywords if keyword in text_lower]
-    
     return has_experience, has_experience, has_experience, found_skills, has_experience
-
 def check_ai_ml_experience(transcript_text):
-    """Check AI/ML experience - SIMPLIFIED"""
     text_lower = transcript_text.lower()
-    
-    # Simple AI/ML keywords
     ai_keywords = [
         "ai", "ml", "machine learning", "artificial intelligence", "deep learning",
         "neural network", "tensorflow", "pytorch", "python", "data science"
     ]
-    
-    # Simple check - if any keyword found, they have experience
     has_ai_experience = any(keyword in text_lower for keyword in ai_keywords)
     found_skills = [keyword for keyword in ai_keywords if keyword in text_lower]
-    
     return has_ai_experience, has_ai_experience, has_ai_experience, has_ai_experience, found_skills
-
+def check_time_availability(transcript_text):
+    """Check if candidate is available for interview right now"""
+    text_lower = transcript_text.lower()
+    
+    positive_indicators = [
+        "yes", "sure", "okay", "ok", "fine", "good time", "available", 
+        "ready", "go ahead", "proceed", "comfortable", "convenient",
+        "now is good", "good to talk", "let's do it", "let's start",
+        "i'm free", "no problem", "that's fine", "perfect"
+    ]
+    
+    negative_indicators = [
+        "no", "not now", "busy", "not a good time", "later", "call back",
+        "not available", "inconvenient", "not convenient", "meeting",
+        "driving", "working", "occupied", "reschedule", "can't talk",
+        "bad time", "not free", "in a meeting", "call later"
+    ]
+    
+    for indicator in positive_indicators:
+        if indicator in text_lower:
+            return True, "available"
+    
+    for indicator in negative_indicators:
+        if indicator in text_lower:
+            return False, "not_available"
+    
+    return True, "unclear"
 def validate_response_selected_questions(call_sid: str, step: int, transcription: str):
     try:
         interview_data = load_interview_session(call_sid)
         if not interview_data:
             return True, "continue", "No state found"      
-        
         validation_result = {"step": step, "passed": True, "reason": ""}
+        if step == 0:
+            is_available, availability_status = check_time_availability(transcription)
+            validation_result["time_available"] = is_available
+            validation_result["availability_status"] = availability_status
+            validation_result["response"] = transcription[:100]
+            
+            if not is_available:
+                validation_result["passed"] = False
+                validation_result["reason"] = "Candidate not available for interview"
+                if "validation_results" not in interview_data:
+                    interview_data["validation_results"] = {}
+                interview_data["validation_results"][str(step)] = validation_result
+                save_interview_session(call_sid, interview_data)
+                return False, "not_available", "Candidate not available for interview"
         
-        if step == 2:
-            # Skills validation - SIMPLIFIED
+        elif step == 2:
             has_skills, found_skills, match_percentage = check_skills_match(transcription)
             validation_result["skills_match"] = has_skills
             validation_result["found_skills"] = found_skills
             validation_result["match_percentage"] = match_percentage
-            
-            # Only fail if NO skills mentioned at all
             if not has_skills and len(found_skills) == 0:
                 validation_result["passed"] = False
                 validation_result["reason"] = "No relevant skills mentioned"
@@ -242,12 +253,9 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
                 return False, "no_skills", "No relevant skills found"
                 
         elif step == 3:
-            # Notice period validation - SIMPLIFIED
             notice_acceptable, notice_days, _ = check_notice_period(transcription)
             validation_result["notice_acceptable"] = notice_acceptable
             validation_result["notice_days"] = notice_days
-            
-            # Only fail if notice period is more than 60 days (more lenient)
             if notice_days > 60:
                 validation_result["passed"] = False
                 validation_result["reason"] = f"Notice period too long ({notice_days} days > 60 days)"
@@ -258,17 +266,13 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
                 return False, "notice_long", f"Notice period {notice_days} days exceeds 60 days"
                 
         elif step == 4:
-            # CTC validation (always pass)
             validation_result["ctc_mentioned"] = True
             validation_result["response"] = transcription[:100]
             
         elif step == 5:
-            # API experience validation - SIMPLIFIED
             has_api_exp, found_api_skills, _ = check_api_experience(transcription)
             validation_result["api_experience"] = has_api_exp
             validation_result["found_api_skills"] = found_api_skills
-            
-            # Only fail if absolutely no API keywords mentioned
             if not has_api_exp and len(found_api_skills) == 0:
                 validation_result["passed"] = False
                 validation_result["reason"] = "No API experience mentioned"
@@ -279,13 +283,10 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
                 return False, "no_api_experience", "No API experience found"
                 
         elif step == 6:
-            # Cloud platforms validation - SIMPLIFIED
             has_cloud_exp, found_platforms, cloud_concepts, platforms_count = check_cloud_platforms_experience(transcription)
             validation_result["cloud_experience"] = has_cloud_exp
             validation_result["found_platforms"] = found_platforms
             validation_result["cloud_concepts"] = cloud_concepts
-            
-            # Only fail if absolutely no cloud keywords mentioned
             if not has_cloud_exp and len(cloud_concepts) == 0:
                 validation_result["passed"] = False
                 validation_result["reason"] = "No cloud experience mentioned"
@@ -296,14 +297,11 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
                 return False, "no_cloud_experience", "No cloud experience found"
                 
         elif step == 7:
-            # Deployment validation - SIMPLIFIED
             has_deploy, has_docker, has_k8s, total_skills, has_modern = check_deployment_docker_kubernetes_experience(transcription)
             validation_result["deployment_experience"] = has_deploy
             validation_result["docker_experience"] = has_docker
             validation_result["kubernetes_experience"] = has_k8s
             validation_result["deployment_skills"] = total_skills
-            
-            # Only fail if absolutely no deployment keywords mentioned
             if not has_deploy and len(total_skills) == 0:
                 validation_result["passed"] = False
                 validation_result["reason"] = "No deployment experience mentioned"
@@ -314,15 +312,12 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
                 return False, "no_deployment_experience", "No deployment experience found"
                 
         elif step == 8:
-            # AI/ML experience validation - SIMPLIFIED
             has_ai, has_genai, has_frameworks, has_dl, total_ai_skills = check_ai_ml_experience(transcription)
             validation_result["ai_experience"] = has_ai
             validation_result["genai_experience"] = has_genai
             validation_result["framework_experience"] = has_frameworks
             validation_result["deep_learning_experience"] = has_dl
             validation_result["ai_skills"] = total_ai_skills
-            
-            # Only fail if absolutely no AI keywords mentioned
             if not has_ai and len(total_ai_skills) == 0:
                 validation_result["passed"] = False
                 validation_result["reason"] = "No AI/ML experience mentioned"
@@ -332,27 +327,30 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
                 save_interview_session(call_sid, interview_data)
                 return False, "no_ai_experience", "No AI/ML experience found"
         
-        # Save validation result
         if "validation_results" not in interview_data:
             interview_data["validation_results"] = {}
         interview_data["validation_results"][str(step)] = validation_result
-        save_interview_session(call_sid, interview_data)     
-        
-        return True, "continue", "Validation passed"       
-        
+        save_interview_session(call_sid, interview_data)
+        return True, "continue", "Validation passed"
     except Exception as e:
         print(f"[ERROR] Validation error for {call_sid}, step {step}: {e}")
         return True, "continue", "Validation error - continuing"
 def ask_next_question_immediately(call_sid: str, question_index: int):
     try:
-        if question_index > len(INTERVIEW_QUESTIONS):
+        if question_index > len(INTERVIEW_QUESTIONS) - 1:
             return complete_interview(call_sid)      
+        
         question = INTERVIEW_QUESTIONS[question_index]     
         resp = VoiceResponse()
-        if question_index > 1:
+        if question_index == 1:
+            resp.say("Great! Let's begin with our technical interview.", voice='Polly.Aditi', rate='medium')
+            resp.pause(length=0.5)
+        elif question_index > 1:
             resp.say("Next question:", voice='Polly.Aditi', rate='medium')
             resp.pause(length=0.2)
+        
         resp.say(question, voice='Polly.Aditi', rate='medium')
+        
         gather = resp.gather(
             input='speech',
             action=f'{WEBHOOK_BASE_URL}/voice/speech/{call_sid}',
@@ -365,7 +363,6 @@ def ask_next_question_immediately(call_sid: str, question_index: int):
             speechModel='experimental_conversations'
         )
         resp.redirect(f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}')      
-        
         return str(resp)      
     except Exception as e:
         print(f"[ERROR] Error asking question {question_index} for {call_sid}: {e}")
@@ -376,10 +373,10 @@ def handle_no_response(call_sid: str):
         if not interview_data:
             return handle_error("Interview session not found")       
         silence_prompts = interview_data.get('silence_prompts', 0)
-        current_question_index = interview_data.get('current_question', 1)        
+        current_question_index = interview_data.get('current_question', 0)  # Changed to 0        
         if silence_prompts >= 1:
             resp = VoiceResponse()
-            resp.say("Thank you for your time. We'll be in touch soon.", voice='Polly.Aditi')  # Changed to Polly.Aditi
+            resp.say("Thank you for your time. We'll be in touch soon.", voice='Polly.Aditi')
             resp.hangup()           
             interview_data['status'] = 'INCOMPLETE_SILENCE'
             interview_data['end_time'] = datetime.now().isoformat()
@@ -389,9 +386,9 @@ def handle_no_response(call_sid: str):
         save_interview_session(call_sid, interview_data)      
         resp = VoiceResponse()
         resp.say("Please respond to the question.", voice='Polly.Aditi', rate='medium')
-        if current_question_index <= len(INTERVIEW_QUESTIONS):
+        if current_question_index <= len(INTERVIEW_QUESTIONS) - 1: # Adjust for 0-based indexing
             resp.pause(length=0.3)
-            resp.say(INTERVIEW_QUESTIONS[current_question_index], voice='Polly.Aditi', rate='medium')  # Changed to Polly.Aditi
+            resp.say(INTERVIEW_QUESTIONS[current_question_index], voice='Polly.Aditi', rate='medium')
             gather = resp.gather(
                 input='speech',
                 action=f'{WEBHOOK_BASE_URL}/voice/speech/{call_sid}',
@@ -409,11 +406,9 @@ def handle_no_response(call_sid: str):
     except Exception as e:
         return handle_error("Technical difficulty occurred.")
 def complete_interview(call_sid):
-    """Complete the interview and save results"""
     try:
         print(f"[DEBUG] Completing interview for {call_sid}")
         interview_data = load_interview_session(call_sid)
-        
         if not interview_data:
             print(f"[ERROR] No interview session found for {call_sid}")
             interview_data = {
@@ -458,13 +453,13 @@ def complete_interview(call_sid):
     except Exception as e:
         print(f"[ERROR] Error completing interview for {call_sid}: {e}")
         response = VoiceResponse()
-        response.say("Thank you for your time! We'll be in touch soon. Have a great day!", voice='Polly.Aditi')  # Changed to Polly.Aditi
+        response.say("Thank you for your time! We'll be in touch soon. Have a great day!", voice='Polly.Aditi')
         response.hangup()
         return str(response)
 def handle_error(message):
     try:
         response = VoiceResponse()
-        response.say(message, voice='Polly.Aditi')  # Changed to Polly.Aditi
+        response.say(message, voice='Polly.Aditi')
         response.hangup()
         return str(response)
     except Exception as e:
@@ -500,12 +495,21 @@ def save_completed_interview(call_sid, responses):
 def save_incomplete_interview(call_sid: str, interview_data: dict, termination_reason: str):
     try:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        
+        # Different summary based on termination reason
+        if termination_reason == "not_available":
+            interview_type = "Interview Not Started - Candidate Unavailable"
+            status = "NOT_STARTED"
+        else:
+            interview_type = "Terminated Interview - Validation Failed"
+            status = "TERMINATED"
+        
         summary = {
             "interview_id": call_sid,
             "company": "Onelab Ventures",
             "interviewer": "AI Assistant with Validation",
             "completion_time": timestamp,
-            "status": "TERMINATED",
+            "status": status,
             "termination_reason": termination_reason,
             "questions_answered": len(interview_data.get("responses", [])),
             "total_questions": len(INTERVIEW_QUESTIONS),
@@ -513,13 +517,21 @@ def save_incomplete_interview(call_sid: str, interview_data: dict, termination_r
             "validation_results": interview_data.get("validation_results", {}),
             "start_time": interview_data.get("start_time", ""),
             "end_time": datetime.now().isoformat(),
-            "interview_type": "Terminated Interview - Validation Failed"}      
-        summary_filename = f"interviews/{call_sid}_ONELAB_TERMINATED_{timestamp}.json"
+            "interview_type": interview_type,
+            "candidate_name": interview_data.get("candidate_name", "Unknown"),
+            "candidate_phone": interview_data.get("candidate_phone", "Unknown"),
+            "bulk_call_id": interview_data.get("bulk_call_id"),
+            "is_bulk_call": interview_data.get("is_bulk_call", False)
+        }
+        
+        summary_filename = f"interviews/{call_sid}_ONELAB_{status}_{timestamp}.json"
         with open(summary_filename, 'w') as f:
-            json.dump(summary, f, indent=2)       
-        print(f"Saved terminated interview: {summary_filename}")      
+            json.dump(summary, f, indent=2)
+        
+        print(f"Saved {status.lower()} interview: {summary_filename}")
+        
     except Exception as e:
-        print(f"Error saving terminated interview: {e}")
+        print(f"Error saving {status.lower()} interview: {e}")
 @app.get("/interviews")
 async def get_interviews():
     try:
@@ -817,10 +829,19 @@ async def get_all_interviews_detailed():
 def terminate_interview(call_sid: str, reason_code: str, reason_message: str):
     try:
         resp = VoiceResponse()
-        resp.say(
-            "Thank you so much for taking the time to speak with us today. We really appreciate your interest. We'll review everything and get back to you soon. Have a wonderful day!",
-            voice='Polly.Aditi', rate='medium')
+        
+        # Different messages based on termination reason
+        if reason_code == "not_available":
+            resp.say(
+                "No problem at all! We completely understand. We'll reach out to you at a more convenient time. Thank you and have a great day!",
+                voice='Polly.Aditi', rate='medium')
+        else:
+            resp.say(
+                "Thank you so much for taking the time to speak with us today. We really appreciate your interest. We'll review everything and get back to you soon. Have a wonderful day!",
+                voice='Polly.Aditi', rate='medium')
+        
         resp.hangup()
+        
         interview_data = load_interview_session(call_sid)
         if interview_data:
             interview_data['status'] = 'TERMINATED'
@@ -828,9 +849,11 @@ def terminate_interview(call_sid: str, reason_code: str, reason_message: str):
             interview_data['end_time'] = datetime.now().isoformat()
             save_interview_session(call_sid, interview_data)
             save_incomplete_interview(call_sid, interview_data, reason_code)
+        
         conversation_state.pop(call_sid, None)
         print(f"[TERMINATED] Interview {call_sid} terminated due to: {reason_code}")
         return str(resp)
+        
     except Exception as e:
         print(f"[ERROR] Error terminating interview for {call_sid}: {e}")
         return handle_error("Thank you for your time. Have a great day!")
@@ -844,8 +867,10 @@ def handle_speech(call_sid: str, speech_result: str, confidence: float):
         if not interview_data:
             print(f"[ERROR] No interview session found for {call_sid}")
             return handle_error("Interview session not found")       
-        current_question_index = interview_data.get('current_question', 1)
+        
+        current_question_index = interview_data.get('current_question', 0)  # Changed to start from 0
         questions = INTERVIEW_QUESTIONS 
+        
         response_data = {
             'question': questions[current_question_index],
             'answer': speech_result,
@@ -859,13 +884,17 @@ def handle_speech(call_sid: str, speech_result: str, confidence: float):
         interview_data['silence_prompts'] = 0       
         save_interview_session(call_sid, interview_data)      
         print(f"[PROGRESS] Call {call_sid}: Question {current_question_index}/{len(questions)} completed")
-        if current_question_index in [2, 3, 5, 6, 7, 8]:
+        
+        # Validate responses for specific questions (now including step 0)
+        if current_question_index in [0, 2, 3, 5, 6, 7, 8]:  # Added 0 for availability check
             should_continue, reason_code, reason_message = validate_response_selected_questions(call_sid, current_question_index, speech_result)
             print(f"Validation Q{current_question_index}: {'PASS' if should_continue else 'FAIL'} - {reason_message}")          
             
             if not should_continue:
                 return terminate_interview(call_sid, reason_code, reason_message)
-        if current_question_index >= len(questions):
+        
+        # Check if all questions are completed (now 0-8 = 9 questions total)
+        if current_question_index >= len(questions) - 1:
             print(f"[INTERVIEW COMPLETE] All {len(questions)} questions answered for {call_sid}")
             return complete_interview(call_sid)
         else:
@@ -875,122 +904,6 @@ def handle_speech(call_sid: str, speech_result: str, confidence: float):
     except Exception as e:
         print(f"[ERROR] Error handling speech for {call_sid}: {e}")
         return handle_error("Sorry, there was an error processing your response.")
-def validate_response_selected_questions(call_sid: str, step: int, transcription: str):
-    try:
-        interview_data = load_interview_session(call_sid)
-        if not interview_data:
-            return True, "continue", "No state found"
-        validation_result = {"step": step, "passed": True, "reason": ""}
-        if step == 2:
-            has_skills, found_skills, match_percentage = check_skills_match(transcription)
-            validation_result["skills_match"] = has_skills
-            validation_result["found_skills"] = found_skills
-            validation_result["match_percentage"] = match_percentage
-            if not has_skills and len(found_skills) == 0:
-                validation_result["passed"] = False
-                validation_result["reason"] = "No relevant skills mentioned"
-                if "validation_results" not in interview_data:
-                    interview_data["validation_results"] = {}
-                interview_data["validation_results"][str(step)] = validation_result
-                save_interview_session(call_sid, interview_data)
-                return False, "no_skills", "No relevant skills found"
-        elif step == 3:
-            notice_acceptable, notice_days, _ = check_notice_period(transcription)
-            validation_result["notice_acceptable"] = notice_acceptable
-            validation_result["notice_days"] = notice_days
-            if notice_days > 60:
-                validation_result["passed"] = False
-                validation_result["reason"] = f"Notice period too long ({notice_days} days > 60 days)"
-                if "validation_results" not in interview_data:
-                    interview_data["validation_results"] = {}
-                interview_data["validation_results"][str(step)] = validation_result
-                save_interview_session(call_sid, interview_data)
-                return False, "notice_long", f"Notice period {notice_days} days exceeds 60 days"
-        elif step == 4:
-            validation_result["ctc_mentioned"] = True
-            validation_result["response"] = transcription[:100]
-        elif step == 5:
-            has_api_exp, found_api_skills, _ = check_api_experience(transcription)
-            validation_result["api_experience"] = has_api_exp
-            validation_result["found_api_skills"] = found_api_skills
-            if not has_api_exp and len(found_api_skills) == 0:
-                validation_result["passed"] = False
-                validation_result["reason"] = "No API experience mentioned"
-                if "validation_results" not in interview_data:
-                    interview_data["validation_results"] = {}
-                interview_data["validation_results"][str(step)] = validation_result
-                save_interview_session(call_sid, interview_data)
-                return False, "no_api_experience", "No API experience found"
-        elif step == 6:
-            has_cloud_exp, found_platforms, cloud_concepts, platforms_count = check_cloud_platforms_experience(transcription)
-            validation_result["cloud_experience"] = has_cloud_exp
-            validation_result["found_platforms"] = found_platforms
-            validation_result["cloud_concepts"] = cloud_concepts
-            if not has_cloud_exp and len(cloud_concepts) == 0:
-                validation_result["passed"] = False
-                validation_result["reason"] = "No cloud experience mentioned"
-                if "validation_results" not in interview_data:
-                    interview_data["validation_results"] = {}
-                interview_data["validation_results"][str(step)] = validation_result
-                save_interview_session(call_sid, interview_data)
-                return False, "no_cloud_experience", "No cloud experience found"
-        elif step == 7:
-            has_deploy, has_docker, has_k8s, total_skills, has_modern = check_deployment_docker_kubernetes_experience(transcription)
-            validation_result["deployment_experience"] = has_deploy
-            validation_result["docker_experience"] = has_docker
-            validation_result["kubernetes_experience"] = has_k8s
-            validation_result["deployment_skills"] = total_skills
-            if not has_deploy and len(total_skills) == 0:
-                validation_result["passed"] = False
-                validation_result["reason"] = "No deployment experience mentioned"
-                if "validation_results" not in interview_data:
-                    interview_data["validation_results"] = {}
-                interview_data["validation_results"][str(step)] = validation_result
-                save_interview_session(call_sid, interview_data)
-                return False, "no_deployment_experience", "No deployment experience found"
-        elif step == 8:
-            has_ai, has_genai, has_frameworks, has_dl, total_ai_skills = check_ai_ml_experience(transcription)
-            validation_result["ai_experience"] = has_ai
-            validation_result["genai_experience"] = has_genai
-            validation_result["framework_experience"] = has_frameworks
-            validation_result["deep_learning_experience"] = has_dl
-            validation_result["ai_skills"] = total_ai_skills
-            if not has_ai and len(total_ai_skills) == 0:
-                validation_result["passed"] = False
-                validation_result["reason"] = "No AI/ML experience mentioned"
-                if "validation_results" not in interview_data:
-                    interview_data["validation_results"] = {}
-                interview_data["validation_results"][str(step)] = validation_result
-                save_interview_session(call_sid, interview_data)
-                return False, "no_ai_experience", "No AI/ML experience found"
-        if "validation_results" not in interview_data:
-            interview_data["validation_results"] = {}
-        interview_data["validation_results"][str(step)] = validation_result
-        save_interview_session(call_sid, interview_data)
-        return True, "continue", "Validation passed"
-    except Exception as e:
-        print(f"[ERROR] Validation error for {call_sid}, step {step}: {e}")
-        return True, "continue", "Validation error - continuing"
-def terminate_interview(call_sid: str, reason_code: str, reason_message: str):
-    try:
-        resp = VoiceResponse()
-        resp.say(
-            "Thank you so much for taking the time to speak with us today. We really appreciate your interest. We'll review everything and get back to you soon. Have a wonderful day!",
-            voice='Polly.Aditi', rate='medium')
-        resp.hangup()
-        interview_data = load_interview_session(call_sid)
-        if interview_data:
-            interview_data['status'] = 'TERMINATED'
-            interview_data['termination_reason'] = reason_code
-            interview_data['end_time'] = datetime.now().isoformat()
-            save_interview_session(call_sid, interview_data)
-            save_incomplete_interview(call_sid, interview_data, reason_code)
-        conversation_state.pop(call_sid, None)
-        print(f"[TERMINATED] Interview {call_sid} terminated due to: {reason_code}")
-        return str(resp)
-    except Exception as e:
-        print(f"[ERROR] Error terminating interview for {call_sid}: {e}")
-        return handle_error("Thank you for your time. Have a great day!")
 @app.post("/make-call")
 async def make_call(request: Request):
     try:
@@ -1255,6 +1168,8 @@ async def handle_voice_call(request: Request):
         from_number = form_data.get('From', 'unknown')
         to_number = form_data.get('To', '+14787807480')       
         print(f"[VOICE] Incoming call {call_sid} from {from_number}")
+        
+        # Load contact mapping for bulk calls
         contact_info = None
         try:
             contact_mappings_file = "contact_mappings.json"
@@ -1264,18 +1179,22 @@ async def handle_voice_call(request: Request):
                 contact_info = all_mappings.get(call_sid, {})
         except Exception as e:
             print(f"Error loading contact mapping: {e}")
+        
+        # Create interview session starting with question 0 (availability check)
         interview_data = {
             'call_sid': call_sid,
             'phone_number': from_number,
             'twilio_number': to_number,
             'start_time': datetime.now().isoformat(),
             'status': 'IN_PROGRESS',
-            'current_question': 1,
+            'current_question': 0,  # Changed: Start with availability check
             'responses': [],
             'validation_results': {},
             'silence_prompts': 0,
             'last_activity': datetime.now().isoformat()
         }
+        
+        # Add candidate info for bulk calls
         if contact_info:
             interview_data.update({
                 'candidate_name': contact_info.get('candidate_name', 'Unknown'),
@@ -1288,11 +1207,14 @@ async def handle_voice_call(request: Request):
         save_interview_session(call_sid, interview_data)
         conversation_state[call_sid] = interview_data       
         print(f"[VOICE] Interview session created for {call_sid}")
+        
+        # Start with availability check
         resp = VoiceResponse()
-        resp.say("Hello! Thank you for calling. I'm your AI interviewer today. Let's begin with our interview.", 
+        resp.say("Hello! Thank you for your interest in our position. I'm your AI interviewer from Onelab Ventures.", 
                 voice='Polly.Aditi', rate='medium')
         resp.pause(length=0.5)
-        resp.say(INTERVIEW_QUESTIONS[1], voice='Polly.Aditi', rate='medium')
+        resp.say(INTERVIEW_QUESTIONS[0], voice='Polly.Aditi', rate='medium')  # Ask availability question
+        
         gather = resp.gather(
             input='speech',
             action=f'{WEBHOOK_BASE_URL}/voice/speech/{call_sid}',

@@ -77,7 +77,6 @@ interface JDAnalysis {
     source?: string;
   };
 }
-
 export const InterviewDetails: React.FC = () => {
   const { interviewId } = useParams<{ interviewId: string }>();
   const navigate = useNavigate();
@@ -87,7 +86,6 @@ export const InterviewDetails: React.FC = () => {
   const [interviewData, setInterviewData] = useState<InterviewData | null>(null);
   const [jdAnalysis, setJDAnalysis] = useState<JDAnalysis | null>(null);
   const [error, setError] = useState<string>('');
-
   useEffect(() => {
     if (interviewId) {
       loadInterviewDetails();
@@ -119,7 +117,6 @@ export const InterviewDetails: React.FC = () => {
       setLoading(false);
     }
   };
-
   const loadJDAnalysis = async () => {
     try {
       console.log('🔍 Loading JD analysis for:', interviewId);
@@ -137,22 +134,15 @@ export const InterviewDetails: React.FC = () => {
     try {
       setRunningAnalysis(true);
       console.log('🔄 Running JD analysis for interview:', interview.interview_id);
-      
-      // First run the general JD analysis to ensure reports are generated
       const analysisResponse = await callsApi.runJDAnalysis();
       console.log('📊 JD Analysis response:', analysisResponse.data);
-      
-      // Wait a moment for the analysis to complete
       setTimeout(async () => {
         try {
-          // Then get the specific report for this interview
           const reportResponse = await callsApi.getJDReport(interview.interview_id);
           
           if (reportResponse.data && !reportResponse.data.error) {
             const report = reportResponse.data;
             console.log('✅ Analysis report received:', report);
-            
-            // Use actual analysis data from backend
             setJDAnalysis({
               job_title: report.candidate_analysis.job_title,
               company: report.candidate_analysis.company,
@@ -175,7 +165,7 @@ export const InterviewDetails: React.FC = () => {
           console.error('❌ Error getting analysis report:', error);
           toast.error(`Analysis failed: ${error.message || 'Unknown error'}`);
         }
-      }, 3000); // Wait 3 seconds for analysis to complete
+      }, 3000);
       
     } catch (error: any) {
       console.error('❌ Analysis error:', error);
@@ -243,8 +233,7 @@ export const InterviewDetails: React.FC = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
+    <Box sx={{ p: 3 }}>~
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <IconButton onClick={() => navigate('/history')} sx={{ mr: 2 }}>
           <ArrowBack />
@@ -256,13 +245,9 @@ export const InterviewDetails: React.FC = () => {
           <Typography variant="body1" sx={{ color: 'text.secondary' }}>
             Interview ID: {interviewData.interview_id}
           </Typography>
-          
-          {/* ENHANCED phone number display with debugging */}
           <Typography variant="body1" sx={{ color: 'text.secondary' }}>
             Interview ID: {interviewData.interview_id}
           </Typography>
-          
-          {/* Force show phone number section for debugging */}
           <Box sx={{ mt: 1, p: 1, backgroundColor: 'yellow', border: '1px solid red' }}>
             <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
               DEBUG - Phone Info:
@@ -277,8 +262,6 @@ export const InterviewDetails: React.FC = () => {
               candidate_name: {JSON.stringify(interviewData.candidate_name)}
             </Typography>
           </Box>
-          
-          {/* Show phone number if available */}
           {(interviewData.candidate_phone || interviewData.phone_number) ? (
             <Typography variant="body1" sx={{ color: 'primary.main', fontWeight: 'bold', display: 'flex', alignItems: 'center', mt: 0.5 }}>
               <Phone sx={{ fontSize: 16, mr: 0.5 }} />
@@ -301,8 +284,6 @@ export const InterviewDetails: React.FC = () => {
           </Button>
         )}
       </Box>
-
-      {/* Enhanced Interview Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} md={3}>
           <Card>
@@ -324,7 +305,6 @@ export const InterviewDetails: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-
         <Grid item xs={12} md={3}>
           <Card>
             <CardContent>
@@ -343,7 +323,6 @@ export const InterviewDetails: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-
         <Grid item xs={12} md={3}>
           <Card>
             <CardContent>
@@ -357,7 +336,6 @@ export const InterviewDetails: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-
         <Grid item xs={12} md={3}>
           <Card>
             <CardContent>
@@ -375,8 +353,6 @@ export const InterviewDetails: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
-
-      {/* JD Analysis Results */}
       {jdAnalysis && (
         <Card sx={{ mb: 3 }}>
           <CardContent>
@@ -424,29 +400,24 @@ export const InterviewDetails: React.FC = () => {
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
                     🎯 Skills Analysis
                   </Typography>
-                  
                   {jdAnalysis.found_skills.length > 0 && (
                     <Typography variant="body2" sx={{ mb: 1 }}>
                       <CheckCircle sx={{ fontSize: 16, color: 'success.main', mr: 0.5 }} />
                       Found Skills ({jdAnalysis.found_skills.length}): {jdAnalysis.found_skills.join(', ')}
                     </Typography>
                   )}
-                  
                   {jdAnalysis.missing_skills.length > 0 && (
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
                       <Cancel sx={{ fontSize: 16, color: 'error.main', mr: 0.5 }} />
                       Missing Skills ({jdAnalysis.missing_skills.length}): {jdAnalysis.missing_skills.join(', ')}
                     </Typography>
                   )}
-
-                  {/* Contact Information from Analysis */}
                   {jdAnalysis.candidate_metadata?.phone && (
                     <Typography variant="body2" sx={{ color: 'info.main', mt: 1 }}>
                       <Phone sx={{ fontSize: 16, mr: 0.5 }} />
                       Contact: {jdAnalysis.candidate_metadata.phone}
                     </Typography>
                   )}
-                  
                   <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1 }}>
                     Analysis Date: {new Date(jdAnalysis.analysis_date).toLocaleString()}
                   </Typography>
@@ -456,8 +427,6 @@ export const InterviewDetails: React.FC = () => {
           </CardContent>
         </Card>
       )}
-
-      {/* Interview Questions & Answers */}
       <Card>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 2 }}>

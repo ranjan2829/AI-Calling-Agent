@@ -113,56 +113,40 @@ export const InterviewResults: React.FC = () => {
       }
     });
     
-    return [...new Set(foundSkills)]; // Remove duplicates
+    return [...new Set(foundSkills)];
   };
-
   const loadInterviewData = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Loading all interview data...');
-      
-      // Get all interviews with detailed information
+      console.log(' Loading all interview data...');
       const interviewsResponse = await callsApi.getAllInterviewsDetailed();
       const allInterviews = interviewsResponse.data.interviews || [];
-      
       console.log('📋 Raw interviews loaded:', allInterviews.length, 'interviews');
       console.log('📊 Sample interview data:', allInterviews[0]);
-      
-      // Debug: Check the actual data structure
       if (allInterviews.length > 0) {
         console.log('🔍 Available fields in first interview:', Object.keys(allInterviews[0]));
       }
-      
-      // More lenient filtering - accept interviews with data
       const validInterviews = allInterviews.filter((interview: any) => {
-        // Use interview_id as fallback for call_sid
         const callId = interview.call_sid || interview.interview_id;
         const candidateName = interview.candidate_name || interview.name || 'Unknown';
         const responses = interview.responses || [];
         const status = interview.status || 'COMPLETED';
-        
-        console.log(`🔍 Checking interview: ${callId}, name: ${candidateName}, responses: ${responses.length}, status: ${status}`);
-        
-        // Less strict filtering - just need basic data
+        console.log(`Checking interview: ${callId}, name: ${candidateName}, responses: ${responses.length}, status: ${status}`);
         const hasBasicData = callId && responses.length > 0;
         const isNotTestData = !candidateName.includes('Test') && candidateName !== 'Unknown';
         
         console.log(`✅ Basic data: ${hasBasicData}, Not test: ${isNotTestData}`);
         
-        return hasBasicData; // Remove the test data filter for now to see all data
+        return hasBasicData;
       });
       
       console.log('✅ Valid interviews after filtering:', validInterviews.length);
       
       const processedInterviews = validInterviews.map((interview: any) => {
         console.log('🔍 Processing interview:', interview.interview_id || interview.call_sid);
-        
-        // Handle both call_sid and interview_id
         const callId = interview.call_sid || interview.interview_id || 'unknown';
         const candidateName = interview.candidate_name || interview.name || 'Unknown Candidate';
         const phoneNumber = interview.candidate_phone || interview.phone_number || 'Unknown';
-        
-        // Safe data extraction with proper fallbacks
         const safeInterview = {
           call_sid: callId,
           phone_number: phoneNumber,
@@ -177,27 +161,19 @@ export const InterviewResults: React.FC = () => {
           validation_results: interview.validation_results || {},
           ...interview
         };
-
-        // Extract all text from responses for skills analysis
         const allResponseText = safeInterview.responses
           .map((r: any) => r.answer || '')
           .join(' ');
       
         console.log(`📝 Response text for ${candidateName}: "${allResponseText.substring(0, 100)}..."`);
-      
-        // Use skills detection from validation results OR extract from text
         let found_skills: string[] = [];
         let skills_percentage = 0;
-      
-        // First try to get from validation results
         const skillsValidation = safeInterview.validation_results?.["2"];
         if (skillsValidation && skillsValidation.found_skills) {
           found_skills = skillsValidation.found_skills;
           skills_percentage = skillsValidation.match_percentage || 0;
         } else {
-          // Fallback: extract skills from response text
           found_skills = extractSkillsFromText(allResponseText);
-          // Calculate percentage based on common job requirements
           const commonRequiredSkills = ['python', 'javascript', 'java', 'react', 'node'];
           skills_percentage = commonRequiredSkills.length > 0 
             ? (found_skills.filter(skill => 
@@ -205,32 +181,22 @@ export const InterviewResults: React.FC = () => {
                   req.toLowerCase().includes(skill.toLowerCase()) || 
                   skill.toLowerCase().includes(req.toLowerCase())
                 )).length / commonRequiredSkills.length) * 100
-            : found_skills.length > 0 ? 50 : 0; // Give at least 50% if any skills found
+            : found_skills.length > 0 ? 50 : 0;
         }
-
-        // Calculate overall score based on validation results
         const validationResults = Object.values(safeInterview.validation_results || {});
         const passedValidations = validationResults.filter((v: any) => v?.passed).length;
         const totalValidations = Math.max(validationResults.length, 1);
         const validation_score = Math.round((passedValidations / totalValidations) * 100);
-      
-        // Combine validation score with skills percentage for overall score
         const overall_score = validationResults.length > 0 
           ? Math.round((validation_score * 0.6) + (skills_percentage * 0.4))
-          : Math.round(skills_percentage); // If no validation, use just skills
-      
-        // Calculate interview duration
+          : Math.round(skills_percentage);
         const startTime = new Date(safeInterview.start_time);
         const endTime = safeInterview.end_time ? new Date(safeInterview.end_time) : new Date();
         const durationMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
         const interview_duration = `${Math.max(0, durationMinutes)} min`;
-      
-        // Calculate completion rate based on actual responses
         const totalQuestions = 7;
         const answeredQuestions = safeInterview.responses.length;
         const completion_rate = `${Math.round((answeredQuestions / totalQuestions) * 100)}%`;
-      
-        // Generate recommendation based on scores and skills
         let recommendation = 'NEEDS REVIEW';
         if (overall_score >= 80 && skills_percentage >= 70) {
           recommendation = 'EXCELLENT FIT';
@@ -264,8 +230,6 @@ export const InterviewResults: React.FC = () => {
           completion_rate
         };
       });
-    
-      // Sort by overall score first, then skills percentage (highest first)
       const sortedInterviews = processedInterviews.sort((a, b) => {
         if (a.overall_score !== b.overall_score) {
           return b.overall_score - a.overall_score;
@@ -273,11 +237,11 @@ export const InterviewResults: React.FC = () => {
         return b.skills_percentage - a.skills_percentage;
       });
     
-      console.log('✅ Final sorted interviews:', sortedInterviews);
+      console.log('Final sorted interviews:', sortedInterviews);
       setInterviews(sortedInterviews);
     
     } catch (error) {
-      console.error('❌ Error loading interview data:', error);
+      console.error(' Error loading interview data:', error);
       toast.error('Failed to load interview data');
       setInterviews([]);
     } finally {
@@ -296,8 +260,6 @@ export const InterviewResults: React.FC = () => {
       } else {
         toast.success('Interview Analysis completed successfully!');
         console.log('✅ Interview Analysis completed, refreshing data...');
-        
-        // Refresh data after analysis
         setTimeout(() => {
           loadInterviewData();
         }, 2000);
@@ -317,7 +279,6 @@ export const InterviewResults: React.FC = () => {
     if (recommendation.includes('MODERATE')) return 'warning';
     return 'error';
   };
-
   const toggleRowExpansion = (callId: string) => {
     const newExpanded = new Set(expandedRows);
     if (newExpanded.has(callId)) {
@@ -327,7 +288,6 @@ export const InterviewResults: React.FC = () => {
     }
     setExpandedRows(newExpanded);
   };
-
   const downloadReport = (interview: ProcessedInterview) => {
     try {
       const reportData = JSON.stringify(interview, null, 2);
@@ -335,12 +295,9 @@ export const InterviewResults: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      
-      // Safe filename generation
       const safeName = (interview.candidate_name || 'unknown').replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
       const safeCallSid = (interview.call_sid || 'unknown').slice(-8);
       a.download = `interview_report_${safeName}_${safeCallSid}.json`;
-      
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -351,27 +308,23 @@ export const InterviewResults: React.FC = () => {
       toast.error('Failed to download report');
     }
   };
-
   const getValidationIcon = (passed: boolean) => {
     return passed ? 
       <CheckCircle sx={{ color: 'success.main', fontSize: 16 }} /> : 
       <Cancel sx={{ color: 'error.main', fontSize: 16 }} />;
   };
-
   const getConfidenceLevel = (confidence: number): string => {
     if (confidence >= 0.8) return 'High';
     if (confidence >= 0.6) return 'Medium';
     if (confidence >= 0.3) return 'Low';
     return 'Very Low';
   };
-
   const getConfidenceColor = (confidence: number): 'success' | 'info' | 'warning' | 'error' => {
     if (confidence >= 0.8) return 'success';
     if (confidence >= 0.6) return 'info';
     if (confidence >= 0.3) return 'warning';
     return 'error';
   };
-
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
@@ -380,7 +333,6 @@ export const InterviewResults: React.FC = () => {
       </Box>
     );
   }
-
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ mb: 3 }}>
@@ -414,7 +366,6 @@ export const InterviewResults: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
-
       <Card>
         <CardContent>
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
@@ -661,8 +612,6 @@ export const InterviewResults: React.FC = () => {
                                       )}
                                     </CardContent>
                                   </Card>
-
-                                  {/* Interview Responses */}
                                   <Card variant="outlined" sx={{ gridColumn: 'span 2' }}>
                                     <CardContent>
                                       <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2 }}>

@@ -82,7 +82,30 @@ export const CallHistory: React.FC = () => {
     try {
       setLoading(true);
       const response = await callsApi.getAllInterviewsDetailed();
-      setInterviews(response.data.interviews || []);
+      
+      // ONLY filter out interviews with N/A or invalid dates
+      const filteredInterviews = (response.data.interviews || []).filter(interview => {
+        const completionTime = interview.completion_time || interview.end_time || interview.start_time;
+        
+        // Only exclude if date is N/A, null, empty, or invalid
+        if (!completionTime || completionTime === 'N/A' || completionTime === '' || completionTime === null) {
+          return false;
+        }
+        
+        // Check if date is parseable
+        try {
+          const date = new Date(completionTime);
+          if (isNaN(date.getTime())) {
+            return false;
+          }
+        } catch {
+          return false;
+        }
+        
+        return true; // Keep all other records
+      });
+      
+      setInterviews(filteredInterviews);
     } catch (error: any) {
       console.error('Error loading interviews:', error);
       // Mock data for development
@@ -142,49 +165,30 @@ export const CallHistory: React.FC = () => {
       setLoading(false);
     }
   };
-
-  const filterValidInterviews = (interviews: any[]) => {
-    return interviews.filter(interview => {
-      // Skip interviews with these patterns
-      const skipPatterns = [
-        'My_Name',
-        'BULK', 
-        'My',
-        'Ohh',
-        'test',
-        'Test'
-      ];
-      
-      const candidateName = interview.candidate_name || interview.name || '';
-      const interviewId = interview.interview_id || interview.call_id || '';
-      
-      // Skip if candidate name matches skip patterns
-      if (skipPatterns.some(pattern => candidateName.toLowerCase().includes(pattern.toLowerCase()))) {
-        return false;
+  const getActualStatus = (interview: Interview) => {
+    if (interview.status === 'TERMINATED' || interview.status === 'COMPLETED') {
+      return interview.status;
+    }
+    if (interview.status === 'IN_PROGRESS') {
+      if (interview.end_time) {
+        return 'TERMINATED';
       }
-      
-      // Skip if interview ID contains analysis patterns
-      if (interviewId.includes('JD_ANALYSIS') || interviewId.includes('COMPLETED')) {
-        return false;
+      const startTime = interview.start_time || interview.completion_time;
+      if (startTime) {
+        const start = new Date(startTime);
+        const now = new Date();
+        const hoursSinceStart = (now.getTime() - start.getTime()) / (1000 * 60 * 60);
+        if (hoursSinceStart > 2) {
+          return 'HUNG_UP';
+        }
       }
-      
-      // Skip if responses are empty or invalid
-      const responses = interview.responses || [];
-      if (!Array.isArray(responses) || responses.length === 0) {
-        return false;
-      }
-      
-      // Skip if no proper candidate name
-      if (!candidateName || candidateName === 'Not provided' || candidateName.length < 2) {
-        return false;
-      }
-      
-      return true;
-    });
+    }
+    
+    return interview.status;
   };
-
-  const getStatusChip = (status: string, validationsPassed?: boolean) => {
-    switch (status) {
+  const getStatusChip = (interview: Interview) => {
+    const actualStatus = getActualStatus(interview);
+    switch (actualStatus) {
       case 'COMPLETED':
         return (
           <Chip
@@ -205,12 +209,22 @@ export const CallHistory: React.FC = () => {
             sx={{ fontWeight: 'bold' }}
           />
         );
+      case 'HUNG_UP':
+        return (
+          <Chip
+            icon={<Cancel />}
+            label="Hung Up"
+            color="warning"
+            size="small"
+            sx={{ fontWeight: 'bold' }}
+          />
+        );
       case 'IN_PROGRESS':
         return (
           <Chip
             icon={<PlayArrow />}
             label="In Progress"
-            color="warning"
+            color="info"
             size="small"
             sx={{ fontWeight: 'bold' }}
           />
@@ -218,7 +232,7 @@ export const CallHistory: React.FC = () => {
       default:
         return (
           <Chip
-            label={status}
+            label={actualStatus}
             color="default"
             size="small"
             sx={{ fontWeight: 'bold' }}
@@ -240,7 +254,23 @@ export const CallHistory: React.FC = () => {
 
   const getCompletionRate = (questionsAnswered: number, totalQuestions: number) => {
     if (totalQuestions === 0) return 0;
-    return Math.round((questionsAnswered / totalQuestions) * 100);
+    
+    // Fix for the backend issue: if total_questions is less than questions_answered, 
+    // use questions_answered as the total to prevent >100%
+    const actualTotal = Math.max(totalQuestions, questionsAnswered);
+    
+    const rate = Math.round((questionsAnswered / actualTotal) * 100);
+    return Math.min(rate, 100); // Cap at 100%
+  };
+  const formatCompletionRate = (questionsAnswered: number, totalQuestions: number) => {
+    // Fix the display to show correct total
+    const actualTotal = Math.max(totalQuestions, questionsAnswered, 8); // 9 is the actual total questions (0-8)
+    const rate = getCompletionRate(questionsAnswered, actualTotal);
+    
+    return {
+      displayText: `${questionsAnswered}/${actualTotal}`,
+      percentage: rate
+    };
   };
 
   const handleViewDetails = (interview: Interview) => {
@@ -319,10 +349,13 @@ export const CallHistory: React.FC = () => {
                 <Cancel sx={{ fontSize: 40, color: 'error.main', mr: 2 }} />
                 <Box>
                   <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'error.main' }}>
-                    {interviews.filter(i => i.status === 'TERMINATED').length}
+                    {interviews.filter(i => {
+                      const status = getActualStatus(i);
+                      return status === 'TERMINATED' || status === 'HUNG_UP';
+                    }).length}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    Terminated
+                    Terminated/Hung Up
                   </Typography>
                 </Box>
               </Box>
@@ -331,7 +364,21 @@ export const CallHistory: React.FC = () => {
         </Grid>
 
         <Grid item xs={12} md={3}>
-          
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <PlayArrow sx={{ fontSize: 40, color: 'info.main', mr: 2 }} />
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'info.main' }}>
+                    {interviews.filter(i => getActualStatus(i) === 'IN_PROGRESS').length}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Active Now
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
 
@@ -369,7 +416,7 @@ export const CallHistory: React.FC = () => {
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        {getStatusChip(interview.status, interview.all_validations_passed)}
+                        {getStatusChip(interview)}
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2">
@@ -387,12 +434,21 @@ export const CallHistory: React.FC = () => {
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <Typography variant="body2" sx={{ mr: 1 }}>
-                            {interview.questions_answered}/{interview.total_questions}
+                            {(() => {
+                              const formatted = formatCompletionRate(interview.questions_answered, interview.total_questions);
+                              return formatted.displayText;
+                            })()}
                           </Typography>
                           <Chip
-                            label={`${getCompletionRate(interview.questions_answered, interview.total_questions)}%`}
+                            label={`${(() => {
+                              const formatted = formatCompletionRate(interview.questions_answered, interview.total_questions);
+                              return formatted.percentage;
+                            })()}%`}
                             size="small"
-                            color={getCompletionRate(interview.questions_answered, interview.total_questions) >= 80 ? 'success' : 'warning'}
+                            color={(() => {
+                              const formatted = formatCompletionRate(interview.questions_answered, interview.total_questions);
+                              return formatted.percentage >= 80 ? 'success' : 'warning';
+                            })()}
                           />
                         </Box>
                       </TableCell>
@@ -447,12 +503,15 @@ export const CallHistory: React.FC = () => {
               <Grid container spacing={2} sx={{ mb: 3 }}>
                 <Grid item xs={6}>
                   <Typography variant="body2" color="textSecondary">Status</Typography>
-                  {getStatusChip(selectedInterview.status, selectedInterview.all_validations_passed)}
+                  {getStatusChip(selectedInterview)}
                 </Grid>
                 <Grid item xs={6}>
                   <Typography variant="body2" color="textSecondary">Completion Rate</Typography>
                   <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                    {getCompletionRate(selectedInterview.questions_answered, selectedInterview.total_questions)}%
+                    {(() => {
+                      const formatted = formatCompletionRate(selectedInterview.questions_answered, selectedInterview.total_questions);
+                      return `${formatted.percentage}% (${formatted.displayText})`;
+                    })()}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
