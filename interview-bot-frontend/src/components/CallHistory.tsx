@@ -83,84 +83,59 @@ export const CallHistory: React.FC = () => {
       setLoading(true);
       const response = await callsApi.getAllInterviewsDetailed();
       
-      // ONLY filter out interviews with N/A or invalid dates
+      console.log('Raw interviews from API:', response.data.interviews);
+      
+      // FIXED: More thorough filtering to remove ALL "N/A" records
       const filteredInterviews = (response.data.interviews || []).filter(interview => {
-        const completionTime = interview.completion_time || interview.end_time || interview.start_time;
+        // Keep all interviews that have basic data
+        const hasBasicData = interview.interview_id || interview.call_sid;
         
-        // Only exclude if date is N/A, null, empty, or invalid
-        if (!completionTime || completionTime === 'N/A' || completionTime === '' || completionTime === null) {
+        // Only exclude if completely invalid
+        if (!hasBasicData) {
+          console.log(`Filtering out - no basic data:`, interview);
           return false;
         }
         
-        // Check if date is parseable
-        try {
-          const date = new Date(completionTime);
-          if (isNaN(date.getTime())) {
-            return false;
-          }
-        } catch {
+        // Get ALL possible time fields
+        const completionTime = interview.completion_time;
+        const endTime = interview.end_time;
+        const startTime = interview.start_time;
+        
+        // Check if ANY time field is exactly "N/A"
+        if (completionTime === "N/A" || endTime === "N/A" || startTime === "N/A") {
+          console.log(`Filtering out - has N/A time:`, {
+            id: interview.interview_id,
+            completion_time: completionTime,
+            end_time: endTime,
+            start_time: startTime
+          });
           return false;
         }
         
-        return true; // Keep all other records
+        // Also filter out records with 0 responses AND no valid dates
+        if ((!completionTime || !endTime || !startTime) && 
+            (!interview.responses || interview.responses.length === 0)) {
+          console.log(`Filtering out - no dates and no responses:`, {
+            id: interview.interview_id,
+            responses: interview.responses?.length || 0
+          });
+          return false;
+        }
+        
+        // Keep the record
+        console.log(`Keeping interview:`, {
+          id: interview.interview_id,
+          completion_time: completionTime,
+          responses: interview.responses?.length || 0
+        });
+        return true;
       });
       
+      console.log(`Filtered from ${response.data.interviews?.length || 0} to ${filteredInterviews.length} interviews`);
       setInterviews(filteredInterviews);
     } catch (error: any) {
       console.error('Error loading interviews:', error);
-      // Mock data for development
-      setInterviews([
-        {
-          interview_id: '1',
-          status: 'COMPLETED',
-          questions_answered: 8,
-          total_questions: 10,
-          completion_time: '2024-01-15T10:30:00Z',
-          all_validations_passed: true,
-          candidate_phone: '+1234567890',
-          interviewer: 'AI Assistant',
-          start_time: '2024-01-15T10:00:00Z',
-          end_time: '2024-01-15T10:30:00Z',
-          responses: [
-            {
-              question_number: 1,
-              question: 'Tell me about yourself and your background in software development.',
-              answer: 'I have 5 years of experience in full-stack development, primarily working with React, Node.js, and Python.',
-              timestamp: '2024-01-15T10:01:00Z',
-              duration: '2:30'
-            },
-            {
-              question_number: 2,
-              question: 'What programming languages are you most comfortable with?',
-              answer: 'I\'m most comfortable with JavaScript, Python, and Java. I also have experience with TypeScript and Go.',
-              timestamp: '2024-01-15T10:03:30Z',
-              duration: '1:45'
-            }
-          ]
-        },
-        {
-          interview_id: '2',
-          status: 'TERMINATED',
-          questions_answered: 3,
-          total_questions: 10,
-          completion_time: '2024-01-14T14:15:00Z',
-          all_validations_passed: false,
-          termination_reason: 'Candidate disconnected',
-          candidate_phone: '+1987654321',
-          interviewer: 'AI Assistant',
-          start_time: '2024-01-14T14:00:00Z',
-          end_time: '2024-01-14T14:15:00Z',
-          responses: [
-            {
-              question_number: 1,
-              question: 'Tell me about yourself and your background in software development.',
-              answer: 'I am a recent graduate with some internship experience in web development.',
-              timestamp: '2024-01-14T14:01:00Z',
-              duration: '1:20'
-            }
-          ]
-        }
-      ]);
+      setInterviews([]);
     } finally {
       setLoading(false);
     }

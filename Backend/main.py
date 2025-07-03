@@ -90,69 +90,60 @@ def load_jd_skills():
 def check_skills_match(transcript_text):
     text_lower = transcript_text.lower()
     jd_skills = load_jd_skills()
-    
-    # Enhanced comprehensive AI/ML skills
     comprehensive_ai_ml_skills = [
-        # NLP/LLM/RAG - Your requested categories
+        # Text based - NLP/LLM/RAG, agents, chatbots, hugging face
         "nlp", "natural language processing", "llm", "large language model", 
-        "rag", "retrieval augmented generation", "agents", "chatbot", "hugging face",
-        "transformers", "bert", "gpt", "openai", "text processing", "language models",
+        "rag", "retrieval augmented generation", "agents", "chatbot", "chatbots",
+        "hugging face", "transformers", "bert", "gpt", "openai", "text processing", 
+        "language models", "text based", "huggingface",
         
-        # Deep Learning/CNN - Your requested categories
-        "deep learning", "neural network", "cnn", "yolo", "stable diffusion",
-        "computer vision", "image processing", "object detection", "convolutional",
-        "pytorch", "tensorflow", "keras", "generative ai", "diffusion models",
+        # Deep Learning/CNN - YOLO, stable diffusion etc image based models
+        "deep learning", "neural network", "cnn", "convolutional neural network",
+        "yolo", "stable diffusion", "computer vision", "image processing", 
+        "object detection", "image based models", "convolutional", "pytorch", 
+        "tensorflow", "keras", "generative ai", "diffusion models", "image models",
         
-        # Machine Learning - Your requested categories
-        "machine learning", "ml", "regression", "classification", "clustering",
-        "supervised", "unsupervised", "algorithm", "fine-tuning", "training",
-        "random forest", "svm", "decision tree", "xgboost", "feature engineering",
+        # ML - regression, clustering algorithms, unsupervised/supervised algorithms
+        "machine learning", "ml", "regression", "clustering", "clustering algorithms",
+        "supervised", "unsupervised", "supervised algorithms", "unsupervised algorithms",
+        "classification", "random forest", "svm", "decision tree", "xgboost",
+        "k-means", "linear regression", "logistic regression", "naive bayes",
         
-        # Training/Fine-tuning - Your requested categories
-        "model training", "transfer learning", "hyperparameter tuning", 
-        "optimization", "data preprocessing", "model fine-tuning",
+        # Knowledge of fine-tuning/training of any model (ML,DL,NLP/LLM)
+        "fine-tuning", "fine tuning", "model training", "training", "transfer learning",
+        "hyperparameter tuning", "optimization", "model fine-tuning", "training models",
+        "fine tuned", "model optimization", "training algorithms",
         
-        # Cloud Platforms - Your requested categories
-        "aws", "ec2", "s3", "sagemaker", "ecr", "azure", "gcp", "google cloud",
-        "cloud computing", "serverless", "lambda functions",
+        # Cloud knowledge and experience - AWS (ec2,s3,sagemaker,ecr), Azure, GCP
+        "aws", "amazon web services", "ec2", "s3", "sagemaker", "ecr", 
+        "azure", "microsoft azure", "gcp", "google cloud", "google cloud platform",
+        "cloud computing", "cloud", "cloud knowledge", "cloud experience",
         
-        # Deployment - Your requested categories
-        "docker", "kubernetes", "deployment", "ci/cd", "devops", "containerization",
-        "microservices", "orchestration",
+        # Deployment knowledge - docker, kubernetes etc
+        "docker", "kubernetes", "deployment", "containerization", "k8s",
+        "container", "orchestration", "ci/cd", "devops", "deployment knowledge",
         
-        # APIs - Your requested categories
-        "fastapi", "flask", "django", "rest api", "api development", "microservices",
-        "endpoints", "json", "http", "web services",
-        
-        # Programming & Frameworks
-        "python", "pandas", "numpy", "scikit-learn", "matplotlib", "jupyter",
-        "streamlit", "gradio", "programming", "coding", "development"
+        # API knowledge and experience - FastAPI, REST API, Flask API or AI/ML APIs
+        "api", "fastapi", "rest api", "restapi", "flask", "flask api", 
+        "api development", "endpoints", "json", "http", "web services",
+        "api knowledge", "api experience", "ai api", "ml api", "model api",
+        "open source model", "apis", "rest", "microservices"
     ]
-    
-    # Check JD skills first (primary)
     jd_found_skills = []
     for skill in jd_skills:
         if skill.lower() in text_lower:
             jd_found_skills.append(skill)
-    
-    # Check comprehensive AI/ML skills (backup)
     ai_found_skills = []
     for skill in comprehensive_ai_ml_skills:
         if skill in text_lower:
             ai_found_skills.append(skill)
-    
-    # Calculate match percentages
     jd_match_percentage = (len(jd_found_skills) / len(jd_skills)) * 100 if jd_skills else 0
     ai_match_percentage = (len(ai_found_skills) / len(comprehensive_ai_ml_skills)) * 100
-    
-    # VERY LENIENT VALIDATION - Pass if ANY of these conditions:
-    all_found_skills = list(set(jd_found_skills + ai_found_skills))  # Remove duplicates
-    
-    # Even more lenient thresholds
+    all_found_skills = list(set(jd_found_skills + ai_found_skills)) 
     has_good_match = (
-        jd_match_percentage >= 20 or          # 20% JD match (very lenient)
-        ai_match_percentage >= 3 or           # 3% AI/ML skills (very lenient)
-        len(all_found_skills) >= 1 or         # At least 1 skill mentioned
+        jd_match_percentage >= 20 or          
+        ai_match_percentage >= 3 or           
+        len(all_found_skills) >= 1 or
         any(word in text_lower for word in ["programming", "development", "coding", "software", "technical", "engineering"])
     )
     
@@ -232,13 +223,56 @@ def check_api_experience(transcript_text):
 
 def check_cloud_platforms_experience(transcript_text):
     text_lower = transcript_text.lower()
+    
+    # Enhanced cloud keywords with better pattern matching
     cloud_keywords = [
-        "aws", "azure", "gcp", "google cloud", "amazon web services",
-        "cloud", "docker", "kubernetes", "devops"
+        # AWS services and variations
+        "aws", "amazon web services", "amazon", "ec2", "s3", "lambda", "rds", "cloudformation",
+        "elastic compute", "simple storage", "sagemaker", "ecr", "elastic container registry",
+        
+        # Azure services
+        "azure", "microsoft azure", "azure storage", "azure functions", "azure sql",
+        
+        # GCP services  
+        "gcp", "google cloud", "google cloud platform", "compute engine", "cloud storage",
+        "bigquery", "cloud functions",
+        
+        # General cloud terms
+        "cloud", "cloud computing", "cloud platform", "cloud platforms", "cloud services",
+        "docker", "kubernetes", "devops", "containerization", "microservices",
+        
+        # Common cloud concepts
+        "deployment", "scaling", "load balancer", "cdn", "api gateway"
     ]
-    has_cloud_experience = any(keyword in text_lower for keyword in cloud_keywords)
-    found_skills = [keyword for keyword in cloud_keywords if keyword in text_lower]
-    return has_cloud_experience, {"cloud": found_skills}, found_skills, 1 if has_cloud_experience else 0
+    
+    # Check for cloud keywords with fuzzy matching
+    found_skills = []
+    for keyword in cloud_keywords:
+        if keyword in text_lower:
+            found_skills.append(keyword)
+    
+    # Special handling for AWS variations (common speech-to-text errors)
+    aws_variations = [
+        "aws", "a w s", "amazon", "ec2", "e c 2", "ec two", "s3", "s 3", "s three",
+        "elastic", "compute", "storage", "cloud"
+    ]
+    
+    aws_found = any(variation in text_lower for variation in aws_variations)
+    
+    # Check for positive indicators
+    positive_indicators = ["yes", "worked with", "experience", "used", "familiar", "know"]
+    has_positive_response = any(indicator in text_lower for indicator in positive_indicators)
+    
+    # Determine if candidate has cloud experience
+    has_cloud_experience = (
+        len(found_skills) > 0 or 
+        aws_found or
+        (has_positive_response and any(cloud_term in text_lower for cloud_term in ["cloud", "aws", "azure", "gcp"]))
+    )
+    
+    platforms_count = 1 if has_cloud_experience else 0
+    
+    return has_cloud_experience, {"cloud": found_skills}, found_skills, platforms_count
 def check_deployment_docker_kubernetes_experience(transcript_text):
     text_lower = transcript_text.lower()
     deployment_keywords = [
@@ -280,7 +314,6 @@ def check_ai_ml_experience(transcript_text):
     
     return has_ai_experience, has_ai_experience, has_ai_experience, has_ai_experience, found_skills
 def check_time_availability(transcript_text):
-    """Check if candidate is available for interview right now"""
     text_lower = transcript_text.lower()
     
     positive_indicators = [
@@ -296,8 +329,6 @@ def check_time_availability(transcript_text):
         "driving", "working", "occupied", "reschedule", "can't talk",
         "bad time", "not free", "in a meeting", "call later"
     ]
-    
-    # NEW: Check for "call later" specific responses
     call_later_indicators = [
         "later", "call back", "reschedule", "call later", "not now",
         "after", "evening", "tomorrow", "next week", "monday", "tuesday", 
@@ -330,15 +361,14 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
             is_available, availability_status = check_time_availability(transcription)
             validation_result["time_available"] = is_available
             validation_result["availability_status"] = availability_status
-            validation_result["response"] = transcription[:200]  # Store more context
-            validation_result["full_response"] = transcription   # Store full response
+            validation_result["response"] = transcription[:200]
+            validation_result["full_response"] = transcription   
             
             if not is_available:
                 validation_result["passed"] = False
                 
                 if availability_status == "call_later":
                     validation_result["reason"] = "Candidate requested to call later"
-                    # Store the callback request
                     interview_data["callback_requested"] = True
                     interview_data["callback_response"] = transcription
                     interview_data["callback_request_time"] = datetime.now().isoformat()
@@ -361,8 +391,6 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
             validation_result["skills_match"] = has_skills
             validation_result["found_skills"] = found_skills
             validation_result["match_percentage"] = match_percentage
-            
-            # MORE LENIENT: Only fail if NO skills mentioned AND no tech words
             basic_tech_words = ["programming", "development", "coding", "software", "technical"]
             has_basic_tech = any(word in transcription.lower() for word in basic_tech_words)
             
@@ -410,14 +438,53 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
             validation_result["cloud_experience"] = has_cloud_exp
             validation_result["found_platforms"] = found_platforms
             validation_result["cloud_concepts"] = cloud_concepts
-            if not has_cloud_exp and len(cloud_concepts) == 0:
+            
+            # More lenient validation - accept if ANY cloud experience is mentioned
+            text_lower = transcription.lower()
+            
+            # Check for explicit "yes" responses
+            explicit_yes = any(word in text_lower for word in ["yes", "yeah", "yep", "sure", "of course"])
+            
+            # Check for cloud-related terms (even with speech-to-text errors)
+            cloud_terms_mentioned = any(term in text_lower for term in [
+                "aws", "a w s", "amazon", "cloud", "azure", "gcp", "google cloud",
+                "ec2", "e c", "s3", "s 3", "docker", "kubernetes", "deployment"
+            ])
+            
+            # Check for experience indicators
+            experience_indicators = any(phrase in text_lower for phrase in [
+                "worked with", "experience", "used", "familiar", "know", "work with"
+            ])
+            
+            # Pass validation if:
+            # 1. Function detected cloud experience, OR
+            # 2. Explicit yes + any cloud terms, OR  
+            # 3. Experience indicators + cloud terms
+            should_pass = (
+                has_cloud_exp or
+                (explicit_yes and cloud_terms_mentioned) or
+                (experience_indicators and cloud_terms_mentioned) or
+                len(cloud_concepts) > 0
+            )
+            
+            if not should_pass:
                 validation_result["passed"] = False
                 validation_result["reason"] = "No cloud experience mentioned"
+                validation_result["debug_info"] = {
+                    "has_cloud_exp": has_cloud_exp,
+                    "explicit_yes": explicit_yes,
+                    "cloud_terms_mentioned": cloud_terms_mentioned,
+                    "experience_indicators": experience_indicators,
+                    "found_concepts": cloud_concepts
+                }
+                
                 if "validation_results" not in interview_data:
                     interview_data["validation_results"] = {}
                 interview_data["validation_results"][str(step)] = validation_result
                 save_interview_session(call_sid, interview_data)
                 return False, "no_cloud_experience", "No cloud experience found"
+            else:
+                print(f"[VALIDATION] Q6 PASSED: {transcription[:100]} -> detected: {cloud_concepts}")
                 
         elif step == 7:
             has_deploy, has_docker, has_k8s, total_skills, has_modern = check_deployment_docker_kubernetes_experience(transcription)
@@ -549,15 +616,11 @@ def complete_interview(call_sid):
         
         responses = interview_data.get("responses", [])
         print(f"[DEBUG] Found {len(responses)} responses for {call_sid}")
-        
-        # Extract name from introduction if available and current name is generic
         current_name = interview_data.get("candidate_name", "")
         if (not current_name or 
             current_name.startswith("Candidate_") or 
             current_name == "Unknown" or 
             current_name == "Unknown Candidate"):
-            
-            # Try to extract name from first response (introduction)
             if responses and len(responses) > 0:
                 intro_response = responses[0].get("answer", "")
                 name_patterns = [
@@ -576,8 +639,6 @@ def complete_interview(call_sid):
                             interview_data["candidate_name"] = extracted_name.title()
                             print(f"🎯 Extracted name from intro: '{extracted_name.title()}'")
                             break
-        
-        # Ensure all required fields exist with meaningful values
         final_name = interview_data.get("candidate_name", f"Candidate_{call_sid[-8:]}")
         final_phone = interview_data.get("candidate_phone") or interview_data.get("phone_number") or f"Phone_{call_sid[-8:]}"
         
@@ -920,6 +981,7 @@ async def get_all_interviews_detailed():
         interview_folder = "interviews"
         
         if os.path.exists(interview_folder):
+            # Include ALL interview files, including terminated ones
             json_files = glob.glob(f"{interview_folder}/*.json")
             for file_path in json_files:
                 if "session_" in file_path:
@@ -929,27 +991,16 @@ async def get_all_interviews_detailed():
                         interview_data = json.load(f)
                     
                     filename = os.path.basename(file_path)
-                    
-                    # ENHANCED data extraction with multiple fallbacks
                     call_sid = (interview_data.get("call_sid") or 
                                interview_data.get("interview_id") or 
                                filename.split('_')[0])
                     
-                    # Enhanced phone number extraction
-                    phone_number = (interview_data.get("candidate_phone") or 
-                                   interview_data.get("phone_number") or 
-                                   interview_data.get("phone") or 
-                                   interview_data.get("from_number"))
-                    
-                    if not phone_number or phone_number == "unknown":
-                        phone_number = f"+91{call_sid[-10:]}" if len(call_sid) >= 10 else f"Phone_{call_sid[-8:]}"
-                    
-                    # Enhanced candidate name extraction with intro parsing
+                    # Enhanced name extraction for terminated interviews
                     candidate_name = (interview_data.get("candidate_name") or 
                                      interview_data.get("name") or 
                                      interview_data.get("contact_name"))
                     
-                    # Try to extract name from first response if name is generic or missing
+                    # If no name, try extracting from responses (even for terminated interviews)
                     if (not candidate_name or 
                         candidate_name == "Unknown" or 
                         candidate_name == "Unknown Candidate" or
@@ -957,10 +1008,10 @@ async def get_all_interviews_detailed():
                         
                         responses = interview_data.get("responses", [])
                         if responses and len(responses) > 0:
+                            # Look for name in the first response (introduction)
                             intro_text = responses[0].get("answer", "")
-                            # Try multiple name extraction patterns
                             name_patterns = [
-                                r"(?:i'?m|my name is|i am|this is)\s+([a-zA-Z][a-zA-Z\s]{1,25})",
+                                r"(?:my name is|i'?m|i am|this is)\s+([a-zA-Z][a-zA-Z\s]{1,25})",
                                 r"^([a-zA-Z][a-zA-Z\s]{1,25}?)(?:\s+speaking|\s+here|\s*$)",
                                 r"myself\s+([a-zA-Z][a-zA-Z\s]{1,25})"
                             ]
@@ -972,13 +1023,22 @@ async def get_all_interviews_detailed():
                                     if (len(extracted_name) > 2 and 
                                         not any(word in extracted_name.lower() for word in ['from', 'calling', 'speaking', 'here', 'hello', 'hi'])):
                                         candidate_name = extracted_name.title()
-                                        print(f"🎯 Extracted name from intro: '{extracted_name.title()}'")
+                                        print(f"🎯 Extracted name from terminated interview: '{extracted_name.title()}'")
                                         break
                     
                     # Final fallback for name
-                    if not candidate_name:
-                        phone_suffix = phone_number.replace('+', '')[-4:] if len(phone_number) >= 4 else call_sid[-4:]
+                    if not candidate_name or candidate_name in ["Unknown", "Unknown Candidate"]:
+                        phone_number = (interview_data.get("candidate_phone") or 
+                                       interview_data.get("phone_number") or 
+                                       call_sid[-8:])
+                        phone_suffix = phone_number.replace('+', '')[-4:] if len(str(phone_number)) >= 4 else call_sid[-4:]
                         candidate_name = f"Candidate_{phone_suffix}"
+                    
+                    # Ensure we have phone number
+                    phone_number = (interview_data.get("candidate_phone") or 
+                                   interview_data.get("phone_number") or 
+                                   interview_data.get("phone") or 
+                                   f"Phone_{call_sid[-8:]}")
                     
                     processed_interview = {
                         "call_sid": call_sid,
@@ -989,13 +1049,13 @@ async def get_all_interviews_detailed():
                         "twilio_number": interview_data.get("twilio_number", "+14787807480"),
                         "start_time": interview_data.get("start_time", ""),
                         "end_time": interview_data.get("end_time", ""),
+                        "completion_time": interview_data.get("completion_time", interview_data.get("end_time", "")),
                         "status": interview_data.get("status", "COMPLETED"),
-                        "current_question": interview_data.get("current_question", len(interview_data.get("responses", []))),
+                        "current_question": interview_data.get("candidate_name", len(interview_data.get("responses", []))),
                         "responses": interview_data.get("responses", []),
                         "validation_results": interview_data.get("validation_results", {}),
                         "questions_answered": len(interview_data.get("responses", [])),
                         "total_questions": interview_data.get("total_questions", 8),
-                        "completion_time": interview_data.get("completion_time", ""),
                         "all_validations_passed": interview_data.get("all_validations_passed", False),
                         "termination_reason": interview_data.get("termination_reason", None),
                         "silence_prompts": interview_data.get("silence_prompts", 0),
@@ -1010,14 +1070,12 @@ async def get_all_interviews_detailed():
                         "preferred_time": interview_data.get("preferred_time", "")
                     }
                     
-                    print(f"📊 Processed interview {call_sid}: name='{candidate_name}', phone='{phone_number}'")
-                    all_interviews.append(processed_interview)
+                    print(f"📊 Processed interview {call_sid}: status='{processed_interview['status']}', name='{candidate_name}'")
+                    all_interviews.append(processed_interview);
                     
                 except Exception as e:
                     print(f"Error reading {file_path}: {e}")
                     continue
-
-        # Handle session files with same enhanced extraction
         session_files = glob.glob("interviews/session_*.json")
         for session_file in session_files:
             try:
@@ -1026,24 +1084,9 @@ async def get_all_interviews_detailed():
                 if session_data:
                     exists_in_files = any(interview["call_sid"] == call_sid for interview in all_interviews)
                     if not exists_in_files:
-                        # Same enhanced extraction logic for sessions
-                        phone_number = (session_data.get("candidate_phone") or 
-                                       session_data.get("phone_number") or 
-                                       f"Phone_{call_sid[-8:]}")
-                        
-                        candidate_name = session_data.get("candidate_name")
-                        if not candidate_name or candidate_name.startswith("Candidate_"):
-                            # Try name extraction from responses
-                            responses = session_data.get("responses", [])
-                            if responses:
-                                intro_text = responses[0].get("answer", "")
-                                name_match = re.search(r"(?:i'?m|my name is|i am)\s+([a-zA-Z\s]{2,25})", intro_text, re.IGNORECASE)
-                                if name_match:
-                                    candidate_name = name_match.group(1).strip().title()
-                                else:
-                                    candidate_name = f"Candidate_{call_sid[-8:]}"
-                            else:
-                                candidate_name = f"Candidate_{call_sid[-8:]}"
+                        # Process session data similar to above
+                        candidate_name = session_data.get("candidate_name", f"Candidate_{call_sid[-8:]}")
+                        phone_number = session_data.get("candidate_phone", f"Phone_{call_sid[-8:]}")
                         
                         processed_session = {
                             "call_sid": call_sid,
@@ -1054,13 +1097,13 @@ async def get_all_interviews_detailed():
                             "twilio_number": session_data.get("twilio_number", "+14787807480"),
                             "start_time": session_data.get("start_time", ""),
                             "end_time": session_data.get("end_time", ""),
+                            "completion_time": session_data.get("start_time", ""),
                             "status": session_data.get("status", "IN_PROGRESS"),
                             "current_question": session_data.get("current_question", 1),
                             "responses": session_data.get("responses", []),
                             "validation_results": session_data.get("validation_results", {}),
                             "questions_answered": len(session_data.get("responses", [])),
                             "total_questions": len(INTERVIEW_QUESTIONS),
-                            "completion_time": session_data.get("start_time", ""),
                             "all_validations_passed": all(v.get('passed', True) for v in session_data.get('validation_results', {}).values()),
                             "termination_reason": session_data.get("termination_reason", None),
                             "silence_prompts": session_data.get("silence_prompts", 0),
@@ -1075,25 +1118,26 @@ async def get_all_interviews_detailed():
                             "preferred_time": session_data.get("preferred_time", "")
                         }
                         
-                        print(f"📊 Processed session {call_sid}: name='{candidate_name}', phone='{phone_number}'")
-                        all_interviews.append(processed_session)
+                        print(f"📊 Processed session {call_sid}: status='{processed_session['status']}', name='{candidate_name}'")
+                        all_interviews.append(processed_session);
             except Exception as e:
                 print(f"Error reading session {session_file}: {e}")
                 continue
-
-        all_interviews.sort(key=lambda x: x.get("start_time", ""), reverse=True)
+        all_interviews.sort(key=lambda x: x.get("start_time", x.get("completion_time", "")), reverse=True)
         
         # Count different statuses
         completed_count = len([i for i in all_interviews if i.get("status") == "COMPLETED"])
+        terminated_count = len([i for i in all_interviews if i.get("status") == "TERMINATED"])
         callback_count = len([i for i in all_interviews if i.get("status") == "CALLBACK_REQUESTED"])
         
-        print(f"📋 Returning {len(all_interviews)} interviews ({callback_count} callback requests)")
+        print(f"📋 Returning {len(all_interviews)} interviews ({completed_count} completed, {terminated_count} terminated, {callback_count} callbacks)")
         
         return {
             "success": True,
             "interviews": all_interviews,
             "total_count": len(all_interviews),
             "completed_count": completed_count,
+            "terminated_count": terminated_count,
             "callback_count": callback_count
         }
     except Exception as e:
@@ -1104,6 +1148,7 @@ async def get_all_interviews_detailed():
             "interviews": [],
             "total_count": 0,
             "completed_count": 0,
+            "terminated_count": 0,
             "callback_count": 0
         }
 def terminate_interview(call_sid: str, reason_code: str, reason_message: str):
@@ -1517,41 +1562,20 @@ async def upload_csv(file: UploadFile = File(...)):
         
         # Read CSV content
         content = await file.read()
-        csv_content = content.decode('utf-8')
-        csv_reader = csv.DictReader(io.StringIO(csv_content))
+        csv_data = content.decode('utf-8')
         
-        candidates = []
-        for row in csv_reader:
-            candidate = {
-                "name": row.get("name", row.get("Name", "Unknown")),
-                "phone": row.get("phone", row.get("Phone", row.get("mobile", row.get("Mobile", "")))),
-                "email": row.get("email", row.get("Email", "")),
-                "experience": row.get("experience", row.get("Experience", "")),
-                "skills": row.get("skills", row.get("Skills", ""))
-            }
-            if candidate["phone"]:
-                candidates.append(candidate)
+        # Parse CSV
+        csv_reader = csv.DictReader(io.StringIO(csv_data))
+        candidates = list(csv_reader)
         
-        return {
-            "success": True,
-            "message": f"Successfully parsed {len(candidates)} candidates",
-            "contacts": candidates,
-            "count": len(candidates)
-        }
-    except Exception as e:
-        print(f"[ERROR] CSV upload failed: {e}")
-        return {"success": False, "error": f"Failed to process CSV: {str(e)}"}
-@app.post("/bulk-call")
-async def make_bulk_calls(request: Request):
-    try:
-        data = await request.json()
-        candidates = data if isinstance(data, list) else data.get("candidates", [])
         if not candidates:
-            return {"success": False, "error": "No candidates provided"}
+            return {"success": False, "error": "No candidates found in CSV"}
         
+        # Generate bulk call ID
+        bulk_call_id = f"bulk_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         results = []
-        bulk_call_id = f"bulk_{int(time.time())}"
         
+        # Process each candidate
         for candidate in candidates:
             try:
                 name = candidate.get("name", candidate.get("Name", ""))
@@ -1568,6 +1592,7 @@ async def make_bulk_calls(request: Request):
                         "error": "No phone number provided"
                     })
                     continue
+                
                 
                 # Clean phone number
                 clean_phone = phone.strip()
