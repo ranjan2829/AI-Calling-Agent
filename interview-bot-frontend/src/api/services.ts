@@ -1,5 +1,15 @@
 import axios from 'axios';
+
 const API_BASE_URL = 'http://13.204.76.229:8000';
+
+// Create axios instance
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -9,6 +19,7 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
       },
       ...options,
     });
+
     if (!response.ok) {
       if (response.status === 404) {
         console.warn(`API endpoint ${endpoint} not found, using mock data`);
@@ -22,6 +33,7 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
     return getMockData(endpoint);
   }
 };
+
 const getMockData = (endpoint: string) => {
   switch (endpoint) {
     case '/interviews':
@@ -40,6 +52,7 @@ const getMockData = (endpoint: string) => {
       return {};
   }
 };
+
 export const getCallStats = async () => {
   const data = await apiRequest('/interviews');
   const interviews = data.interviews || [];
@@ -47,6 +60,7 @@ export const getCallStats = async () => {
   const successfulCalls = interviews.filter((i: any) => i.status === 'COMPLETED').length;
   const failedCalls = totalCalls - successfulCalls;
   const avgDuration = interviews.reduce((sum: number, i: any) => sum + (i.questionsAnswered || 0), 0) / totalCalls || 0;
+  
   return {
     totalCalls,
     successfulCalls,
@@ -55,41 +69,52 @@ export const getCallStats = async () => {
     completedCalls: successfulCalls
   };
 };
+
 export const getJobDescription = async () => {
   return apiRequest('/job-description');
 };
+
 export const updateJobDescription = async (jobData: any) => {
   return apiRequest('/update-job-description', {
     method: 'POST',
     body: JSON.stringify(jobData),
   });
 };
+
 export const getDetailedInterviews = async () => {
   return apiRequest('/all-interviews');
 };
+
 export const getInterviewDetails = async (interviewId: string) => {
   return apiRequest(`/interview-details/${interviewId}`);
 };
+
 export const initiateCall = async (phoneNumber: string) => {
   return apiRequest('/make-call', {
     method: 'POST',
     body: JSON.stringify({ phone_number: phoneNumber }),
   });
 };
+
 export const runJDAnalysis = async () => {
   return apiRequest('/run-jd-analysis', {
     method: 'POST',
   });
 };
+
 export const getJDReport = async (callId: string) => {
   return apiRequest(`/jd-report/${callId}`);
 };
+
 export const getAllInterviews = async () => {
-  return apiRequest('/all-interviews');
+  return apiRequest('/all-interviews'); // This matches your backend
 };
+
 export const testAWSServices = async () => {
   return apiRequest('/test-aws');
 };
+
+// Main API object with all methods
 export const callsApi = {
   getInterviewDetails: async (interviewId: string) => {
     const data = await getInterviewDetails(interviewId);
@@ -119,5 +144,38 @@ export const callsApi = {
   initiateCall: async (phoneNumber: string) => {
     const data = await initiateCall(phoneNumber);
     return { data };
+  },
+  
+  // FIXED: Use apiClient instead of undefined reference
+  saveBulkResults: async (bulkData: any) => {
+    const response = await apiClient.post('/save-bulk-results', bulkData);
+    return response;
+  },
+  
+  getBulkResults: async (bulkCallId: string) => {
+    const response = await apiClient.get(`/bulk-results/${bulkCallId}`);
+    return response;
+  },
+  
+  getAllBulkResults: async () => {
+    const response = await apiClient.get('/bulk-results');
+    return response;
+  },
+
+  // Add missing methods that the BulkCallDashboard needs
+  makeBulkCalls: async (contacts: any[]) => {
+    const response = await apiClient.post('/bulk-call', contacts);
+    return response;
+  },
+
+  uploadCSV: async (formData: FormData) => {
+    const response = await apiClient.post('/upload-csv', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response;
   }
 };
+
+export default callsApi;

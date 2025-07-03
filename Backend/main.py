@@ -41,7 +41,10 @@ executor = ThreadPoolExecutor(max_workers=10)
 def create_folders():
     folders = [
         "interviews/audio_recordings",
-        "interviews/transcriptions"]
+        "interviews/transcriptions",
+        "interviews/bulk_results",
+        "interviews/contact_mappings"
+        ]
     for folder in folders:
         os.makedirs(folder, exist_ok=True)
 create_folders()
@@ -87,12 +90,75 @@ def load_jd_skills():
 def check_skills_match(transcript_text):
     text_lower = transcript_text.lower()
     jd_skills = load_jd_skills()
-    found_skills = []
+    
+    # Enhanced comprehensive AI/ML skills
+    comprehensive_ai_ml_skills = [
+        # NLP/LLM/RAG - Your requested categories
+        "nlp", "natural language processing", "llm", "large language model", 
+        "rag", "retrieval augmented generation", "agents", "chatbot", "hugging face",
+        "transformers", "bert", "gpt", "openai", "text processing", "language models",
+        
+        # Deep Learning/CNN - Your requested categories
+        "deep learning", "neural network", "cnn", "yolo", "stable diffusion",
+        "computer vision", "image processing", "object detection", "convolutional",
+        "pytorch", "tensorflow", "keras", "generative ai", "diffusion models",
+        
+        # Machine Learning - Your requested categories
+        "machine learning", "ml", "regression", "classification", "clustering",
+        "supervised", "unsupervised", "algorithm", "fine-tuning", "training",
+        "random forest", "svm", "decision tree", "xgboost", "feature engineering",
+        
+        # Training/Fine-tuning - Your requested categories
+        "model training", "transfer learning", "hyperparameter tuning", 
+        "optimization", "data preprocessing", "model fine-tuning",
+        
+        # Cloud Platforms - Your requested categories
+        "aws", "ec2", "s3", "sagemaker", "ecr", "azure", "gcp", "google cloud",
+        "cloud computing", "serverless", "lambda functions",
+        
+        # Deployment - Your requested categories
+        "docker", "kubernetes", "deployment", "ci/cd", "devops", "containerization",
+        "microservices", "orchestration",
+        
+        # APIs - Your requested categories
+        "fastapi", "flask", "django", "rest api", "api development", "microservices",
+        "endpoints", "json", "http", "web services",
+        
+        # Programming & Frameworks
+        "python", "pandas", "numpy", "scikit-learn", "matplotlib", "jupyter",
+        "streamlit", "gradio", "programming", "coding", "development"
+    ]
+    
+    # Check JD skills first (primary)
+    jd_found_skills = []
     for skill in jd_skills:
         if skill.lower() in text_lower:
-            found_skills.append(skill)
-    match_percentage = (len(found_skills) / len(jd_skills)) * 100 if jd_skills else 0
-    return match_percentage >= 50, found_skills, match_percentage
+            jd_found_skills.append(skill)
+    
+    # Check comprehensive AI/ML skills (backup)
+    ai_found_skills = []
+    for skill in comprehensive_ai_ml_skills:
+        if skill in text_lower:
+            ai_found_skills.append(skill)
+    
+    # Calculate match percentages
+    jd_match_percentage = (len(jd_found_skills) / len(jd_skills)) * 100 if jd_skills else 0
+    ai_match_percentage = (len(ai_found_skills) / len(comprehensive_ai_ml_skills)) * 100
+    
+    # VERY LENIENT VALIDATION - Pass if ANY of these conditions:
+    all_found_skills = list(set(jd_found_skills + ai_found_skills))  # Remove duplicates
+    
+    # Even more lenient thresholds
+    has_good_match = (
+        jd_match_percentage >= 20 or          # 20% JD match (very lenient)
+        ai_match_percentage >= 3 or           # 3% AI/ML skills (very lenient)
+        len(all_found_skills) >= 1 or         # At least 1 skill mentioned
+        any(word in text_lower for word in ["programming", "development", "coding", "software", "technical", "engineering"])
+    )
+    
+    overall_percentage = max(jd_match_percentage, ai_match_percentage)
+    
+    return has_good_match, all_found_skills, overall_percentage
 def check_relocation_willingness(transcript_text):
     text_lower = transcript_text.lower()
     positive_indicators = ["yes", "open", "willing", "can relocate", "no problem", "sure", "okay", "fine"]
@@ -183,12 +249,35 @@ def check_deployment_docker_kubernetes_experience(transcript_text):
     return has_experience, has_experience, has_experience, found_skills, has_experience
 def check_ai_ml_experience(transcript_text):
     text_lower = transcript_text.lower()
+    
+    # Your comprehensive categories
     ai_keywords = [
-        "ai", "ml", "machine learning", "artificial intelligence", "deep learning",
-        "neural network", "tensorflow", "pytorch", "python", "data science"
+        # NLP/LLM
+        "nlp", "natural language processing", "llm", "large language model", 
+        "rag", "retrieval augmented generation", "agents", "chatbot", "hugging face",
+        "transformers", "bert", "gpt", "openai",
+        
+        # Deep Learning
+        "deep learning", "neural network", "cnn", "convolutional neural network",
+        "yolo", "stable diffusion", "computer vision", "image processing",
+        "pytorch", "tensorflow", "keras", "generative ai",
+        
+        # Machine Learning  
+        "machine learning", "ml", "regression", "classification", "clustering",
+        "supervised learning", "unsupervised learning", "random forest", "svm",
+        "decision tree", "xgboost", "naive bayes", "feature engineering",
+        
+        # Training/Fine-tuning
+        "fine-tuning", "training", "model training", "transfer learning",
+        "hyperparameter tuning", "optimization", "data preprocessing",
+        
+        # General AI
+        "ai", "artificial intelligence", "data science", "python", "analytics"
     ]
-    has_ai_experience = any(keyword in text_lower for keyword in ai_keywords)
+    
     found_skills = [keyword for keyword in ai_keywords if keyword in text_lower]
+    has_ai_experience = len(found_skills) > 0
+    
     return has_ai_experience, has_ai_experience, has_ai_experience, has_ai_experience, found_skills
 def check_time_availability(transcript_text):
     """Check if candidate is available for interview right now"""
@@ -208,9 +297,21 @@ def check_time_availability(transcript_text):
         "bad time", "not free", "in a meeting", "call later"
     ]
     
+    # NEW: Check for "call later" specific responses
+    call_later_indicators = [
+        "later", "call back", "reschedule", "call later", "not now",
+        "after", "evening", "tomorrow", "next week", "monday", "tuesday", 
+        "wednesday", "thursday", "friday", "saturday", "sunday",
+        "morning", "afternoon", "evening", "tonight", "weekend"
+    ]
+    
     for indicator in positive_indicators:
         if indicator in text_lower:
             return True, "available"
+    
+    for indicator in call_later_indicators:
+        if indicator in text_lower:
+            return False, "call_later"
     
     for indicator in negative_indicators:
         if indicator in text_lower:
@@ -222,30 +323,52 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
         interview_data = load_interview_session(call_sid)
         if not interview_data:
             return True, "continue", "No state found"      
+        
         validation_result = {"step": step, "passed": True, "reason": ""}
+        
         if step == 0:
             is_available, availability_status = check_time_availability(transcription)
             validation_result["time_available"] = is_available
             validation_result["availability_status"] = availability_status
-            validation_result["response"] = transcription[:100]
+            validation_result["response"] = transcription[:200]  # Store more context
+            validation_result["full_response"] = transcription   # Store full response
             
             if not is_available:
                 validation_result["passed"] = False
-                validation_result["reason"] = "Candidate not available for interview"
-                if "validation_results" not in interview_data:
-                    interview_data["validation_results"] = {}
-                interview_data["validation_results"][str(step)] = validation_result
-                save_interview_session(call_sid, interview_data)
-                return False, "not_available", "Candidate not available for interview"
-        
+                
+                if availability_status == "call_later":
+                    validation_result["reason"] = "Candidate requested to call later"
+                    # Store the callback request
+                    interview_data["callback_requested"] = True
+                    interview_data["callback_response"] = transcription
+                    interview_data["callback_request_time"] = datetime.now().isoformat()
+                    
+                    if "validation_results" not in interview_data:
+                        interview_data["validation_results"] = {}
+                    interview_data["validation_results"][str(step)] = validation_result
+                    save_interview_session(call_sid, interview_data)
+                    return False, "call_later", "Candidate requested to call later"
+                else:
+                    validation_result["reason"] = "Candidate not available for interview"
+                    if "validation_results" not in interview_data:
+                        interview_data["validation_results"] = {}
+                    interview_data["validation_results"][str(step)] = validation_result
+                    save_interview_session(call_sid, interview_data)
+                    return False, "not_available", "Candidate not available for interview"
+
         elif step == 2:
             has_skills, found_skills, match_percentage = check_skills_match(transcription)
             validation_result["skills_match"] = has_skills
             validation_result["found_skills"] = found_skills
             validation_result["match_percentage"] = match_percentage
-            if not has_skills and len(found_skills) == 0:
+            
+            # MORE LENIENT: Only fail if NO skills mentioned AND no tech words
+            basic_tech_words = ["programming", "development", "coding", "software", "technical"]
+            has_basic_tech = any(word in transcription.lower() for word in basic_tech_words)
+            
+            if not has_skills and len(found_skills) == 0 and not has_basic_tech:
                 validation_result["passed"] = False
-                validation_result["reason"] = "No relevant skills mentioned"
+                validation_result["reason"] = "No relevant technical skills mentioned"
                 if "validation_results" not in interview_data:
                     interview_data["validation_results"] = {}
                 interview_data["validation_results"][str(step)] = validation_result
@@ -332,6 +455,7 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
         interview_data["validation_results"][str(step)] = validation_result
         save_interview_session(call_sid, interview_data)
         return True, "continue", "Validation passed"
+        
     except Exception as e:
         print(f"[ERROR] Validation error for {call_sid}, step {step}: {e}")
         return True, "continue", "Validation error - continuing"
@@ -413,31 +537,79 @@ def complete_interview(call_sid):
             print(f"[ERROR] No interview session found for {call_sid}")
             interview_data = {
                 "interview_id": call_sid,
+                "call_sid": call_sid,
                 "responses": [],
                 "status": "COMPLETED",
                 "start_time": datetime.now().isoformat(),
-                "phone_number": "unknown",
+                "phone_number": f"Phone_{call_sid[-8:]}",
+                "candidate_phone": f"Phone_{call_sid[-8:]}",
+                "candidate_name": f"Candidate_{call_sid[-8:]}",
                 "twilio_number": "+14787807480"
             }
+        
         responses = interview_data.get("responses", [])
         print(f"[DEBUG] Found {len(responses)} responses for {call_sid}")
-        interview_data["status"] = "COMPLETED"
-        interview_data["end_time"] = datetime.now().isoformat()
-        interview_data["completion_time"] = datetime.now().isoformat()
-        if "phone_number" not in interview_data:
-            interview_data["phone_number"] = "unknown"
-        if "twilio_number" not in interview_data:
-            interview_data["twilio_number"] = "+14787807480"
+        
+        # Extract name from introduction if available and current name is generic
+        current_name = interview_data.get("candidate_name", "")
+        if (not current_name or 
+            current_name.startswith("Candidate_") or 
+            current_name == "Unknown" or 
+            current_name == "Unknown Candidate"):
+            
+            # Try to extract name from first response (introduction)
+            if responses and len(responses) > 0:
+                intro_response = responses[0].get("answer", "")
+                name_patterns = [
+                    r"(?:i'?m|my name is|i am|this is)\s+([a-zA-Z][a-zA-Z\s]{1,25})",
+                    r"^([a-zA-Z][a-zA-Z\s]{1,25}?)(?:\s+speaking|\s+here|\s*$)",
+                    r"myself\s+([a-zA-Z][a-zA-Z\s]{1,25})"
+                ]
+                
+                for pattern in name_patterns:
+                    match = re.search(pattern, intro_response, re.IGNORECASE)
+                    if match:
+                        extracted_name = match.group(1).strip()
+                        # Validate the extracted name
+                        if (len(extracted_name) > 2 and 
+                            not any(word in extracted_name.lower() for word in ['from', 'calling', 'speaking', 'here', 'hello', 'hi'])):
+                            interview_data["candidate_name"] = extracted_name.title()
+                            print(f"🎯 Extracted name from intro: '{extracted_name.title()}'")
+                            break
+        
+        # Ensure all required fields exist with meaningful values
+        final_name = interview_data.get("candidate_name", f"Candidate_{call_sid[-8:]}")
+        final_phone = interview_data.get("candidate_phone") or interview_data.get("phone_number") or f"Phone_{call_sid[-8:]}"
+        
+        # Update interview data with final values
+        interview_data.update({
+            "status": "COMPLETED",
+            "end_time": datetime.now().isoformat(),
+            "completion_time": datetime.now().isoformat(),
+            "interview_id": call_sid,
+            "call_sid": call_sid,
+            "candidate_name": final_name,
+            "name": final_name,  # Alternative field
+            "phone_number": final_phone,
+            "candidate_phone": final_phone,
+            "twilio_number": interview_data.get("twilio_number", "+14787807480")
+        })
+        
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"interviews/{call_sid}_COMPLETED_{timestamp}.json"
         os.makedirs("interviews", exist_ok=True)
+        
         with open(filename, 'w') as f:
             json.dump(interview_data, f, indent=2)
+        
         print(f"[COMPLETED] Interview {call_sid} saved to {filename}")
+        print(f"[DATA] Saved data for {final_name} - {final_phone}")
+        
         try:
             executor.submit(run_jd_analysis)
         except Exception as e:
             print(f"[ERROR] Failed to run analysis: {e}")
+        
         try:
             session_file = f"interviews/session_{call_sid}.json"
             if os.path.exists(session_file):
@@ -445,9 +617,10 @@ def complete_interview(call_sid):
                 print(f"[CLEANUP] Removed session file for {call_sid}")
         except Exception as e:
             print(f"[ERROR] Failed to cleanup session file: {e}")
+        
         conversation_state.pop(call_sid, None)
         response = VoiceResponse()
-        response.say("Thank you for your time! Your interview has been completed successfully. We will review your responses and get back to you soon. Have a great day!", voice='Polly.Aditi')  # Changed to Polly.Aditi
+        response.say("Thank you for your time! Your interview has been completed successfully. We will review your responses and get back to you soon. Have a great day!", voice='Polly.Aditi')
         response.hangup()
         return str(response)
     except Exception as e:
@@ -500,6 +673,9 @@ def save_incomplete_interview(call_sid: str, interview_data: dict, termination_r
         if termination_reason == "not_available":
             interview_type = "Interview Not Started - Candidate Unavailable"
             status = "NOT_STARTED"
+        elif termination_reason == "call_later":
+            interview_type = "Callback Requested - Will Reschedule"
+            status = "CALLBACK_REQUESTED"
         else:
             interview_type = "Terminated Interview - Validation Failed"
             status = "TERMINATED"
@@ -521,7 +697,13 @@ def save_incomplete_interview(call_sid: str, interview_data: dict, termination_r
             "candidate_name": interview_data.get("candidate_name", "Unknown"),
             "candidate_phone": interview_data.get("candidate_phone", "Unknown"),
             "bulk_call_id": interview_data.get("bulk_call_id"),
-            "is_bulk_call": interview_data.get("is_bulk_call", False)
+            "is_bulk_call": interview_data.get("is_bulk_call", False),
+            
+            # NEW: Callback-specific fields
+            "callback_requested": interview_data.get("callback_requested", False),
+            "callback_response": interview_data.get("callback_response", ""),
+            "callback_request_time": interview_data.get("callback_request_time", ""),
+            "preferred_time": interview_data.get("preferred_time", "")
         }
         
         summary_filename = f"interviews/{call_sid}_ONELAB_{status}_{timestamp}.json"
@@ -707,7 +889,7 @@ async def get_all_interviews():
         for session_file in session_files:
             try:
                 call_sid = os.path.basename(session_file).replace("session_", "").replace(".json", "")
-                session_data = load_interview_session(call_sid)               
+                session_data = load_interview_session(call_sid)
                 if session_data:
                     exists_in_files = any(interview["interview_id"] == call_sid for interview in all_interviews)   
                     if not exists_in_files:
@@ -736,6 +918,7 @@ async def get_all_interviews_detailed():
     try:
         all_interviews = []
         interview_folder = "interviews"
+        
         if os.path.exists(interview_folder):
             json_files = glob.glob(f"{interview_folder}/*.json")
             for file_path in json_files:
@@ -744,13 +927,65 @@ async def get_all_interviews_detailed():
                 try:
                     with open(file_path, 'r') as f:
                         interview_data = json.load(f)
+                    
                     filename = os.path.basename(file_path)
+                    
+                    # ENHANCED data extraction with multiple fallbacks
+                    call_sid = (interview_data.get("call_sid") or 
+                               interview_data.get("interview_id") or 
+                               filename.split('_')[0])
+                    
+                    # Enhanced phone number extraction
+                    phone_number = (interview_data.get("candidate_phone") or 
+                                   interview_data.get("phone_number") or 
+                                   interview_data.get("phone") or 
+                                   interview_data.get("from_number"))
+                    
+                    if not phone_number or phone_number == "unknown":
+                        phone_number = f"+91{call_sid[-10:]}" if len(call_sid) >= 10 else f"Phone_{call_sid[-8:]}"
+                    
+                    # Enhanced candidate name extraction with intro parsing
+                    candidate_name = (interview_data.get("candidate_name") or 
+                                     interview_data.get("name") or 
+                                     interview_data.get("contact_name"))
+                    
+                    # Try to extract name from first response if name is generic or missing
+                    if (not candidate_name or 
+                        candidate_name == "Unknown" or 
+                        candidate_name == "Unknown Candidate" or
+                        candidate_name.startswith("Candidate_")):
+                        
+                        responses = interview_data.get("responses", [])
+                        if responses and len(responses) > 0:
+                            intro_text = responses[0].get("answer", "")
+                            # Try multiple name extraction patterns
+                            name_patterns = [
+                                r"(?:i'?m|my name is|i am|this is)\s+([a-zA-Z][a-zA-Z\s]{1,25})",
+                                r"^([a-zA-Z][a-zA-Z\s]{1,25}?)(?:\s+speaking|\s+here|\s*$)",
+                                r"myself\s+([a-zA-Z][a-zA-Z\s]{1,25})"
+                            ]
+                            
+                            for pattern in name_patterns:
+                                match = re.search(pattern, intro_text, re.IGNORECASE)
+                                if match:
+                                    extracted_name = match.group(1).strip()
+                                    if (len(extracted_name) > 2 and 
+                                        not any(word in extracted_name.lower() for word in ['from', 'calling', 'speaking', 'here', 'hello', 'hi'])):
+                                        candidate_name = extracted_name.title()
+                                        print(f"🎯 Extracted name from intro: '{extracted_name.title()}'")
+                                        break
+                    
+                    # Final fallback for name
+                    if not candidate_name:
+                        phone_suffix = phone_number.replace('+', '')[-4:] if len(phone_number) >= 4 else call_sid[-4:]
+                        candidate_name = f"Candidate_{phone_suffix}"
+                    
                     processed_interview = {
-                        "call_sid": interview_data.get("call_sid") or interview_data.get("interview_id"),
-                        "interview_id": interview_data.get("interview_id") or interview_data.get("call_sid"),
-                        "phone_number": interview_data.get("phone_number") or interview_data.get("candidate_phone"),
-                        "candidate_name": interview_data.get("candidate_name") or "Unknown Candidate",
-                        "candidate_phone": interview_data.get("candidate_phone") or interview_data.get("phone_number"),
+                        "call_sid": call_sid,
+                        "interview_id": call_sid,
+                        "phone_number": phone_number,
+                        "candidate_name": candidate_name,
+                        "candidate_phone": phone_number,
                         "twilio_number": interview_data.get("twilio_number", "+14787807480"),
                         "start_time": interview_data.get("start_time", ""),
                         "end_time": interview_data.get("end_time", ""),
@@ -759,19 +994,30 @@ async def get_all_interviews_detailed():
                         "responses": interview_data.get("responses", []),
                         "validation_results": interview_data.get("validation_results", {}),
                         "questions_answered": len(interview_data.get("responses", [])),
-                        "total_questions": interview_data.get("total_questions", 8),  # Updated to 8 questions
+                        "total_questions": interview_data.get("total_questions", 8),
                         "completion_time": interview_data.get("completion_time", ""),
                         "all_validations_passed": interview_data.get("all_validations_passed", False),
                         "termination_reason": interview_data.get("termination_reason", None),
                         "silence_prompts": interview_data.get("silence_prompts", 0),
                         "last_activity": interview_data.get("last_activity", ""),
                         "bulk_call_id": interview_data.get("bulk_call_id"),
-                        "is_bulk_call": interview_data.get("is_bulk_call", False)
+                        "is_bulk_call": interview_data.get("is_bulk_call", False),
+                        
+                        # Callback fields
+                        "callback_requested": interview_data.get("callback_requested", False),
+                        "callback_response": interview_data.get("callback_response", ""),
+                        "callback_request_time": interview_data.get("callback_request_time", ""),
+                        "preferred_time": interview_data.get("preferred_time", "")
                     }
+                    
+                    print(f"📊 Processed interview {call_sid}: name='{candidate_name}', phone='{phone_number}'")
                     all_interviews.append(processed_interview)
+                    
                 except Exception as e:
                     print(f"Error reading {file_path}: {e}")
                     continue
+
+        # Handle session files with same enhanced extraction
         session_files = glob.glob("interviews/session_*.json")
         for session_file in session_files:
             try:
@@ -780,12 +1026,31 @@ async def get_all_interviews_detailed():
                 if session_data:
                     exists_in_files = any(interview["call_sid"] == call_sid for interview in all_interviews)
                     if not exists_in_files:
+                        # Same enhanced extraction logic for sessions
+                        phone_number = (session_data.get("candidate_phone") or 
+                                       session_data.get("phone_number") or 
+                                       f"Phone_{call_sid[-8:]}")
+                        
+                        candidate_name = session_data.get("candidate_name")
+                        if not candidate_name or candidate_name.startswith("Candidate_"):
+                            # Try name extraction from responses
+                            responses = session_data.get("responses", [])
+                            if responses:
+                                intro_text = responses[0].get("answer", "")
+                                name_match = re.search(r"(?:i'?m|my name is|i am)\s+([a-zA-Z\s]{2,25})", intro_text, re.IGNORECASE)
+                                if name_match:
+                                    candidate_name = name_match.group(1).strip().title()
+                                else:
+                                    candidate_name = f"Candidate_{call_sid[-8:]}"
+                            else:
+                                candidate_name = f"Candidate_{call_sid[-8:]}"
+                        
                         processed_session = {
                             "call_sid": call_sid,
                             "interview_id": call_sid,
-                            "phone_number": session_data.get("phone_number") or session_data.get("candidate_phone"),
-                            "candidate_name": session_data.get("candidate_name", "Unknown Candidate"),
-                            "candidate_phone": session_data.get("candidate_phone") or session_data.get("phone_number"),
+                            "phone_number": phone_number,
+                            "candidate_name": candidate_name,
+                            "candidate_phone": phone_number,
                             "twilio_number": session_data.get("twilio_number", "+14787807480"),
                             "start_time": session_data.get("start_time", ""),
                             "end_time": session_data.get("end_time", ""),
@@ -801,21 +1066,35 @@ async def get_all_interviews_detailed():
                             "silence_prompts": session_data.get("silence_prompts", 0),
                             "last_activity": session_data.get("last_activity", ""),
                             "bulk_call_id": session_data.get("bulk_call_id"),
-                            "is_bulk_call": session_data.get("is_bulk_call", False)
+                            "is_bulk_call": session_data.get("is_bulk_call", False),
+                            
+                            # Callback fields
+                            "callback_requested": session_data.get("callback_requested", False),
+                            "callback_response": session_data.get("callback_response", ""),
+                            "callback_request_time": session_data.get("callback_request_time", ""),
+                            "preferred_time": session_data.get("preferred_time", "")
                         }
+                        
+                        print(f"📊 Processed session {call_sid}: name='{candidate_name}', phone='{phone_number}'")
                         all_interviews.append(processed_session)
             except Exception as e:
                 print(f"Error reading session {session_file}: {e}")
                 continue
+
         all_interviews.sort(key=lambda x: x.get("start_time", ""), reverse=True)
-        print(f"📋 Returning {len(all_interviews)} interviews")
-        if all_interviews:
-            print(f"📊 Sample interview: {all_interviews[0]}")
+        
+        # Count different statuses
+        completed_count = len([i for i in all_interviews if i.get("status") == "COMPLETED"])
+        callback_count = len([i for i in all_interviews if i.get("status") == "CALLBACK_REQUESTED"])
+        
+        print(f"📋 Returning {len(all_interviews)} interviews ({callback_count} callback requests)")
+        
         return {
             "success": True,
             "interviews": all_interviews,
             "total_count": len(all_interviews),
-            "completed_count": len([i for i in all_interviews if i.get("status") == "COMPLETED"])
+            "completed_count": completed_count,
+            "callback_count": callback_count
         }
     except Exception as e:
         print(f"Error getting all interviews: {e}")
@@ -824,7 +1103,8 @@ async def get_all_interviews_detailed():
             "error": str(e),
             "interviews": [],
             "total_count": 0,
-            "completed_count": 0
+            "completed_count": 0,
+            "callback_count": 0
         }
 def terminate_interview(call_sid: str, reason_code: str, reason_message: str):
     try:
@@ -835,6 +1115,10 @@ def terminate_interview(call_sid: str, reason_code: str, reason_message: str):
             resp.say(
                 "No problem at all! We completely understand. We'll reach out to you at a more convenient time. Thank you and have a great day!",
                 voice='Polly.Aditi', rate='medium')
+        elif reason_code == "call_later":
+            resp.say(
+                "Absolutely! We completely understand your schedule. We'll make sure to call you back at a more convenient time. Thank you for letting us know, and we'll be in touch soon!",
+                voice='Polly.Aditi', rate='medium')
         else:
             resp.say(
                 "Thank you so much for taking the time to speak with us today. We really appreciate your interest. We'll review everything and get back to you soon. Have a wonderful day!",
@@ -844,7 +1128,10 @@ def terminate_interview(call_sid: str, reason_code: str, reason_message: str):
         
         interview_data = load_interview_session(call_sid)
         if interview_data:
-            interview_data['status'] = 'TERMINATED'
+            if reason_code == "call_later":
+                interview_data['status'] = 'CALLBACK_REQUESTED'
+            else:
+                interview_data['status'] = 'TERMINATED'
             interview_data['termination_reason'] = reason_code
             interview_data['end_time'] = datetime.now().isoformat()
             save_interview_session(call_sid, interview_data)
@@ -909,18 +1196,36 @@ async def make_call(request: Request):
     try:
         data = await request.json()
         phone_number = data.get("phone_number")
-        candidate_name = data.get("name", "Test Candidate")
+        candidate_name = data.get("name", "")
+        
         if not phone_number:
             return {"error": "Phone number is required"}
+        
+        # Clean phone number
+        clean_phone = phone_number.strip()
+        if not clean_phone.startswith('+'):
+            if clean_phone.startswith('91') and len(clean_phone) == 12:
+                clean_phone = f"+{clean_phone}"
+            elif len(clean_phone) == 10:
+                clean_phone = f"+91{clean_phone}"
+        
+        # Generate meaningful name if missing
+        if not candidate_name or candidate_name.strip() == "":
+            phone_suffix = clean_phone.replace('+', '')[-4:] if len(clean_phone) >= 4 else "0000"
+            candidate_name = f"Candidate_{phone_suffix}"
+        
         call = client.calls.create(
             url=f"{WEBHOOK_BASE_URL}/voice",
-            to=phone_number,
+            to=clean_phone,
             from_="+14787807480",
             record=True,
             recording_channels="dual",
             recording_status_callback=f"{WEBHOOK_BASE_URL}/recording-status"
         )
-        print(f"Call initiated with recording: {call.sid} to {phone_number}")
+        
+        print(f"Call initiated with recording: {call.sid} to {clean_phone}")
+        
+        # Store contact mapping with complete data
         contact_mappings_file = "contact_mappings.json"
         try:
             if os.path.exists(contact_mappings_file):
@@ -928,24 +1233,34 @@ async def make_call(request: Request):
                     all_mappings = json.load(f)
             else:
                 all_mappings = {}
+            
             all_mappings[call.sid] = {
                 "candidate_name": candidate_name,
-                "candidate_phone": phone_number,
+                "candidate_phone": clean_phone,
                 "is_bulk_call": False,
-                "recording_enabled": True
+                "recording_enabled": True,
+                "candidate_data": {
+                    "name": candidate_name,
+                    "phone": clean_phone
+                }
             }
+            
             with open(contact_mappings_file, 'w') as f:
                 json.dump(all_mappings, f, indent=2)
+                
+            print(f"[SINGLE CALL MAPPING] Stored data for {candidate_name} ({clean_phone})")
+            
         except Exception as mapping_error:
             print(f"Error storing contact mapping: {mapping_error}")
+        
         return {
             "success": True,
             "call_sid": call.sid,
             "status": call.status,
-            "phone_number": phone_number,
+            "phone_number": clean_phone,
             "candidate_name": candidate_name,
             "recording_enabled": True,
-            "message": f"Call initiated to {phone_number} with high-accuracy recording enabled"
+            "message": f"Call initiated to {candidate_name} at {clean_phone} with recording enabled"
         }
     except Exception as e:
         return {"error": f"Failed to make call: {str(e)}"}
@@ -1037,129 +1352,50 @@ def download_and_save_recording(call_sid: str, recording_url: str, recording_sid
                             interview_data['recording_sid'] = recording_sid
                             interview_data['recording_duration'] = duration
                             interview_data['audio_file'] = final_audio_filename
-                            interview_data['s3_key'] = s3_key if 's3_key' in locals() else None
-                            interview_data['recording_status'] = 'downloaded_successfully'
                             save_interview_session(call_sid, interview_data)
-                    except Exception:
-                        pass
-                    return
+                            print(f"[RECORDING] Updated interview data for {call_sid}")
+                    except Exception as update_error:
+                        print(f"[ERROR] Failed to update interview data: {update_error}")
+                    
+                    break
+                    
                 else:
                     if attempt < max_wait_attempts - 1:
-                        time.sleep(wait_interval)  
-            except Exception:
+                        print(f"[RECORDING] Attempt {attempt + 1} failed, waiting {wait_interval}s...")
+                        time.sleep(wait_interval)
+                    else:
+                        print(f"[ERROR] Failed to download recording after {max_wait_attempts} attempts")
+                        
+            except Exception as attempt_error:
+                print(f"[ERROR] Recording attempt {attempt + 1} failed: {attempt_error}")
                 if attempt < max_wait_attempts - 1:
                     time.sleep(wait_interval)
-                continue   
-        try:
-            interview_data = load_interview_session(call_sid)
-            if interview_data:
-                interview_data['recording_url'] = recording_url
-                interview_data['recording_sid'] = recording_sid
-                interview_data['recording_duration'] = duration
-                interview_data['recording_status'] = 'download_failed'
-                interview_data['recording_error'] = 'Failed to download after multiple attempts'
-                save_interview_session(call_sid, interview_data)
-        except Exception:
-            pass       
-    except Exception:
-        pass
+                
+    except Exception as e:
+        print(f"[ERROR] Recording download failed for {call_sid}: {e}")
+
 def start_transcription_job_indian(call_sid: str, s3_key: str, recording_sid: str):
     try:
-        job_name = f"interview-{call_sid}-{recording_sid}-{int(time.time())}"
-        job_uri = f"s3://{S3_BUCKET}/{s3_key}"
-        file_extension = os.path.splitext(s3_key)[1].lower()
-        if file_extension == '.wav':
-            media_format = 'wav'
-        elif file_extension == '.mp3':
-            media_format = 'mp3'
-        elif file_extension == '.mp4':
-            media_format = 'mp4'
-        else:
-            media_format = 'wav'   
-        transcribe_response = transcribe_client.start_transcription_job(
+        import time
+        job_name = f"transcribe_{call_sid}_{recording_sid}_{int(time.time())}"
+        
+        transcribe_client.start_transcription_job(
             TranscriptionJobName=job_name,
-            Media={'MediaFileUri': job_uri},
-            MediaFormat=media_format,
+            Media={
+                'MediaFileUri': f's3://{S3_BUCKET}/{s3_key}'
+            },
+            MediaFormat='wav',
             LanguageCode='en-IN',
-            OutputBucketName=S3_BUCKET,
-            OutputKey=f"transcripts/{call_sid}_aws_transcript.json",
             Settings={
-                'VocabularyFilterName': None,
                 'ShowSpeakerLabels': True,
-                'MaxSpeakerLabels': 2,
-                'ChannelIdentification': False,
-                'ShowAlternatives': True,
-                'MaxAlternatives': 5,
-                'VocabularyFilterMethod': 'remove'
+                'MaxSpeakerLabels': 2
             }
         )
-        executor.submit(poll_transcription_job_fast_indian, call_sid, job_name, recording_sid)
-    except Exception:
-        pass
-def poll_transcription_job_fast_indian(call_sid: str, job_name: str, recording_sid: str):
-    try:
-        max_attempts = 120
-        for attempt in range(max_attempts):
-            time.sleep(5)
-            try:
-                response = transcribe_client.get_transcription_job(TranscriptionJobName=job_name)
-                status = response['TranscriptionJob']['TranscriptionJobStatus']
-                if status == 'COMPLETED':
-                    transcript_uri = response['TranscriptionJob']['Transcript']['TranscriptFileUri']
-                    import requests
-                    transcript_response = requests.get(transcript_uri, timeout=30)
-                    if transcript_response.status_code == 200:
-                        transcript_data = transcript_response.json()
-                        full_transcript = transcript_data['results']['transcripts'][0]['transcript']
-                        transcript_filename = f"interviews/transcriptions/{call_sid}_{recording_sid}_aws_indian_transcript.txt"
-                        os.makedirs("interviews/transcriptions", exist_ok=True)                       
-                        with open(transcript_filename, 'w', encoding='utf-8') as f:
-                            f.write(f"Call ID: {call_sid}\n")
-                            f.write(f"Recording SID: {recording_sid}\n")
-                            f.write(f"AWS Transcribe Job: {job_name}\n")
-                            f.write(f"Language: Indian English (en-IN)\n")
-                            f.write(f"Completion Date: {datetime.now().isoformat()}\n")
-                            f.write(f"\n--- HIGH-ACCURACY INDIAN ENGLISH TRANSCRIPT ---\n")
-                            f.write(full_transcript)
-                            f.write(f"\n\n--- RAW JSON DATA ---\n")
-                            f.write(json.dumps(transcript_data, indent=2, ensure_ascii=False))
-                        interview_data = load_interview_session(call_sid)
-                        if interview_data:
-                            interview_data['aws_transcript'] = full_transcript
-                            interview_data['aws_transcript_file'] = transcript_filename
-                            interview_data['transcription_completed'] = datetime.now().isoformat()
-                            save_interview_session(call_sid, interview_data)                        
-                    break                   
-                elif status == 'FAILED':
-                    break                   
-            except Exception:
-                continue               
-    except Exception:
-        pass
-@app.post("/transcription/{call_sid}")
-async def handle_transcription(call_sid: str, request: Request):
-    try:
-        form_data = await request.form()
-        transcription_text = form_data.get('TranscriptionText', '')
-        transcription_status = form_data.get('TranscriptionStatus', '')
-        confidence = form_data.get('TranscriptionConfidence', '0.0')
-        print(f"[TWILIO TRANSCRIPTION] Call {call_sid}: Status={transcription_status}, Confidence={confidence}")
-        if transcription_text and transcription_status == 'completed':
-            transcript_filename = f"interviews/transcriptions/{call_sid}_twilio_backup_transcript.txt"
-            os.makedirs("interviews/transcriptions", exist_ok=True)           
-            with open(transcript_filename, 'w', encoding='utf-8') as f:
-                f.write(f"Call ID: {call_sid}\n")
-                f.write(f"Transcription Date: {datetime.now().isoformat()}\n")
-                f.write(f"Status: {transcription_status}\n")
-                f.write(f"Confidence: {confidence}\n")
-                f.write(f"Source: Twilio (Backup)\n")
-                f.write(f"\n--- TWILIO BACKUP TRANSCRIPT ---\n")
-                f.write(transcription_text)          
-            print(f"[TWILIO TRANSCRIPT SAVED] {transcript_filename}")      
-        return Response("", media_type="application/xml")      
-    except Exception as e:  # ADD THIS MISSING EXCEPT BLOCK
-        print(f"[ERROR] Transcription handler error for {call_sid}: {e}")
-        return Response("", media_type="application/xml")
+        
+        print(f"[TRANSCRIPTION] Started job: {job_name}")
+        
+    except Exception as e:
+        print(f"[ERROR] Transcription job failed: {e}")
 @app.post("/voice")
 async def handle_voice_call(request: Request):
     try:
@@ -1168,45 +1404,62 @@ async def handle_voice_call(request: Request):
         from_number = form_data.get('From', 'unknown')
         to_number = form_data.get('To', '+14787807480')       
         print(f"[VOICE] Incoming call {call_sid} from {from_number}")
-        
-        # Load contact mapping for bulk calls
         contact_info = None
+        candidate_name = None
+        candidate_phone = from_number
+        
         try:
             contact_mappings_file = "contact_mappings.json"
             if os.path.exists(contact_mappings_file):
                 with open(contact_mappings_file, 'r') as f:
                     all_mappings = json.load(f)
                 contact_info = all_mappings.get(call_sid, {})
+                if contact_info:
+                    candidate_name = contact_info.get('candidate_name')
+                    candidate_phone = contact_info.get('candidate_phone', from_number)
+                    print(f"[CONTACT INFO] Found mapping: {candidate_name} - {candidate_phone}")
         except Exception as e:
             print(f"Error loading contact mapping: {e}")
+        if not candidate_name or candidate_name == "Unknown":
+            clean_phone = from_number.replace('+', '').replace('-', '').replace(' ', '')
+            if len(clean_phone) >= 4:
+                candidate_name = f"Candidate_{clean_phone[-4:]}"
+            else:
+                candidate_name = f"Candidate_{call_sid[-8:]}"
+            print(f"[VOICE] Generated candidate name: {candidate_name}")
         
-        # Create interview session starting with question 0 (availability check)
+        if not candidate_phone or candidate_phone == "unknown":
+            candidate_phone = from_number if from_number != "unknown" else f"Phone_{call_sid[-8:]}"
         interview_data = {
             'call_sid': call_sid,
-            'phone_number': from_number,
+            'interview_id': call_sid,
+            'phone_number': candidate_phone,
+            'candidate_phone': candidate_phone,
+            'candidate_name': candidate_name,
+            'name': candidate_name,
             'twilio_number': to_number,
             'start_time': datetime.now().isoformat(),
             'status': 'IN_PROGRESS',
-            'current_question': 0,  # Changed: Start with availability check
+            'current_question': 0,
             'responses': [],
             'validation_results': {},
             'silence_prompts': 0,
             'last_activity': datetime.now().isoformat()
         }
-        
-        # Add candidate info for bulk calls
         if contact_info:
             interview_data.update({
-                'candidate_name': contact_info.get('candidate_name', 'Unknown'),
-                'candidate_phone': contact_info.get('candidate_phone', from_number),
-                'candidate_data': contact_info.get('candidate_data', ''),
                 'bulk_call_id': contact_info.get('bulk_call_id'),
-                'is_bulk_call': contact_info.get('is_bulk_call', False)
+                'is_bulk_call': contact_info.get('is_bulk_call', False),
+                'candidate_data': contact_info.get('candidate_data', ''),
+                'candidate_email': contact_info.get('candidate_email', ''),
+                'candidate_experience': contact_info.get('candidate_experience', ''),
+                'candidate_skills': contact_info.get('candidate_skills', '')
             })
         
         save_interview_session(call_sid, interview_data)
         conversation_state[call_sid] = interview_data       
-        print(f"[VOICE] Interview session created for {call_sid}")
+        print(f"[VOICE] Interview session created for {call_sid} - {candidate_name} ({candidate_phone})")
+        
         resp = VoiceResponse()
         resp.say("Hello! Thank you for your interest in our position. I'm your AI interviewer from Onelab Ventures.", 
                 voice='Polly.Aditi', rate='medium')
@@ -1226,6 +1479,7 @@ async def handle_voice_call(request: Request):
         )
         resp.redirect(f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}')
         return Response(str(resp), media_type="application/xml")
+        
     except Exception as e:
         print(f"[ERROR] Voice call handler error: {e}")
         resp = VoiceResponse()
@@ -1259,23 +1513,25 @@ async def handle_voice_no_response(call_sid: str, request: Request):
 async def upload_csv(file: UploadFile = File(...)):
     try:
         if not file.filename.endswith('.csv'):
-            return {"success": False, "error": "Please upload a CSV file"}
+            return {"success": False, "error": "Only CSV files are allowed"}
+        
+        # Read CSV content
         content = await file.read()
-        csv_string = content.decode('utf-8')
-        csv_reader = csv.DictReader(io.StringIO(csv_string))
+        csv_content = content.decode('utf-8')
+        csv_reader = csv.DictReader(io.StringIO(csv_content))
+        
         candidates = []
         for row in csv_reader:
-            name = row.get('name', '').strip()
-            phone = row.get('phone', '').strip()
-            if name and phone:
-                if not phone.startswith('+'):
-                    phone = f"+91{phone}"
-                candidates.append({
-                    "name": name,
-                    "phone": phone
-                })
-        if not candidates:
-            return {"success": False, "error": "No valid candidates found in CSV"}
+            candidate = {
+                "name": row.get("name", row.get("Name", "Unknown")),
+                "phone": row.get("phone", row.get("Phone", row.get("mobile", row.get("Mobile", "")))),
+                "email": row.get("email", row.get("Email", "")),
+                "experience": row.get("experience", row.get("Experience", "")),
+                "skills": row.get("skills", row.get("Skills", ""))
+            }
+            if candidate["phone"]:
+                candidates.append(candidate)
+        
         return {
             "success": True,
             "message": f"Successfully parsed {len(candidates)} candidates",
@@ -1292,28 +1548,50 @@ async def make_bulk_calls(request: Request):
         candidates = data if isinstance(data, list) else data.get("candidates", [])
         if not candidates:
             return {"success": False, "error": "No candidates provided"}
+        
         results = []
         bulk_call_id = f"bulk_{int(time.time())}"
+        
         for candidate in candidates:
             try:
-                name = candidate.get("name", "Unknown")
-                phone = candidate.get("phone", "")
+                name = candidate.get("name", candidate.get("Name", ""))
+                phone = candidate.get("phone", candidate.get("Phone", candidate.get("mobile", candidate.get("Mobile", ""))))
+                email = candidate.get("email", candidate.get("Email", ""))
+                experience = candidate.get("experience", candidate.get("Experience", ""))
+                skills = candidate.get("skills", candidate.get("Skills", ""))
+                
                 if not phone:
                     results.append({
-                        "name": name,
+                        "name": name or "Unknown",
                         "phone": phone,
                         "success": False,
                         "error": "No phone number provided"
                     })
                     continue
+                
+                # Clean phone number
+                clean_phone = phone.strip()
+                if not clean_phone.startswith('+'):
+                    if clean_phone.startswith('91') and len(clean_phone) == 12:
+                        clean_phone = f"+{clean_phone}"
+                    elif len(clean_phone) == 10:
+                        clean_phone = f"+91{clean_phone}"
+                
+                # Generate meaningful name if missing
+                if not name or name.strip() == "":
+                    phone_suffix = clean_phone.replace('+', '')[-4:] if len(clean_phone) >= 4 else "0000"
+                    name = f"Candidate_{phone_suffix}"
+                
                 call = client.calls.create(
                     url=f"{WEBHOOK_BASE_URL}/voice",
-                    to=phone,
+                    to=clean_phone,
                     from_="+14787807480",
                     record=True,
                     recording_channels="dual",
                     recording_status_callback=f"{WEBHOOK_BASE_URL}/recording-status"
                 )
+                
+                # Store comprehensive contact mapping
                 contact_mappings_file = "contact_mappings.json"
                 try:
                     if os.path.exists(contact_mappings_file):
@@ -1321,34 +1599,50 @@ async def make_bulk_calls(request: Request):
                             all_mappings = json.load(f)
                     else:
                         all_mappings = {}
+                    
                     all_mappings[call.sid] = {
                         "candidate_name": name,
-                        "candidate_phone": phone,
+                        "candidate_phone": clean_phone,
+                        "candidate_email": email,
+                        "candidate_experience": experience,
+                        "candidate_skills": skills,
                         "is_bulk_call": True,
                         "bulk_call_id": bulk_call_id,
                         "recording_enabled": True,
-                        "speech_only": True
+                        "candidate_data": {
+                            "name": name,
+                            "phone": clean_phone,
+                            "email": email,
+                            "experience": experience,
+                            "skills": skills
+                        }
                     }
+                    
                     with open(contact_mappings_file, 'w') as f:
                         json.dump(all_mappings, f, indent=2)
+                        
+                    print(f"[BULK MAPPING] Stored complete data for {name} ({clean_phone})")
+                    
                 except Exception as mapping_error:
                     print(f"Error storing contact mapping: {mapping_error}")
+                
                 results.append({
                     "name": name,
-                    "phone": phone,
+                    "phone": clean_phone,
                     "success": True,
                     "call_sid": call.sid,
                     "status": call.status
                 })
-                print(f"[BULK CALL] {name} ({phone}): {call.sid}")
+                print(f"[BULK CALL] {name} ({clean_phone}): {call.sid}")
                 
             except Exception as call_error:
                 results.append({
-                    "name": candidate.get("name", "Unknown"),
-                    "phone": candidate.get("phone", ""),
+                    "name": candidate.get("name", candidate.get("Name", "Unknown")),
+                    "phone": candidate.get("phone", candidate.get("Phone", "")),
                     "success": False,
                     "error": str(call_error)
                 })
+        
         successful_calls = len([r for r in results if r["success"]])
         return {
             "success": True,
@@ -1361,3 +1655,280 @@ async def make_bulk_calls(request: Request):
     except Exception as e:
         print(f"[ERROR] Bulk call failed: {e}")
         return {"success": False, "error": str(e)}
+@app.get("/callback-requests")
+async def get_callback_requests():
+    try:
+        callback_requests = []
+        pattern = "interviews/*_ONELAB_CALLBACK_REQUESTED_*.json"
+        files = glob.glob(pattern)
+        
+        for file_path in files:
+            try:
+                with open(file_path, 'r') as f:
+                    data = json.load(f)
+                    callback_requests.append({
+                        "interview_id": data.get("interview_id", "unknown"),
+                        "candidate_name": data.get("candidate_name", "Unknown"),
+                        "candidate_phone": data.get("candidate_phone", "Unknown"),
+                        "callback_response": data.get("callback_response", ""),
+                        "callback_request_time": data.get("callback_request_time", ""),
+                        "preferred_time": data.get("preferred_time", ""),
+                        "start_time": data.get("start_time", ""),
+                        "status": data.get("status", "CALLBACK_REQUESTED"),
+                        "bulk_call_id": data.get("bulk_call_id"),
+                        "is_bulk_call": data.get("is_bulk_call", False)
+                    })
+            except Exception as e:
+                print(f"Error loading callback request file {file_path}: {e}")
+                continue
+        
+        callback_requests.sort(key=lambda x: x["callback_request_time"], reverse=True)
+        return {
+            "success": True,
+            "callback_requests": callback_requests,
+            "total_count": len(callback_requests)
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "callback_requests": []
+        }
+
+@app.post("/reschedule-callback/{interview_id}")
+async def reschedule_callback(interview_id: str, request: Request):
+    try:
+        data = await request.json()
+        phone_number = data.get("phone_number")
+        candidate_name = data.get("candidate_name", "Candidate")
+        
+        if not phone_number:
+            return {"success": False, "error": "Phone number is required"}
+        
+        # Make the rescheduled call
+        call = client.calls.create(
+            url=f"{WEBHOOK_BASE_URL}/voice",
+            to=phone_number,
+            from_="+14787807480",
+            record=True,
+            recording_channels="dual",
+            recording_status_callback=f"{WEBHOOK_BASE_URL}/recording-status"
+        )
+        
+        # Store contact mapping
+        contact_mappings_file = "contact_mappings.json"
+        try:
+            if os.path.exists(contact_mappings_file):
+                with open(contact_mappings_file, 'r') as f:
+                    all_mappings = json.load(f)
+            else:
+                all_mappings = {}
+            
+            all_mappings[call.sid] = {
+                "candidate_name": candidate_name,
+                "candidate_phone": phone_number,
+                "is_bulk_call": False,
+                "recording_enabled": True,
+                "is_rescheduled_call": True,
+                "original_interview_id": interview_id
+            }
+            
+            with open(contact_mappings_file, 'w') as f:
+                json.dump(all_mappings, f, indent=2)
+        except Exception as mapping_error:
+            print(f"Error storing contact mapping: {mapping_error}")
+        
+        return {
+            "success": True,
+            "call_sid": call.sid,
+            "status": call.status,
+            "phone_number": phone_number,
+            "candidate_name": candidate_name,
+            "message": f"Rescheduled call initiated to {candidate_name} at {phone_number}"
+        }
+        
+    except Exception as e:
+        print(f"[ERROR] Reschedule callback error: {e}")
+        return {"success": False, "error": str(e)}
+@app.post("/save-bulk-results")
+async def save_bulk_results(request: Request):
+    try:
+        data = await request.json()
+        bulk_call_id = data.get("bulk_call_id")
+        results = data.get("results", [])
+        
+        if not bulk_call_id:
+            return {"success": False, "error": "Bulk call ID required"}
+        
+        # Save to persistent storage
+        bulk_results_file = f"bulk_results/{bulk_call_id}.json"
+        os.makedirs("bulk_results", exist_ok=True)
+        
+        bulk_data = {
+            "bulk_call_id": bulk_call_id,
+            "total_candidates": data.get("total_candidates", 0),
+            "successful_calls": data.get("successful_calls", 0),
+            "failed_calls": data.get("failed_calls", 0),
+            "results": results,
+            "created_at": datetime.now().isoformat(),
+            "status": "completed"
+        }
+        
+        with open(bulk_results_file, 'w') as f:
+            json.dump(bulk_data, f, indent=2)
+        
+        print(f"[BULK RESULTS] Saved {len(results)} results to {bulk_results_file}")
+        
+        return {
+            "success": True,
+            "message": "Bulk call results saved successfully",
+            "bulk_call_id": bulk_call_id
+        }
+        
+    except Exception as e:
+        print(f"[ERROR] Failed to save bulk results: {e}")
+        return {"success": False, "error": str(e)}
+
+@app.get("/bulk-results/{bulk_call_id}")
+async def get_bulk_results(bulk_call_id: str):
+    try:
+        bulk_results_file = f"bulk_results/{bulk_call_id}.json"
+        
+        if os.path.exists(bulk_results_file):
+            with open(bulk_results_file, 'r') as f:
+                data = json.load(f)
+            return {"success": True, "data": data}
+        else:
+            return {"success": False, "error": "Bulk call results not found"}
+            
+    except Exception as e:
+        print(f"[ERROR] Failed to load bulk results: {e}")
+        return {"success": False, "error": str(e)}
+
+@app.get("/bulk-results")
+async def get_all_bulk_results():
+    try:
+        bulk_results = []
+        bulk_results_folder = "bulk_results"
+        
+        if os.path.exists(bulk_results_folder):
+            json_files = glob.glob(f"{bulk_results_folder}/*.json")
+            for file_path in json_files:
+                try:
+                    with open(file_path, 'r') as f:
+                        data = json.load(f)
+                    bulk_results.append(data)
+                except Exception as e:
+                    print(f"Error reading {file_path}: {e}")
+                    continue
+        
+        # Sort by creation date
+        bulk_results.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+        
+        return {
+            "success": True,
+            "bulk_results": bulk_results,
+            "total_count": len(bulk_results)
+        }
+        
+    except Exception as e:
+        print(f"[ERROR] Failed to get bulk results: {e}")
+        return {"success": False, "error": str(e), "bulk_results": []}
+# Add this to your main.py file
+@app.get("/interview-details/{interview_id}")
+async def get_interview_details(interview_id: str):
+    """Get detailed information for a specific interview"""
+    try:
+        print(f"[INTERVIEW DETAILS] Loading details for interview: {interview_id}")
+        
+        # Search in completed interview files
+        interview_folder = "interviews"
+        if os.path.exists(interview_folder):
+            json_files = glob.glob(f"{interview_folder}/*{interview_id}*.json")
+            
+            for file_path in json_files:
+                if "session_" in file_path:
+                    continue
+                    
+                try:
+                    with open(file_path, 'r') as f:
+                        interview_data = json.load(f)
+                    
+                    # Enhanced data processing
+                    candidate_name = interview_data.get('candidate_name') or interview_data.get('name')
+                    if not candidate_name or candidate_name == 'Unknown':
+                        responses = interview_data.get('responses', [])
+                        if responses:
+                            intro_text = responses[0].get('answer', '')
+                            name_match = re.search(r'(?:i\'?m|my name is|i am|this is)\s+([a-zA-Z\s]{2,25})', intro_text, re.IGNORECASE)
+                            if name_match:
+                                candidate_name = name_match.group(1).strip().title()
+                            else:
+                                candidate_name = f"Candidate_{interview_id[-8:]}"
+                        else:
+                            candidate_name = f"Candidate_{interview_id[-8:]}"
+                    
+                    phone_number = (interview_data.get('candidate_phone') or 
+                                   interview_data.get('phone_number') or 
+                                   f"Phone_{interview_id[-8:]}")
+                    
+                    processed_data = {
+                        "interview_id": interview_id,
+                        "call_sid": interview_data.get('call_sid', interview_id),
+                        "candidate_name": candidate_name,
+                        "candidate_phone": phone_number,
+                        "phone_number": phone_number,
+                        "status": interview_data.get('status', 'COMPLETED'),
+                        "start_time": interview_data.get('start_time', ''),
+                        "end_time": interview_data.get('end_time', ''),
+                        "completion_time": interview_data.get('completion_time', ''),
+                        "responses": interview_data.get('responses', []),
+                        "validation_results": interview_data.get('validation_results', {}),
+                        "questions_answered": len(interview_data.get('responses', [])),
+                        "total_questions": interview_data.get('total_questions', 8),
+                        "completion_rate": f"{int((len(interview_data.get('responses', [])) / 8) * 100)}%",
+                        "interviewer": "AI Assistant - Onelab Ventures",
+                        "twilio_number": interview_data.get('twilio_number', '+14787807480'),
+                        "bulk_call_id": interview_data.get('bulk_call_id'),
+                        "is_bulk_call": interview_data.get('is_bulk_call', False)
+                    }
+                    
+                    print(f"[INTERVIEW DETAILS] Found interview data for {candidate_name}")
+                    return processed_data
+                    
+                except Exception as e:
+                    print(f"Error reading interview file {file_path}: {e}")
+                    continue
+        
+        # Check session files
+        session_file = f"interviews/session_{interview_id}.json"
+        if os.path.exists(session_file):
+            session_data = load_interview_session(interview_id)
+            if session_data:
+                candidate_name = session_data.get('candidate_name', f"Candidate_{interview_id[-8:]}")
+                phone_number = session_data.get('candidate_phone', f"Phone_{interview_id[-8:]}")
+                
+                return {
+                    "interview_id": interview_id,
+                    "call_sid": interview_id,
+                    "candidate_name": candidate_name,
+                    "candidate_phone": phone_number,
+                    "phone_number": phone_number,
+                    "status": session_data.get('status', 'IN_PROGRESS'),
+                    "start_time": session_data.get('start_time', ''),
+                    "end_time": session_data.get('end_time', ''),
+                    "responses": session_data.get('responses', []),
+                    "validation_results": session_data.get('validation_results', {}),
+                    "questions_answered": len(session_data.get('responses', [])),
+                    "total_questions": 8,
+                    "completion_rate": f"{int((len(session_data.get('responses', [])) / 8) * 100)}%",
+                    "interviewer": "AI Assistant - Onelab Ventures",
+                    "twilio_number": session_data.get('twilio_number', '+14787807480')
+                }
+        
+        return {"error": "Interview not found"}
+        
+    except Exception as e:
+        print(f"[ERROR] Failed to get interview details: {e}")
+        return {"error": str(e)}

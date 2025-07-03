@@ -118,25 +118,35 @@ export const InterviewResults: React.FC = () => {
   const loadInterviewData = async () => {
     try {
       setLoading(true);
-      console.log(' Loading all interview data...');
+      console.log('🔄 Loading all interview data...');
       const interviewsResponse = await callsApi.getAllInterviewsDetailed();
       const allInterviews = interviewsResponse.data.interviews || [];
       console.log('📋 Raw interviews loaded:', allInterviews.length, 'interviews');
-      console.log('📊 Sample interview data:', allInterviews[0]);
+      
       if (allInterviews.length > 0) {
+        console.log('🔍 Sample interview structure:', JSON.stringify(allInterviews[0], null, 2));
         console.log('🔍 Available fields in first interview:', Object.keys(allInterviews[0]));
+        
+        // Enhanced debug logging for CSV data
+        const sample = allInterviews[0];
+        console.log('📊 CSV/Contact Data Check:', {
+          candidate_name: sample.candidate_name,
+          candidate_phone: sample.candidate_phone,
+          candidate_email: sample.candidate_email,
+          candidate_experience: sample.candidate_experience,
+          candidate_skills: sample.candidate_skills,
+          candidate_data: sample.candidate_data,
+          is_bulk_call: sample.is_bulk_call,
+          bulk_call_id: sample.bulk_call_id
+        });
       }
+
       const validInterviews = allInterviews.filter((interview: any) => {
         const callId = interview.call_sid || interview.interview_id;
-        const candidateName = interview.candidate_name || interview.name || 'Unknown';
         const responses = interview.responses || [];
-        const status = interview.status || 'COMPLETED';
-        console.log(`Checking interview: ${callId}, name: ${candidateName}, responses: ${responses.length}, status: ${status}`);
         const hasBasicData = callId && responses.length > 0;
-        const isNotTestData = !candidateName.includes('Test') && candidateName !== 'Unknown';
         
-        console.log(`✅ Basic data: ${hasBasicData}, Not test: ${isNotTestData}`);
-        
+        console.log(`Checking interview: ${callId}, responses: ${responses.length}`);
         return hasBasicData;
       });
       
@@ -144,28 +154,140 @@ export const InterviewResults: React.FC = () => {
       
       const processedInterviews = validInterviews.map((interview: any) => {
         console.log('🔍 Processing interview:', interview.interview_id || interview.call_sid);
+        
         const callId = interview.call_sid || interview.interview_id || 'unknown';
-        const candidateName = interview.candidate_name || interview.name || 'Unknown Candidate';
-        const phoneNumber = interview.candidate_phone || interview.phone_number || 'Unknown';
+        
+        // PRIORITY 1: Get CSV data first (bulk calls)
+        let candidateName = 'Unknown';
+        let phoneNumber = 'No Phone Available';
+        let candidateEmail = '';
+        let candidateExperience = '';
+        let candidateSkills = '';
+        
+        // Check if this is from CSV/bulk call data
+        if (interview.is_bulk_call && interview.candidate_data) {
+          const csvData = interview.candidate_data;
+          candidateName = csvData.name || csvData.candidate_name || candidateName;
+          phoneNumber = csvData.phone || csvData.candidate_phone || phoneNumber;
+          candidateEmail = csvData.email || csvData.candidate_email || '';
+          candidateExperience = csvData.experience || csvData.candidate_experience || '';
+          candidateSkills = csvData.skills || csvData.candidate_skills || '';
+          console.log(`📊 CSV Data Found - Name: ${candidateName}, Phone: ${phoneNumber}`);
+        }
+        
+        // PRIORITY 2: Direct fields from interview data
+        if (candidateName === 'Unknown' || candidateName === '' || candidateName === null) {
+          candidateName = interview.candidate_name || 
+                        interview.name || 
+                        interview.caller_name || 
+                        interview.from_name ||
+                        interview.contact_name || 
+                        'Unknown';
+        }
+        
+        if (phoneNumber === 'No Phone Available' || phoneNumber === '' || phoneNumber === null) {
+          phoneNumber = interview.candidate_phone || 
+                       interview.phone_number || 
+                       interview.from_number ||
+                       interview.phone ||
+                       interview.caller_number ||
+                       interview.to ||
+                       interview.from ||
+                       'No Phone Available';
+        }
+        
+        // PRIORITY 3: Extract from CSV fields directly
+        if (!candidateEmail) {
+          candidateEmail = interview.candidate_email || '';
+        }
+        if (!candidateExperience) {
+          candidateExperience = interview.candidate_experience || '';
+        }
+        if (!candidateSkills) {
+          candidateSkills = interview.candidate_skills || '';
+        }
+        
+        // PRIORITY 4: Try to extract name from first response (last resort)
+        if (candidateName === 'Unknown' || candidateName.startsWith('Candidate_')) {
+          const responses = interview.responses || [];
+          if (responses.length > 0) {
+            const introText = responses[0].answer || responses[0].text || '';
+            const namePatterns = [
+              "(?:i'?m|my name is|i am|this is)\\s+([a-zA-Z][a-zA-Z\\s]{1,25})",
+              "^([a-zA-Z][a-zA-Z\\s]{1,25}?)(?:\\s+speaking|\\s+here|\\s*$)",
+              "myself\\s+([a-zA-Z][a-zA-Z\\s]{1,25})"
+            ];
+            
+            for (const pattern of namePatterns) {
+              const regex = new RegExp(pattern, 'i');
+              const match = introText.match(regex);
+              if (match && match[1]) {
+                const extractedName = match[1].trim();
+                if (extractedName.length > 2 && 
+                    !['from', 'calling', 'speaking', 'here', 'hello', 'hi'].some(word => 
+                      extractedName.toLowerCase().includes(word))) {
+                  candidateName = extractedName.split(' ').slice(0, 2).join(' ').replace(/[^a-zA-Z\s]/g, '');
+                  console.log(`🎯 Extracted name from intro: '${candidateName}'`);
+                  break;
+                }
+              }
+            }
+          }
+        }
+        
+        // Clean up phone number format
+        if (phoneNumber && phoneNumber !== 'No Phone Available' && phoneNumber !== 'Unknown') {
+          phoneNumber = phoneNumber.toString().replace(/[^\d+]/g, '');
+          if (!phoneNumber.startsWith('+') && phoneNumber.length === 10) {
+            phoneNumber = '+91' + phoneNumber; // Add India country code
+          } else if (!phoneNumber.startsWith('+') && phoneNumber.length === 12 && phoneNumber.startsWith('91')) {
+            phoneNumber = '+' + phoneNumber;
+          }
+        }
+        
+        // Final fallback for name
+        if (!candidateName || candidateName === 'Unknown' || candidateName === '') {
+          const phoneSuffix = phoneNumber !== 'No Phone Available' ? 
+                             phoneNumber.replace(/\D/g, '').slice(-4) : 
+                             callId.slice(-4);
+          candidateName = `Candidate_${phoneSuffix}`;
+        }
+        
+        // Get Twilio number
+        const twilioNumber = interview.twilio_number || 
+                            interview.to_number ||
+                            interview.called_number ||
+                            interview.agent_number ||
+                            '+14787807480';
+
+        console.log(`📋 Final extracted data - Name: ${candidateName}, Phone: ${phoneNumber}, Email: ${candidateEmail}`);
+
         const safeInterview = {
           call_sid: callId,
           phone_number: phoneNumber,
           candidate_name: candidateName,
           candidate_phone: phoneNumber,
-          twilio_number: interview.twilio_number || '+14787807480',
+          candidate_email: candidateEmail,
+          candidate_experience: candidateExperience,
+          candidate_skills: candidateSkills,
+          twilio_number: twilioNumber,
           start_time: interview.start_time || new Date().toISOString(),
           end_time: interview.end_time,
           status: interview.status || 'COMPLETED',
           current_question: interview.current_question || interview.questions_answered || 7,
           responses: interview.responses || [],
           validation_results: interview.validation_results || {},
+          is_bulk_call: interview.is_bulk_call || false,
+          bulk_call_id: interview.bulk_call_id || null,
           ...interview
         };
+
         const allResponseText = safeInterview.responses
           .map((r: any) => r.answer || '')
           .join(' ');
-      
+    
         console.log(`📝 Response text for ${candidateName}: "${allResponseText.substring(0, 100)}..."`);
+        
         let found_skills: string[] = [];
         let skills_percentage = 0;
         const skillsValidation = safeInterview.validation_results?.["2"];
@@ -183,6 +305,7 @@ export const InterviewResults: React.FC = () => {
                 )).length / commonRequiredSkills.length) * 100
             : found_skills.length > 0 ? 50 : 0;
         }
+        
         const validationResults = Object.values(safeInterview.validation_results || {});
         const passedValidations = validationResults.filter((v: any) => v?.passed).length;
         const totalValidations = Math.max(validationResults.length, 1);
@@ -190,13 +313,16 @@ export const InterviewResults: React.FC = () => {
         const overall_score = validationResults.length > 0 
           ? Math.round((validation_score * 0.6) + (skills_percentage * 0.4))
           : Math.round(skills_percentage);
+        
         const startTime = new Date(safeInterview.start_time);
         const endTime = safeInterview.end_time ? new Date(safeInterview.end_time) : new Date();
         const durationMinutes = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
         const interview_duration = `${Math.max(0, durationMinutes)} min`;
+        
         const totalQuestions = 7;
         const answeredQuestions = safeInterview.responses.length;
         const completion_rate = `${Math.round((answeredQuestions / totalQuestions) * 100)}%`;
+        
         let recommendation = 'NEEDS REVIEW';
         if (overall_score >= 80 && skills_percentage >= 70) {
           recommendation = 'EXCELLENT FIT';
@@ -210,16 +336,16 @@ export const InterviewResults: React.FC = () => {
       
         console.log(`📊 Processed interview for ${candidateName}:`, {
           call_sid: callId,
+          phone_number: phoneNumber,
+          candidate_email: candidateEmail,
           overall_score,
           skills_percentage,
           found_skills,
-          validation_score,
-          passedValidations,
-          totalValidations,
           recommendation,
-          responses_count: safeInterview.responses.length
+          responses_count: safeInterview.responses.length,
+          is_bulk_call: safeInterview.is_bulk_call
         });
-      
+    
         return {
           ...safeInterview,
           overall_score,
@@ -230,6 +356,7 @@ export const InterviewResults: React.FC = () => {
           completion_rate
         };
       });
+      
       const sortedInterviews = processedInterviews.sort((a, b) => {
         if (a.overall_score !== b.overall_score) {
           return b.overall_score - a.overall_score;
@@ -241,7 +368,7 @@ export const InterviewResults: React.FC = () => {
       setInterviews(sortedInterviews);
     
     } catch (error) {
-      console.error(' Error loading interview data:', error);
+      console.error('❌ Error loading interview data:', error);
       toast.error('Failed to load interview data');
       setInterviews([]);
     } finally {
