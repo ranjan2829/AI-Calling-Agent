@@ -1,5 +1,5 @@
 import React, { useState, createContext, useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import {
   Box,
@@ -23,11 +23,14 @@ import {
   History,
   Assessment,
   GroupAdd,
-  Menu
+  Menu,
+  ExitToApp
 } from '@mui/icons-material';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+// Import components
+import SignIn from './components/SignIn';
 import { CallDashboard } from './components/CallDashboard';
 import { CallHistory } from './components/CallHistory';
 import { InterviewDetails } from './components/InterviewDetails';
@@ -35,6 +38,17 @@ import { InterviewResults } from './components/InterviewResults';
 import { BulkCallDashboard } from './components/BulkCallDashboard';
 
 const drawerWidth = 280;
+
+// Protected Route Component
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    return <Navigate to="/signin" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
 // Bulk Call Context for state management across tabs
 interface BulkCallContextType {
@@ -136,8 +150,14 @@ const Sidebar: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClo
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { isCalling, bulkCallSession } = useBulkCall();
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/signin';
+  };
+
   const menuItems = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/' },
+    { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
     { text: 'Call History', icon: <History />, path: '/history' },
     { text: 'Interview Results', icon: <Assessment />, path: '/results' },
     { text: 'Bulk Calling', icon: <GroupAdd />, path: '/bulk-call', showBadge: isCalling },
@@ -147,7 +167,7 @@ const Sidebar: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClo
 
   const sidebarContent = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Logo Section with Different Background */}
+      {/* Logo Section */}
       <Box
         sx={{
           p: 3,
@@ -244,6 +264,40 @@ const Sidebar: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClo
               </ListItemButton>
             </ListItem>
           ))}
+
+          {/* Logout Button */}
+          <ListItem disablePadding sx={{ mt: 2 }}>
+            <ListItemButton
+              onClick={handleLogout}
+              sx={{
+                borderRadius: 2,
+                py: 1.5,
+                px: 2,
+                color: '#64748b',
+                '&:hover': {
+                  backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                  color: 'error.main',
+                },
+                transition: 'all 0.2s ease-in-out',
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  color: '#64748b',
+                  minWidth: 40,
+                }}
+              >
+                <ExitToApp />
+              </ListItemIcon>
+              <ListItemText
+                primary="Logout"
+                primaryTypographyProps={{
+                  fontWeight: 500,
+                  fontSize: '0.95rem',
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
         </List>
 
         {/* Bulk Call Status in Sidebar */}
@@ -407,60 +461,193 @@ function App() {
       <CssBaseline />
       <BulkCallContext.Provider value={bulkCallContextValue}>
         <Router>
-          <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-            {/* Top Progress Bar */}
-            <TopProgressBar />
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/" element={<Navigate to="/signin" replace />} />
 
-            {/* Sidebar */}
-            <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
-
-            {/* Main Content */}
-            <Box
-              sx={{
-                flexGrow: 1,
-                ml: { md: `${drawerWidth}px` },
-                backgroundColor: 'background.default',
-                minHeight: '100vh',
-                pt: isCalling ? '60px' : 0,
-              }}
-            >
-              {/* Horizontal Upper Line */}
-              <Box
-                sx={{
-                  height: '4px',
-                  background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
-                  width: '100%'
-                }}
-              />
-
-              {/* Top Bar for Mobile */}
-              <TopBar onMenuClick={handleDrawerToggle} />
-
-              {/* Page Content */}
-              <Box sx={{ p: { xs: 2, md: 4 } }}>
-                <Routes>
-                  <Route path="/" element={<CallDashboard />} />
-                  <Route path="/history" element={<CallHistory />} />
-                  <Route path="/interview/:interviewId" element={<InterviewDetails />} />
-                  <Route path="/results" element={<InterviewResults />} />
-                  <Route path="/bulk-call" element={<BulkCallDashboard />} />
-                </Routes>
-              </Box>
-            </Box>
-
-            <ToastContainer
-              position="top-right"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="light"
+            {/* Protected Routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                    <TopProgressBar />
+                    <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        ml: { md: `${drawerWidth}px` },
+                        backgroundColor: 'background.default',
+                        minHeight: '100vh',
+                        pt: isCalling ? '60px' : 0,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          height: '4px',
+                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
+                          width: '100%'
+                        }}
+                      />
+                      <TopBar onMenuClick={handleDrawerToggle} />
+                      <Box sx={{ p: { xs: 2, md: 4 } }}>
+                        <CallDashboard />
+                      </Box>
+                    </Box>
+                  </Box>
+                </ProtectedRoute>
+              }
             />
-          </Box>
+
+            <Route
+              path="/history"
+              element={
+                <ProtectedRoute>
+                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                    <TopProgressBar />
+                    <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        ml: { md: `${drawerWidth}px` },
+                        backgroundColor: 'background.default',
+                        minHeight: '100vh',
+                        pt: isCalling ? '60px' : 0,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          height: '4px',
+                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
+                          width: '100%'
+                        }}
+                      />
+                      <TopBar onMenuClick={handleDrawerToggle} />
+                      <Box sx={{ p: { xs: 2, md: 4 } }}>
+                        <CallHistory />
+                      </Box>
+                    </Box>
+                  </Box>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/interview/:interviewId"
+              element={
+                <ProtectedRoute>
+                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                    <TopProgressBar />
+                    <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        ml: { md: `${drawerWidth}px` },
+                        backgroundColor: 'background.default',
+                        minHeight: '100vh',
+                        pt: isCalling ? '60px' : 0,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          height: '4px',
+                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
+                          width: '100%'
+                        }}
+                      />
+                      <TopBar onMenuClick={handleDrawerToggle} />
+                      <Box sx={{ p: { xs: 2, md: 4 } }}>
+                        <InterviewDetails />
+                      </Box>
+                    </Box>
+                  </Box>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/results"
+              element={
+                <ProtectedRoute>
+                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                    <TopProgressBar />
+                    <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        ml: { md: `${drawerWidth}px` },
+                        backgroundColor: 'background.default',
+                        minHeight: '100vh',
+                        pt: isCalling ? '60px' : 0,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          height: '4px',
+                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
+                          width: '100%'
+                        }}
+                      />
+                      <TopBar onMenuClick={handleDrawerToggle} />
+                      <Box sx={{ p: { xs: 2, md: 4 } }}>
+                        <InterviewResults />
+                      </Box>
+                    </Box>
+                  </Box>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/bulk-call"
+              element={
+                <ProtectedRoute>
+                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                    <TopProgressBar />
+                    <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        ml: { md: `${drawerWidth}px` },
+                        backgroundColor: 'background.default',
+                        minHeight: '100vh',
+                        pt: isCalling ? '60px' : 0,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          height: '4px',
+                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
+                          width: '100%'
+                        }}
+                      />
+                      <TopBar onMenuClick={handleDrawerToggle} />
+                      <Box sx={{ p: { xs: 2, md: 4 } }}>
+                        <BulkCallDashboard />
+                      </Box>
+                    </Box>
+                  </Box>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Catch all route */}
+            <Route path="*" element={<Navigate to="/signin" replace />} />
+          </Routes>
+
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
         </Router>
       </BulkCallContext.Provider>
     </ThemeProvider>

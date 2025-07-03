@@ -1207,13 +1207,11 @@ async def handle_voice_call(request: Request):
         save_interview_session(call_sid, interview_data)
         conversation_state[call_sid] = interview_data       
         print(f"[VOICE] Interview session created for {call_sid}")
-        
-        # Start with availability check
         resp = VoiceResponse()
         resp.say("Hello! Thank you for your interest in our position. I'm your AI interviewer from Onelab Ventures.", 
                 voice='Polly.Aditi', rate='medium')
         resp.pause(length=0.5)
-        resp.say(INTERVIEW_QUESTIONS[0], voice='Polly.Aditi', rate='medium')  # Ask availability question
+        resp.say(INTERVIEW_QUESTIONS[0], voice='Polly.Aditi', rate='medium')
         
         gather = resp.gather(
             input='speech',
