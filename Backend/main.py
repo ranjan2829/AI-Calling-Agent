@@ -357,6 +357,7 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
         
         validation_result = {"step": step, "passed": True, "reason": ""}
         
+        # Only validate availability (step 0) during interview
         if step == 0:
             is_available, availability_status = check_time_availability(transcription)
             validation_result["time_available"] = is_available
@@ -385,137 +386,9 @@ def validate_response_selected_questions(call_sid: str, step: int, transcription
                     interview_data["validation_results"][str(step)] = validation_result
                     save_interview_session(call_sid, interview_data)
                     return False, "not_available", "Candidate not available for interview"
-
-        elif step == 2:
-            has_skills, found_skills, match_percentage = check_skills_match(transcription)
-            validation_result["skills_match"] = has_skills
-            validation_result["found_skills"] = found_skills
-            validation_result["match_percentage"] = match_percentage
-            basic_tech_words = ["programming", "development", "coding", "software", "technical"]
-            has_basic_tech = any(word in transcription.lower() for word in basic_tech_words)
-            
-            if not has_skills and len(found_skills) == 0 and not has_basic_tech:
-                validation_result["passed"] = False
-                validation_result["reason"] = "No relevant technical skills mentioned"
-                if "validation_results" not in interview_data:
-                    interview_data["validation_results"] = {}
-                interview_data["validation_results"][str(step)] = validation_result
-                save_interview_session(call_sid, interview_data)
-                return False, "no_skills", "No relevant skills found"
-                
-        elif step == 3:
-            notice_acceptable, notice_days, _ = check_notice_period(transcription)
-            validation_result["notice_acceptable"] = notice_acceptable
-            validation_result["notice_days"] = notice_days
-            if notice_days > 60:
-                validation_result["passed"] = False
-                validation_result["reason"] = f"Notice period too long ({notice_days} days > 60 days)"
-                if "validation_results" not in interview_data:
-                    interview_data["validation_results"] = {}
-                interview_data["validation_results"][str(step)] = validation_result
-                save_interview_session(call_sid, interview_data)
-                return False, "notice_long", f"Notice period {notice_days} days exceeds 60 days"
-                
-        elif step == 4:
-            validation_result["ctc_mentioned"] = True
-            validation_result["response"] = transcription[:100]
-            
-        elif step == 5:
-            has_api_exp, found_api_skills, _ = check_api_experience(transcription)
-            validation_result["api_experience"] = has_api_exp
-            validation_result["found_api_skills"] = found_api_skills
-            if not has_api_exp and len(found_api_skills) == 0:
-                validation_result["passed"] = False
-                validation_result["reason"] = "No API experience mentioned"
-                if "validation_results" not in interview_data:
-                    interview_data["validation_results"] = {}
-                interview_data["validation_results"][str(step)] = validation_result
-                save_interview_session(call_sid, interview_data)
-                return False, "no_api_experience", "No API experience found"
-                
-        elif step == 6:
-            has_cloud_exp, found_platforms, cloud_concepts, platforms_count = check_cloud_platforms_experience(transcription)
-            validation_result["cloud_experience"] = has_cloud_exp
-            validation_result["found_platforms"] = found_platforms
-            validation_result["cloud_concepts"] = cloud_concepts
-            
-            # More lenient validation - accept if ANY cloud experience is mentioned
-            text_lower = transcription.lower()
-            
-            # Check for explicit "yes" responses
-            explicit_yes = any(word in text_lower for word in ["yes", "yeah", "yep", "sure", "of course"])
-            
-            # Check for cloud-related terms (even with speech-to-text errors)
-            cloud_terms_mentioned = any(term in text_lower for term in [
-                "aws", "a w s", "amazon", "cloud", "azure", "gcp", "google cloud",
-                "ec2", "e c", "s3", "s 3", "docker", "kubernetes", "deployment"
-            ])
-            
-            # Check for experience indicators
-            experience_indicators = any(phrase in text_lower for phrase in [
-                "worked with", "experience", "used", "familiar", "know", "work with"
-            ])
-            
-            # Pass validation if:
-            # 1. Function detected cloud experience, OR
-            # 2. Explicit yes + any cloud terms, OR  
-            # 3. Experience indicators + cloud terms
-            should_pass = (
-                has_cloud_exp or
-                (explicit_yes and cloud_terms_mentioned) or
-                (experience_indicators and cloud_terms_mentioned) or
-                len(cloud_concepts) > 0
-            )
-            
-            if not should_pass:
-                validation_result["passed"] = False
-                validation_result["reason"] = "No cloud experience mentioned"
-                validation_result["debug_info"] = {
-                    "has_cloud_exp": has_cloud_exp,
-                    "explicit_yes": explicit_yes,
-                    "cloud_terms_mentioned": cloud_terms_mentioned,
-                    "experience_indicators": experience_indicators,
-                    "found_concepts": cloud_concepts
-                }
-                
-                if "validation_results" not in interview_data:
-                    interview_data["validation_results"] = {}
-                interview_data["validation_results"][str(step)] = validation_result
-                save_interview_session(call_sid, interview_data)
-                return False, "no_cloud_experience", "No cloud experience found"
-            else:
-                print(f"[VALIDATION] Q6 PASSED: {transcription[:100]} -> detected: {cloud_concepts}")
-                
-        elif step == 7:
-            has_deploy, has_docker, has_k8s, total_skills, has_modern = check_deployment_docker_kubernetes_experience(transcription)
-            validation_result["deployment_experience"] = has_deploy
-            validation_result["docker_experience"] = has_docker
-            validation_result["kubernetes_experience"] = has_k8s
-            validation_result["deployment_skills"] = total_skills
-            if not has_deploy and len(total_skills) == 0:
-                validation_result["passed"] = False
-                validation_result["reason"] = "No deployment experience mentioned"
-                if "validation_results" not in interview_data:
-                    interview_data["validation_results"] = {}
-                interview_data["validation_results"][str(step)] = validation_result
-                save_interview_session(call_sid, interview_data)
-                return False, "no_deployment_experience", "No deployment experience found"
-                
-        elif step == 8:
-            has_ai, has_genai, has_frameworks, has_dl, total_ai_skills = check_ai_ml_experience(transcription)
-            validation_result["ai_experience"] = has_ai
-            validation_result["genai_experience"] = has_genai
-            validation_result["framework_experience"] = has_frameworks
-            validation_result["deep_learning_experience"] = has_dl
-            validation_result["ai_skills"] = total_ai_skills
-            if not has_ai and len(total_ai_skills) == 0:
-                validation_result["passed"] = False
-                validation_result["reason"] = "No AI/ML experience mentioned"
-                if "validation_results" not in interview_data:
-                    interview_data["validation_results"] = {}
-                interview_data["validation_results"][str(step)] = validation_result
-                save_interview_session(call_sid, interview_data)
-                return False, "no_ai_experience", "No AI/ML experience found"
+        
+        # For all other steps (2,3,4,5,6,7,8), just store response without validation
+        # All technical validations will happen post-interview
         
         if "validation_results" not in interview_data:
             interview_data["validation_results"] = {}
@@ -981,7 +854,6 @@ async def get_all_interviews_detailed():
         interview_folder = "interviews"
         
         if os.path.exists(interview_folder):
-            # Include ALL interview files, including terminated ones
             json_files = glob.glob(f"{interview_folder}/*.json")
             for file_path in json_files:
                 if "session_" in file_path:
@@ -994,13 +866,9 @@ async def get_all_interviews_detailed():
                     call_sid = (interview_data.get("call_sid") or 
                                interview_data.get("interview_id") or 
                                filename.split('_')[0])
-                    
-                    # Enhanced name extraction for terminated interviews
                     candidate_name = (interview_data.get("candidate_name") or 
                                      interview_data.get("name") or 
                                      interview_data.get("contact_name"))
-                    
-                    # If no name, try extracting from responses (even for terminated interviews)
                     if (not candidate_name or 
                         candidate_name == "Unknown" or 
                         candidate_name == "Unknown Candidate" or
@@ -1008,7 +876,6 @@ async def get_all_interviews_detailed():
                         
                         responses = interview_data.get("responses", [])
                         if responses and len(responses) > 0:
-                            # Look for name in the first response (introduction)
                             intro_text = responses[0].get("answer", "")
                             name_patterns = [
                                 r"(?:my name is|i'?m|i am|this is)\s+([a-zA-Z][a-zA-Z\s]{1,25})",
@@ -1025,16 +892,12 @@ async def get_all_interviews_detailed():
                                         candidate_name = extracted_name.title()
                                         print(f"🎯 Extracted name from terminated interview: '{extracted_name.title()}'")
                                         break
-                    
-                    # Final fallback for name
                     if not candidate_name or candidate_name in ["Unknown", "Unknown Candidate"]:
                         phone_number = (interview_data.get("candidate_phone") or 
                                        interview_data.get("phone_number") or 
                                        call_sid[-8:])
                         phone_suffix = phone_number.replace('+', '')[-4:] if len(str(phone_number)) >= 4 else call_sid[-4:]
                         candidate_name = f"Candidate_{phone_suffix}"
-                    
-                    # Ensure we have phone number
                     phone_number = (interview_data.get("candidate_phone") or 
                                    interview_data.get("phone_number") or 
                                    interview_data.get("phone") or 
@@ -1124,8 +987,6 @@ async def get_all_interviews_detailed():
                 print(f"Error reading session {session_file}: {e}")
                 continue
         all_interviews.sort(key=lambda x: x.get("start_time", x.get("completion_time", "")), reverse=True)
-        
-        # Count different statuses
         completed_count = len([i for i in all_interviews if i.get("status") == "COMPLETED"])
         terminated_count = len([i for i in all_interviews if i.get("status") == "TERMINATED"])
         callback_count = len([i for i in all_interviews if i.get("status") == "CALLBACK_REQUESTED"])
@@ -1154,8 +1015,6 @@ async def get_all_interviews_detailed():
 def terminate_interview(call_sid: str, reason_code: str, reason_message: str):
     try:
         resp = VoiceResponse()
-        
-        # Different messages based on termination reason
         if reason_code == "not_available":
             resp.say(
                 "No problem at all! We completely understand. We'll reach out to you at a more convenient time. Thank you and have a great day!",
@@ -1200,7 +1059,7 @@ def handle_speech(call_sid: str, speech_result: str, confidence: float):
             print(f"[ERROR] No interview session found for {call_sid}")
             return handle_error("Interview session not found")       
         
-        current_question_index = interview_data.get('current_question', 0)  # Changed to start from 0
+        current_question_index = interview_data.get('current_question', 0)
         questions = INTERVIEW_QUESTIONS 
         
         response_data = {
@@ -1217,15 +1076,15 @@ def handle_speech(call_sid: str, speech_result: str, confidence: float):
         save_interview_session(call_sid, interview_data)      
         print(f"[PROGRESS] Call {call_sid}: Question {current_question_index}/{len(questions)} completed")
         
-        # Validate responses for specific questions (now including step 0)
-        if current_question_index in [0, 2, 3, 5, 6, 7, 8]:  # Added 0 for availability check
+        # Only validate availability (step 0) - all other validations moved to post-interview
+        if current_question_index == 0:  # Only availability check
             should_continue, reason_code, reason_message = validate_response_selected_questions(call_sid, current_question_index, speech_result)
             print(f"Validation Q{current_question_index}: {'PASS' if should_continue else 'FAIL'} - {reason_message}")          
             
             if not should_continue:
                 return terminate_interview(call_sid, reason_code, reason_message)
         
-        # Check if all questions are completed (now 0-8 = 9 questions total)
+        # Continue to next question without validation for Q2,3,5,6,7,8
         if current_question_index >= len(questions) - 1:
             print(f"[INTERVIEW COMPLETE] All {len(questions)} questions answered for {call_sid}")
             return complete_interview(call_sid)
@@ -1245,16 +1104,12 @@ async def make_call(request: Request):
         
         if not phone_number:
             return {"error": "Phone number is required"}
-        
-        # Clean phone number
         clean_phone = phone_number.strip()
         if not clean_phone.startswith('+'):
             if clean_phone.startswith('91') and len(clean_phone) == 12:
                 clean_phone = f"+{clean_phone}"
             elif len(clean_phone) == 10:
                 clean_phone = f"+91{clean_phone}"
-        
-        # Generate meaningful name if missing
         if not candidate_name or candidate_name.strip() == "":
             phone_suffix = clean_phone.replace('+', '')[-4:] if len(clean_phone) >= 4 else "0000"
             candidate_name = f"Candidate_{phone_suffix}"
@@ -1793,7 +1648,7 @@ async def save_bulk_results(request: Request):
         bulk_data = {
             "bulk_call_id": bulk_call_id,
             "total_candidates": data.get("total_candidates", 0),
-            "successful_calls": data.get("successful_calls", 0),
+            "successful_calls": data.get("successful_calls",  0),
             "failed_calls": data.get("failed_calls", 0),
             "results": results,
             "created_at": datetime.now().isoformat(),
