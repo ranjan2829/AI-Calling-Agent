@@ -1398,3 +1398,52 @@ async def start_bulk_calling(request: Request):
             "successful_calls": 0,
             "failed_calls": 0
         }
+@app.post("/make-call")
+async def make_single_call(request: Request):
+    """Make a single AI interview call"""
+    try:
+        data = await request.json()
+        phone_number = data.get("phone_number", "").strip()
+        
+        if not phone_number:
+            return {"success": False, "error": "Phone number is required"}
+        
+        # Clean phone number format
+        clean_phone = phone_number
+        if phone_number.startswith('+'):
+            clean_phone = phone_number
+        elif phone_number.startswith('91') and len(phone_number) == 12:
+            clean_phone = f"+{phone_number}"
+        elif len(phone_number) == 10:
+            clean_phone = f"+91{phone_number}"
+        
+        print(f"[SINGLE CALL] 📞 Making call to {clean_phone}")
+        
+        # Make the actual Twilio call
+        call = client.calls.create(
+            url=f"{WEBHOOK_BASE_URL}/voice",
+            to=clean_phone,
+            from_="+14787807480",
+            record=True,
+            recording_channels="dual",
+            recording_status_callback=f"{WEBHOOK_BASE_URL}/recording-status"
+        )
+        
+        print(f"[SINGLE CALL] ✅ Call created: {call.sid}")
+        
+        return {
+            "success": True,
+            "call_sid": call.sid,
+            "status": call.status,
+            "to": clean_phone,
+            "from": "+14787807480",
+            "message": f"Call initiated successfully to {clean_phone}"
+        }
+        
+    except Exception as e:
+        print(f"[SINGLE CALL ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "call_sid": None
+        }
