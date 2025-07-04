@@ -140,12 +140,85 @@ export const CallDashboard: React.FC = () => {
 
   const loadCallStats = async () => {
     try {
-      const stats = await getCallStats();
-      setCallStats(stats || { totalCalls: 0, completedCalls: 0 });
+      // 🔥 FIX: Use getAllInterviewsDetailed instead of getCallStats
+      const response = await callsApi.getAllInterviewsDetailed();
+      const allInterviews = response.data.interviews || [];
+      
+      console.log('📊 CallDashboard - Raw interviews loaded:', allInterviews.length);
+      
+      // 🔥 Include ALL interviews (same logic as CallHistory)
+      const validInterviews = allInterviews.filter(interview => {
+        const hasBasicData = interview.interview_id || interview.call_sid;
+        
+        // Don't exclude INCOMPLETE_SILENCE - keep them!
+        if (!hasBasicData) {
+          return false;
+        }
+        
+        // Keep INCOMPLETE_SILENCE interviews
+        if (interview.status === 'INCOMPLETE_SILENCE') {
+          return true;
+        }
+        
+        // Check for invalid time fields
+        const completionTime = interview.completion_time;
+        const endTime = interview.end_time;
+        const startTime = interview.start_time;
+        
+        if (completionTime === "N/A" || endTime === "N/A" || startTime === "N/A") {
+          return false;
+        }
+        
+        if ((!completionTime || !endTime || !startTime) && 
+            (!interview.responses || interview.responses.length === 0)) {
+          return false;
+        }
+        
+        return true;
+      });
+      
+      console.log('📊 CallDashboard - Valid interviews after filtering:', validInterviews.length);
+      
+      // 🔥 Calculate comprehensive stats
+      const totalCalls = validInterviews.length;
+      const completedCalls = validInterviews.filter(i => i.status === 'COMPLETED').length;
+      const incompleteSilence = validInterviews.filter(i => i.status === 'INCOMPLETE_SILENCE').length;
+      const terminated = validInterviews.filter(i => i.status === 'TERMINATED').length;
+      const inProgress = validInterviews.filter(i => i.status === 'IN_PROGRESS').length;
+      const callbackRequested = validInterviews.filter(i => i.status === 'CALLBACK_REQUESTED').length;
+      
+      console.log('📊 CallDashboard - Stats breakdown:', {
+        totalCalls,
+        completedCalls,
+        incompleteSilence,
+        terminated,
+        inProgress,
+        callbackRequested
+      });
+      
+      setCallStats({ 
+        totalCalls, 
+        completedCalls,
+        incompleteSilence,
+        terminated,
+        inProgress,
+        callbackRequested
+      });
+      
+      // Also set the interviews for display
+      setInterviews(validInterviews);
+      
     } catch (error) {
       console.error('Error loading call stats:', error);
-      // FIX: Set default values on error
-      setCallStats({ totalCalls: 0, completedCalls: 0 });
+      setCallStats({ 
+        totalCalls: 0, 
+        completedCalls: 0,
+        incompleteSilence: 0,
+        terminated: 0,
+        inProgress: 0,
+        callbackRequested: 0
+      });
+      setInterviews([]);
     }
   };
 
@@ -416,7 +489,7 @@ export const CallDashboard: React.FC = () => {
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={2}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -434,11 +507,11 @@ export const CallDashboard: React.FC = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={2}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Assessment sx={{ color: 'success.main', fontSize: 40, mr: 2 }} />
+                <CheckCircle sx={{ color: 'success.main', fontSize: 40, mr: 2 }} />
                 <Box>
                   <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'success.main' }}>
                     {callStats.completedCalls}
@@ -452,7 +525,45 @@ export const CallDashboard: React.FC = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={3}>
+        {/* 🔥 NEW: No Response Card */}
+        <Grid item xs={12} md={2}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Phone sx={{ color: 'warning.main', fontSize: 40, mr: 2 }} />
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'warning.main' }}>
+                    {callStats.incompleteSilence || 0}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    🔇 No Response
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* 🔥 NEW: Terminated Card */}
+        <Grid item xs={12} md={2}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Error sx={{ color: 'error.main', fontSize: 40, mr: 2 }} />
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'error.main' }}>
+                    {callStats.terminated || 0}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Terminated
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={2}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -470,17 +581,17 @@ export const CallDashboard: React.FC = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={2}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <CheckCircle sx={{ color: 'success.main', fontSize: 40, mr: 2 }} />
+                <PlayArrow sx={{ color: 'secondary.main', fontSize: 40, mr: 2 }} />
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'success.main' }}>
-                    {bulkCallSession?.results?.filter(r => r.status === 'SUCCESS').length || 0}
+                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
+                    {callStats.inProgress || 0}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    Bulk Success
+                    In Progress
                   </Typography>
                 </Box>
               </Box>
