@@ -896,7 +896,7 @@ async def get_all_interviews_detailed():
                         phone_number = (interview_data.get("candidate_phone") or 
                                        interview_data.get("phone_number") or 
                                        call_sid[-8:])
-                        phone_suffix = phone_number.replace('+', '')[-4:] if len(str(phone_number)) >= 4 else call_sid[-4:]
+                        phone_suffix = phone_number.replace('+', '')[-4:] if len(phone_number) >= 4 else call_sid[-4:]
                         candidate_name = f"Candidate_{phone_suffix}"
                     phone_number = (interview_data.get("candidate_phone") or 
                                    interview_data.get("phone_number") or 
@@ -1012,709 +1012,6 @@ async def get_all_interviews_detailed():
             "terminated_count": 0,
             "callback_count": 0
         }
-def terminate_interview(call_sid: str, reason_code: str, reason_message: str):
-    try:
-        resp = VoiceResponse()
-        if reason_code == "not_available":
-            resp.say(
-                "No problem at all! We completely understand. We'll reach out to you at a more convenient time. Thank you and have a great day!",
-                voice='Polly.Aditi', rate='medium')
-        elif reason_code == "call_later":
-            resp.say(
-                "Absolutely! We completely understand your schedule. We'll make sure to call you back at a more convenient time. Thank you for letting us know, and we'll be in touch soon!",
-                voice='Polly.Aditi', rate='medium')
-        else:
-            resp.say(
-                "Thank you so much for taking the time to speak with us today. We really appreciate your interest. We'll review everything and get back to you soon. Have a wonderful day!",
-                voice='Polly.Aditi', rate='medium')
-        
-        resp.hangup()
-        
-        interview_data = load_interview_session(call_sid)
-        if interview_data:
-            if reason_code == "call_later":
-                interview_data['status'] = 'CALLBACK_REQUESTED'
-            else:
-                interview_data['status'] = 'TERMINATED'
-            interview_data['termination_reason'] = reason_code
-            interview_data['end_time'] = datetime.now().isoformat()
-            save_interview_session(call_sid, interview_data)
-            save_incomplete_interview(call_sid, interview_data, reason_code)
-        
-        conversation_state.pop(call_sid, None)
-        print(f"[TERMINATED] Interview {call_sid} terminated due to: {reason_code}")
-        return str(resp)
-        
-    except Exception as e:
-        print(f"[ERROR] Error terminating interview for {call_sid}: {e}")
-        return handle_error("Thank you for your time. Have a great day!")
-def handle_speech(call_sid: str, speech_result: str, confidence: float):
-    try:
-        print(f"[SPEECH] Call {call_sid}: '{speech_result}'")       
-        if not speech_result or speech_result.strip() == "":
-            print(f"[SPEECH ERROR] Empty transcription for {call_sid}")
-            return handle_no_response(call_sid)        
-        interview_data = load_interview_session(call_sid)
-        if not interview_data:
-            print(f"[ERROR] No interview session found for {call_sid}")
-            return handle_error("Interview session not found")       
-        
-        current_question_index = interview_data.get('current_question', 0)
-        questions = INTERVIEW_QUESTIONS 
-        
-        response_data = {
-            'question': questions[current_question_index],
-            'answer': speech_result,
-            'confidence': confidence,
-            'timestamp': datetime.now().isoformat(),
-            'question_number': current_question_index
-        }     
-        interview_data['responses'].append(response_data)
-        interview_data['current_question'] = current_question_index + 1
-        interview_data['last_activity'] = datetime.now().isoformat()
-        interview_data['silence_prompts'] = 0       
-        save_interview_session(call_sid, interview_data)      
-        print(f"[PROGRESS] Call {call_sid}: Question {current_question_index}/{len(questions)} completed")
-        
-        # Only validate availability (step 0) - all other validations moved to post-interview
-        if current_question_index == 0:  # Only availability check
-            should_continue, reason_code, reason_message = validate_response_selected_questions(call_sid, current_question_index, speech_result)
-            print(f"Validation Q{current_question_index}: {'PASS' if should_continue else 'FAIL'} - {reason_message}")          
-            
-            if not should_continue:
-                return terminate_interview(call_sid, reason_code, reason_message)
-        
-        # Continue to next question without validation for Q2,3,5,6,7,8
-        if current_question_index >= len(questions) - 1:
-            print(f"[INTERVIEW COMPLETE] All {len(questions)} questions answered for {call_sid}")
-            return complete_interview(call_sid)
-        else:
-            next_question_index = current_question_index + 1
-            print(f"[NEXT] Moving to question {next_question_index} for {call_sid}")
-            return ask_next_question_immediately(call_sid, next_question_index)
-    except Exception as e:
-        print(f"[ERROR] Error handling speech for {call_sid}: {e}")
-        return handle_error("Sorry, there was an error processing your response.")
-@app.post("/make-call")
-async def make_call(request: Request):
-    try:
-        data = await request.json()
-        phone_number = data.get("phone_number")
-        candidate_name = data.get("name", "")
-        
-        if not phone_number:
-            return {"error": "Phone number is required"}
-        clean_phone = phone_number.strip()
-        if not clean_phone.startswith('+'):
-            if clean_phone.startswith('91') and len(clean_phone) == 12:
-                clean_phone = f"+{clean_phone}"
-            elif len(clean_phone) == 10:
-                clean_phone = f"+91{clean_phone}"
-        if not candidate_name or candidate_name.strip() == "":
-            phone_suffix = clean_phone.replace('+', '')[-4:] if len(clean_phone) >= 4 else "0000"
-            candidate_name = f"Candidate_{phone_suffix}"
-        
-        call = client.calls.create(
-            url=f"{WEBHOOK_BASE_URL}/voice",
-            to=clean_phone,
-            from_="+14787807480",
-            record=True,
-            recording_channels="dual",
-            recording_status_callback=f"{WEBHOOK_BASE_URL}/recording-status"
-        )
-        
-        print(f"Call initiated with recording: {call.sid} to {clean_phone}")
-        
-        # Store contact mapping with complete data
-        contact_mappings_file = "contact_mappings.json"
-        try:
-            if os.path.exists(contact_mappings_file):
-                with open(contact_mappings_file, 'r') as f:
-                    all_mappings = json.load(f)
-            else:
-                all_mappings = {}
-            
-            all_mappings[call.sid] = {
-                "candidate_name": candidate_name,
-                "candidate_phone": clean_phone,
-                "is_bulk_call": False,
-                "recording_enabled": True,
-                "candidate_data": {
-                    "name": candidate_name,
-                    "phone": clean_phone
-                }
-            }
-            
-            with open(contact_mappings_file, 'w') as f:
-                json.dump(all_mappings, f, indent=2)
-                
-            print(f"[SINGLE CALL MAPPING] Stored data for {candidate_name} ({clean_phone})")
-            
-        except Exception as mapping_error:
-            print(f"Error storing contact mapping: {mapping_error}")
-        
-        return {
-            "success": True,
-            "call_sid": call.sid,
-            "status": call.status,
-            "phone_number": clean_phone,
-            "candidate_name": candidate_name,
-            "recording_enabled": True,
-            "message": f"Call initiated to {candidate_name} at {clean_phone} with recording enabled"
-        }
-    except Exception as e:
-        return {"error": f"Failed to make call: {str(e)}"}
-@app.post("/recording-status")
-async def recording_status(request: Request):
-    try:
-        form_data = await request.form()
-        call_sid = form_data.get("CallSid")
-        recording_status = form_data.get("RecordingStatus")
-        print(f"[RECORDING STATUS] Call {call_sid}: {recording_status}")
-        return Response("", media_type="application/xml")
-    except Exception as e:
-        print(f"[ERROR] Recording status error: {e}")
-        return Response("", media_type="application/xml")
-@app.post("/recording/{call_sid}")
-async def handle_recording(call_sid: str, request: Request):
-    try:
-        form_data = await request.form()
-        recording_url = form_data.get('RecordingUrl')
-        recording_sid = form_data.get('RecordingSid')
-        recording_duration = form_data.get('RecordingDuration', '0')
-        print(f"[RECORDING] Call {call_sid}: Recording available at {recording_url}")
-        if recording_url:
-            executor.submit(download_and_save_recording, call_sid, recording_url, recording_sid, recording_duration)
-        return Response("", media_type="application/xml")
-    except Exception as e:
-        print(f"[ERROR] Recording handler error for {call_sid}: {e}")
-        return Response("", media_type="application/xml")
-def download_and_save_recording(call_sid: str, recording_url: str, recording_sid: str, duration: str):
-    try:
-        import requests
-        import time
-        max_wait_attempts = 12
-        wait_interval = 10
-        for attempt in range(max_wait_attempts):
-            try:
-                download_urls = [
-                    f"{recording_url}.wav",
-                    f"{recording_url}.mp3",
-                    recording_url,
-                    f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Recordings/{recording_sid}.wav",
-                    f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Recordings/{recording_sid}.mp3"
-                ]
-                recording_downloaded = False
-                final_audio_filename = None
-                for url_attempt, download_url in enumerate(download_urls):
-                    try:
-                        response = requests.get(
-                            download_url, 
-                            auth=(account_sid, auth_token),
-                            timeout=30,
-                            headers={
-                                'User-Agent': 'AI-Interviewer/1.0',
-                                'Accept': 'audio/*'
-                            }
-                        )
-                        if response.status_code == 200 and len(response.content) > 1000:
-                            content_type = response.headers.get('content-type', '').lower()
-                            if 'wav' in content_type or download_url.endswith('.wav'):
-                                extension = '.wav'
-                            elif 'mp3' in content_type or download_url.endswith('.mp3'):
-                                extension = '.mp3'
-                            else:
-                                extension = '.wav'
-                            audio_filename = f"interviews/audio_recordings/{call_sid}_{recording_sid}{extension}"
-                            os.makedirs("interviews/audio_recordings", exist_ok=True)
-                            with open(audio_filename, 'wb') as f:
-                                f.write(response.content)
-                            final_audio_filename = audio_filename
-                            recording_downloaded = True
-                            break
-                        elif response.status_code == 404:
-                            continue
-                        else:
-                            continue
-                    except requests.RequestException:
-                        continue
-                if recording_downloaded and final_audio_filename:
-                    try:
-                        s3_key = f"recordings/{call_sid}_{recording_sid}{os.path.splitext(final_audio_filename)[1]}"
-                        s3_client.upload_file(final_audio_filename, S3_BUCKET, s3_key)
-                        start_transcription_job_indian(call_sid, s3_key, recording_sid)
-                    except Exception:
-                        pass
-                    try:
-                        interview_data = load_interview_session(call_sid)
-                        if interview_data:
-                            interview_data['recording_url'] = recording_url
-                            interview_data['recording_sid'] = recording_sid
-                            interview_data['recording_duration'] = duration
-                            interview_data['audio_file'] = final_audio_filename
-                            save_interview_session(call_sid, interview_data)
-                            print(f"[RECORDING] Updated interview data for {call_sid}")
-                    except Exception as update_error:
-                        print(f"[ERROR] Failed to update interview data: {update_error}")
-                    
-                    break
-                    
-                else:
-                    if attempt < max_wait_attempts - 1:
-                        print(f"[RECORDING] Attempt {attempt + 1} failed, waiting {wait_interval}s...")
-                        time.sleep(wait_interval)
-                    else:
-                        print(f"[ERROR] Failed to download recording after {max_wait_attempts} attempts")
-                        
-            except Exception as attempt_error:
-                print(f"[ERROR] Recording attempt {attempt + 1} failed: {attempt_error}")
-                if attempt < max_wait_attempts - 1:
-                    time.sleep(wait_interval)
-                
-    except Exception as e:
-        print(f"[ERROR] Recording download failed for {call_sid}: {e}")
-
-def start_transcription_job_indian(call_sid: str, s3_key: str, recording_sid: str):
-    try:
-        import time
-        job_name = f"transcribe_{call_sid}_{recording_sid}_{int(time.time())}"
-        
-        transcribe_client.start_transcription_job(
-            TranscriptionJobName=job_name,
-            Media={
-                'MediaFileUri': f's3://{S3_BUCKET}/{s3_key}'
-            },
-            MediaFormat='wav',
-            LanguageCode='en-IN',
-            Settings={
-                'ShowSpeakerLabels': True,
-                'MaxSpeakerLabels': 2
-            }
-        )
-        
-        print(f"[TRANSCRIPTION] Started job: {job_name}")
-        
-    except Exception as e:
-        print(f"[ERROR] Transcription job failed: {e}")
-@app.post("/voice")
-async def handle_voice_call(request: Request):
-    try:
-        form_data = await request.form()
-        call_sid = form_data.get('CallSid')
-        from_number = form_data.get('From', 'unknown')
-        to_number = form_data.get('To', '+14787807480')       
-        print(f"[VOICE] Incoming call {call_sid} from {from_number}")
-        contact_info = None
-        candidate_name = None
-        candidate_phone = from_number
-        
-        try:
-            contact_mappings_file = "contact_mappings.json"
-            if os.path.exists(contact_mappings_file):
-                with open(contact_mappings_file, 'r') as f:
-                    all_mappings = json.load(f)
-                contact_info = all_mappings.get(call_sid, {})
-                if contact_info:
-                    candidate_name = contact_info.get('candidate_name')
-                    candidate_phone = contact_info.get('candidate_phone', from_number)
-                    print(f"[CONTACT INFO] Found mapping: {candidate_name} - {candidate_phone}")
-        except Exception as e:
-            print(f"Error loading contact mapping: {e}")
-        if not candidate_name or candidate_name == "Unknown":
-            clean_phone = from_number.replace('+', '').replace('-', '').replace(' ', '')
-            if len(clean_phone) >= 4:
-                candidate_name = f"Candidate_{clean_phone[-4:]}"
-            else:
-                candidate_name = f"Candidate_{call_sid[-8:]}"
-            print(f"[VOICE] Generated candidate name: {candidate_name}")
-        
-        if not candidate_phone or candidate_phone == "unknown":
-            candidate_phone = from_number if from_number != "unknown" else f"Phone_{call_sid[-8:]}"
-        interview_data = {
-            'call_sid': call_sid,
-            'interview_id': call_sid,
-            'phone_number': candidate_phone,
-            'candidate_phone': candidate_phone,
-            'candidate_name': candidate_name,
-            'name': candidate_name,
-            'twilio_number': to_number,
-            'start_time': datetime.now().isoformat(),
-            'status': 'IN_PROGRESS',
-            'current_question': 0,
-            'responses': [],
-            'validation_results': {},
-            'silence_prompts': 0,
-            'last_activity': datetime.now().isoformat()
-        }
-        if contact_info:
-            interview_data.update({
-                'bulk_call_id': contact_info.get('bulk_call_id'),
-                'is_bulk_call': contact_info.get('is_bulk_call', False),
-                'candidate_data': contact_info.get('candidate_data', ''),
-                'candidate_email': contact_info.get('candidate_email', ''),
-                'candidate_experience': contact_info.get('candidate_experience', ''),
-                'candidate_skills': contact_info.get('candidate_skills', '')
-            })
-        
-        save_interview_session(call_sid, interview_data)
-        conversation_state[call_sid] = interview_data       
-        print(f"[VOICE] Interview session created for {call_sid} - {candidate_name} ({candidate_phone})")
-        
-        resp = VoiceResponse()
-        resp.say("Hello! Thank you for your interest in our position. I'm your AI interviewer from Onelab Ventures.", 
-                voice='Polly.Aditi', rate='medium')
-        resp.pause(length=0.5)
-        resp.say(INTERVIEW_QUESTIONS[0], voice='Polly.Aditi', rate='medium')
-        
-        gather = resp.gather(
-            input='speech',
-            action=f'{WEBHOOK_BASE_URL}/voice/speech/{call_sid}',
-            method='POST',
-            speechTimeout='auto',
-            timeout='6',
-            language='en-IN',
-            enhanced=True,
-            profanityFilter=False,
-            speechModel='experimental_conversations'
-        )
-        resp.redirect(f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}')
-        return Response(str(resp), media_type="application/xml")
-        
-    except Exception as e:
-        print(f"[ERROR] Voice call handler error: {e}")
-        resp = VoiceResponse()
-        resp.say("Sorry, there was an error. Please try again later.", voice='Polly.Aditi')
-        resp.hangup()
-        return Response(str(resp), media_type="application/xml")
-@app.post("/voice/speech/{call_sid}")
-async def handle_voice_speech(call_sid: str, request: Request):
-    try:
-        form_data = await request.form()
-        speech_result = form_data.get('SpeechResult', '')
-        confidence = float(form_data.get('Confidence', '0.0'))
-        print(f"[SPEECH] Call {call_sid}: '{speech_result}' (confidence: {confidence})")
-        response_xml = handle_speech(call_sid, speech_result, confidence)
-        return Response(response_xml, media_type="application/xml")
-    except Exception as e:
-        print(f"[ERROR] Speech handler error for {call_sid}: {e}")
-        return Response(handle_error("Sorry, there was an error processing your response."), 
-                       media_type="application/xml")
-@app.post("/voice/no-response/{call_sid}")
-async def handle_voice_no_response(call_sid: str, request: Request):
-    try:
-        print(f"[NO RESPONSE] Call {call_sid}")
-        response_xml = handle_no_response(call_sid)
-        return Response(response_xml, media_type="application/xml")
-    except Exception as e:
-        print(f"[ERROR] No response handler error for {call_sid}: {e}")
-        return Response(handle_error("Sorry, there was an error."), 
-                       media_type="application/xml")
-@app.post("/upload-csv")
-async def upload_csv(file: UploadFile = File(...)):
-    try:
-        if not file.filename.endswith('.csv'):
-            return {"success": False, "error": "Only CSV files are allowed"}
-        
-        # Read CSV content
-        content = await file.read()
-        csv_data = content.decode('utf-8')
-        
-        # Parse CSV
-        csv_reader = csv.DictReader(io.StringIO(csv_data))
-        candidates = list(csv_reader)
-        
-        if not candidates:
-            return {"success": False, "error": "No candidates found in CSV"}
-        
-        # Generate bulk call ID
-        bulk_call_id = f"bulk_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        results = []
-        
-        # Process each candidate
-        for candidate in candidates:
-            try:
-                name = candidate.get("name", candidate.get("Name", ""))
-                phone = candidate.get("phone", candidate.get("Phone", candidate.get("mobile", candidate.get("Mobile", ""))))
-                email = candidate.get("email", candidate.get("Email", ""))
-                experience = candidate.get("experience", candidate.get("Experience", ""))
-                skills = candidate.get("skills", candidate.get("Skills", ""))
-                
-                if not phone:
-                    results.append({
-                        "name": name or "Unknown",
-                        "phone": phone,
-                        "success": False,
-                        "error": "No phone number provided"
-                    })
-                    continue
-                
-                
-                # Clean phone number
-                clean_phone = phone.strip()
-                if not clean_phone.startswith('+'):
-                    if clean_phone.startswith('91') and len(clean_phone) == 12:
-                        clean_phone = f"+{clean_phone}"
-                    elif len(clean_phone) == 10:
-                        clean_phone = f"+91{clean_phone}"
-                
-                # Generate meaningful name if missing
-                if not name or name.strip() == "":
-                    phone_suffix = clean_phone.replace('+', '')[-4:] if len(clean_phone) >= 4 else "0000"
-                    name = f"Candidate_{phone_suffix}"
-                
-                call = client.calls.create(
-                    url=f"{WEBHOOK_BASE_URL}/voice",
-                    to=clean_phone,
-                    from_="+14787807480",
-                    record=True,
-                    recording_channels="dual",
-                    recording_status_callback=f"{WEBHOOK_BASE_URL}/recording-status"
-                )
-                
-                # Store comprehensive contact mapping
-                contact_mappings_file = "contact_mappings.json"
-                try:
-                    if os.path.exists(contact_mappings_file):
-                        with open(contact_mappings_file, 'r') as f:
-                            all_mappings = json.load(f)
-                    else:
-                        all_mappings = {}
-                    
-                    all_mappings[call.sid] = {
-                        "candidate_name": name,
-                        "candidate_phone": clean_phone,
-                        "candidate_email": email,
-                        "candidate_experience": experience,
-                        "candidate_skills": skills,
-                        "is_bulk_call": True,
-                        "bulk_call_id": bulk_call_id,
-                        "recording_enabled": True,
-                        "candidate_data": {
-                            "name": name,
-                            "phone": clean_phone,
-                            "email": email,
-                            "experience": experience,
-                            "skills": skills
-                        }
-                    }
-                    
-                    with open(contact_mappings_file, 'w') as f:
-                        json.dump(all_mappings, f, indent=2)
-                        
-                    print(f"[BULK MAPPING] Stored complete data for {name} ({clean_phone})")
-                    
-                except Exception as mapping_error:
-                    print(f"Error storing contact mapping: {mapping_error}")
-                
-                results.append({
-                    "name": name,
-                    "phone": clean_phone,
-                    "success": True,
-                    "call_sid": call.sid,
-                    "status": call.status
-                })
-                print(f"[BULK CALL] {name} ({clean_phone}): {call.sid}")
-                
-            except Exception as call_error:
-                results.append({
-                    "name": candidate.get("name", candidate.get("Name", "Unknown")),
-                    "phone": candidate.get("phone", candidate.get("Phone", "")),
-                    "success": False,
-                    "error": str(call_error)
-                })
-        
-        successful_calls = len([r for r in results if r["success"]])
-        return {
-            "success": True,
-            "bulk_call_id": bulk_call_id,
-            "total_candidates": len(candidates),
-            "successful_calls": successful_calls,
-            "failed_calls": len(candidates) - successful_calls,
-            "results": results
-        }   
-    except Exception as e:
-        print(f"[ERROR] Bulk call failed: {e}")
-        return {"success": False, "error": str(e)}
-@app.get("/callback-requests")
-async def get_callback_requests():
-    try:
-        callback_requests = []
-        pattern = "interviews/*_ONELAB_CALLBACK_REQUESTED_*.json"
-        files = glob.glob(pattern)
-        
-        for file_path in files:
-            try:
-                with open(file_path, 'r') as f:
-                    data = json.load(f)
-                    callback_requests.append({
-                        "interview_id": data.get("interview_id", "unknown"),
-                        "candidate_name": data.get("candidate_name", "Unknown"),
-                        "candidate_phone": data.get("candidate_phone", "Unknown"),
-                        "callback_response": data.get("callback_response", ""),
-                        "callback_request_time": data.get("callback_request_time", ""),
-                        "preferred_time": data.get("preferred_time", ""),
-                        "start_time": data.get("start_time", ""),
-                        "status": data.get("status", "CALLBACK_REQUESTED"),
-                        "bulk_call_id": data.get("bulk_call_id"),
-                        "is_bulk_call": data.get("is_bulk_call", False)
-                    })
-            except Exception as e:
-                print(f"Error loading callback request file {file_path}: {e}")
-                continue
-        
-        callback_requests.sort(key=lambda x: x["callback_request_time"], reverse=True)
-        return {
-            "success": True,
-            "callback_requests": callback_requests,
-            "total_count": len(callback_requests)
-        }
-        
-    except Exception as e:
-        return {
-            "success": False,
-            "error": str(e),
-            "callback_requests": []
-        }
-
-@app.post("/reschedule-callback/{interview_id}")
-async def reschedule_callback(interview_id: str, request: Request):
-    try:
-        data = await request.json()
-        phone_number = data.get("phone_number")
-        candidate_name = data.get("candidate_name", "Candidate")
-        
-        if not phone_number:
-            return {"success": False, "error": "Phone number is required"}
-        
-        # Make the rescheduled call
-        call = client.calls.create(
-            url=f"{WEBHOOK_BASE_URL}/voice",
-            to=phone_number,
-            from_="+14787807480",
-            record=True,
-            recording_channels="dual",
-            recording_status_callback=f"{WEBHOOK_BASE_URL}/recording-status"
-        )
-        
-        # Store contact mapping
-        contact_mappings_file = "contact_mappings.json"
-        try:
-            if os.path.exists(contact_mappings_file):
-                with open(contact_mappings_file, 'r') as f:
-                    all_mappings = json.load(f)
-            else:
-                all_mappings = {}
-            
-            all_mappings[call.sid] = {
-                "candidate_name": candidate_name,
-                "candidate_phone": phone_number,
-                "is_bulk_call": False,
-                "recording_enabled": True,
-                "is_rescheduled_call": True,
-                "original_interview_id": interview_id
-            }
-            
-            with open(contact_mappings_file, 'w') as f:
-                json.dump(all_mappings, f, indent=2)
-        except Exception as mapping_error:
-            print(f"Error storing contact mapping: {mapping_error}")
-        
-        return {
-            "success": True,
-            "call_sid": call.sid,
-            "status": call.status,
-            "phone_number": phone_number,
-            "candidate_name": candidate_name,
-            "message": f"Rescheduled call initiated to {candidate_name} at {phone_number}"
-        }
-        
-    except Exception as e:
-        print(f"[ERROR] Reschedule callback error: {e}")
-        return {"success": False, "error": str(e)}
-@app.post("/save-bulk-results")
-async def save_bulk_results(request: Request):
-    try:
-        data = await request.json()
-        bulk_call_id = data.get("bulk_call_id")
-        results = data.get("results", [])
-        
-        if not bulk_call_id:
-            return {"success": False, "error": "Bulk call ID required"}
-        
-        # Save to persistent storage
-        bulk_results_file = f"bulk_results/{bulk_call_id}.json"
-        os.makedirs("bulk_results", exist_ok=True)
-        
-        bulk_data = {
-            "bulk_call_id": bulk_call_id,
-            "total_candidates": data.get("total_candidates", 0),
-            "successful_calls": data.get("successful_calls",  0),
-            "failed_calls": data.get("failed_calls", 0),
-            "results": results,
-            "created_at": datetime.now().isoformat(),
-            "status": "completed"
-        }
-        
-        with open(bulk_results_file, 'w') as f:
-            json.dump(bulk_data, f, indent=2)
-        
-        print(f"[BULK RESULTS] Saved {len(results)} results to {bulk_results_file}")
-        
-        return {
-            "success": True,
-            "message": "Bulk call results saved successfully",
-            "bulk_call_id": bulk_call_id
-        }
-        
-    except Exception as e:
-        print(f"[ERROR] Failed to save bulk results: {e}")
-        return {"success": False, "error": str(e)}
-
-@app.get("/bulk-results/{bulk_call_id}")
-async def get_bulk_results(bulk_call_id: str):
-    try:
-        bulk_results_file = f"bulk_results/{bulk_call_id}.json"
-        
-        if os.path.exists(bulk_results_file):
-            with open(bulk_results_file, 'r') as f:
-                data = json.load(f)
-            return {"success": True, "data": data}
-        else:
-            return {"success": False, "error": "Bulk call results not found"}
-            
-    except Exception as e:
-        print(f"[ERROR] Failed to load bulk results: {e}")
-        return {"success": False, "error": str(e)}
-
-@app.get("/bulk-results")
-async def get_all_bulk_results():
-    try:
-        bulk_results = []
-        bulk_results_folder = "bulk_results"
-        
-        if os.path.exists(bulk_results_folder):
-            json_files = glob.glob(f"{bulk_results_folder}/*.json")
-            for file_path in json_files:
-                try:
-                    with open(file_path, 'r') as f:
-                        data = json.load(f)
-                    bulk_results.append(data)
-                except Exception as e:
-                    print(f"Error reading {file_path}: {e}")
-                    continue
-        
-        # Sort by creation date
-        bulk_results.sort(key=lambda x: x.get("created_at", ""), reverse=True)
-        
-        return {
-            "success": True,
-            "bulk_results": bulk_results,
-            "total_count": len(bulk_results)
-        }
-        
-    except Exception as e:
-        print(f"[ERROR] Failed to get bulk results: {e}")
-        return {"success": False, "error": str(e), "bulk_results": []}
 # Add this to your main.py file
 @app.get("/interview-details/{interview_id}")
 async def get_interview_details(interview_id: str):
@@ -1812,3 +1109,292 @@ async def get_interview_details(interview_id: str):
     except Exception as e:
         print(f"[ERROR] Failed to get interview details: {e}")
         return {"error": str(e)}
+@app.post("/upload-csv")
+async def upload_csv(file: UploadFile = File(...)):
+    """
+    ONLY PROCESSES CSV FILE - NO CALLS ARE MADE HERE!
+    This endpoint only parses the CSV and returns contact data.
+    """
+    try:
+        print("=" * 50)
+        print("[CSV UPLOAD] 📄 PROCESSING CSV FILE ONLY - NO CALLS!")
+        print("=" * 50)
+        
+        if not file.filename.endswith('.csv'):
+            print("[CSV UPLOAD] ❌ Invalid file format")
+            return {
+                "success": False, 
+                "error": "Only CSV files are allowed",
+                "contacts": [],
+                "total_contacts": 0,
+                "message": "Invalid file format"
+            }
+        
+        # Read CSV content
+        content = await file.read()
+        csv_data = content.decode('utf-8')
+        
+        # Parse CSV
+        csv_reader = csv.DictReader(io.StringIO(csv_data))
+        candidates = list(csv_reader)
+        
+        if not candidates:
+            print("[CSV UPLOAD] ❌ Empty CSV file")
+            return {
+                "success": False, 
+                "error": "No candidates found in CSV",
+                "contacts": [],
+                "total_contacts": 0,
+                "message": "Empty CSV file"
+            }
+        
+        # ⚠️ CRITICAL: ONLY PROCESS CSV DATA - ABSOLUTELY NO CALLING!
+        processed_contacts = []
+        for candidate in candidates:
+            name = candidate.get("name", candidate.get("Name", "")).strip()
+            phone = candidate.get("phone", candidate.get("Phone", candidate.get("mobile", candidate.get("Mobile", "")))).strip()
+            email = candidate.get("email", candidate.get("Email", "")).strip()
+            experience = candidate.get("experience", candidate.get("Experience", "")).strip()
+            skills = candidate.get("skills", candidate.get("Skills", "")).strip()
+            
+            # Clean phone number format
+            clean_phone = phone
+            if phone:
+                if phone.startswith('+'):
+                    clean_phone = phone[1:]
+                
+                # Handle double 91 prefix: +91918619570449 -> +918619570449
+                if clean_phone.startswith('919') and len(clean_phone) == 13:
+                    clean_phone = clean_phone[2:]  # Remove first "91"
+                    clean_phone = f"+91{clean_phone}"
+                elif clean_phone.startswith('91') and len(clean_phone) == 12:
+                    clean_phone = f"+{clean_phone}"
+                elif len(clean_phone) == 10:
+                    clean_phone = f"+91{clean_phone}"
+            
+            if not name and clean_phone:
+                phone_suffix = clean_phone.replace('+', '')[-4:] if len(clean_phone) >= 4 else "0000"
+                name = f"Candidate_{phone_suffix}"
+            
+            processed_contacts.append({
+                "name": name or "Unknown",
+                "phone": clean_phone or "",
+                "email": email,
+                "experience": experience,
+                "skills": skills
+            })
+        
+        print(f"[CSV UPLOAD] ✅ Successfully processed {len(processed_contacts)} contacts")
+        print(f"[CSV UPLOAD] 📋 Data parsed and ready for frontend display")
+        print(f"[CSV UPLOAD] ⚠️  NO TWILIO CALLS MADE - This is CSV processing only!")
+        print("=" * 50)
+        
+        # ✅ RETURN ONLY CONTACT DATA - NO BULK CALL FIELDS!
+        return {
+            "success": True,
+            "contacts": processed_contacts,
+            "total_contacts": len(processed_contacts),
+            "message": f"✅ {len(processed_contacts)} contacts loaded successfully! Click 'Start AI Bulk Interviews' to begin calling."
+        }
+        
+    except Exception as e:
+        print(f"[CSV UPLOAD] ❌ Error: {e}")
+        return {
+            "success": False, 
+            "error": str(e),
+            "contacts": [],
+            "total_contacts": 0,
+            "message": "Failed to process CSV file"
+        }
+
+@app.post("/bulk-call")
+async def start_bulk_calling(request: Request):
+    """
+    THIS IS WHERE ACTUAL TWILIO CALLS ARE MADE!
+    Only triggered when user clicks 'Start AI Bulk Interviews' button.
+    """
+    try:
+        print("=" * 60)
+        print("[BULK CALL] 🚀 STARTING ACTUAL TWILIO CALLS NOW!")
+        print("=" * 60)
+        
+        contacts = await request.json()
+        
+        if not contacts or len(contacts) == 0:
+            print("[BULK CALL] ❌ No contacts provided")
+            return {"success": False, "error": "No contacts provided", "results": []}
+        
+        # Generate bulk call ID
+        bulk_call_id = f"bulk_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        results = []
+        successful_calls = 0
+        failed_calls = 0
+        
+        print(f"[BULK CALL] 📞 About to make {len(contacts)} actual Twilio calls...")
+        print(f"[BULK CALL] 🆔 Bulk Call ID: {bulk_call_id}")
+        
+        # Process each contact and MAKE ACTUAL CALLS
+        for index, contact in enumerate(contacts):
+            try:
+                name = contact.get("name", "").strip()
+                phone = contact.get("phone", "").strip()
+                email = contact.get("email", "").strip()
+                experience = contact.get("experience", "").strip()
+                skills = contact.get("skills", "").strip()
+                
+                print(f"[BULK CALL] 📞 Processing {index + 1}/{len(contacts)}: {name} ({phone})")
+                
+                if not phone:
+                    print(f"[BULK CALL] ⚠️  Skipping {name} - No phone number")
+                    failed_calls += 1
+                    results.append({
+                        "name": name or "Unknown",
+                        "phone": "N/A",
+                        "success": False,
+                        "error": "No phone number",
+                        "call_sid": None,
+                        "status": "failed"
+                    })
+                    continue
+                
+                # Generate meaningful name if missing
+                if not name:
+                    phone_suffix = phone.replace('+', '')[-4:] if len(phone) >= 4 else "0000"
+                    name = f"Candidate_{phone_suffix}"
+                
+                # 🔥 MAKE ACTUAL TWILIO CALL HERE 🔥
+                try:
+                    print(f"[TWILIO] 📞 Creating actual call to {phone}...")
+                    
+                    call = client.calls.create(
+                        url=f"{WEBHOOK_BASE_URL}/voice",
+                        to=phone,
+                        from_="+14787807480",
+                        record=True,
+                        recording_channels="dual",
+                        recording_status_callback=f"{WEBHOOK_BASE_URL}/recording-status"
+                    )
+                    
+                    print(f"[TWILIO] ✅ Call created successfully: {call.sid}")
+                    
+                    # Store contact mapping for the interview
+                    contact_mappings_file = "contact_mappings.json"
+                    try:
+                        if os.path.exists(contact_mappings_file):
+                            with open(contact_mappings_file, 'r') as f:
+                                all_mappings = json.load(f)
+                        else:
+                            all_mappings = {}
+                        
+                        all_mappings[call.sid] = {
+                            "candidate_name": name,
+                            "candidate_phone": phone,
+                            "candidate_email": email,
+                            "candidate_experience": experience,
+                            "candidate_skills": skills,
+                            "is_bulk_call": True,
+                            "bulk_call_id": bulk_call_id,
+                            "recording_enabled": True,
+                            "candidate_data": {
+                                "name": name,
+                                "phone": phone,
+                                "email": email,
+                                "experience": experience,
+                                "skills": skills
+                            }
+                        }
+                        
+                        with open(contact_mappings_file, 'w') as f:
+                            json.dump(all_mappings, f, indent=2)
+                            
+                        print(f"[BULK MAPPING] 💾 Stored data for {name} ({phone})")
+                        
+                    except Exception as mapping_error:
+                        print(f"[MAPPING ERROR] ❌ {mapping_error}")
+                    
+                    successful_calls += 1
+                    results.append({
+                        "name": name,
+                        "phone": phone,
+                        "success": True,
+                        "call_sid": call.sid,
+                        "status": call.status,
+                        "error": None
+                    })
+                    
+                    print(f"[BULK SUCCESS] ✅ {name} ({phone}): Call SID {call.sid}")
+                    
+                    # Small delay between calls to avoid rate limiting
+                    import time
+                    time.sleep(1)
+                    
+                except Exception as call_error:
+                    print(f"[TWILIO ERROR] ❌ Failed to call {name} ({phone}): {call_error}")
+                    failed_calls += 1
+                    results.append({
+                        "name": name,
+                        "phone": phone,
+                        "success": False,
+                        "error": str(call_error),
+                        "call_sid": None,
+                        "status": "failed"
+                    })
+                    
+            except Exception as contact_error:
+                print(f"[CONTACT ERROR] ❌ Error processing contact: {contact_error}")
+                failed_calls += 1
+                results.append({
+                    "name": contact.get("name", "Unknown"),
+                    "phone": contact.get("phone", "N/A"),
+                    "success": False,
+                    "error": str(contact_error),
+                    "call_sid": None,
+                    "status": "failed"
+                })
+        
+        # Save bulk call results
+        bulk_data = {
+            "bulk_call_id": bulk_call_id,
+            "total_candidates": len(contacts),
+            "successful_calls": successful_calls,
+            "failed_calls": failed_calls,
+            "results": results,
+            "created_at": datetime.now().isoformat(),
+            "status": "COMPLETED"
+        }
+        
+        # Save to persistent storage
+        try:
+            os.makedirs("bulk_results", exist_ok=True)
+            bulk_results_file = f"bulk_results/{bulk_call_id}.json"
+            with open(bulk_results_file, 'w') as f:
+                json.dump(bulk_data, f, indent=2)
+            print(f"[BULK RESULTS] 💾 Saved results to {bulk_results_file}")
+        except Exception as save_error:
+            print(f"[SAVE ERROR] ❌ Failed to save bulk results: {save_error}")
+        
+        print("=" * 60)
+        print(f"[BULK COMPLETED] ✅ Bulk calling session finished!")
+        print(f"[BULK STATS] 📊 Total: {len(contacts)} | Success: {successful_calls} | Failed: {failed_calls}")
+        print("=" * 60)
+        
+        return {
+            "success": True,
+            "bulk_call_id": bulk_call_id,
+            "total_candidates": len(contacts),
+            "successful_calls": successful_calls,
+            "failed_calls": failed_calls,
+            "results": results
+        }
+        
+    except Exception as e:
+        print(f"[BULK ERROR] ❌ Bulk calling failed: {e}")
+        return {
+            "success": False, 
+            "error": str(e), 
+            "results": [],
+            "bulk_call_id": None,
+            "total_candidates": 0,
+            "successful_calls": 0,
+            "failed_calls": 0
+        }

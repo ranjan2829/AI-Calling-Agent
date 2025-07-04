@@ -104,6 +104,7 @@ export const CallDashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [savingJD, setSavingJD] = useState(false);
   const [jdSaved, setJdSaved] = useState(false);
+  // FIX: Initialize as empty array
   const [interviews, setInterviews] = useState<any[]>([]);
   const [callStats, setCallStats] = useState<CallStats>({
     totalCalls: 0,
@@ -124,6 +125,7 @@ export const CallDashboard: React.FC = () => {
   
   // Bulk calling states
   const [tabValue, setTabValue] = useState(0);
+  // FIX: Initialize as empty array
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isBulkCalling, setIsBulkCalling] = useState(false);
@@ -139,27 +141,46 @@ export const CallDashboard: React.FC = () => {
   const loadCallStats = async () => {
     try {
       const stats = await getCallStats();
-      setCallStats(stats);
+      setCallStats(stats || { totalCalls: 0, completedCalls: 0 });
     } catch (error) {
       console.error('Error loading call stats:', error);
+      // FIX: Set default values on error
+      setCallStats({ totalCalls: 0, completedCalls: 0 });
     }
   };
 
   const loadJobDescription = async () => {
     try {
       const jd = await getJobDescription();
-      setJobDescription(jd);
+      setJobDescription(jd || {
+        title: '',
+        company: '',
+        description: '',
+        required_skills: '',
+        experience_required: ''
+      });
     } catch (error) {
       console.error('Error loading job description:', error);
+      // FIX: Set default values on error
+      setJobDescription({
+        title: '',
+        company: '',
+        description: '',
+        required_skills: '',
+        experience_required: ''
+      });
     }
   };
 
   const loadInterviews = async () => {
     try {
       const data = await getAllInterviews();
-      setInterviews(data.interviews || []);
+      // FIX: Always ensure interviews is an array
+      setInterviews(data?.interviews || []);
     } catch (error) {
       console.error('Error loading interviews:', error);
+      // FIX: Set empty array on error
+      setInterviews([]);
     }
   };
 
@@ -252,12 +273,23 @@ export const CallDashboard: React.FC = () => {
       const result = await response.json();
       
       if (result.success) {
-        setContacts(result.contacts);
-        toast.success(`${result.count} contacts loaded successfully!`);
+        // FIX: Always ensure contacts is an array
+        const processedContacts = result.contacts || [];
+        
+        const validContacts = processedContacts.map((contact: any) => ({
+          name: contact.name || contact.Name || `Contact_${Math.random().toString(36).substr(2, 4)}`,
+          phone: contact.phone || contact.Phone || contact.mobile || contact.Mobile,
+          data: contact.data || ''
+        })).filter((contact: any) => contact.phone);
+        
+        setContacts(validContacts);
+        toast.success(`${validContacts.length} contacts loaded successfully!`);
       } else {
-        toast.error(result.error);
+        setContacts([]);
+        toast.error(result.error || 'Failed to process CSV file');
       }
     } catch (error: any) {
+      setContacts([]);
       toast.error('Failed to upload CSV: ' + error.message);
     } finally {
       setIsUploading(false);

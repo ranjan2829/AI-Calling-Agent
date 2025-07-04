@@ -162,40 +162,71 @@ export const BulkCallDashboard: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
       
+      console.log('📤 Uploading CSV file...');
+      
       const response = await fetch('http://13.204.76.229:8000/upload-csv', {
         method: 'POST',
         body: formData,
       });
       
       const result = await response.json();
+      console.log('📥 Upload response:', result);
       
       if (result.success) {
-        // Enhanced contact processing
-        const processedContacts = result.contacts.map((contact: any) => ({
+        // FIX: Always ensure contacts is an array and process properly
+        const processedContacts = Array.isArray(result.contacts) ? result.contacts : [];
+        
+        // Enhanced contact processing with safe array handling
+        const validContacts = processedContacts.map((contact: any) => ({
           name: contact.name || contact.Name || `Contact_${Math.random().toString(36).substr(2, 4)}`,
           phone: contact.phone || contact.Phone || contact.mobile || contact.Mobile,
           email: contact.email || contact.Email || '',
           experience: contact.experience || contact.Experience || '',
           skills: contact.skills || contact.Skills || '',
           data: contact.data || ''
-        }));
+        })).filter((contact: any) => contact.phone && contact.phone.trim()); // Only include contacts with phone numbers
         
-        setContacts(processedContacts);
-        toast.success(`${processedContacts.length} contacts loaded successfully!`);
+        setContacts(validContacts);
+        console.log('✅ Contacts loaded:', validContacts);
+        
+        toast.success(`✅ ${validContacts.length} contacts loaded successfully! Review the list and click "Start AI Bulk Interviews" to begin calling.`);
       } else {
-        toast.error(result.error);
+        // FIX: Handle error case properly
+        setContacts([]); // Reset contacts on error
+        toast.error(result.error || 'Failed to process CSV file');
+        console.error('❌ CSV upload failed:', result.error);
       }
     } catch (error: any) {
+      // FIX: Reset contacts on error
+      setContacts([]);
       toast.error('Failed to upload CSV: ' + error.message);
+      console.error('❌ CSV upload error:', error);
     } finally {
       setIsUploading(false);
+      // Clear the file input
+      event.target.value = '';
     }
   };
 
   const startBulkCalling = async () => {
-    if (contacts.length === 0) return;
+    if (!contacts || contacts.length === 0) {
+      toast.error('❌ No contacts available for calling. Please upload a CSV file first.');
+      return;
+    }
+    
+    // FIX: Validate contacts have phone numbers
+    const validContacts = contacts.filter(contact => contact.phone && contact.phone.trim());
+    if (validContacts.length === 0) {
+      toast.error('❌ No valid phone numbers found in contacts');
+      return;
+    }
+    
+    if (validContacts.length !== contacts.length) {
+      toast.warning(`⚠️ ${contacts.length - validContacts.length} contacts without phone numbers will be skipped`);
+    }
     
     setIsCalling(true);
+    console.log('🚀 Starting bulk calling for', validContacts.length, 'contacts...');
     
     try {
       const response = await fetch('http://13.204.76.229:8000/bulk-call', {
@@ -203,51 +234,39 @@ export const BulkCallDashboard: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(contacts),
+        body: JSON.stringify(validContacts), // Use validContacts instead of contacts
       });
       
       const result = await response.json();
+      console.log('📞 Bulk call response:', result);
       
       if (result.success) {
         const newSession: BulkCallSession = {
           bulk_call_id: result.bulk_call_id,
-          status: 'IN_PROGRESS',
+          status: 'COMPLETED', // Mark as completed since backend processes all calls
           total_candidates: result.total_candidates,
           successful_calls: result.successful_calls || 0,
           failed_calls: result.failed_calls || 0,
           results: result.results || [],
-          start_time: new Date().toISOString()
+          start_time: new Date().toISOString(),
+          created_at: new Date().toISOString()
         };
         
         setBulkCallSession(newSession);
+        setShowResults(true); // Show results immediately
         
-        // NEW: Save initial results
+        // NEW: Save results automatically
         await saveBulkResults(newSession);
         
-        toast.success(`🚀 Bulk calling initiated! ${result.successful_calls}/${result.total_candidates} calls started successfully.`);
-        
-        // Update final results after a delay
-        setTimeout(async () => {
-          const finalSession = {
-            ...newSession,
-            status: 'COMPLETED',
-            end_time: new Date().toISOString()
-          };
-          setBulkCallSession(finalSession);
-          setIsCalling(false);
-          
-          // Save final results
-          await saveBulkResults(finalSession);
-          
-          toast.success(`✅ Bulk calling completed! Check interview results for detailed analysis.`);
-        }, 5000);
+        toast.success(`🎉 Bulk calling completed! ${result.successful_calls}/${result.total_candidates} calls initiated successfully.`);
         
       } else {
-        toast.error(result.error);
-        setIsCalling(false);
+        toast.error(result.error || 'Failed to start bulk calling');
       }
     } catch (error: any) {
       toast.error('Failed to start bulk calling: ' + error.message);
+      console.error('❌ Bulk calling error:', error);
+    } finally {
       setIsCalling(false);
     }
   };
@@ -315,7 +334,7 @@ export const BulkCallDashboard: React.FC = () => {
       </Box>
 
       {/* Action Bar */}
-      <Box sx={{ mb: 4, display: 'flex', gap: 2, alignItems: 'center' }}>
+      <Box sx={{ mb: 4, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
         <Button
           variant="outlined"
           startIcon={<History />}
@@ -333,6 +352,34 @@ export const BulkCallDashboard: React.FC = () => {
         >
           {loadingSavedResults ? 'Loading...' : 'Refresh'}
         </Button>
+
+        {/* Stats */}
+        {contacts.length > 0 && (
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', ml: 'auto' }}>
+            <Chip 
+              icon={<People />} 
+              label={`${contacts.length} contacts loaded`} 
+              color="primary" 
+              variant="outlined"
+            />
+            {bulkCallSession && (
+              <>
+                <Chip 
+                  icon={<CheckCircle />} 
+                  label={`${bulkCallSession.successful_calls} successful`} 
+                  color="success" 
+                  size="small"
+                />
+                <Chip 
+                  icon={<Error />} 
+                  label={`${bulkCallSession.failed_calls} failed`} 
+                  color="error" 
+                  size="small"
+                />
+              </>
+            )}
+          </Box>
+        )}
       </Box>
 
       {/* Upload Section */}
@@ -341,7 +388,7 @@ export const BulkCallDashboard: React.FC = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <Upload sx={{ color: 'primary.main', mr: 1 }} />
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Upload Contact List
+              Step 1: Upload Contact List
             </Typography>
           </Box>
           
@@ -351,8 +398,11 @@ export const BulkCallDashboard: React.FC = () => {
               borderRadius: 2,
               p: 4,
               textAlign: 'center',
-              cursor: 'pointer',
-              '&:hover': { bgcolor: 'grey.50' }
+              cursor: isUploading || isCalling ? 'not-allowed' : 'pointer',
+              '&:hover': { 
+                bgcolor: isUploading || isCalling ? 'inherit' : 'grey.50' 
+              },
+              opacity: isUploading || isCalling ? 0.6 : 1
             }}
           >
             <input
@@ -363,56 +413,89 @@ export const BulkCallDashboard: React.FC = () => {
               id="csv-upload"
               disabled={isUploading || isCalling}
             />
-            <label htmlFor="csv-upload" style={{ cursor: 'pointer', width: '100%', display: 'block' }}>
-              <People sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-              <Typography variant="h6" sx={{ mb: 1 }}>
-                {isUploading ? 'Processing...' : 'Upload CSV File'}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                CSV should contain: name, phone, email (optional), experience (optional), skills (optional)
-              </Typography>
+            <label 
+              htmlFor="csv-upload" 
+              style={{ 
+                cursor: isUploading || isCalling ? 'not-allowed' : 'pointer', 
+                width: '100%', 
+                display: 'block' 
+              }}
+            >
+              {isUploading ? (
+                <Box>
+                  <CircularProgress sx={{ mb: 2 }} />
+                  <Typography variant="h6" sx={{ mb: 1 }}>
+                    Processing CSV file...
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Please wait while we parse your contact list
+                  </Typography>
+                </Box>
+              ) : (
+                <Box>
+                  <People sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" sx={{ mb: 1 }}>
+                    Upload CSV File
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    CSV should contain: name, phone, email (optional), experience (optional), skills (optional)
+                  </Typography>
+                </Box>
+              )}
             </label>
           </Box>
           
           {contacts.length > 0 && (
             <Alert severity="success" sx={{ mt: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <People sx={{ mr: 1 }} />
-                <Typography>
-                  {contacts.length} contacts loaded successfully - AI will interview each candidate
-                </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <CheckCircle sx={{ mr: 1 }} />
+                  <Typography>
+                    ✅ {contacts.length} contacts loaded successfully! 
+                    Review the contact list below and click "Start AI Bulk Interviews" to begin calling.
+                  </Typography>
+                </Box>
               </Box>
             </Alert>
           )}
         </CardContent>
       </Card>
 
-      {/* Control Panel */}
+      {/* Contact List and Control Panel */}
       {contacts.length > 0 && (
         <Grid container spacing={3} sx={{ mb: 4 }}>
+          {/* Contact List */}
           <Grid item xs={12} md={8}>
             <Card>
               <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3 }}>
-                  Contact List ({contacts.length} contacts)
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                    📋 Contact List Preview
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {contacts.length} contacts ready for AI interviews
+                  </Typography>
+                </Box>
                 
-                <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
+                <Box sx={{ maxHeight: 400, overflow: 'auto', border: '1px solid #e0e0e0', borderRadius: 1 }}>
                   {contacts.map((contact, index) => (
                     <Box
                       key={index}
                       sx={{
                         p: 2,
-                        border: '1px solid #e0e0e0',
-                        borderRadius: 1,
-                        mb: 1,
-                        bgcolor: 'white'
+                        borderBottom: index < contacts.length - 1 ? '1px solid #f0f0f0' : 'none',
+                        '&:hover': { bgcolor: 'grey.50' }
                       }}
                     >
-                      <Grid container alignItems="center">
+                      <Grid container alignItems="center" spacing={2}>
+                        <Grid item xs={12} sm={1}>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                            #{index + 1}
+                          </Typography>
+                        </Grid>
                         <Grid item xs={12} sm={3}>
                           <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-                            {contact.name}
+                            👤 {contact.name}
                           </Typography>
                         </Grid>
                         <Grid item xs={12} sm={3}>
@@ -420,16 +503,16 @@ export const BulkCallDashboard: React.FC = () => {
                             📞 {contact.phone}
                           </Typography>
                         </Grid>
-                        <Grid item xs={12} sm={3}>
+                        <Grid item xs={12} sm={2}>
                           {contact.email && (
-                            <Typography variant="body2" color="textSecondary">
-                              ✉️ {contact.email}
+                            <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.8rem' }}>
+                              ✉️ {contact.email.substring(0, 15)}{contact.email.length > 15 ? '...' : ''}
                             </Typography>
                           )}
                         </Grid>
                         <Grid item xs={12} sm={3}>
                           {contact.experience && (
-                            <Typography variant="body2" color="textSecondary">
+                            <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.8rem' }}>
                               🎯 {contact.experience}
                             </Typography>
                           )}
@@ -447,11 +530,12 @@ export const BulkCallDashboard: React.FC = () => {
             </Card>
           </Grid>
 
+          {/* Control Panel */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
                 <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3 }}>
-                  🚀 AI Bulk Interview Control
+                  🚀 Step 2: Start AI Interviews
                 </Typography>
                 
                 <Box sx={{ mb: 3 }}>
@@ -459,10 +543,16 @@ export const BulkCallDashboard: React.FC = () => {
                     variant="contained"
                     fullWidth
                     size="large"
-                    startIcon={isCalling ? <CircularProgress size={20} /> : <PlayArrow />}
+                    startIcon={isCalling ? <CircularProgress size={20} color="inherit" /> : <PlayArrow />}
                     onClick={startBulkCalling}
                     disabled={contacts.length === 0 || isCalling}
-                    sx={{ mb: 2 }}
+                    sx={{ 
+                      mb: 2,
+                      bgcolor: isCalling ? 'grey.500' : 'primary.main',
+                      '&:hover': {
+                        bgcolor: isCalling ? 'grey.500' : 'primary.dark'
+                      }
+                    }}
                   >
                     {isCalling ? 'Calling in Progress...' : 'Start AI Bulk Interviews'}
                   </Button>
@@ -479,10 +569,14 @@ export const BulkCallDashboard: React.FC = () => {
                 </Box>
 
                 {/* Statistics */}
+                <Divider sx={{ mb: 2 }} />
+                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold' }}>
+                  📊 Call Statistics
+                </Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
                     <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                      <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                         {contacts.length}
                       </Typography>
                       <Typography variant="caption" color="textSecondary">
@@ -515,19 +609,50 @@ export const BulkCallDashboard: React.FC = () => {
                 {/* Progress */}
                 {isCalling && (
                   <Box sx={{ mt: 3 }}>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
+                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 'medium' }}>
                       🔄 Processing bulk calls...
                     </Typography>
                     <LinearProgress sx={{ height: 8, borderRadius: 4 }} />
                     <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
-                      AI interviews are being conducted automatically
+                      AI interviews are being conducted automatically. Each call will be processed and analyzed.
                     </Typography>
                   </Box>
+                )}
+
+                {/* Success Message */}
+                {bulkCallSession && !isCalling && (
+                  <Alert severity="info" sx={{ mt: 2 }}>
+                    <Typography variant="body2">
+                      ✅ Bulk calling completed! 
+                      <br />
+                      <strong>{bulkCallSession.successful_calls}/{bulkCallSession.total_candidates}</strong> calls initiated successfully.
+                      <br />
+                      Check the interview results dashboard for detailed analysis.
+                    </Typography>
+                  </Alert>
                 )}
               </CardContent>
             </Card>
           </Grid>
         </Grid>
+      )}
+
+      {/* Empty State */}
+      {contacts.length === 0 && !isUploading && (
+        <Card>
+          <CardContent sx={{ textAlign: 'center', py: 6 }}>
+            <People sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              No contacts loaded
+            </Typography>
+            <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+              Upload a CSV file with candidate information to start bulk AI interviews
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              CSV format: name, phone, email (optional), experience (optional), skills (optional)
+            </Typography>
+          </CardContent>
+        </Card>
       )}
 
       {/* Results Dialog */}
