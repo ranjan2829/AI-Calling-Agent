@@ -85,7 +85,7 @@ export const CallHistory: React.FC = () => {
       
       console.log('Raw interviews from API:', response.data.interviews);
       
-      // KEEP: existing filtering logic - no changes
+      // UPDATED: Include ALL interviews, including INCOMPLETE_SILENCE
       const filteredInterviews = (response.data.interviews || []).filter(interview => {
         // Keep all interviews that have basic data
         const hasBasicData = interview.interview_id || interview.call_sid;
@@ -94,6 +94,12 @@ export const CallHistory: React.FC = () => {
         if (!hasBasicData) {
           console.log(`Filtering out - no basic data:`, interview);
           return false;
+        }
+        
+        // 🔥 KEEP INCOMPLETE_SILENCE INTERVIEWS - Don't filter them out
+        if (interview.status === 'INCOMPLETE_SILENCE') {
+          console.log(`Keeping INCOMPLETE_SILENCE interview:`, interview.interview_id);
+          return true;
         }
         
         // Get ALL possible time fields
@@ -293,9 +299,9 @@ export const CallHistory: React.FC = () => {
         </Typography>
       </Box>
 
-      {/* Statistics Cards */}
+      {/* UPDATED Statistics Cards - Added No Response Card */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={2.4}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -313,7 +319,7 @@ export const CallHistory: React.FC = () => {
           </Card>
         </Grid>
         
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={2.4}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -331,7 +337,26 @@ export const CallHistory: React.FC = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={3}>
+        {/* 🔥 NEW: No Response Card for INCOMPLETE_SILENCE */}
+        <Grid item xs={12} md={2.4}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Phone sx={{ fontSize: 40, color: 'warning.main', mr: 2 }} />
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'warning.main' }}>
+                    {interviews.filter(i => i.status === 'INCOMPLETE_SILENCE').length}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    🔇 No Response
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={2.4}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -352,7 +377,7 @@ export const CallHistory: React.FC = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={2.4}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
