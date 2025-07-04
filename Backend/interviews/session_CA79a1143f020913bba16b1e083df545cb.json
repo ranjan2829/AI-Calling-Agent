@@ -1,0 +1,28 @@
+{
+  "call_sid": "CA79a1143f020913bba16b1e083df545cb",
+  "interview_id": "CA79a1143f020913bba16b1e083df545cb",
+  "phone_number": "+919850411276",
+  "candidate_phone": "+919850411276",
+  "candidate_name": "SAGAR KESHAVE",
+  "name": "SAGAR KESHAVE",
+  "twilio_number": "+919850411276",
+  "start_time": "2025-07-04T04:57:23.762795",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:57:23.762803",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "SAGAR KESHAVE",
+    "phone": "+919850411276",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

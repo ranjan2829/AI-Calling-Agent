@@ -1,0 +1,104 @@
+{
+  "call_sid": "CAdfe9bd4d57a0c10d20df586dc8321b7f",
+  "interview_id": "CAdfe9bd4d57a0c10d20df586dc8321b7f",
+  "phone_number": "+918237431625",
+  "candidate_phone": "+918237431625",
+  "candidate_name": "MAYUR SANDEEP KADAM",
+  "name": "MAYUR SANDEEP KADAM",
+  "twilio_number": "+918237431625",
+  "start_time": "2025-07-04T04:55:33.840927",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "yas",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T04:55:54.692083",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Myself from your son that Kadam currently graduate for currently credit from zip college off engineering from CS branch branch name and apart from dait I have also work for van Man Tu D return.",
+      "confidence": 0.51887673,
+      "timestamp": "2025-07-04T04:56:36.574531",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "Python my school machine learning artificial intelligence",
+      "confidence": 0.7618686,
+      "timestamp": "2025-07-04T04:56:51.169780",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "I can join immediately.",
+      "confidence": 0.83522916,
+      "timestamp": "2025-07-04T04:57:01.393981",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "current le aaya, but my expected salary six pack",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T04:57:19.252649",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I have not use any Pyar",
+      "confidence": 0.40087894,
+      "timestamp": "2025-07-04T04:57:34.061239",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I have work in all the three services because for one of my project and I also attended a training of Microsoft and currently recently I just completed D best training.",
+      "confidence": 0.7687172,
+      "timestamp": "2025-07-04T04:58:05.970977",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "I have not deflorate any project and I have not experience ine D cockroach planning Tu learn about ITE and feature.",
+      "confidence": 0.5868816,
+      "timestamp": "2025-07-04T04:58:28.581808",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "ya talking about machine learning and artificial intelli",
+      "confidence": 0.6064718,
+      "timestamp": "2025-07-04T04:58:47.157744",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "yas",
+      "full_response": "yas"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T04:58:47.157755",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "MAYUR SANDEEP KADAM",
+    "phone": "+918237431625",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T04:58:47.158267",
+  "completion_time": "2025-07-04T04:58:47.158274"
+}

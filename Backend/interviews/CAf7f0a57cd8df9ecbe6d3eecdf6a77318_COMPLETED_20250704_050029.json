@@ -1,0 +1,104 @@
+{
+  "call_sid": "CAf7f0a57cd8df9ecbe6d3eecdf6a77318",
+  "interview_id": "CAf7f0a57cd8df9ecbe6d3eecdf6a77318",
+  "phone_number": "+918600576080",
+  "candidate_phone": "+918600576080",
+  "candidate_name": "Ishwar Ambad",
+  "name": "Ishwar Ambad",
+  "twilio_number": "+918600576080",
+  "start_time": "2025-07-04T04:56:52.305564",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yes, this is the good time to speak.",
+      "confidence": 0.91714334,
+      "timestamp": "2025-07-04T04:57:22.886952",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Hello. My name is number recently completed master graduation statistics from Pune University I have asked on various machine learning models also recently I have Van reality model Google",
+      "confidence": 0.69230294,
+      "timestamp": "2025-07-04T04:57:53.679133",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "Ki skills I use your Python SQL then where is Deep learning techniques in machine learning techniques for the one of the particular quality.",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T04:58:16.950209",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "available Tu join immediately",
+      "confidence": 0.7290604,
+      "timestamp": "2025-07-04T04:58:28.475071",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "expecting up Tu 8 LP",
+      "confidence": 0.47020274,
+      "timestamp": "2025-07-04T04:58:39.796259",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "Sorry, I have not able Tu understand D question.",
+      "confidence": 0.5698831,
+      "timestamp": "2025-07-04T04:58:52.810820",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "aisa hai walk on DCP result aur modern",
+      "confidence": 0.24168298,
+      "timestamp": "2025-07-04T04:59:16.447524",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "I have work on document document used to container as our model with all the requirements and the virgins that vi have used for D model. So sad on date is used for D scale ability scale ability off D modern and work off cotton Tu ITE so dait D use off docker and Kevin",
+      "confidence": 0.5563843,
+      "timestamp": "2025-07-04T04:59:52.262933",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "amazing project pipeline using that model the project was particularly Tu u blood creating an general question answer system using",
+      "confidence": 0.6027364,
+      "timestamp": "2025-07-04T05:00:29.527387",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "Yes, this is the good time to speak.",
+      "full_response": "Yes, this is the good time to speak."
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:00:29.527395",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Ishwar Ambad",
+    "phone": "+918600576080",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:00:29.527751",
+  "completion_time": "2025-07-04T05:00:29.527755"
+}

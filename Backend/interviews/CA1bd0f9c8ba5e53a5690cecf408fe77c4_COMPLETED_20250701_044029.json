@@ -1,0 +1,143 @@
+{
+  "call_sid": "CA1bd0f9c8ba5e53a5690cecf408fe77c4",
+  "phone_number": "+14787807480",
+  "twilio_number": "+917387792437",
+  "start_time": "2025-07-01T04:37:39.768704",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Introduce yourself.",
+      "answer": "So my name ise Ranjan shitole, and I have Bin AI engineering graduate from Pune University with CGP of 8.9.",
+      "confidence": 0.76145583,
+      "timestamp": "2025-07-01T04:38:00.904014",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "Verma ki skills aur Python and JavaScript",
+      "confidence": 0.5205326,
+      "timestamp": "2025-07-01T04:38:11.587965",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "Vel my current notice period is off zero days. I don't have any notice period",
+      "confidence": 0.8011741,
+      "timestamp": "2025-07-01T04:38:23.933828",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "My current city se 0 l Pi n expectations are zero.",
+      "confidence": 0.45387924,
+      "timestamp": "2025-07-01T04:38:35.877972",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "To Hai I have developed Mini fast epi application Veri nice development a restful API for efficient data transfer f created Meni API using fast API and AZ Vel",
+      "confidence": 0.5437036,
+      "timestamp": "2025-07-01T04:39:09.899829",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I have used with a w s i have used a w s ec2 services. I have Bin using Dem for deployment deployment of my web applications. I have used AWS sage make an for ml and point diploma. I have used EWS ec2 F3 transcript and dynamo DBS Vel",
+      "confidence": 0.6489163,
+      "timestamp": "2025-07-01T04:39:42.457709",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "So I have used many docker containers. I have deployed Meni dog docker containers. So I have Bin like using docker and cuben its services as Vel",
+      "confidence": 0.7673996,
+      "timestamp": "2025-07-01T04:40:05.273478",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "I have used many different large language models and I have developed Mili Rahega application Shayad use deep learning Technology so",
+      "confidence": 0.71395236,
+      "timestamp": "2025-07-01T04:40:29.435277",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "2": {
+      "step": 2,
+      "passed": true,
+      "reason": "",
+      "skills_match": true,
+      "found_skills": [
+        "python",
+        "javascript"
+      ],
+      "match_percentage": 100.0
+    },
+    "3": {
+      "step": 3,
+      "passed": true,
+      "reason": "",
+      "notice_acceptable": true,
+      "notice_days": 0
+    },
+    "5": {
+      "step": 5,
+      "passed": true,
+      "reason": "",
+      "api_experience": true,
+      "found_api_skills": [
+        "api",
+        "rest"
+      ]
+    },
+    "6": {
+      "step": 6,
+      "passed": true,
+      "reason": "",
+      "cloud_experience": true,
+      "found_platforms": {
+        "cloud": [
+          "aws"
+        ]
+      },
+      "cloud_concepts": [
+        "aws"
+      ]
+    },
+    "7": {
+      "step": 7,
+      "passed": true,
+      "reason": "",
+      "deployment_experience": true,
+      "docker_experience": true,
+      "kubernetes_experience": true,
+      "deployment_skills": [
+        "deploy",
+        "docker"
+      ]
+    },
+    "8": {
+      "step": 8,
+      "passed": true,
+      "reason": "",
+      "ai_experience": true,
+      "genai_experience": true,
+      "framework_experience": true,
+      "deep_learning_experience": true,
+      "ai_skills": [
+        "deep learning"
+      ]
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-01T04:40:29.435285",
+  "candidate_name": "Test Candidate",
+  "candidate_phone": "+917387792437",
+  "candidate_data": "",
+  "bulk_call_id": null,
+  "is_bulk_call": false,
+  "end_time": "2025-07-01T04:40:29.437505",
+  "completion_time": "2025-07-01T04:40:29.437512"
+}

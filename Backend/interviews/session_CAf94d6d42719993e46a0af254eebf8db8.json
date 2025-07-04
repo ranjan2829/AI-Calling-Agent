@@ -1,0 +1,28 @@
+{
+  "call_sid": "CAf94d6d42719993e46a0af254eebf8db8",
+  "interview_id": "CAf94d6d42719993e46a0af254eebf8db8",
+  "phone_number": "+916304470698",
+  "candidate_phone": "+916304470698",
+  "candidate_name": "Sameer Satpute",
+  "name": "Sameer Satpute",
+  "twilio_number": "+916304470698",
+  "start_time": "2025-07-04T04:55:38.627193",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:55:38.627200",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Sameer Satpute",
+    "phone": "+916304470698",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

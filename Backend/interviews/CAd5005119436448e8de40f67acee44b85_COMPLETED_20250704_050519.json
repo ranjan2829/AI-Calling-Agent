@@ -1,0 +1,104 @@
+{
+  "call_sid": "CAd5005119436448e8de40f67acee44b85",
+  "interview_id": "CAd5005119436448e8de40f67acee44b85",
+  "phone_number": "+919116995972",
+  "candidate_phone": "+919116995972",
+  "candidate_name": "Ankush Surana",
+  "name": "Ankush Surana",
+  "twilio_number": "+919116995972",
+  "start_time": "2025-07-04T05:01:57.137671",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "yes, I am available and it's a good time for Interview",
+      "confidence": 0.8719826,
+      "timestamp": "2025-07-04T05:02:28.849257",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "So an my name is Ankush and previously I work as n a r engineer tape kya hai. I have also an 1 year off experience.",
+      "confidence": 0.55733097,
+      "timestamp": "2025-07-04T05:02:49.649704",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "I no machine learning a i Python plus KPI and lens and all dij an new technology. I experience vid.",
+      "confidence": 0.6306493,
+      "timestamp": "2025-07-04T05:03:07.333623",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "image image joiner",
+      "confidence": 0.4333029,
+      "timestamp": "2025-07-04T05:03:16.746437",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "current CTC was my 3lp and expected vaj food Tu success",
+      "confidence": 0.52200377,
+      "timestamp": "2025-07-04T05:03:31.645169",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "Experience vid. I pay I have done many projects in API Tu making an API and deploy ITE on ec2 service. So I have a good experience off Van ears Van year off experience on a ine Napier",
+      "confidence": 0.581834,
+      "timestamp": "2025-07-04T05:03:54.721385",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I have work width AWS I work. Ah, I use services like AC Tu for deployment Le Lambda Lambda for server Les and s3 workers RDS for management and all D things",
+      "confidence": 0.5868679,
+      "timestamp": "2025-07-04T05:04:23.250628",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "So I Vil use I have Dan deployment vid D use off docker. I have Dan Meni deployments off my off my personal project on ITE on ec2 services.",
+      "confidence": 0.5877775,
+      "timestamp": "2025-07-04T05:04:48.772744",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "So, ah mosta, I work from D last Tu year I work on ya ine machine learning making AI agents working on machine learning projects trend D models and frame work. I Vil like an part off flow.",
+      "confidence": 0.626175,
+      "timestamp": "2025-07-04T05:05:19.496026",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "yes, I am available and it's a good time for Interview",
+      "full_response": "yes, I am available and it's a good time for Interview"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:05:19.496034",
+  "bulk_call_id": "bulk_20250704_050130",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Ankush Surana",
+    "phone": "+919116995972",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:05:19.496385",
+  "completion_time": "2025-07-04T05:05:19.496389"
+}

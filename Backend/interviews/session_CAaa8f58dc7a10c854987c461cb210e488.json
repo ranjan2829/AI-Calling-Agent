@@ -1,0 +1,53 @@
+{
+  "call_sid": "CAaa8f58dc7a10c854987c461cb210e488",
+  "interview_id": "CAaa8f58dc7a10c854987c461cb210e488",
+  "phone_number": "+918080422304",
+  "candidate_phone": "+918080422304",
+  "candidate_name": "PRANIL SAVALE",
+  "name": "PRANIL SAVALE",
+  "twilio_number": "+918080422304",
+  "start_time": "2025-07-04T04:54:48.090408",
+  "status": "IN_PROGRESS",
+  "current_question": 2,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "LCD is a good time to speak.",
+      "confidence": 0.7403678,
+      "timestamp": "2025-07-04T04:55:17.990827",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "To hello, my name ise pranil Saware I am from Kalyan Mumbai Maharashtra and I have completed my diploma ine mechanical engineering 2019 10 degree mechanical engineering ine 202 and also date I completed my M take ine data science and air from Ratan Tata Maharashtra state skills University Pune ine 2025. I give my exam ine Mein 2025 to R talking about my experience. So after completing my degree ine Mechanical engineering. I joint isase bhi financial age executive ine data sense sem and ine June 2023 ine, June 2023. I join Yes Bank Limited EJ executive and cyber Sel froad control unit. I left my job ine 2025 due Tu Sam due Tu educational purpose. No I M available for u maintain joining.",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T04:56:36.569588",
+      "question_number": 1
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "LCD is a good time to speak.",
+      "full_response": "LCD is a good time to speak."
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T04:56:36.569595",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "PRANIL SAVALE",
+    "phone": "+918080422304",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

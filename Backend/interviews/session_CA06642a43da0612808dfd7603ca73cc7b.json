@@ -1,0 +1,46 @@
+{
+  "call_sid": "CA06642a43da0612808dfd7603ca73cc7b",
+  "interview_id": "CA06642a43da0612808dfd7603ca73cc7b",
+  "phone_number": "+919422604848",
+  "candidate_phone": "+919422604848",
+  "candidate_name": "Vaishnavi Patil",
+  "name": "Vaishnavi Patil",
+  "twilio_number": "+919422604848",
+  "start_time": "2025-07-04T04:54:59.164853",
+  "status": "IN_PROGRESS",
+  "current_question": 1,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "kaun hai",
+      "confidence": 0.31295905,
+      "timestamp": "2025-07-04T04:55:33.198975",
+      "question_number": 0
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "kaun hai",
+      "full_response": "kaun hai"
+    }
+  },
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:55:33.198983",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Vaishnavi Patil",
+    "phone": "+919422604848",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

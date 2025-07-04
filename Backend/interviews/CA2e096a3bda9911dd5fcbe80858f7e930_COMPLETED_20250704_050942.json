@@ -1,0 +1,104 @@
+{
+  "call_sid": "CA2e096a3bda9911dd5fcbe80858f7e930",
+  "interview_id": "CA2e096a3bda9911dd5fcbe80858f7e930",
+  "phone_number": "+916304470698",
+  "candidate_phone": "+916304470698",
+  "candidate_name": "Sameer Satpute",
+  "name": "Sameer Satpute",
+  "twilio_number": "+916304470698",
+  "start_time": "2025-07-04T05:05:19.588614",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "gas aur",
+      "confidence": 0.037276875,
+      "timestamp": "2025-07-04T05:05:35.915394",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Ya to my name ise Amit Rajput and I am Total 2 years of experience working as a data scientist in different different domain such as agriculture have created D financial related reports using genius Sam utility. And so I have D majorly textile ise use machine learning Geni hai, and five dait is my men aur Text type and bhaiya looking for D good opportunity ware. I can use my overall skills to develop my self.",
+      "confidence": 0.6206137,
+      "timestamp": "2025-07-04T05:06:30.655190",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "Hai aur Siyar to basically the ki skills Python Den machine learning and den r a g system Den cloud based system aur cloud cloud base cloud architecture that I can use.",
+      "confidence": 0.5904962,
+      "timestamp": "2025-07-04T05:06:56.707519",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "So I can join with in one month.",
+      "confidence": 0.917708,
+      "timestamp": "2025-07-04T05:07:07.088740",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "Anshu Karan CTC is 8.5 CTC plus one lakh variable there and the expected is around 10 to 11.",
+      "confidence": 0.80097103,
+      "timestamp": "2025-07-04T05:07:27.397879",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "Ya to I have created the fast APS integrated for D financial reports for fast PP I have created. So ine recent organisation. I have created D fast catch fill for D front and integration vid D back hand ya.",
+      "confidence": 0.5837665,
+      "timestamp": "2025-07-04T05:07:54.097972",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "Ya and its basically I use d a w s majorly d. S3 bucket Den dynamo DB Den ah, I can se ise Tu instances and sage maker aur but age Vel age exploring D gcps Vel sem time for D",
+      "confidence": 0.37341076,
+      "timestamp": "2025-07-04T05:08:26.030094",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "Bhaiya so docker and coconut is files we have created and just D container. So I have used and vi diplo ITE into D using d a w s machine learning model. Is there that is HD boost?",
+      "confidence": 0.6177918,
+      "timestamp": "2025-07-04T05:08:54.658166",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "Yah, so basically machine learning model HD most I have used ine an previous Tu previous company and incres and companies like off India Technology ware r u Technology Sach is normali. Jay bhi nahin, APS vi, R calling Den Gate d a i inserts for dait and recent organisations and using an lehenga flying Chayan so dait AI a joints vi can create and so dait aur dait agent can be work be off u like dait.",
+      "confidence": 0.39886713,
+      "timestamp": "2025-07-04T05:09:42.064582",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "gas aur",
+      "full_response": "gas aur"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:09:42.064590",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Sameer Satpute",
+    "phone": "+916304470698",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:09:42.064976",
+  "completion_time": "2025-07-04T05:09:42.064981"
+}

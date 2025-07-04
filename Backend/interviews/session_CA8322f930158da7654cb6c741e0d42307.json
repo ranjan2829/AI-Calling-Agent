@@ -1,0 +1,29 @@
+{
+  "call_sid": "CA8322f930158da7654cb6c741e0d42307",
+  "interview_id": "CA8322f930158da7654cb6c741e0d42307",
+  "phone_number": "+917773902239",
+  "candidate_phone": "+917773902239",
+  "candidate_name": "Akanksha Khode",
+  "name": "Akanksha Khode",
+  "twilio_number": "+917773902239",
+  "start_time": "2025-07-04T04:57:00.559256",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:57:00.559264",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Akanksha Khode",
+    "phone": "+917773902239",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T04:57:21.639810"
+}

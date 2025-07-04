@@ -1,0 +1,53 @@
+{
+  "call_sid": "CA439a6a3adce6865f961fbd6fde2ecd1b",
+  "interview_id": "CA439a6a3adce6865f961fbd6fde2ecd1b",
+  "phone_number": "+917083050347",
+  "candidate_phone": "+917083050347",
+  "candidate_name": "POOJA LOKHANDE",
+  "name": "POOJA LOKHANDE",
+  "twilio_number": "+917083050347",
+  "start_time": "2025-07-04T04:57:09.758284",
+  "status": "IN_PROGRESS",
+  "current_question": 2,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "yas yas",
+      "confidence": 0.00056475756,
+      "timestamp": "2025-07-04T04:57:38.833545",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "u r from Vich organisation",
+      "confidence": 0.20242786,
+      "timestamp": "2025-07-04T04:57:51.006380",
+      "question_number": 1
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "yas yas",
+      "full_response": "yas yas"
+    }
+  },
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:57:51.006388",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "POOJA LOKHANDE",
+    "phone": "+917083050347",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

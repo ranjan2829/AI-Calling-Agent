@@ -1,0 +1,96 @@
+{
+  "interview_id": "CAdc5239fbec96d23ac67bb619ae21caf3",
+  "company": "Onelab Ventures",
+  "interviewer": "AI Assistant with Validation",
+  "completion_time": "20250701_041957",
+  "status": "TERMINATED",
+  "termination_reason": "no_cloud_experience",
+  "questions_answered": 6,
+  "total_questions": 8,
+  "responses": [
+    {
+      "question": "Introduce yourself.",
+      "answer": "To he my name ise Ranjan shitole and have Bin rescent AI engineering graduate from Pune University app completed my graduation with CGPA of 8.9.",
+      "confidence": 0.7007751,
+      "timestamp": "2025-07-01T04:18:33.905128",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "sohe Mai ki skills are Python and JavaScript",
+      "confidence": 0.58485025,
+      "timestamp": "2025-07-01T04:18:45.025687",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "Vel my current notice period is off zero days. I don't have any notice period",
+      "confidence": 0.81572765,
+      "timestamp": "2025-07-01T04:18:57.421531",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "My current CTC is zero lpa. And my expectations are zero lpa.",
+      "confidence": 0.8133638,
+      "timestamp": "2025-07-01T04:19:11.222705",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "well, I have created Meni API using fast API have created Meni price ine class KPI for back and deployment age Vel Tu leveraged data transfer between the API",
+      "confidence": 0.62661195,
+      "timestamp": "2025-07-01T04:19:31.503798",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "Yes, I have work with a w s for ec2 deployment of my application. So D Web and I have used D services like ISI Tu S3 dynamo DB sage maker and trans services.",
+      "confidence": 0.6876814,
+      "timestamp": "2025-07-01T04:19:57.215667",
+      "question_number": 6
+    }
+  ],
+  "validation_results": {
+    "2": {
+      "step": 2,
+      "passed": true,
+      "reason": "",
+      "skills_match": true,
+      "found_skills": [
+        "python",
+        "javascript"
+      ],
+      "match_percentage": 100.0
+    },
+    "3": {
+      "step": 3,
+      "passed": true,
+      "reason": "",
+      "notice_acceptable": true,
+      "notice_days": 0
+    },
+    "5": {
+      "step": 5,
+      "passed": true,
+      "reason": "",
+      "api_experience": true,
+      "found_api_skills": [
+        "api"
+      ]
+    },
+    "6": {
+      "step": 6,
+      "passed": false,
+      "reason": "No cloud experience mentioned",
+      "cloud_experience": false,
+      "found_platforms": {
+        "cloud": []
+      },
+      "cloud_concepts": []
+    }
+  },
+  "start_time": "2025-07-01T04:18:10.143941",
+  "end_time": "2025-07-01T04:19:57.218538",
+  "interview_type": "Terminated Interview - Validation Failed"
+}

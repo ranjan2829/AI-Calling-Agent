@@ -1,0 +1,104 @@
+{
+  "call_sid": "CAd5b075dff037e96c5a08e9c7b7039746",
+  "interview_id": "CAd5b075dff037e96c5a08e9c7b7039746",
+  "phone_number": "+918237431625",
+  "candidate_phone": "+918237431625",
+  "candidate_name": "MAYUR SANDEEP KADAM",
+  "name": "MAYUR SANDEEP KADAM",
+  "twilio_number": "+918237431625",
+  "start_time": "2025-07-04T05:05:23.124755",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "yas",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T05:05:43.059354",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Main sirf Mayur Sandeep Kadam from Pune current affair from GK College of Engineering and my interesting and official intelligence learning domain I have created an fek review detection website using distil about model and Python and Jango for classifying D fak reviews off D product and apart from dait. I have recently completed a data analyst intensive ate U no dait technology and apart from technical skills Mein Hoke Ghar swimming and cooking and playing and sports.",
+      "confidence": 0.44824156,
+      "timestamp": "2025-07-04T05:06:29.787693",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "Main ki skills R Python my school jaenge.",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T05:06:50.416215",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "Aaya Maine just joiner can immediately join with him.",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T05:07:08.166942",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "Currently I have an off later off Lak for NM on my expected. CTC is 7 lakh per NM",
+      "confidence": 0.54763967,
+      "timestamp": "2025-07-04T05:07:25.593766",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I have not work on a page but I am going Tu learn ITE ine D future ife ITE is required for D roll.",
+      "confidence": 0.5360761,
+      "timestamp": "2025-07-04T05:07:42.385992",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I have work in all the three platform like use Google fire base for one of my project and I have attended D training for a Microsoft Azure and",
+      "confidence": 0.7737139,
+      "timestamp": "2025-07-04T05:08:06.375557",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "I want to play any project have an experience ine paper NET exam docker record time planning to learn it in future.",
+      "confidence": 0.46043813,
+      "timestamp": "2025-07-04T05:08:24.437355",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "ine my final year project multiple projects using D language",
+      "confidence": 0.55655783,
+      "timestamp": "2025-07-04T05:08:53.808988",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "yas",
+      "full_response": "yas"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:08:53.808996",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "MAYUR SANDEEP KADAM",
+    "phone": "+918237431625",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:08:53.811082",
+  "completion_time": "2025-07-04T05:08:53.811088"
+}

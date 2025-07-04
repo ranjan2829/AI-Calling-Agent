@@ -1,0 +1,67 @@
+{
+  "call_sid": "CA39f2cfee3af0385fa8fde7bb191db05d",
+  "interview_id": "CA39f2cfee3af0385fa8fde7bb191db05d",
+  "phone_number": "+918308264711",
+  "candidate_phone": "+918308264711",
+  "candidate_name": "Praful Avinashrao Maskar",
+  "name": "Praful Avinashrao Maskar",
+  "twilio_number": "+918308264711",
+  "start_time": "2025-07-04T04:54:42.972863",
+  "status": "IN_PROGRESS",
+  "current_question": 4,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "kya yah Dekho time",
+      "confidence": 0.25018758,
+      "timestamp": "2025-07-04T04:54:59.914527",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Hello, I M Praful Avinash namaskar. I have Dan bi ine mechanical and I have 1.5 year experience ine mechanical field and I have Van year experience ine a ml field ine Vich I have completed a projects chat bot brand identification and product quality rating system.",
+      "confidence": 0.65804183,
+      "timestamp": "2025-07-04T04:55:31.746561",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "I no Python power bi learning machine learning computer vision yellow framework and I have I have my build chart board and reply ine bye using fast API framework and I have a email Framework aur no Framework also five torch.",
+      "confidence": 0.7146663,
+      "timestamp": "2025-07-04T04:56:05.154849",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "Yeah, I leave this job before 1 month and I am looking for job. So there is no",
+      "confidence": 0.8477059,
+      "timestamp": "2025-07-04T04:56:36.570513",
+      "question_number": 3
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "kya yah Dekho time",
+      "full_response": "kya yah Dekho time"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T04:56:36.570518",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Praful Avinashrao Maskar",
+    "phone": "+918308264711",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

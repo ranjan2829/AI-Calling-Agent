@@ -1,0 +1,29 @@
+{
+  "call_sid": "CA3bcf3c25cc02b686f467e0e3e28e9683",
+  "interview_id": "CA3bcf3c25cc02b686f467e0e3e28e9683",
+  "phone_number": "+919359780193",
+  "candidate_phone": "+919359780193",
+  "candidate_name": "prashant malge",
+  "name": "prashant malge",
+  "twilio_number": "+919359780193",
+  "start_time": "2025-07-04T04:57:43.625378",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:57:43.625386",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "prashant malge",
+    "phone": "+919359780193",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T04:58:06.621138"
+}

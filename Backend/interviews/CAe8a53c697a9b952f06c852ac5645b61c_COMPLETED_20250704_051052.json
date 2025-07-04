@@ -1,0 +1,104 @@
+{
+  "call_sid": "CAe8a53c697a9b952f06c852ac5645b61c",
+  "interview_id": "CAe8a53c697a9b952f06c852ac5645b61c",
+  "phone_number": "+918600576080",
+  "candidate_phone": "+918600576080",
+  "candidate_name": "Ishwar Ambad",
+  "name": "Ishwar Ambad",
+  "twilio_number": "+918600576080",
+  "start_time": "2025-07-04T05:05:28.053137",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "We just had call on dispatching aur lost things.",
+      "confidence": 0.6594997,
+      "timestamp": "2025-07-04T05:05:49.001543",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Hello. My name is number recently. I completed my Masters in data science India I completed my graduation statistics company University as you can see academic background hash provided MI how Mach solid Foundation machine learning techniques and that is difficult and ITE Vil take ITE what is job profile I have work from Python Iske various machine learning and deep learning techniques and creation.",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T05:06:33.494846",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "21 inch aur is roll mein aap Python S12 machine learning techniques and deep learning techniques. And also I have experience off working and LLM dait is lost language and open source projects using hugging face taking",
+      "confidence": 0.54081094,
+      "timestamp": "2025-07-04T05:07:04.343543",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "M available Tu join immediately",
+      "confidence": 0.5561552,
+      "timestamp": "2025-07-04T05:07:15.717651",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "main expected salary is 8 LPG",
+      "confidence": 0.5396965,
+      "timestamp": "2025-07-04T05:07:28.838693",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "API is application programming interface APS are used to reply aur models on web servers for our sales Sel offer avar customers Tu understand what vi have Bin I have work on flasky and stream DPS",
+      "confidence": 0.59086764,
+      "timestamp": "2025-07-04T05:08:09.188594",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "Yes, I have work on cloud platform and monitor and manage our model dait vi have work from deyar Industries bye using clock platform vi R going Tu u ji riding industry products. So dait vi can vi bra aur models on clock platform and customers can use ITE from deyar.",
+      "confidence": 0.49141163,
+      "timestamp": "2025-07-04T05:08:50.638553",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "Dokara Inko vanities are used to deploy models doctor is basically continuation off model ine whitch vi container is our model with all D requirement files dait R required and D varjan date vi R use for D particular project. So for D doctor ise use vid D because off continuation ITE hells, Tu create an special environment for D project and vi can ran ITE dait product on u have various sources like vi, can D economy cloud or any other local service dait vi want and your net is used for D scale ability ine monitoring out model. So that difference between",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T05:09:42.371103",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "I have work on Van project using Google Gmail project off building question answer chat dot whitch Vil bi able to answer D questions off user and answers Vil bi generated from D PDF dait I m going Tu give input so far. Dait I created a rap bye plane D LLM dait I use for D project vause Google ji, Vinay into D specific. I use Gemini promo model aur MBD I use an gay ko zero zero Van Mor Den and D vectors Tu store D vectors. I use off a i s s dait ise Facebook hi hai similarity search width D database Tu store D vectors and using dis famous. I created directly and whitch Vil bi whitch Vas able Tu answer D question off D user and the famous that I use vaj Lama index for D particular project and also I have work from",
+      "confidence": 0.42867553,
+      "timestamp": "2025-07-04T05:10:52.756494",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "We just had call on dispatching aur lost things.",
+      "full_response": "We just had call on dispatching aur lost things."
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:10:52.756504",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Ishwar Ambad",
+    "phone": "+918600576080",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:10:52.756871",
+  "completion_time": "2025-07-04T05:10:52.756876"
+}

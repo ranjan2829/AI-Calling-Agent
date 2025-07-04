@@ -1,0 +1,104 @@
+{
+  "call_sid": "CA2368f6e06adc7c7f4855cee192139083",
+  "interview_id": "CA2368f6e06adc7c7f4855cee192139083",
+  "phone_number": "+919209657473",
+  "candidate_phone": "+919209657473",
+  "candidate_name": "PARAG KHARWADE",
+  "name": "PARAG KHARWADE",
+  "twilio_number": "+919209657473",
+  "start_time": "2025-07-04T04:56:45.075921",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yas yas I m ready?",
+      "confidence": 0.356072,
+      "timestamp": "2025-07-04T04:57:14.605953",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "My name is Parag kharwade. Basically I M from Vardha ine Maharashtra completed my graduation ine BSC Computer Science from Bajaj college off science ine Wardha currently I am working as an data scientist for D past 3 ears applying machine learning technics and statistical analysis to generate Real world problems and actionable insights from D data ine Mein previous roll, and my rule was mainly as a data scientist and I waz responsible for task like feature engineering features election and machine learning building machine learning model and",
+      "confidence": 0.6323024,
+      "timestamp": "2025-07-04T04:58:04.837398",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "Lori generative air and have walked on a proof off concept project like crack system. I have Van ears off experience learning and LP thank",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T04:58:33.860536",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "My current notice period is 30 days negotiable so I can join UP Tu 15 Tu 20 days.",
+      "confidence": 0.82993853,
+      "timestamp": "2025-07-04T04:58:47.558851",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "main current CTC is 6.8 LP and my expectation so I M expecting Abu Airtel pay Tu ten LP",
+      "confidence": 0.5576925,
+      "timestamp": "2025-07-04T04:59:05.281348",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I have a good knowledge about flowers. So for creating APS we can use flowers and I dont have Tu Mach Experience so ab on flash but I no D basic knowledge and I have good knowledge about dip and how ITE works properly.",
+      "confidence": 0.7698006,
+      "timestamp": "2025-07-04T04:59:33.274754",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I have work I have worked on AWS and I have an I no dait deployment process off diploma ine process off machine learning model on Di cloud platform. So I no D best I know d good knowledge about AWS platform.",
+      "confidence": 0.6429094,
+      "timestamp": "2025-07-04T05:00:24.643793",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "okayplayer",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T05:00:44.041476",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "can u please repeat",
+      "confidence": 0.7092364,
+      "timestamp": "2025-07-04T05:01:00.738665",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "Yas yas I m ready?",
+      "full_response": "Yas yas I m ready?"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:01:00.738673",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "PARAG KHARWADE",
+    "phone": "+919209657473",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:01:00.739049",
+  "completion_time": "2025-07-04T05:01:00.739053"
+}

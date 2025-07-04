@@ -1,0 +1,104 @@
+{
+  "call_sid": "CAb4bfbbc441cd105e95b6b66849bc0b20",
+  "interview_id": "CAb4bfbbc441cd105e95b6b66849bc0b20",
+  "phone_number": "+918308264711",
+  "candidate_phone": "+918308264711",
+  "candidate_name": "Praful Avinashrao Maskar",
+  "name": "Praful Avinashrao Maskar",
+  "twilio_number": "+918308264711",
+  "start_time": "2025-07-04T04:56:41.672216",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "ya good time",
+      "confidence": 0.65361553,
+      "timestamp": "2025-07-04T04:56:58.552806",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Hai ya I M Praful Avinash namaskar. I have done bi ine mechanical and I have 1.5 year experience ine mechanical and I have Van year experience ine a ml field vid industry exchange u an experience and I have Dan three projects ine D Van year experience Van ise chat bot whitch is LLM dis project second is pqrs whitch ise object detection and ah defect detection project and second ise an third ise an brand identification. So ine, dait Tu bi cover D market research analysis rising object detection.",
+      "confidence": 0.45953393,
+      "timestamp": "2025-07-04T04:57:44.352455",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "ya I no Python SQL power Diya Hai machine learning deep learning off dip learning an Pai torch pencher flow",
+      "confidence": 0.5310314,
+      "timestamp": "2025-07-04T04:58:03.469687",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "I can join immediately like within 15 days.",
+      "confidence": 0.9724561,
+      "timestamp": "2025-07-04T04:58:14.047178",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "Ya I have 1.2 lpa current CTC and I my expecting salary is for lpa.",
+      "confidence": 0.7622511,
+      "timestamp": "2025-07-04T04:58:31.440549",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "Ya I have done project like chart boat in that I am I I M creating D API for D base on D base on D base on D application and ah design so ine, dait I created D API off deploying dait projects.",
+      "confidence": 0.6190341,
+      "timestamp": "2025-07-04T04:59:07.719171",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "No currently I m not using a w s platform adjuster deploy D my deployment python code by using an age device.",
+      "confidence": 0.51704067,
+      "timestamp": "2025-07-04T04:59:34.136574",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "I no doctor and deploying that deploying the projects ine by using D docker.",
+      "confidence": 0.58944005,
+      "timestamp": "2025-07-04T04:59:51.596311",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "Yeah, I have one year experience in ml. In machine learning I have done Van project ine, dait vi predict D machine down time down time and second is Deep learning experience ine, dait i m using yellow framework ine dait and I M ine dait project I use Tu detect D object and an recognise D defect on dait object. Ah, I M and an I M using your Lo flame work for dait and I no and nanod its Framework for dait also fine for D object detection projects.",
+      "confidence": 0.5300117,
+      "timestamp": "2025-07-04T05:00:45.980963",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "ya good time",
+      "full_response": "ya good time"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:00:45.980973",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Praful Avinashrao Maskar",
+    "phone": "+918308264711",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:00:45.981347",
+  "completion_time": "2025-07-04T05:00:45.981351"
+}

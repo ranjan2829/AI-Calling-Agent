@@ -1,0 +1,29 @@
+{
+  "call_sid": "CAa9500b9466ae0c6496ebc9b64d4e432a",
+  "interview_id": "CAa9500b9466ae0c6496ebc9b64d4e432a",
+  "phone_number": "+919022122317",
+  "candidate_phone": "+919022122317",
+  "candidate_name": "Mukund Bagul",
+  "name": "Mukund Bagul",
+  "twilio_number": "+919022122317",
+  "start_time": "2025-07-04T04:57:45.125350",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:57:45.125358",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Mukund Bagul",
+    "phone": "+919022122317",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T04:58:18.142269"
+}

@@ -1,0 +1,41 @@
+{
+  "interview_id": "CAdc5563a844275cdd25fed4ca285c754c",
+  "company": "Onelab Ventures",
+  "interviewer": "AI Assistant with Validation",
+  "completion_time": "20250704_045512",
+  "status": "CALLBACK_REQUESTED",
+  "termination_reason": "call_later",
+  "questions_answered": 1,
+  "total_questions": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Me U please call Mi after 5:00 p.m. Today.",
+      "confidence": 0.56472653,
+      "timestamp": "2025-07-04T04:55:12.836082",
+      "question_number": 0
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": false,
+      "reason": "Candidate requested to call later",
+      "time_available": false,
+      "availability_status": "call_later",
+      "response": "Me U please call Mi after 5:00 p.m. Today.",
+      "full_response": "Me U please call Mi after 5:00 p.m. Today."
+    }
+  },
+  "start_time": "2025-07-04T04:54:55.085796",
+  "end_time": "2025-07-04T04:55:12.839731",
+  "interview_type": "Callback Requested - Will Reschedule",
+  "candidate_name": "Ashutosh Mishra",
+  "candidate_phone": "+918305870369",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "callback_requested": true,
+  "callback_response": "Me U please call Mi after 5:00 p.m. Today.",
+  "callback_request_time": "2025-07-04T04:55:12.836458",
+  "preferred_time": ""
+}

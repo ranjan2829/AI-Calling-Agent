@@ -1,0 +1,28 @@
+{
+  "call_sid": "CA14ab6659417968f8a9cb6fdb3e51ead0",
+  "interview_id": "CA14ab6659417968f8a9cb6fdb3e51ead0",
+  "phone_number": "+917676075450",
+  "candidate_phone": "+917676075450",
+  "candidate_name": "KIRUBHA SHREE",
+  "name": "KIRUBHA SHREE",
+  "twilio_number": "+917676075450",
+  "start_time": "2025-07-04T04:54:44.987109",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:54:44.987118",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "KIRUBHA SHREE",
+    "phone": "+917676075450",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

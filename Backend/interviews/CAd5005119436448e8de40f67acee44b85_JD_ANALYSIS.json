@@ -1,0 +1,59 @@
+{
+  "call_id": "CAd5005119436448e8de40f67acee44b85",
+  "candidate_name": "Am",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [
+      "python"
+    ],
+    "missing_skills": [],
+    "skills_match_percentage": 100.0,
+    "experience_match_percentage": 100,
+    "overall_score": 100.0,
+    "comprehensive_score": 100.0,
+    "priority_score": 5,
+    "recommendation": "EXCELLENT MATCH",
+    "analysis_date": "2025-07-04 05:05:03",
+    "skill_mentions": {
+      "python": 4
+    },
+    "experience_data": {
+      "years_mentioned": [
+        "1"
+      ],
+      "experience_score": 2
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+919116995972",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [
+      "python"
+    ],
+    "skills_found_count": 1,
+    "total_required_skills": 1,
+    "phone_number": "+919116995972"
+  },
+  "interview_summary": {
+    "questions_answered": 8,
+    "total_questions": 8,
+    "completion_rate": "8/8"
+  },
+  "source_file": "interviews/session_CAd5005119436448e8de40f67acee44b85.json",
+  "candidate_phone": "+919116995972",
+  "candidate_data": {
+    "name": "Ankush Surana",
+    "phone": "+919116995972",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "analysis_created": "2025-07-04 05:05:03"
+}

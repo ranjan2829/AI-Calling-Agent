@@ -1,0 +1,28 @@
+{
+  "call_sid": "CAf6426ea37ed97f55c4d8d5bb3e2ff8ae",
+  "interview_id": "CAf6426ea37ed97f55c4d8d5bb3e2ff8ae",
+  "phone_number": "+918080422304",
+  "candidate_phone": "+918080422304",
+  "candidate_name": "PRANIL SAVALE",
+  "name": "PRANIL SAVALE",
+  "twilio_number": "+918080422304",
+  "start_time": "2025-07-04T05:04:59.002364",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T05:04:59.002374",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "PRANIL SAVALE",
+    "phone": "+918080422304",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

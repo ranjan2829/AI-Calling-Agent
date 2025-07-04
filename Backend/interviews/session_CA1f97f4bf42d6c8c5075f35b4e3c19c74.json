@@ -1,0 +1,28 @@
+{
+  "call_sid": "CA1f97f4bf42d6c8c5075f35b4e3c19c74",
+  "interview_id": "CA1f97f4bf42d6c8c5075f35b4e3c19c74",
+  "phone_number": "+919422604848",
+  "candidate_phone": "+919422604848",
+  "candidate_name": "Vaishnavi Patil",
+  "name": "Vaishnavi Patil",
+  "twilio_number": "+919422604848",
+  "start_time": "2025-07-04T04:57:06.354685",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:57:06.354694",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Vaishnavi Patil",
+    "phone": "+919422604848",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

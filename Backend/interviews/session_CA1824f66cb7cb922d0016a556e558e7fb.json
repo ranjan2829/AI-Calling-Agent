@@ -1,0 +1,29 @@
+{
+  "call_sid": "CA1824f66cb7cb922d0016a556e558e7fb",
+  "interview_id": "CA1824f66cb7cb922d0016a556e558e7fb",
+  "phone_number": "+918208040480",
+  "candidate_phone": "+918208040480",
+  "candidate_name": "Nainisha Sanjay Bhosale",
+  "name": "Nainisha Sanjay Bhosale",
+  "twilio_number": "+918208040480",
+  "start_time": "2025-07-04T04:54:47.304987",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:54:47.304994",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Nainisha Sanjay Bhosale",
+    "phone": "+918208040480",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T04:55:20.483974"
+}

@@ -1,0 +1,26 @@
+{
+  "call_sid": "CA637457c868442884aab0e98c31b90300",
+  "interview_id": "CA637457c868442884aab0e98c31b90300",
+  "phone_number": "+917387792437",
+  "candidate_phone": "+917387792437",
+  "candidate_name": "Candidate_2437",
+  "name": "Candidate_2437",
+  "twilio_number": "+917387792437",
+  "start_time": "2025-07-03T08:26:28.404518",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-03T08:26:28.404526",
+  "bulk_call_id": null,
+  "is_bulk_call": false,
+  "candidate_data": {
+    "name": "Candidate_2437",
+    "phone": "+917387792437"
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-03T08:27:01.715612"
+}

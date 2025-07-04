@@ -1,0 +1,60 @@
+{
+  "call_id": "CAb4bfbbc441cd105e95b6b66849bc0b20",
+  "candidate_name": "Ya_Good_Time",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [
+      "python"
+    ],
+    "missing_skills": [],
+    "skills_match_percentage": 100.0,
+    "experience_match_percentage": 100,
+    "overall_score": 100.0,
+    "comprehensive_score": 100.0,
+    "priority_score": 5,
+    "recommendation": "EXCELLENT MATCH",
+    "analysis_date": "2025-07-04 04:58:12",
+    "skill_mentions": {
+      "python": 4
+    },
+    "experience_data": {
+      "years_mentioned": [
+        "5",
+        "5"
+      ],
+      "experience_score": 4
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+918308264711",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [
+      "python"
+    ],
+    "skills_found_count": 1,
+    "total_required_skills": 1,
+    "phone_number": "+918308264711"
+  },
+  "interview_summary": {
+    "questions_answered": 3,
+    "total_questions": 3,
+    "completion_rate": "3/3"
+  },
+  "source_file": "interviews/session_CAb4bfbbc441cd105e95b6b66849bc0b20.json",
+  "candidate_phone": "+918308264711",
+  "candidate_data": {
+    "name": "Praful Avinashrao Maskar",
+    "phone": "+918308264711",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "analysis_created": "2025-07-04 04:58:12"
+}

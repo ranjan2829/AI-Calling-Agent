@@ -1,0 +1,29 @@
+{
+  "call_sid": "CA3fcd95e81112ee9d67a79c0e2efe63f1",
+  "interview_id": "CA3fcd95e81112ee9d67a79c0e2efe63f1",
+  "phone_number": "+919424419855",
+  "candidate_phone": "+919424419855",
+  "candidate_name": "Ankit Malviya",
+  "name": "Ankit Malviya",
+  "twilio_number": "+919424419855",
+  "start_time": "2025-07-04T05:05:44.125165",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T05:05:44.125173",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Ankit Malviya",
+    "phone": "+919424419855",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:06:17.157562"
+}

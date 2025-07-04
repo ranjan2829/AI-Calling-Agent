@@ -1,0 +1,104 @@
+{
+  "call_sid": "CAc022b8819904258091d37103d10431f0",
+  "interview_id": "CAc022b8819904258091d37103d10431f0",
+  "phone_number": "+919552430387",
+  "candidate_phone": "+919552430387",
+  "candidate_name": "Srushti Pawar",
+  "name": "Srushti Pawar",
+  "twilio_number": "+919552430387",
+  "start_time": "2025-07-04T04:56:36.576733",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yah Sach good time to speak.",
+      "confidence": 0.63901687,
+      "timestamp": "2025-07-04T04:57:07.151726",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "I M Srishti Pawar I have Tu ears off experience ine cloud and D box. I walked on edblues services like a w s e e Si Tu S3 lamda, vpc extra and ine your depot. I walked on docker tera form jins. I work on automation side projects and also ate diploid Sam projects on a w s like website aay walked on snowflake. AZ Vel ine, dait I have worked on an data warehouse is data mining and also ETL jobs. I have completed my AWS certificate AZ Vel and no flick budget S Vel 10 educational background. I have completed mc, and BCA from Pune University so its all about MI",
+      "confidence": 0.34979618,
+      "timestamp": "2025-07-04T04:58:01.514161",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "i m r Di l cloud watch extra and Mayer 12 and 5000",
+      "confidence": 0.3983997,
+      "timestamp": "2025-07-04T04:58:29.396625",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "Aman  immediate",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T04:58:42.344592",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "My current city se 2.5 and expected as a market standard ine between range 4 lakh Tu six lpa.",
+      "confidence": 0.677926,
+      "timestamp": "2025-07-04T04:58:59.359253",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "Ok so I dont work mostly in API but like I use API in API integration and in contacts in devops cloud and data analysis.",
+      "confidence": 0.82788056,
+      "timestamp": "2025-07-04T04:59:22.640296",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "yes, I have walked on a w s ine that I have hands for hands on experience ine a w s ine varies services and also have certified AWS",
+      "confidence": 0.6431849,
+      "timestamp": "2025-07-04T04:59:46.584721",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "I have diploid D website like in WordPress aur Python aur like any programming languages. So ine, dait I have used D doctor and also use ECS and ECS for deployment aay Di plus off website dait is from educational diagram AZ Vel",
+      "confidence": 0.5541746,
+      "timestamp": "2025-07-04T05:00:19.284315",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "I walked on one project but in my educational that is when I completed my MCA ine, dait ine last semester IV created Van application date ine human activity recognization ine, dait. I have use machine learning and deep learning ine. Dait. I have used Sam libraries like Pandas Namak bye et cetera. And I have an use algorithm like random for S aur regression simple regression et cetera.",
+      "confidence": 0.5927883,
+      "timestamp": "2025-07-04T05:01:02.874493",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "Yah Sach good time to speak.",
+      "full_response": "Yah Sach good time to speak."
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:01:02.874506",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Srushti Pawar",
+    "phone": "+919552430387",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:01:02.874884",
+  "completion_time": "2025-07-04T05:01:02.874888"
+}

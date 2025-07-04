@@ -1,0 +1,28 @@
+{
+  "call_sid": "CAc0ff9a82152c2dc5ca4151d0839b828a",
+  "interview_id": "CAc0ff9a82152c2dc5ca4151d0839b828a",
+  "phone_number": "+919104773358",
+  "candidate_phone": "+919104773358",
+  "candidate_name": "Yash Tadiyal",
+  "name": "Yash Tadiyal",
+  "twilio_number": "+919104773358",
+  "start_time": "2025-07-04T05:05:21.326703",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T05:05:21.326711",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Yash Tadiyal",
+    "phone": "+919104773358",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

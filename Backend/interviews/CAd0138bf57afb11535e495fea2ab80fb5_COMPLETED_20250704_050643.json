@@ -1,0 +1,104 @@
+{
+  "call_sid": "CAd0138bf57afb11535e495fea2ab80fb5",
+  "interview_id": "CAd0138bf57afb11535e495fea2ab80fb5",
+  "phone_number": "+919209657473",
+  "candidate_phone": "+919209657473",
+  "candidate_name": "PARAG KHARWADE",
+  "name": "PARAG KHARWADE",
+  "twilio_number": "+919209657473",
+  "start_time": "2025-07-04T05:01:56.563929",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yas yas I m ready?",
+      "confidence": 0.33868328,
+      "timestamp": "2025-07-04T05:02:26.373831",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "To my name is Parakh kharwade currently working as a data scientist for D pass 3 ears applying machine learning technician statistical analysis, Tu solve real word business problem and generate actionable inside. So ine my previous roll. I waz responsible for an task like teacher engineering features election motion learning building machine learning models and everything performance off D model recently. I have Bin active during generated and have walked on an proof off concept project like system.",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T05:03:18.491710",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "Hai To Main kis ki machine learning Python generative hai?",
+      "confidence": 0.39514944,
+      "timestamp": "2025-07-04T05:03:36.415638",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "current notification",
+      "confidence": 0.49072608,
+      "timestamp": "2025-07-04T05:03:47.109630",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "main current CTC 6.8 LP and my expectation is above 8 LPG",
+      "confidence": 0.6079013,
+      "timestamp": "2025-07-04T05:04:04.034563",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I dont have Tu Mach experience on D area but I no D steps. I no D basic steps off D flowers how create how an flash is created how API bhi is created bye using class Sam work.",
+      "confidence": 0.52602214,
+      "timestamp": "2025-07-04T05:04:48.767596",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "apan Ja vyakti se bolat Aahat Dhyan Ne apna call hold world",
+      "confidence": 0.2677724,
+      "timestamp": "2025-07-04T05:05:05.410421",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "I diploid machine learning model on D A W S cloud platform. So I did reply any thing. I know the basic steps and I no D basic process how Mach ine learning how D matching living model diploid on bi edblues cloud platform. So bye using ec2 instant, ah, vi, diploid machine learning for first vi need Tu an great launch ec2 instant, aur Diploma and den after dait deyar is Sam command deyar R Sam Tu three commands and bye using dis command u cantly connect over virtual computer, Tu avar local system and den simply by using an Gate loan kamai, vi, simply vi can simply diploid.",
+      "confidence": 0.39912528,
+      "timestamp": "2025-07-04T05:06:04.762794",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "I have walked so basically my expertise is a lies in machine learning also I have walked on an Axis team. So I have used from engineering and indirect deyar R Meni network neural network dait and no, I have good knowledge about Deep learning a and CNN rnn.",
+      "confidence": 0.64951456,
+      "timestamp": "2025-07-04T05:06:43.916346",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "Yas yas I m ready?",
+      "full_response": "Yas yas I m ready?"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:06:43.916355",
+  "bulk_call_id": "bulk_20250704_050130",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "PARAG KHARWADE",
+    "phone": "+919209657473",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:06:43.916725",
+  "completion_time": "2025-07-04T05:06:43.916729"
+}

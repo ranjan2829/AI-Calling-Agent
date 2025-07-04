@@ -1,0 +1,95 @@
+{
+  "call_sid": "CA91e829dd03d4fe58c2cad53befea1ebf",
+  "interview_id": "CA91e829dd03d4fe58c2cad53befea1ebf",
+  "phone_number": "+917002115411",
+  "candidate_phone": "+917002115411",
+  "candidate_name": "Rajat Raj",
+  "name": "Rajat Raj",
+  "twilio_number": "+917002115411",
+  "start_time": "2025-07-04T04:57:22.741483",
+  "status": "IN_PROGRESS",
+  "current_question": 8,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yes, this is good time.",
+      "confidence": 0.98113316,
+      "timestamp": "2025-07-04T04:57:41.223886",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Hay I M Rajat Raj I M currently current result from doctor MGR University as a computer science engineer and I have done Tu intensive Van ine. Bundela andar ine law age an engineer. I have work done several systems like vid chat bot systems and Recommendation system. I and my technical skill is like Python fighters namak.",
+      "confidence": 0.63639325,
+      "timestamp": "2025-07-04T04:58:32.694803",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "I M Veri strong ine Python programming.",
+      "confidence": 0.50714797,
+      "timestamp": "2025-07-04T04:58:56.810416",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "my current notice period is immediately",
+      "confidence": 0.9570214,
+      "timestamp": "2025-07-04T04:59:19.048512",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "My current CTC is 3.6 lakh ine Indian rupiece and Mike MI accepted salary will be six lpa.",
+      "confidence": 0.6711199,
+      "timestamp": "2025-07-04T04:59:37.109145",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I have built several API with help of fast API like ware I have been rest API which help of like",
+      "confidence": 0.817142,
+      "timestamp": "2025-07-04T05:00:08.310052",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "yas I have worked on cloud platform and I also worked on AWS Amazon Web Services",
+      "confidence": 0.8662835,
+      "timestamp": "2025-07-04T05:00:47.527120",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "Yas I have worked on several deployment system basically docker is a tool dait tels, uh packages your applications and all its dependency into consider. So its ran D sem and every ware.",
+      "confidence": 0.6727547,
+      "timestamp": "2025-07-04T05:01:56.555079",
+      "question_number": 7
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "Yes, this is good time.",
+      "full_response": "Yes, this is good time."
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:01:56.555087",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Rajat Raj",
+    "phone": "+917002115411",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

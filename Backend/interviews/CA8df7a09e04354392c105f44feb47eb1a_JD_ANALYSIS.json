@@ -1,0 +1,53 @@
+{
+  "call_id": "CA8df7a09e04354392c105f44feb47eb1a",
+  "candidate_name": "Good_Time",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [],
+    "missing_skills": [
+      "python"
+    ],
+    "skills_match_percentage": 0.0,
+    "experience_match_percentage": 50,
+    "overall_score": 10.0,
+    "comprehensive_score": 10.0,
+    "priority_score": 1,
+    "recommendation": "LOW MATCH",
+    "analysis_date": "2025-07-04 05:05:44",
+    "skill_mentions": {},
+    "experience_data": {
+      "years_mentioned": [],
+      "experience_score": 0
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+919330137341",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [],
+    "skills_found_count": 0,
+    "total_required_skills": 1,
+    "phone_number": "+919330137341"
+  },
+  "interview_summary": {
+    "questions_answered": 1,
+    "total_questions": 1,
+    "completion_rate": "1/1"
+  },
+  "source_file": "interviews/session_CA8df7a09e04354392c105f44feb47eb1a.json",
+  "candidate_phone": "+919330137341",
+  "candidate_data": {
+    "name": "RITIKA NAYAK",
+    "phone": "+919330137341",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "analysis_created": "2025-07-04 05:05:44"
+}

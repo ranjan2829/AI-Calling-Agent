@@ -1,0 +1,104 @@
+{
+  "call_sid": "CAb4b5f802ea19cf5171cfe00fa3981ff7",
+  "interview_id": "CAb4b5f802ea19cf5171cfe00fa3981ff7",
+  "phone_number": "+918208040480",
+  "candidate_phone": "+918208040480",
+  "candidate_name": "Nainisha Sanjay Bhosale",
+  "name": "Nainisha Sanjay Bhosale",
+  "twilio_number": "+918208040480",
+  "start_time": "2025-07-04T04:57:05.971347",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yas its good time.",
+      "confidence": 0.43633646,
+      "timestamp": "2025-07-04T04:57:35.282035",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "So high and Aisha I have done my bachelors ine D statistics and den. My Masters ine D deters and special analytics Den college placement only I got TU job ine, Tu company call Find D British scientist. So I M working deyar for more than 2 years Nau so ine, dis Tu yours. I have work width D different projects whitch consist off forecasting recommendations and den u intelligent document processing and 6 7 months back I started working vid D class whitch ise D fan mark company and De have deyar on air Di So for Dem working as an immune engineer consultant. So for Dem working vid Tu different projects Van is D generating synthetic rate off D CL and andar project is D predicting D how Mach time Vil ITE take Tu complete.",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T04:58:30.540924",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "So yah my ki skills r d machine learning data science data analysis data visualisation Den LLM Jain air. Den Python is van off my love Van off D language r u Den ask u l",
+      "confidence": 0.39719972,
+      "timestamp": "2025-07-04T04:58:52.865023",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "oh, basically I M serving my notice period right Nau so its 90 days but I already serve 2 months 2 months out off ITE so my last working De use off 14th off August",
+      "confidence": 0.6573713,
+      "timestamp": "2025-07-04T04:59:11.263563",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "my current city se 6.72 and my Expectations R 14 Tu 15 LP",
+      "confidence": 0.601236,
+      "timestamp": "2025-07-04T04:59:26.317849",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "Ya I walk width D epi, like an Van off D API AZ Vel work vid deyar is an opinion hai ji, please for D find tuning yellam, den. I also work vid D EPF from D adar form recognizer.",
+      "confidence": 0.31095552,
+      "timestamp": "2025-07-04T04:59:47.789758",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "ya so recently I have Bin working vid d a w s from the AWS have work vid its features like code comment ECE Tu instances Den an AWS Bedrock",
+      "confidence": 0.47087833,
+      "timestamp": "2025-07-04T05:00:11.319604",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "So basically I dont have Mach experience ine D deployment, but I walk when D Van project whitch vi deployed u doing using Janki so vi stor avar, whatever course and ine D SP so vi an cave d s vi and representati ine D gen docker. I haven't used ine professional life. But an I can an I have my own learning about ITE",
+      "confidence": 0.4488613,
+      "timestamp": "2025-07-04T05:00:44.003465",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "Yas, so I want Tu D project cal intelligent document processing. So ITE vaasta Veri complicated project D kind vause an japanies and de wanted us Tu attack D an information out off dis document and give D min off structured form ITE so far dait what vi have Dan is vi find dualism on R specific data. So dait an aluminium and understand based on D data vi have given and den vi give D expected data Tu D client.",
+      "confidence": 0.4781065,
+      "timestamp": "2025-07-04T05:01:26.263856",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "Yas its good time.",
+      "full_response": "Yas its good time."
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:01:26.263865",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Nainisha Sanjay Bhosale",
+    "phone": "+918208040480",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:01:26.264289",
+  "completion_time": "2025-07-04T05:01:26.264294"
+}

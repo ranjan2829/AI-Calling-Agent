@@ -1,0 +1,29 @@
+{
+  "call_sid": "CA211367fc45f7c9ee1c946137d3d6c08b",
+  "interview_id": "CA211367fc45f7c9ee1c946137d3d6c08b",
+  "phone_number": "+918411994990",
+  "candidate_phone": "+918411994990",
+  "candidate_name": "SAMIKSHA MAHURKAR",
+  "name": "SAMIKSHA MAHURKAR",
+  "twilio_number": "+918411994990",
+  "start_time": "2025-07-04T05:05:16.920277",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T05:05:16.920286",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "SAMIKSHA MAHURKAR",
+    "phone": "+918411994990",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:05:49.869610"
+}

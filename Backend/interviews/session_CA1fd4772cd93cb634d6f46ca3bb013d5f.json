@@ -1,0 +1,28 @@
+{
+  "call_sid": "CA1fd4772cd93cb634d6f46ca3bb013d5f",
+  "interview_id": "CA1fd4772cd93cb634d6f46ca3bb013d5f",
+  "phone_number": "+917387485081",
+  "candidate_phone": "+917387485081",
+  "candidate_name": "MANSI DHAVALE",
+  "name": "MANSI DHAVALE",
+  "twilio_number": "+917387485081",
+  "start_time": "2025-07-04T04:56:37.625206",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:56:37.625214",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "MANSI DHAVALE",
+    "phone": "+917387485081",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

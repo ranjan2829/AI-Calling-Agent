@@ -1,0 +1,146 @@
+{
+  "call_sid": "CA12a5b38dfae07c760dd22ebd25507b68",
+  "phone_number": "+14787807480",
+  "twilio_number": "+917387792437",
+  "start_time": "2025-06-30T07:37:01.480229",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Introduce yourself.",
+      "answer": "Kya so hello, my name ise Ranjan shitole and I have been recent air engineering graduate from Pune University with CGPA of 8.9. I have been closed with cloud deployments and yes.",
+      "confidence": 0.7903291,
+      "timestamp": "2025-06-30T07:37:28.122807",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "to main ki skills R Python JavaScript and type script Di Jama ki skills for this role",
+      "confidence": 0.53204703,
+      "timestamp": "2025-06-30T07:37:43.378774",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "well, my current notice period is of zero days I don't have any notice period",
+      "confidence": 0.9497978,
+      "timestamp": "2025-06-30T07:37:56.965757",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "Main current CTC is zero lpa. And I dont have any expectations.",
+      "confidence": 0.7461231,
+      "timestamp": "2025-06-30T07:38:10.828286",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "so I have developed Mini UPS I have developed Meni restful API for my application ware ine have used fast API Jango and flask API for development and back and leverage ine D power off AI into ITE so dait I can similar Si transfer data between my applications vid D help off API",
+      "confidence": 0.62659645,
+      "timestamp": "2025-06-30T07:38:41.856768",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "So he I have work with AWS and I have used D elastic Cloud comput Service dait is Di ISI Tu service dat aay have used for deployment off my web applications. I have used feed make an for ml, and points. I have used land off off list functions. I have used adar service is like S3 and dynamo DB for storage and recoverable off Cloud Computing services from dws.",
+      "confidence": 0.6422705,
+      "timestamp": "2025-06-30T07:39:20.122148",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "Google I have used docker containers I have work with docker and cubic age Vel I have worked with container docker containers and den using cuboid is for orkestra station off D docker containers dat aay have Dan Bai using auto scaling and platform. I have work vid darker and cubic age.",
+      "confidence": 0.62258685,
+      "timestamp": "2025-06-30T07:39:54.675473",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "Well, I have work with aim and Technology is like deep learning and mushroom learning and reinforcement learning leverage ine D power off large language models and RAC systems rack systems, like retrieval augmented generation so that I can latis D power off AI * my applications.",
+      "confidence": 0.67710716,
+      "timestamp": "2025-06-30T07:40:29.114386",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "2": {
+      "step": 2,
+      "passed": true,
+      "reason": "",
+      "skills_match": true,
+      "found_skills": [
+        "python",
+        "javascript"
+      ],
+      "match_percentage": 100.0
+    },
+    "3": {
+      "step": 3,
+      "passed": true,
+      "reason": "",
+      "notice_acceptable": true,
+      "notice_days": 0
+    },
+    "5": {
+      "step": 5,
+      "passed": true,
+      "reason": "",
+      "api_experience": true,
+      "found_api_skills": [
+        "api",
+        "rest",
+        "flask"
+      ]
+    },
+    "6": {
+      "step": 6,
+      "passed": true,
+      "reason": "",
+      "cloud_experience": true,
+      "found_platforms": {
+        "cloud": [
+          "aws",
+          "cloud"
+        ]
+      },
+      "cloud_concepts": [
+        "aws",
+        "cloud"
+      ]
+    },
+    "7": {
+      "step": 7,
+      "passed": true,
+      "reason": "",
+      "deployment_experience": true,
+      "docker_experience": true,
+      "kubernetes_experience": true,
+      "deployment_skills": [
+        "docker"
+      ]
+    },
+    "8": {
+      "step": 8,
+      "passed": true,
+      "reason": "",
+      "ai_experience": true,
+      "genai_experience": true,
+      "framework_experience": true,
+      "deep_learning_experience": true,
+      "ai_skills": [
+        "ai",
+        "deep learning"
+      ]
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-06-30T07:40:29.114395",
+  "candidate_name": "Test Candidate",
+  "candidate_phone": "+917387792437",
+  "candidate_data": "",
+  "bulk_call_id": null,
+  "is_bulk_call": false,
+  "end_time": "2025-06-30T07:40:29.116396",
+  "completion_time": "2025-06-30T07:40:29.116402"
+}

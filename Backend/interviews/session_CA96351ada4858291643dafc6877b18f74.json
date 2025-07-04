@@ -1,0 +1,46 @@
+{
+  "call_sid": "CA96351ada4858291643dafc6877b18f74",
+  "interview_id": "CA96351ada4858291643dafc6877b18f74",
+  "phone_number": "+917002115411",
+  "candidate_phone": "+917002115411",
+  "candidate_name": "Rajat Raj",
+  "name": "Rajat Raj",
+  "twilio_number": "+917002115411",
+  "start_time": "2025-07-04T04:55:34.915998",
+  "status": "IN_PROGRESS",
+  "current_question": 1,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yes, this is good time.",
+      "confidence": 0.9774842,
+      "timestamp": "2025-07-04T04:56:06.052272",
+      "question_number": 0
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "Yes, this is good time.",
+      "full_response": "Yes, this is good time."
+    }
+  },
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:56:06.052282",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Rajat Raj",
+    "phone": "+917002115411",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

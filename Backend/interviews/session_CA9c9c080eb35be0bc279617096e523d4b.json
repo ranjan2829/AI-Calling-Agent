@@ -1,0 +1,28 @@
+{
+  "call_sid": "CA9c9c080eb35be0bc279617096e523d4b",
+  "interview_id": "CA9c9c080eb35be0bc279617096e523d4b",
+  "phone_number": "+917498317995",
+  "candidate_phone": "+917498317995",
+  "candidate_name": "ADITYA NAGARE",
+  "name": "ADITYA NAGARE",
+  "twilio_number": "+917498317995",
+  "start_time": "2025-07-04T04:56:38.312582",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:56:38.312589",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "ADITYA NAGARE",
+    "phone": "+917498317995",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

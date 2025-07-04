@@ -1,0 +1,28 @@
+{
+  "call_sid": "CAc50959c02e2a303a460ff31ce119502c",
+  "interview_id": "CAc50959c02e2a303a460ff31ce119502c",
+  "phone_number": "+919116995972",
+  "candidate_phone": "+919116995972",
+  "candidate_name": "Ankush Surana",
+  "name": "Ankush Surana",
+  "twilio_number": "+919116995972",
+  "start_time": "2025-07-04T05:05:34.265628",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T05:05:34.265637",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Ankush Surana",
+    "phone": "+919116995972",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

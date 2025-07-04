@@ -1,0 +1,28 @@
+{
+  "call_sid": "CA1746ece8a7e9cf209b10d8dd5fd281ed",
+  "interview_id": "CA1746ece8a7e9cf209b10d8dd5fd281ed",
+  "phone_number": "+919552430387",
+  "candidate_phone": "+919552430387",
+  "candidate_name": "Srushti Pawar",
+  "name": "Srushti Pawar",
+  "twilio_number": "+919552430387",
+  "start_time": "2025-07-04T05:01:56.559607",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:01:56.559613",
+  "bulk_call_id": "bulk_20250704_050130",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Srushti Pawar",
+    "phone": "+919552430387",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

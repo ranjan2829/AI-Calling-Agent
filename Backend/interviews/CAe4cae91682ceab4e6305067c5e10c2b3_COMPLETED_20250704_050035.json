@@ -1,0 +1,104 @@
+{
+  "call_sid": "CAe4cae91682ceab4e6305067c5e10c2b3",
+  "interview_id": "CAe4cae91682ceab4e6305067c5e10c2b3",
+  "phone_number": "+917676075450",
+  "candidate_phone": "+917676075450",
+  "candidate_name": "KIRUBHA SHREE",
+  "name": "KIRUBHA SHREE",
+  "twilio_number": "+917676075450",
+  "start_time": "2025-07-04T04:56:36.578050",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Hello.",
+      "confidence": 0.9810207,
+      "timestamp": "2025-07-04T04:56:53.706532",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "iron ke Barshi I am in Pune and I have completed my graduation in Spanish of Engineering and Technology and I have experience an Tu ears off experience ine retain Technology dait waz located ine Chennai so D position off for engineers and dait is back and development and u r that",
+      "confidence": 0.5980931,
+      "timestamp": "2025-07-04T04:57:30.702580",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "Java scroll and manual testing and I have completed my manual testing School Java and Apache Tomcat and I no tu use jeera tool and",
+      "confidence": 0.7079329,
+      "timestamp": "2025-07-04T04:57:56.880580",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "I M immediate joiner. Actually I have kam. I dait my lost working over an working days January 31 and Nau I M looking for D job.",
+      "confidence": 0.6332008,
+      "timestamp": "2025-07-04T04:58:17.597341",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "3.81 lakh is my current an seriously and I M expecting the range 6 27.",
+      "confidence": 0.6461714,
+      "timestamp": "2025-07-04T04:58:34.787591",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "BPL no no experience in that.",
+      "confidence": 0.612729,
+      "timestamp": "2025-07-04T04:58:59.731258",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I dont have experienced ine cloud but I know the database that is I have obtain SQL index, so I M interested Tu learn dait.",
+      "confidence": 0.6627499,
+      "timestamp": "2025-07-04T04:59:24.932019",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "Yahan actually I for the deployment. I have used Atul Vin Spiti and putty D deployment. So vi have work ine D online game kaise ho games So vi have Tu deploy a packet. So dait time vi have used an winner CP and putting Tu diploma your packages Tu D live users, so I no Tu u something.",
+      "confidence": 0.5306732,
+      "timestamp": "2025-07-04T05:00:03.397505",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "No, I dont have any experience in artificial intelligence and machine learning and an because I M an back and development width Java and dait so I Vil I Vil ready Tu learn dait.",
+      "confidence": 0.6063814,
+      "timestamp": "2025-07-04T05:00:35.797245",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "Hello.",
+      "full_response": "Hello."
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:00:35.797254",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "KIRUBHA SHREE",
+    "phone": "+917676075450",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:00:35.797597",
+  "completion_time": "2025-07-04T05:00:35.797601"
+}

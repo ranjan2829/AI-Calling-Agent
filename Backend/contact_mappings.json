@@ -104,5 +104,4027 @@
     "candidate_phone": "+916006656596",
     "is_bulk_call": false,
     "recording_enabled": true
+  },
+  "CA44a4460c42ece74da691fe2f78226028": {
+    "candidate_name": "Candidate_2437",
+    "candidate_phone": "+917387792437",
+    "is_bulk_call": false,
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Candidate_2437",
+      "phone": "+917387792437"
+    }
+  },
+  "CA88ee1d32ee6e16999969f9a5bc160242": {
+    "candidate_name": "ASHISH M. VORA",
+    "candidate_phone": "+91918619570449",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "ASHISH M. VORA",
+      "phone": "+91918619570449",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA6214041a30109586accf91c701ae03ab": {
+    "candidate_name": "Ritesh Mahale",
+    "candidate_phone": "+91919561005117",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ritesh Mahale",
+      "phone": "+91919561005117",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA2e970955a60100f084a01f349ddf6126": {
+    "candidate_name": "VISHNU BALASO KARANDE",
+    "candidate_phone": "+91919175460615",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "VISHNU BALASO KARANDE",
+      "phone": "+91919175460615",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAd2833fc2f4b5db8afe96fd8398c74776": {
+    "candidate_name": "Akshay Borkar",
+    "candidate_phone": "+917030061343",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Akshay Borkar",
+      "phone": "+917030061343",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA289d0d398e117fbe832dc9a6f4fab8b4": {
+    "candidate_name": "VEDANSH SAINI",
+    "candidate_phone": "+919826666148",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "VEDANSH SAINI",
+      "phone": "+919826666148",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA2d76c9514c0a022d4b166ef22e6fa094": {
+    "candidate_name": "Srushti Pawar",
+    "candidate_phone": "+919552430387",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Srushti Pawar",
+      "phone": "+919552430387",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAb3a76410e2e32e9508f0830b98e0be01": {
+    "candidate_name": "HARSHIT SHARMA",
+    "candidate_phone": "+919636745647",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "HARSHIT SHARMA",
+      "phone": "+919636745647",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA55257324490720431420bb8fa5d7c620": {
+    "candidate_name": "RITIKA NAYAK",
+    "candidate_phone": "+919330137341",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "RITIKA NAYAK",
+      "phone": "+919330137341",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA31a20f78112b92ccdc6e7f76fdc20baa": {
+    "candidate_name": "Aniket Dattaram Desai",
+    "candidate_phone": "+919594909568",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Aniket Dattaram Desai",
+      "phone": "+919594909568",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA39f2cfee3af0385fa8fde7bb191db05d": {
+    "candidate_name": "Praful Avinashrao Maskar",
+    "candidate_phone": "+918308264711",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Praful Avinashrao Maskar",
+      "phone": "+918308264711",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA06642a43da0612808dfd7603ca73cc7b": {
+    "candidate_name": "Vaishnavi Patil",
+    "candidate_phone": "+919422604848",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Vaishnavi Patil",
+      "phone": "+919422604848",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAaa8f58dc7a10c854987c461cb210e488": {
+    "candidate_name": "PRANIL SAVALE",
+    "candidate_phone": "+918080422304",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PRANIL SAVALE",
+      "phone": "+918080422304",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA25de9d24919843f018896a42cdf2f7dc": {
+    "candidate_name": "ADITYA NAGARE",
+    "candidate_phone": "+917498317995",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "ADITYA NAGARE",
+      "phone": "+917498317995",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAa4acf22020745f562db974aa2b483efe": {
+    "candidate_name": "Pankaj Baghele",
+    "candidate_phone": "+919673949795",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Pankaj Baghele",
+      "phone": "+919673949795",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA49a2bffd2f90e48e9e925fa13f22e921": {
+    "candidate_name": "MANSI DHAVALE",
+    "candidate_phone": "+917387485081",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "MANSI DHAVALE",
+      "phone": "+917387485081",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAdbb441f70a7c4b214c3b27bda1f88da0": {
+    "candidate_name": "RUTUJA PATIL",
+    "candidate_phone": "+919898820243",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "RUTUJA PATIL",
+      "phone": "+919898820243",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA4f33fde6d00916add96d52f5fb65899f": {
+    "candidate_name": "Akshay Sunil Patil",
+    "candidate_phone": "+919561649834",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Akshay Sunil Patil",
+      "phone": "+919561649834",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA486811135d4f7dca75971a6b137c021f": {
+    "candidate_name": "Kunal Kalyan Jagtap",
+    "candidate_phone": "+917028305502",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Kunal Kalyan Jagtap",
+      "phone": "+917028305502",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAb507b4c49d116dd316cb50dd6766e17d": {
+    "candidate_name": "AISHWARYA RANA",
+    "candidate_phone": "+918482923677",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "AISHWARYA RANA",
+      "phone": "+918482923677",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAdcd2952e376ac19ce93c86613464d5e3": {
+    "candidate_name": "AKASH KUMAR SINGH",
+    "candidate_phone": "+918109474701",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "AKASH KUMAR SINGH",
+      "phone": "+918109474701",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA14ab6659417968f8a9cb6fdb3e51ead0": {
+    "candidate_name": "KIRUBHA SHREE",
+    "candidate_phone": "+917676075450",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "KIRUBHA SHREE",
+      "phone": "+917676075450",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAdc5563a844275cdd25fed4ca285c754c": {
+    "candidate_name": "Ashutosh Mishra",
+    "candidate_phone": "+918305870369",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ashutosh Mishra",
+      "phone": "+918305870369",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAc8eeade6644c8d3a0f00cf58097cef47": {
+    "candidate_name": "PARAG KHARWADE",
+    "candidate_phone": "+919209657473",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PARAG KHARWADE",
+      "phone": "+919209657473",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA1824f66cb7cb922d0016a556e558e7fb": {
+    "candidate_name": "Nainisha Sanjay Bhosale",
+    "candidate_phone": "+918208040480",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Nainisha Sanjay Bhosale",
+      "phone": "+918208040480",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAbeeeb42fea2be63d4467a54bf755d938": {
+    "candidate_name": "Mandar Ingole",
+    "candidate_phone": "+918698569045",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Mandar Ingole",
+      "phone": "+918698569045",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA8451889d43d246af1ef0c2ba96ab9918": {
+    "candidate_name": "TEJSWINI JAWARE",
+    "candidate_phone": "+919370856004",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "TEJSWINI JAWARE",
+      "phone": "+919370856004",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA0a878526da1ccdb5c27e7c9f8f2d8c20": {
+    "candidate_name": "Ishwar Ambad",
+    "candidate_phone": "+918600576080",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ishwar Ambad",
+      "phone": "+918600576080",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAb81ccc846c43c5b22277c23c5a5fc638": {
+    "candidate_name": "Ankush Surana",
+    "candidate_phone": "+919116995972",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ankush Surana",
+      "phone": "+919116995972",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAf3d077a6c5fbbce87b09d4c33300e239": {
+    "candidate_name": "SAMIKSHA MAHURKAR",
+    "candidate_phone": "+918411994990",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SAMIKSHA MAHURKAR",
+      "phone": "+918411994990",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA73b372866420103d9b631befecfbd2ba": {
+    "candidate_name": "SHIVANI YADAV",
+    "candidate_phone": "+91764909804",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SHIVANI YADAV",
+      "phone": "+91764909804",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAdba6aaa07c7ed7effd7998b6b9645798": {
+    "candidate_name": "Kunal Jagtap",
+    "candidate_phone": "+917028305502",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Kunal Jagtap",
+      "phone": "+917028305502",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAd16e725703b0659f3bfd074a4b078ae7": {
+    "candidate_name": "Sanket Patil",
+    "candidate_phone": "+919579046405",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Sanket Patil",
+      "phone": "+919579046405",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA5c599b95bd22345345fc79044a35b497": {
+    "candidate_name": "Subhash Shivram Mokase",
+    "candidate_phone": "+919021214347",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Subhash Shivram Mokase",
+      "phone": "+919021214347",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA6a26b0c2b2204c0e713e06cc890982f9": {
+    "candidate_name": "Chaitanya Nitinchandra Talathi",
+    "candidate_phone": "+917066706742",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Chaitanya Nitinchandra Talathi",
+      "phone": "+917066706742",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAec2322bff69e0df7c8b3562d6a077171": {
+    "candidate_name": "POOJA LOKHANDE",
+    "candidate_phone": "+917083050347",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "POOJA LOKHANDE",
+      "phone": "+917083050347",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA316fa3f1d86c41f81203457c0d522aab": {
+    "candidate_name": "PANKAJ KATKAR",
+    "candidate_phone": "+919156816174",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PANKAJ KATKAR",
+      "phone": "+919156816174",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAfec05aa278e93f3f1828d5f5e2cf0ca0": {
+    "candidate_name": "Akanksha Khode",
+    "candidate_phone": "+917773902239",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Akanksha Khode",
+      "phone": "+917773902239",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA9ddc69a9e8ea9741a3955d2735a08541": {
+    "candidate_name": "SANKET JADHAV",
+    "candidate_phone": "+918379848483",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SANKET JADHAV",
+      "phone": "+918379848483",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA2ee326d951c4e0109ca7c8835d2f0130": {
+    "candidate_name": "Ankit Malviya",
+    "candidate_phone": "+919424419855",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ankit Malviya",
+      "phone": "+919424419855",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA916ea861389f74eb684303df758052a2": {
+    "candidate_name": "SAMIKSHA MAHURKAR",
+    "candidate_phone": "+918411994990",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SAMIKSHA MAHURKAR",
+      "phone": "+918411994990",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA96351ada4858291643dafc6877b18f74": {
+    "candidate_name": "Rajat Raj",
+    "candidate_phone": "+917002115411",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Rajat Raj",
+      "phone": "+917002115411",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA11a05e3d27e94100138b041a19d021e9": {
+    "candidate_name": "PATIL PRASHANT",
+    "candidate_phone": "+918460633805",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PATIL PRASHANT",
+      "phone": "+918460633805",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAdfe9bd4d57a0c10d20df586dc8321b7f": {
+    "candidate_name": "MAYUR SANDEEP KADAM",
+    "candidate_phone": "+918237431625",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "MAYUR SANDEEP KADAM",
+      "phone": "+918237431625",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA31fa29229f67e528ac82ca9f97bf3729": {
+    "candidate_name": "Satyansh Rai",
+    "candidate_phone": "+916306239692",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Satyansh Rai",
+      "phone": "+916306239692",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA04b114a2fe9472a377da393e3df90434": {
+    "candidate_name": "Saurabh Vasant Bhosale",
+    "candidate_phone": "+918600757423",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Saurabh Vasant Bhosale",
+      "phone": "+918600757423",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA8a52e28bb2f24ea6ea3a26b9e12f654e": {
+    "candidate_name": "SAGAR KESHAVE",
+    "candidate_phone": "+919850411276",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SAGAR KESHAVE",
+      "phone": "+919850411276",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAc4157c3d780eadeef97c12da34e9fc65": {
+    "candidate_name": "Shirish Utage",
+    "candidate_phone": "+918237238132",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Shirish Utage",
+      "phone": "+918237238132",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA948d7550bd35c695d33a20cc7bd6cf81": {
+    "candidate_name": "Yash Tapase",
+    "candidate_phone": "+919373865027",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Yash Tapase",
+      "phone": "+919373865027",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA00fa28f78c8e7aa79a40fab2f5f3aee8": {
+    "candidate_name": "ANANTA KALE",
+    "candidate_phone": "+918149203726",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "ANANTA KALE",
+      "phone": "+918149203726",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA2436d521204dacae3276f329d4148928": {
+    "candidate_name": "Yash Tadiyal",
+    "candidate_phone": "+919104773358",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Yash Tadiyal",
+      "phone": "+919104773358",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA2cc8ed5a951a32189ba0fec2d94d3adb": {
+    "candidate_name": "Mukund Bagul",
+    "candidate_phone": "+919022122317",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Mukund Bagul",
+      "phone": "+919022122317",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAe2ad87577ba273a08f4b51dfb4527d2d": {
+    "candidate_name": "Shruti Ambekar",
+    "candidate_phone": "+918530298856",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Shruti Ambekar",
+      "phone": "+918530298856",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAde074c76103971ad4650f3ae514f26ff": {
+    "candidate_name": "Sheshang Harge",
+    "candidate_phone": "+918766910515",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Sheshang Harge",
+      "phone": "+918766910515",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA337621b8d85cf728907e56f99c89f94c": {
+    "candidate_name": "prashant malge",
+    "candidate_phone": "+919359780193",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "prashant malge",
+      "phone": "+919359780193",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAf94d6d42719993e46a0af254eebf8db8": {
+    "candidate_name": "Sameer Satpute",
+    "candidate_phone": "+916304470698",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Sameer Satpute",
+      "phone": "+916304470698",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA9d9882aaf81d610bf16b8d47bd52a71c": {
+    "candidate_name": "Somnath Kshirsagar",
+    "candidate_phone": "+919518710423",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Somnath Kshirsagar",
+      "phone": "+919518710423",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA171081314de4ce8a0796150011c72be3": {
+    "candidate_name": "VAIBHAV GHORPADE",
+    "candidate_phone": "+917745046077",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "VAIBHAV GHORPADE",
+      "phone": "+917745046077",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA39744342dc39e169086ef6c837b98f23": {
+    "candidate_name": "Omkar Satve",
+    "candidate_phone": "+918275688637",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Omkar Satve",
+      "phone": "+918275688637",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA2ce70a705048256f36e1daf1594dde5e": {
+    "candidate_name": "Anil Lokare",
+    "candidate_phone": "+919420576832",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045420",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Anil Lokare",
+      "phone": "+919420576832",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA5395f67cc8cfdb050e177ca18610d269": {
+    "candidate_name": "ASHISH M. VORA",
+    "candidate_phone": "+91918619570449",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "ASHISH M. VORA",
+      "phone": "+91918619570449",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA5adcef7d995ffbb8c56ccee0d592d44d": {
+    "candidate_name": "Ritesh Mahale",
+    "candidate_phone": "+91919561005117",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ritesh Mahale",
+      "phone": "+91919561005117",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA84e37bdb364959bc2871e383cca53217": {
+    "candidate_name": "VISHNU BALASO KARANDE",
+    "candidate_phone": "+91919175460615",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "VISHNU BALASO KARANDE",
+      "phone": "+91919175460615",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA268ec10739abd5a5af7b2978d6f61c07": {
+    "candidate_name": "Akshay Borkar",
+    "candidate_phone": "+917030061343",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Akshay Borkar",
+      "phone": "+917030061343",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA6ad9b7193fb772e4b666329f228957ff": {
+    "candidate_name": "VEDANSH SAINI",
+    "candidate_phone": "+919826666148",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "VEDANSH SAINI",
+      "phone": "+919826666148",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAc022b8819904258091d37103d10431f0": {
+    "candidate_name": "Srushti Pawar",
+    "candidate_phone": "+919552430387",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Srushti Pawar",
+      "phone": "+919552430387",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA11ee3517ca9859b0f0e3d77c60c714b6": {
+    "candidate_name": "HARSHIT SHARMA",
+    "candidate_phone": "+919636745647",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "HARSHIT SHARMA",
+      "phone": "+919636745647",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA9fe2bf753c1bc24e3dfb8f7a3a506205": {
+    "candidate_name": "RITIKA NAYAK",
+    "candidate_phone": "+919330137341",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "RITIKA NAYAK",
+      "phone": "+919330137341",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAf88cd1a842c77e940921bfb26edcae1e": {
+    "candidate_name": "Aniket Dattaram Desai",
+    "candidate_phone": "+919594909568",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Aniket Dattaram Desai",
+      "phone": "+919594909568",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAb4bfbbc441cd105e95b6b66849bc0b20": {
+    "candidate_name": "Praful Avinashrao Maskar",
+    "candidate_phone": "+918308264711",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Praful Avinashrao Maskar",
+      "phone": "+918308264711",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA1f97f4bf42d6c8c5075f35b4e3c19c74": {
+    "candidate_name": "Vaishnavi Patil",
+    "candidate_phone": "+919422604848",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Vaishnavi Patil",
+      "phone": "+919422604848",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAaaf46b93962625302915b577f1c99609": {
+    "candidate_name": "PRANIL SAVALE",
+    "candidate_phone": "+918080422304",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PRANIL SAVALE",
+      "phone": "+918080422304",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA9c9c080eb35be0bc279617096e523d4b": {
+    "candidate_name": "ADITYA NAGARE",
+    "candidate_phone": "+917498317995",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "ADITYA NAGARE",
+      "phone": "+917498317995",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA03a63afe93b1cb9be6a09eff9ce8d10b": {
+    "candidate_name": "Pankaj Baghele",
+    "candidate_phone": "+919673949795",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Pankaj Baghele",
+      "phone": "+919673949795",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA1fd4772cd93cb634d6f46ca3bb013d5f": {
+    "candidate_name": "MANSI DHAVALE",
+    "candidate_phone": "+917387485081",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "MANSI DHAVALE",
+      "phone": "+917387485081",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA25d9a1ef726b0e3aff3785a8740b84e3": {
+    "candidate_name": "RUTUJA PATIL",
+    "candidate_phone": "+919898820243",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "RUTUJA PATIL",
+      "phone": "+919898820243",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA1cd3dec6d7b335132881fff5fa0b4906": {
+    "candidate_name": "Akshay Sunil Patil",
+    "candidate_phone": "+919561649834",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Akshay Sunil Patil",
+      "phone": "+919561649834",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA121c826450f5bd661420368972a9b190": {
+    "candidate_name": "Kunal Kalyan Jagtap",
+    "candidate_phone": "+917028305502",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Kunal Kalyan Jagtap",
+      "phone": "+917028305502",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA9627eb4ef60346c103e36edfb51b1976": {
+    "candidate_name": "AISHWARYA RANA",
+    "candidate_phone": "+918482923677",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "AISHWARYA RANA",
+      "phone": "+918482923677",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA6080190d524258da0c5d1d90baa9c4e9": {
+    "candidate_name": "AKASH KUMAR SINGH",
+    "candidate_phone": "+918109474701",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "AKASH KUMAR SINGH",
+      "phone": "+918109474701",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAe4cae91682ceab4e6305067c5e10c2b3": {
+    "candidate_name": "KIRUBHA SHREE",
+    "candidate_phone": "+917676075450",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "KIRUBHA SHREE",
+      "phone": "+917676075450",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA71690f00b41fe1bb130b1eb4dc5c4de7": {
+    "candidate_name": "Ashutosh Mishra",
+    "candidate_phone": "+918305870369",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ashutosh Mishra",
+      "phone": "+918305870369",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA2368f6e06adc7c7f4855cee192139083": {
+    "candidate_name": "PARAG KHARWADE",
+    "candidate_phone": "+919209657473",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PARAG KHARWADE",
+      "phone": "+919209657473",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAb4b5f802ea19cf5171cfe00fa3981ff7": {
+    "candidate_name": "Nainisha Sanjay Bhosale",
+    "candidate_phone": "+918208040480",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Nainisha Sanjay Bhosale",
+      "phone": "+918208040480",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA1137177c5db6ac755505f0b513ea2308": {
+    "candidate_name": "Mandar Ingole",
+    "candidate_phone": "+918698569045",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Mandar Ingole",
+      "phone": "+918698569045",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA0177f61649bb152b2d0a5c59a48a5456": {
+    "candidate_name": "TEJSWINI JAWARE",
+    "candidate_phone": "+919370856004",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "TEJSWINI JAWARE",
+      "phone": "+919370856004",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAf7f0a57cd8df9ecbe6d3eecdf6a77318": {
+    "candidate_name": "Ishwar Ambad",
+    "candidate_phone": "+918600576080",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ishwar Ambad",
+      "phone": "+918600576080",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA66242a237c7cb1a4649972da4215c1d1": {
+    "candidate_name": "Ankush Surana",
+    "candidate_phone": "+919116995972",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ankush Surana",
+      "phone": "+919116995972",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAd7932f6f00be5916f767488a666f4fc3": {
+    "candidate_name": "SAMIKSHA MAHURKAR",
+    "candidate_phone": "+918411994990",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SAMIKSHA MAHURKAR",
+      "phone": "+918411994990",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAb0e3552ad3b0d51ba031095eed29fa24": {
+    "candidate_name": "SHIVANI YADAV",
+    "candidate_phone": "+91764909804",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SHIVANI YADAV",
+      "phone": "+91764909804",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAb7098e53ac3462f41dbdc8ddc5329118": {
+    "candidate_name": "Kunal Jagtap",
+    "candidate_phone": "+917028305502",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Kunal Jagtap",
+      "phone": "+917028305502",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA1e62949392a10eb3d34c49ac62362b86": {
+    "candidate_name": "Sanket Patil",
+    "candidate_phone": "+919579046405",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Sanket Patil",
+      "phone": "+919579046405",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA86b7f32c93706b74afd65905f38629b0": {
+    "candidate_name": "Subhash Shivram Mokase",
+    "candidate_phone": "+919021214347",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Subhash Shivram Mokase",
+      "phone": "+919021214347",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA73ee0db61ed0049c46d69b95e8596d1d": {
+    "candidate_name": "Chaitanya Nitinchandra Talathi",
+    "candidate_phone": "+917066706742",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Chaitanya Nitinchandra Talathi",
+      "phone": "+917066706742",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA439a6a3adce6865f961fbd6fde2ecd1b": {
+    "candidate_name": "POOJA LOKHANDE",
+    "candidate_phone": "+917083050347",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "POOJA LOKHANDE",
+      "phone": "+917083050347",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAf880529c90877703113a3d60f20b149b": {
+    "candidate_name": "PANKAJ KATKAR",
+    "candidate_phone": "+919156816174",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PANKAJ KATKAR",
+      "phone": "+919156816174",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA8322f930158da7654cb6c741e0d42307": {
+    "candidate_name": "Akanksha Khode",
+    "candidate_phone": "+917773902239",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Akanksha Khode",
+      "phone": "+917773902239",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA516f05a3cd4f738e10f9d615af8f3f22": {
+    "candidate_name": "SANKET JADHAV",
+    "candidate_phone": "+918379848483",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SANKET JADHAV",
+      "phone": "+918379848483",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAe13fd22e1530a2a94913609dc590ace4": {
+    "candidate_name": "Ankit Malviya",
+    "candidate_phone": "+919424419855",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ankit Malviya",
+      "phone": "+919424419855",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA0db4cfeba8f2f4d1203a569613ac9af8": {
+    "candidate_name": "SAMIKSHA MAHURKAR",
+    "candidate_phone": "+918411994990",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SAMIKSHA MAHURKAR",
+      "phone": "+918411994990",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA91e829dd03d4fe58c2cad53befea1ebf": {
+    "candidate_name": "Rajat Raj",
+    "candidate_phone": "+917002115411",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Rajat Raj",
+      "phone": "+917002115411",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAeeb67619edfdf83797430583f1f6c38c": {
+    "candidate_name": "PATIL PRASHANT",
+    "candidate_phone": "+918460633805",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PATIL PRASHANT",
+      "phone": "+918460633805",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA83e5c009ae72c7a48bc2d1a6ec871b10": {
+    "candidate_name": "MAYUR SANDEEP KADAM",
+    "candidate_phone": "+918237431625",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "MAYUR SANDEEP KADAM",
+      "phone": "+918237431625",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAd6ac9939ac9f921283901106b5de85bd": {
+    "candidate_name": "Satyansh Rai",
+    "candidate_phone": "+916306239692",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Satyansh Rai",
+      "phone": "+916306239692",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA5e674c3cc4827686501e3d8f22ead258": {
+    "candidate_name": "Saurabh Vasant Bhosale",
+    "candidate_phone": "+918600757423",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Saurabh Vasant Bhosale",
+      "phone": "+918600757423",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA79a1143f020913bba16b1e083df545cb": {
+    "candidate_name": "SAGAR KESHAVE",
+    "candidate_phone": "+919850411276",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SAGAR KESHAVE",
+      "phone": "+919850411276",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAb2019d948ac204ad19e66f4ceae7a74b": {
+    "candidate_name": "Shirish Utage",
+    "candidate_phone": "+918237238132",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Shirish Utage",
+      "phone": "+918237238132",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA6ab4851607a373e2392a94f637825741": {
+    "candidate_name": "Yash Tapase",
+    "candidate_phone": "+919373865027",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Yash Tapase",
+      "phone": "+919373865027",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAefce0fc1657cf8ced6f5379abeac0e09": {
+    "candidate_name": "ANANTA KALE",
+    "candidate_phone": "+918149203726",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "ANANTA KALE",
+      "phone": "+918149203726",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA9cf1697f560739c51060b53573fdcc10": {
+    "candidate_name": "Yash Tadiyal",
+    "candidate_phone": "+919104773358",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Yash Tadiyal",
+      "phone": "+919104773358",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAa9500b9466ae0c6496ebc9b64d4e432a": {
+    "candidate_name": "Mukund Bagul",
+    "candidate_phone": "+919022122317",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Mukund Bagul",
+      "phone": "+919022122317",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAb6210755451c54c127b2f77844cae43c": {
+    "candidate_name": "Shruti Ambekar",
+    "candidate_phone": "+918530298856",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Shruti Ambekar",
+      "phone": "+918530298856",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAa42e9b707a55b9c75b9284a443543670": {
+    "candidate_name": "Sheshang Harge",
+    "candidate_phone": "+918766910515",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Sheshang Harge",
+      "phone": "+918766910515",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA3bcf3c25cc02b686f467e0e3e28e9683": {
+    "candidate_name": "prashant malge",
+    "candidate_phone": "+919359780193",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "prashant malge",
+      "phone": "+919359780193",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA00de07a9a7e08d95fc499bfbf94d3744": {
+    "candidate_name": "Sameer Satpute",
+    "candidate_phone": "+916304470698",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Sameer Satpute",
+      "phone": "+916304470698",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA0dd6925e99ad60dec941c745244b4464": {
+    "candidate_name": "Somnath Kshirsagar",
+    "candidate_phone": "+919518710423",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Somnath Kshirsagar",
+      "phone": "+919518710423",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA5b5d8d51c86da41f478c2f8ba7162608": {
+    "candidate_name": "VAIBHAV GHORPADE",
+    "candidate_phone": "+917745046077",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "VAIBHAV GHORPADE",
+      "phone": "+917745046077",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAe32710cb4ff7e1a7ca1ed75120d38d42": {
+    "candidate_name": "Omkar Satve",
+    "candidate_phone": "+918275688637",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Omkar Satve",
+      "phone": "+918275688637",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA155fcea43e74c53cb59d07a79fe4fe1f": {
+    "candidate_name": "Anil Lokare",
+    "candidate_phone": "+919420576832",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_045617",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Anil Lokare",
+      "phone": "+919420576832",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAa0eb9f113db3c3d669ddbee9ce7e9afb": {
+    "candidate_name": "ASHISH M. VORA",
+    "candidate_phone": "+91918619570449",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "ASHISH M. VORA",
+      "phone": "+91918619570449",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA39ce325188a173c14a6338bf834d7a46": {
+    "candidate_name": "Ritesh Mahale",
+    "candidate_phone": "+91919561005117",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ritesh Mahale",
+      "phone": "+91919561005117",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA5a649d3c00e113546deb7b55158771e5": {
+    "candidate_name": "VISHNU BALASO KARANDE",
+    "candidate_phone": "+91919175460615",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "VISHNU BALASO KARANDE",
+      "phone": "+91919175460615",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAd152d5271a5735f3d499a6e5c58fbc9a": {
+    "candidate_name": "Akshay Borkar",
+    "candidate_phone": "+917030061343",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Akshay Borkar",
+      "phone": "+917030061343",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAa3535f88786ae6c12b08b71c6df974c8": {
+    "candidate_name": "VEDANSH SAINI",
+    "candidate_phone": "+919826666148",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "VEDANSH SAINI",
+      "phone": "+919826666148",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA1746ece8a7e9cf209b10d8dd5fd281ed": {
+    "candidate_name": "Srushti Pawar",
+    "candidate_phone": "+919552430387",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Srushti Pawar",
+      "phone": "+919552430387",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA119969896b61927439fad241d37f9f02": {
+    "candidate_name": "HARSHIT SHARMA",
+    "candidate_phone": "+919636745647",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "HARSHIT SHARMA",
+      "phone": "+919636745647",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA59ef0fc0ab4c542ee3b052df42187d5a": {
+    "candidate_name": "RITIKA NAYAK",
+    "candidate_phone": "+919330137341",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "RITIKA NAYAK",
+      "phone": "+919330137341",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA54a18dc12d61eb1c832e8ff057c0869a": {
+    "candidate_name": "Aniket Dattaram Desai",
+    "candidate_phone": "+919594909568",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Aniket Dattaram Desai",
+      "phone": "+919594909568",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAa43f5745ac9fa4eec176be08aea0081c": {
+    "candidate_name": "Praful Avinashrao Maskar",
+    "candidate_phone": "+918308264711",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Praful Avinashrao Maskar",
+      "phone": "+918308264711",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAf95810e25a9a37a8c1d0dc2b4bd67716": {
+    "candidate_name": "Vaishnavi Patil",
+    "candidate_phone": "+919422604848",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Vaishnavi Patil",
+      "phone": "+919422604848",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAd2743d4d04a5d0be7f800ef5c696a290": {
+    "candidate_name": "PRANIL SAVALE",
+    "candidate_phone": "+918080422304",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PRANIL SAVALE",
+      "phone": "+918080422304",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAff0be91a5f502630d62aa294b15af0c6": {
+    "candidate_name": "ADITYA NAGARE",
+    "candidate_phone": "+917498317995",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "ADITYA NAGARE",
+      "phone": "+917498317995",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA6cccdb426bd05ae32ad0c2a9fdff8e24": {
+    "candidate_name": "Pankaj Baghele",
+    "candidate_phone": "+919673949795",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Pankaj Baghele",
+      "phone": "+919673949795",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA2bc1bf9403c84cad6b03de10db004545": {
+    "candidate_name": "MANSI DHAVALE",
+    "candidate_phone": "+917387485081",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "MANSI DHAVALE",
+      "phone": "+917387485081",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAfae47c5ad7f3c5ddcdb367cbd77d981d": {
+    "candidate_name": "RUTUJA PATIL",
+    "candidate_phone": "+919898820243",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "RUTUJA PATIL",
+      "phone": "+919898820243",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAb68f8320244f067ee02147e0036782ff": {
+    "candidate_name": "Akshay Sunil Patil",
+    "candidate_phone": "+919561649834",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Akshay Sunil Patil",
+      "phone": "+919561649834",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAdeed7a318d7575dab6e43cd204d34ed4": {
+    "candidate_name": "Kunal Kalyan Jagtap",
+    "candidate_phone": "+917028305502",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Kunal Kalyan Jagtap",
+      "phone": "+917028305502",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAdd3b7129217a359bcc5650072610df43": {
+    "candidate_name": "AISHWARYA RANA",
+    "candidate_phone": "+918482923677",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "AISHWARYA RANA",
+      "phone": "+918482923677",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAafac6b6f549612ffe07eded15578be5c": {
+    "candidate_name": "AKASH KUMAR SINGH",
+    "candidate_phone": "+918109474701",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "AKASH KUMAR SINGH",
+      "phone": "+918109474701",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA8738828e9e4cde51c19aaf6b37b0fcc6": {
+    "candidate_name": "KIRUBHA SHREE",
+    "candidate_phone": "+917676075450",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "KIRUBHA SHREE",
+      "phone": "+917676075450",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA3faf1c64187ddcaf6ecc5db6b0de7097": {
+    "candidate_name": "Ashutosh Mishra",
+    "candidate_phone": "+918305870369",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ashutosh Mishra",
+      "phone": "+918305870369",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAd0138bf57afb11535e495fea2ab80fb5": {
+    "candidate_name": "PARAG KHARWADE",
+    "candidate_phone": "+919209657473",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PARAG KHARWADE",
+      "phone": "+919209657473",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA8ea6fe3e8ab571305d75970d4a8b0d05": {
+    "candidate_name": "Nainisha Sanjay Bhosale",
+    "candidate_phone": "+918208040480",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Nainisha Sanjay Bhosale",
+      "phone": "+918208040480",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA67638f88e74cbbf5ec80f35d50142f1e": {
+    "candidate_name": "Mandar Ingole",
+    "candidate_phone": "+918698569045",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Mandar Ingole",
+      "phone": "+918698569045",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAb6dbeb87f1f87ce76ce6cdc8f21ccb96": {
+    "candidate_name": "TEJSWINI JAWARE",
+    "candidate_phone": "+919370856004",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "TEJSWINI JAWARE",
+      "phone": "+919370856004",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA4e72a51896d88a3bb4fde1b6aca47ab9": {
+    "candidate_name": "Ishwar Ambad",
+    "candidate_phone": "+918600576080",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ishwar Ambad",
+      "phone": "+918600576080",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAd5005119436448e8de40f67acee44b85": {
+    "candidate_name": "Ankush Surana",
+    "candidate_phone": "+919116995972",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ankush Surana",
+      "phone": "+919116995972",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA5f17e712e73dc953527e6bd6c55a81fe": {
+    "candidate_name": "SAMIKSHA MAHURKAR",
+    "candidate_phone": "+918411994990",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SAMIKSHA MAHURKAR",
+      "phone": "+918411994990",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA5186405742a8746b0779aabaaa879842": {
+    "candidate_name": "SHIVANI YADAV",
+    "candidate_phone": "+91764909804",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SHIVANI YADAV",
+      "phone": "+91764909804",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA0be64002d0c7ae6646a4e2ee9998d61f": {
+    "candidate_name": "Kunal Jagtap",
+    "candidate_phone": "+917028305502",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Kunal Jagtap",
+      "phone": "+917028305502",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAd25ce2ada91aa51efca11e85e62ccd9a": {
+    "candidate_name": "Sanket Patil",
+    "candidate_phone": "+919579046405",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Sanket Patil",
+      "phone": "+919579046405",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAa456a2b8a6ef8033d7095432e47d0d82": {
+    "candidate_name": "Subhash Shivram Mokase",
+    "candidate_phone": "+919021214347",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Subhash Shivram Mokase",
+      "phone": "+919021214347",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA42c3f15680c6d971a62feaefe3272351": {
+    "candidate_name": "Chaitanya Nitinchandra Talathi",
+    "candidate_phone": "+917066706742",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Chaitanya Nitinchandra Talathi",
+      "phone": "+917066706742",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA14322485e5a567a6209169ec6a579bdb": {
+    "candidate_name": "POOJA LOKHANDE",
+    "candidate_phone": "+917083050347",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "POOJA LOKHANDE",
+      "phone": "+917083050347",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAfeff0ad9a8f7599d287c69903c8ff2d1": {
+    "candidate_name": "PANKAJ KATKAR",
+    "candidate_phone": "+919156816174",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PANKAJ KATKAR",
+      "phone": "+919156816174",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA643c5511b98842118dad5214ee0ea296": {
+    "candidate_name": "Akanksha Khode",
+    "candidate_phone": "+917773902239",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Akanksha Khode",
+      "phone": "+917773902239",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA5f0df009f623f099d7669522e1b45e53": {
+    "candidate_name": "SANKET JADHAV",
+    "candidate_phone": "+918379848483",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SANKET JADHAV",
+      "phone": "+918379848483",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA433928fd6c77f4e30782b63f54f0f064": {
+    "candidate_name": "Ankit Malviya",
+    "candidate_phone": "+919424419855",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ankit Malviya",
+      "phone": "+919424419855",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA73ad781762c2e336713eb05dd5572221": {
+    "candidate_name": "SAMIKSHA MAHURKAR",
+    "candidate_phone": "+918411994990",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SAMIKSHA MAHURKAR",
+      "phone": "+918411994990",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA16adf23a069724cecf905efe5fddcf5b": {
+    "candidate_name": "Rajat Raj",
+    "candidate_phone": "+917002115411",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Rajat Raj",
+      "phone": "+917002115411",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA6df82e1aec0eda08d856253cd5dcd30f": {
+    "candidate_name": "PATIL PRASHANT",
+    "candidate_phone": "+918460633805",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PATIL PRASHANT",
+      "phone": "+918460633805",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA7dbc48076bdb1f722cc5053d1b005dea": {
+    "candidate_name": "MAYUR SANDEEP KADAM",
+    "candidate_phone": "+918237431625",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "MAYUR SANDEEP KADAM",
+      "phone": "+918237431625",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAa8e09317f01e564316a11bcde514f712": {
+    "candidate_name": "Satyansh Rai",
+    "candidate_phone": "+916306239692",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Satyansh Rai",
+      "phone": "+916306239692",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAc11e72b06acab7b4d7f0c31d0e166bcd": {
+    "candidate_name": "Saurabh Vasant Bhosale",
+    "candidate_phone": "+918600757423",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Saurabh Vasant Bhosale",
+      "phone": "+918600757423",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAe08ef8928028584a2a9c772cb5d503d9": {
+    "candidate_name": "SAGAR KESHAVE",
+    "candidate_phone": "+919850411276",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SAGAR KESHAVE",
+      "phone": "+919850411276",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA7bdc4535f2921906815bb663ad796cf7": {
+    "candidate_name": "Shirish Utage",
+    "candidate_phone": "+918237238132",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Shirish Utage",
+      "phone": "+918237238132",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAdd6bb8175242f971c830c9c5e6c99a72": {
+    "candidate_name": "Yash Tapase",
+    "candidate_phone": "+919373865027",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Yash Tapase",
+      "phone": "+919373865027",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAba7d0f7c667499fcd2d2de35c01b6f46": {
+    "candidate_name": "ANANTA KALE",
+    "candidate_phone": "+918149203726",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "ANANTA KALE",
+      "phone": "+918149203726",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA631b1d54f8db6d0c1b7d00639f05baa5": {
+    "candidate_name": "Yash Tadiyal",
+    "candidate_phone": "+919104773358",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Yash Tadiyal",
+      "phone": "+919104773358",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA7b8843c71a5cf515da692e89fe51a3de": {
+    "candidate_name": "Mukund Bagul",
+    "candidate_phone": "+919022122317",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Mukund Bagul",
+      "phone": "+919022122317",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAae81d5b20093ef76e28d6f1a9e755b0d": {
+    "candidate_name": "Shruti Ambekar",
+    "candidate_phone": "+918530298856",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Shruti Ambekar",
+      "phone": "+918530298856",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA2827764ea28a61029dc58c086d471b73": {
+    "candidate_name": "Sheshang Harge",
+    "candidate_phone": "+918766910515",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Sheshang Harge",
+      "phone": "+918766910515",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAfd369ed258e7cb87dc383b9ecddb4d4e": {
+    "candidate_name": "prashant malge",
+    "candidate_phone": "+919359780193",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "prashant malge",
+      "phone": "+919359780193",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA47ebeb7e6a618037de7199d07f421e3a": {
+    "candidate_name": "Sameer Satpute",
+    "candidate_phone": "+916304470698",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Sameer Satpute",
+      "phone": "+916304470698",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA9ed4a2b9a88b2f22f999d29559122f80": {
+    "candidate_name": "Somnath Kshirsagar",
+    "candidate_phone": "+919518710423",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Somnath Kshirsagar",
+      "phone": "+919518710423",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA196bfa3c69f548fc4d8fe3550349450c": {
+    "candidate_name": "VAIBHAV GHORPADE",
+    "candidate_phone": "+917745046077",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "VAIBHAV GHORPADE",
+      "phone": "+917745046077",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA42f28c6f004d568fef346df4e6a5bbc5": {
+    "candidate_name": "Omkar Satve",
+    "candidate_phone": "+918275688637",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Omkar Satve",
+      "phone": "+918275688637",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAfc6b28b07577f3e0cd72bf31d039cac9": {
+    "candidate_name": "Anil Lokare",
+    "candidate_phone": "+919420576832",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050130",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Anil Lokare",
+      "phone": "+919420576832",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA06e653faa823324c651b0da18a8985af": {
+    "candidate_name": "ASHISH M. VORA",
+    "candidate_phone": "+91918619570449",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "ASHISH M. VORA",
+      "phone": "+91918619570449",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA93613e2a83702b7a3baf5a74b0685beb": {
+    "candidate_name": "Ritesh Mahale",
+    "candidate_phone": "+91919561005117",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ritesh Mahale",
+      "phone": "+91919561005117",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAf98b3895fd9f4821ebedb1620ed6fe25": {
+    "candidate_name": "VISHNU BALASO KARANDE",
+    "candidate_phone": "+91919175460615",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "VISHNU BALASO KARANDE",
+      "phone": "+91919175460615",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAe00e3e25a4903a6cbb719ffe3f87ecef": {
+    "candidate_name": "Akshay Borkar",
+    "candidate_phone": "+917030061343",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Akshay Borkar",
+      "phone": "+917030061343",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA1b459562726cd9107b97526fdd23b081": {
+    "candidate_name": "VEDANSH SAINI",
+    "candidate_phone": "+919826666148",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "VEDANSH SAINI",
+      "phone": "+919826666148",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAce02e401ea06e3e94ecaa21f6da5fd03": {
+    "candidate_name": "Srushti Pawar",
+    "candidate_phone": "+919552430387",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Srushti Pawar",
+      "phone": "+919552430387",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA1dff25568c83d0b9e2b3544933992e47": {
+    "candidate_name": "HARSHIT SHARMA",
+    "candidate_phone": "+919636745647",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "HARSHIT SHARMA",
+      "phone": "+919636745647",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA8df7a09e04354392c105f44feb47eb1a": {
+    "candidate_name": "RITIKA NAYAK",
+    "candidate_phone": "+919330137341",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "RITIKA NAYAK",
+      "phone": "+919330137341",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA3296ac9d0cd272bfa04e1286c056574c": {
+    "candidate_name": "Aniket Dattaram Desai",
+    "candidate_phone": "+919594909568",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Aniket Dattaram Desai",
+      "phone": "+919594909568",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA095ac05825c0a2ba631a52d01614a5d4": {
+    "candidate_name": "Praful Avinashrao Maskar",
+    "candidate_phone": "+918308264711",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Praful Avinashrao Maskar",
+      "phone": "+918308264711",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA7621323caef50bd47001bdc01495b9a0": {
+    "candidate_name": "Vaishnavi Patil",
+    "candidate_phone": "+919422604848",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Vaishnavi Patil",
+      "phone": "+919422604848",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAf6426ea37ed97f55c4d8d5bb3e2ff8ae": {
+    "candidate_name": "PRANIL SAVALE",
+    "candidate_phone": "+918080422304",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PRANIL SAVALE",
+      "phone": "+918080422304",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA972e3d3dc4d31b9962932381770e1da7": {
+    "candidate_name": "ADITYA NAGARE",
+    "candidate_phone": "+917498317995",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "ADITYA NAGARE",
+      "phone": "+917498317995",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA002207aaaada4f6f4293d02249511758": {
+    "candidate_name": "Pankaj Baghele",
+    "candidate_phone": "+919673949795",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Pankaj Baghele",
+      "phone": "+919673949795",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA5023f5ccb59b94259ec42307126fb5a7": {
+    "candidate_name": "MANSI DHAVALE",
+    "candidate_phone": "+917387485081",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "MANSI DHAVALE",
+      "phone": "+917387485081",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAff0e39c497aae6c3098cb86135f90f1a": {
+    "candidate_name": "RUTUJA PATIL",
+    "candidate_phone": "+919898820243",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "RUTUJA PATIL",
+      "phone": "+919898820243",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAb9dae781d37af3701bae18933e98f68d": {
+    "candidate_name": "Akshay Sunil Patil",
+    "candidate_phone": "+919561649834",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Akshay Sunil Patil",
+      "phone": "+919561649834",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA111d6468faf053a4b8c1ad336dd03937": {
+    "candidate_name": "Kunal Kalyan Jagtap",
+    "candidate_phone": "+917028305502",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Kunal Kalyan Jagtap",
+      "phone": "+917028305502",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAf87595b797ed484dd6b9f403c35bdfd4": {
+    "candidate_name": "AISHWARYA RANA",
+    "candidate_phone": "+918482923677",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "AISHWARYA RANA",
+      "phone": "+918482923677",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA3371645d788d77c4183d4728f64c1cfe": {
+    "candidate_name": "AKASH KUMAR SINGH",
+    "candidate_phone": "+918109474701",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "AKASH KUMAR SINGH",
+      "phone": "+918109474701",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA4d6aab871466841c9a4eed200cae238e": {
+    "candidate_name": "KIRUBHA SHREE",
+    "candidate_phone": "+917676075450",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "KIRUBHA SHREE",
+      "phone": "+917676075450",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA9df1cdc332da8f38d793cc74dab30f01": {
+    "candidate_name": "Ashutosh Mishra",
+    "candidate_phone": "+918305870369",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ashutosh Mishra",
+      "phone": "+918305870369",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAf4088068be90c71e4b4da31909401337": {
+    "candidate_name": "PARAG KHARWADE",
+    "candidate_phone": "+919209657473",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PARAG KHARWADE",
+      "phone": "+919209657473",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAf0753fd6a1ebbbab9d7f7c7a644d3cf2": {
+    "candidate_name": "Nainisha Sanjay Bhosale",
+    "candidate_phone": "+918208040480",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Nainisha Sanjay Bhosale",
+      "phone": "+918208040480",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA976eb17f7cc667ff9fe69fe64d155e27": {
+    "candidate_name": "Mandar Ingole",
+    "candidate_phone": "+918698569045",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Mandar Ingole",
+      "phone": "+918698569045",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA869d4ac9c3d0b0322a48b2ed42bd7e4d": {
+    "candidate_name": "TEJSWINI JAWARE",
+    "candidate_phone": "+919370856004",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "TEJSWINI JAWARE",
+      "phone": "+919370856004",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAe8a53c697a9b952f06c852ac5645b61c": {
+    "candidate_name": "Ishwar Ambad",
+    "candidate_phone": "+918600576080",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ishwar Ambad",
+      "phone": "+918600576080",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAc50959c02e2a303a460ff31ce119502c": {
+    "candidate_name": "Ankush Surana",
+    "candidate_phone": "+919116995972",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ankush Surana",
+      "phone": "+919116995972",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA74ca08dc0f6430cbe5e8d6141bed8334": {
+    "candidate_name": "SAMIKSHA MAHURKAR",
+    "candidate_phone": "+918411994990",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SAMIKSHA MAHURKAR",
+      "phone": "+918411994990",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA010f6f86597537a9cfcf3326a58e95f5": {
+    "candidate_name": "SHIVANI YADAV",
+    "candidate_phone": "+91764909804",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SHIVANI YADAV",
+      "phone": "+91764909804",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAd77a6d40eb630f7a6d09dc9fcbd1c8ba": {
+    "candidate_name": "Kunal Jagtap",
+    "candidate_phone": "+917028305502",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Kunal Jagtap",
+      "phone": "+917028305502",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA6cda01baa3c9fbd7434556d37a73d057": {
+    "candidate_name": "Sanket Patil",
+    "candidate_phone": "+919579046405",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Sanket Patil",
+      "phone": "+919579046405",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAbbf6360ed45f1876d8dc05b0e1d2c490": {
+    "candidate_name": "Subhash Shivram Mokase",
+    "candidate_phone": "+919021214347",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Subhash Shivram Mokase",
+      "phone": "+919021214347",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA8a63f117c90bda9768ce7796f5b45992": {
+    "candidate_name": "Chaitanya Nitinchandra Talathi",
+    "candidate_phone": "+917066706742",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Chaitanya Nitinchandra Talathi",
+      "phone": "+917066706742",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAf27265254a857b19144d03c5a37ba234": {
+    "candidate_name": "POOJA LOKHANDE",
+    "candidate_phone": "+917083050347",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "POOJA LOKHANDE",
+      "phone": "+917083050347",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAbae5592fc19fc8f74532dd9985ce4a27": {
+    "candidate_name": "PANKAJ KATKAR",
+    "candidate_phone": "+919156816174",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PANKAJ KATKAR",
+      "phone": "+919156816174",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA2b479f1cc1a202b330fbc83073afc42e": {
+    "candidate_name": "Akanksha Khode",
+    "candidate_phone": "+917773902239",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Akanksha Khode",
+      "phone": "+917773902239",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAa6972de1cfb2a56213c761bc710d1671": {
+    "candidate_name": "SANKET JADHAV",
+    "candidate_phone": "+918379848483",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SANKET JADHAV",
+      "phone": "+918379848483",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA3fcd95e81112ee9d67a79c0e2efe63f1": {
+    "candidate_name": "Ankit Malviya",
+    "candidate_phone": "+919424419855",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Ankit Malviya",
+      "phone": "+919424419855",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA211367fc45f7c9ee1c946137d3d6c08b": {
+    "candidate_name": "SAMIKSHA MAHURKAR",
+    "candidate_phone": "+918411994990",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SAMIKSHA MAHURKAR",
+      "phone": "+918411994990",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA515451093a721411bc45a17917143c7e": {
+    "candidate_name": "Rajat Raj",
+    "candidate_phone": "+917002115411",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Rajat Raj",
+      "phone": "+917002115411",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA9a486df10a28bdb79bbc8a987a645a7f": {
+    "candidate_name": "PATIL PRASHANT",
+    "candidate_phone": "+918460633805",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "PATIL PRASHANT",
+      "phone": "+918460633805",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAd5b075dff037e96c5a08e9c7b7039746": {
+    "candidate_name": "MAYUR SANDEEP KADAM",
+    "candidate_phone": "+918237431625",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "MAYUR SANDEEP KADAM",
+      "phone": "+918237431625",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA843e71fff9a303cd8df3d4f9eebf9a1f": {
+    "candidate_name": "Satyansh Rai",
+    "candidate_phone": "+916306239692",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Satyansh Rai",
+      "phone": "+916306239692",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAcbece42c508d3e9fcb297c7994cac72a": {
+    "candidate_name": "Saurabh Vasant Bhosale",
+    "candidate_phone": "+918600757423",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Saurabh Vasant Bhosale",
+      "phone": "+918600757423",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA7812d8a1754d2ca123c6108f2c5e5ab3": {
+    "candidate_name": "SAGAR KESHAVE",
+    "candidate_phone": "+919850411276",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "SAGAR KESHAVE",
+      "phone": "+919850411276",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAb4f21b9060cf5a7572cd54ff218165f8": {
+    "candidate_name": "Shirish Utage",
+    "candidate_phone": "+918237238132",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Shirish Utage",
+      "phone": "+918237238132",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA57a591e2c64ea333a18471924cca91c0": {
+    "candidate_name": "Yash Tapase",
+    "candidate_phone": "+919373865027",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Yash Tapase",
+      "phone": "+919373865027",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA4069db5a12bc57100fdfa7b04e50d31a": {
+    "candidate_name": "ANANTA KALE",
+    "candidate_phone": "+918149203726",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "ANANTA KALE",
+      "phone": "+918149203726",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAc0ff9a82152c2dc5ca4151d0839b828a": {
+    "candidate_name": "Yash Tadiyal",
+    "candidate_phone": "+919104773358",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Yash Tadiyal",
+      "phone": "+919104773358",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAd494db6484df0608956305fa6ec7f3fb": {
+    "candidate_name": "Mukund Bagul",
+    "candidate_phone": "+919022122317",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Mukund Bagul",
+      "phone": "+919022122317",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAcc30ee2100db41017721f61a71dc4590": {
+    "candidate_name": "Shruti Ambekar",
+    "candidate_phone": "+918530298856",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Shruti Ambekar",
+      "phone": "+918530298856",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA1710f0ec804fa6fa4d294954412599cc": {
+    "candidate_name": "Sheshang Harge",
+    "candidate_phone": "+918766910515",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Sheshang Harge",
+      "phone": "+918766910515",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA1ffd8ac2057cfb4f3178750356a1b1aa": {
+    "candidate_name": "prashant malge",
+    "candidate_phone": "+919359780193",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "prashant malge",
+      "phone": "+919359780193",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA2e096a3bda9911dd5fcbe80858f7e930": {
+    "candidate_name": "Sameer Satpute",
+    "candidate_phone": "+916304470698",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Sameer Satpute",
+      "phone": "+916304470698",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA5445e3c441cdfcb0404862a77a25d20f": {
+    "candidate_name": "Somnath Kshirsagar",
+    "candidate_phone": "+919518710423",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Somnath Kshirsagar",
+      "phone": "+919518710423",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA39862e5ed70fdb6f6044b056cf372e45": {
+    "candidate_name": "VAIBHAV GHORPADE",
+    "candidate_phone": "+917745046077",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "VAIBHAV GHORPADE",
+      "phone": "+917745046077",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CA52a484d85bb50fda807377252dc4754d": {
+    "candidate_name": "Omkar Satve",
+    "candidate_phone": "+918275688637",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Omkar Satve",
+      "phone": "+918275688637",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
+  },
+  "CAe24d6a599ed020b266a28c73f4edfc84": {
+    "candidate_name": "Anil Lokare",
+    "candidate_phone": "+919420576832",
+    "candidate_email": "",
+    "candidate_experience": "",
+    "candidate_skills": "",
+    "is_bulk_call": true,
+    "bulk_call_id": "bulk_20250704_050429",
+    "recording_enabled": true,
+    "candidate_data": {
+      "name": "Anil Lokare",
+      "phone": "+919420576832",
+      "email": "",
+      "experience": "",
+      "skills": ""
+    }
   }
 }

@@ -1,0 +1,29 @@
+{
+  "call_sid": "CA67638f88e74cbbf5ec80f35d50142f1e",
+  "interview_id": "CA67638f88e74cbbf5ec80f35d50142f1e",
+  "phone_number": "+918698569045",
+  "candidate_phone": "+918698569045",
+  "candidate_name": "Mandar Ingole",
+  "name": "Mandar Ingole",
+  "twilio_number": "+918698569045",
+  "start_time": "2025-07-04T05:02:12.354979",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T05:02:12.354987",
+  "bulk_call_id": "bulk_20250704_050130",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Mandar Ingole",
+    "phone": "+918698569045",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:02:45.510272"
+}

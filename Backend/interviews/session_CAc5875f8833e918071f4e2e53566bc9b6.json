@@ -1,0 +1,17 @@
+{
+  "call_sid": "CAc5875f8833e918071f4e2e53566bc9b6",
+  "phone_number": "+14787807480",
+  "twilio_number": "+917387792437",
+  "start_time": "2025-07-03T05:39:41.077411",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-03T05:39:41.077418",
+  "candidate_name": "Test Candidate",
+  "candidate_phone": "+917387792437",
+  "candidate_data": "",
+  "bulk_call_id": null,
+  "is_bulk_call": false
+}

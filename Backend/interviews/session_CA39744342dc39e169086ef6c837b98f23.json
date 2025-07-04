@@ -1,0 +1,28 @@
+{
+  "call_sid": "CA39744342dc39e169086ef6c837b98f23",
+  "interview_id": "CA39744342dc39e169086ef6c837b98f23",
+  "phone_number": "+918275688637",
+  "candidate_phone": "+918275688637",
+  "candidate_name": "Omkar Satve",
+  "name": "Omkar Satve",
+  "twilio_number": "+918275688637",
+  "start_time": "2025-07-04T04:55:17.203103",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:55:17.203111",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Omkar Satve",
+    "phone": "+918275688637",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

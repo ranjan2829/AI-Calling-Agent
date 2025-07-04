@@ -1,0 +1,28 @@
+{
+  "call_sid": "CA268ec10739abd5a5af7b2978d6f61c07",
+  "interview_id": "CA268ec10739abd5a5af7b2978d6f61c07",
+  "phone_number": "+917030061343",
+  "candidate_phone": "+917030061343",
+  "candidate_name": "Akshay Borkar",
+  "name": "Akshay Borkar",
+  "twilio_number": "+917030061343",
+  "start_time": "2025-07-04T04:56:36.572360",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T04:56:36.572365",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Akshay Borkar",
+    "phone": "+917030061343",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

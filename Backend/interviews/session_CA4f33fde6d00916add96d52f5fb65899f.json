@@ -1,0 +1,29 @@
+{
+  "call_sid": "CA4f33fde6d00916add96d52f5fb65899f",
+  "interview_id": "CA4f33fde6d00916add96d52f5fb65899f",
+  "phone_number": "+919561649834",
+  "candidate_phone": "+919561649834",
+  "candidate_name": "Akshay Sunil Patil",
+  "name": "Akshay Sunil Patil",
+  "twilio_number": "+919561649834",
+  "start_time": "2025-07-04T04:54:58.944490",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:54:58.944497",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Akshay Sunil Patil",
+    "phone": "+919561649834",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T04:55:31.787415"
+}

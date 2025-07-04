@@ -1,0 +1,104 @@
+{
+  "call_sid": "CAb81ccc846c43c5b22277c23c5a5fc638",
+  "interview_id": "CAb81ccc846c43c5b22277c23c5a5fc638",
+  "phone_number": "+919116995972",
+  "candidate_phone": "+919116995972",
+  "candidate_name": "Ankush Surana",
+  "name": "Ankush Surana",
+  "twilio_number": "+919116995972",
+  "start_time": "2025-07-04T04:54:42.971985",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "han yas",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T04:55:01.948548",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "So high my name ise Ankush Rana I am recently completed my MC from Bharati Vidyapeeth University Pune and recently have work at optics ware.",
+      "confidence": 0.6275055,
+      "timestamp": "2025-07-04T04:55:27.363418",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "So I no machine learning ya i l l m open Hai tuning and all dis upcoming technology and all ise new technology.",
+      "confidence": 0.5117932,
+      "timestamp": "2025-07-04T04:55:47.396259",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "what ise your",
+      "confidence": 0.62695867,
+      "timestamp": "2025-07-04T04:55:55.954634",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "main current CTC was real Piye and my expected vause 426",
+      "confidence": 0.57348084,
+      "timestamp": "2025-07-04T04:56:12.398027",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "hai to I have done many projects ine API making ine fast API restful API making Meni projects and I have Meni aay Mach experience Van year off experience ine Tu making ine API",
+      "confidence": 0.5597548,
+      "timestamp": "2025-07-04T04:56:36.958916",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "So I work on a w s use like I Si Tu use Lambda RDS I have diploid Menis API on ec2 services. So I have and greater knowledge off.",
+      "confidence": 0.60942894,
+      "timestamp": "2025-07-04T04:57:09.988042",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "Ine diploma time ab use docker Tu maintain proper file structure ine and maintain an proper micro service architecture Tu diploid D ITE ezili on ec2 service and cloud platform.",
+      "confidence": 0.44488937,
+      "timestamp": "2025-07-04T04:57:37.407004",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "And I have used I M experience vid D Jain yai, and AI making AI agents have use an part aur tensor flows. I have an frameworks like tense flow and pipe aur se and Mor Technology like open Si vi have an use ine an project.",
+      "confidence": 0.4877528,
+      "timestamp": "2025-07-04T04:58:12.320722",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "han yas",
+      "full_response": "han yas"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T04:58:12.320732",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Ankush Surana",
+    "phone": "+919116995972",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T04:58:12.321248",
+  "completion_time": "2025-07-04T04:58:12.321256"
+}

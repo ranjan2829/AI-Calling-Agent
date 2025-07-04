@@ -1,0 +1,29 @@
+{
+  "call_sid": "CA04b114a2fe9472a377da393e3df90434",
+  "interview_id": "CA04b114a2fe9472a377da393e3df90434",
+  "phone_number": "+918600757423",
+  "candidate_phone": "+918600757423",
+  "candidate_name": "Saurabh Vasant Bhosale",
+  "name": "Saurabh Vasant Bhosale",
+  "twilio_number": "+918600757423",
+  "start_time": "2025-07-04T04:55:33.255757",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:55:33.255764",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Saurabh Vasant Bhosale",
+    "phone": "+918600757423",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T04:56:06.409869"
+}

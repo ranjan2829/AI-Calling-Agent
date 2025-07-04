@@ -1,0 +1,104 @@
+{
+  "call_sid": "CA2bc1bf9403c84cad6b03de10db004545",
+  "interview_id": "CA2bc1bf9403c84cad6b03de10db004545",
+  "phone_number": "+917387485081",
+  "candidate_phone": "+917387485081",
+  "candidate_name": "MANSI DHAVALE",
+  "name": "MANSI DHAVALE",
+  "twilio_number": "+917387485081",
+  "start_time": "2025-07-04T05:01:59.736855",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Oh, yes sure.",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T05:02:19.593771",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Sar so my name is Mansi Roy and current eleven Pune admin currently working with Liberty software junior Software Engineer with MLT and priority date off birth operative media and about education and completed my Mtech from Pimpri Chinchwad College of Engineering Pune in 2022.",
+      "confidence": 0.6176374,
+      "timestamp": "2025-07-04T05:02:49.051776",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "Samay ki skills include piping sequel nose equal for database for visualisation tools power beta blue machine learning algorithms deep learning algorithm and LP LLM model",
+      "confidence": 0.6467025,
+      "timestamp": "2025-07-04T05:03:09.046983",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "So officially it is 30 days but with negotiation acting join with into weeks.",
+      "confidence": 0.85351694,
+      "timestamp": "2025-07-04T05:03:23.282294",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "Current city se 3.5 expected will be around 6 lpa.",
+      "confidence": 0.62692225,
+      "timestamp": "2025-07-04T05:03:36.651629",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I do have some experience with regards Tu API like collecting bi.",
+      "confidence": 0.6950691,
+      "timestamp": "2025-07-04T05:03:50.791641",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "So I have basic understanding about a w c Tu instance and about Azure ml flow.",
+      "confidence": 0.7139102,
+      "timestamp": "2025-07-04T05:04:08.783729",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "so about deployment likh de raha hai 20 se understanding about Doctor",
+      "confidence": 0.4678456,
+      "timestamp": "2025-07-04T05:04:27.204011",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "to have use like dis team works and Library that is tense flow by target learn and for ml, algorithm, aur regression classification method boosting and similarly techniques and also any kind of an surprise loving method also and also for LLM ise I M Veri burst width Di an JPT model and Vel",
+      "confidence": 0.5900792,
+      "timestamp": "2025-07-04T05:05:03.606483",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "Oh, yes sure.",
+      "full_response": "Oh, yes sure."
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:05:03.606492",
+  "bulk_call_id": "bulk_20250704_050130",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "MANSI DHAVALE",
+    "phone": "+917387485081",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:05:03.606846",
+  "completion_time": "2025-07-04T05:05:03.606850"
+}

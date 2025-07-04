@@ -1,0 +1,28 @@
+{
+  "call_sid": "CA14322485e5a567a6209169ec6a579bdb",
+  "interview_id": "CA14322485e5a567a6209169ec6a579bdb",
+  "phone_number": "+917083050347",
+  "candidate_phone": "+917083050347",
+  "candidate_name": "POOJA LOKHANDE",
+  "name": "POOJA LOKHANDE",
+  "twilio_number": "+917083050347",
+  "start_time": "2025-07-04T05:02:01.862645",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T05:02:01.862654",
+  "bulk_call_id": "bulk_20250704_050130",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "POOJA LOKHANDE",
+    "phone": "+917083050347",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

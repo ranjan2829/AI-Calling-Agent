@@ -1,0 +1,29 @@
+{
+  "call_sid": "CA73ee0db61ed0049c46d69b95e8596d1d",
+  "interview_id": "CA73ee0db61ed0049c46d69b95e8596d1d",
+  "phone_number": "+917066706742",
+  "candidate_phone": "+917066706742",
+  "candidate_name": "Chaitanya Nitinchandra Talathi",
+  "name": "Chaitanya Nitinchandra Talathi",
+  "twilio_number": "+917066706742",
+  "start_time": "2025-07-04T04:57:18.843926",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:57:18.843934",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Chaitanya Nitinchandra Talathi",
+    "phone": "+917066706742",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T04:57:51.910933"
+}

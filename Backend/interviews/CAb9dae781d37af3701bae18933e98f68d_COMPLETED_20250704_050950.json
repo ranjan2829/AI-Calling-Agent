@@ -1,0 +1,104 @@
+{
+  "call_sid": "CAb9dae781d37af3701bae18933e98f68d",
+  "interview_id": "CAb9dae781d37af3701bae18933e98f68d",
+  "phone_number": "+919561649834",
+  "candidate_phone": "+919561649834",
+  "candidate_name": "Akshay Sunil Patil",
+  "name": "Akshay Sunil Patil",
+  "twilio_number": "+919561649834",
+  "start_time": "2025-07-04T05:05:07.702726",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "FIR yas yas",
+      "confidence": 0.0027989072,
+      "timestamp": "2025-07-04T05:05:22.512142",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Prince ko first time talk about myself. I am Akshay Sunil Patil my graduation in 2020 after that. I after my graduation. I study aur data science machine learning deep learning and all D things I study D Van year about dait and den. I started working vid an common Private Limited EJ aimal development.",
+      "confidence": 0.577547,
+      "timestamp": "2025-07-04T05:06:12.230355",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "First can u explain what is the role?",
+      "confidence": 0.81618565,
+      "timestamp": "2025-07-04T05:06:24.099037",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "30 days",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T05:06:36.198888",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "my current CTC 8.6 lpa as Indian currency and as per Indian currency expecting 12 LP",
+      "confidence": 0.8454254,
+      "timestamp": "2025-07-04T05:06:55.116305",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "to for free I Ho experience using first paper off post Gate Sam kind off refresh like dait u think",
+      "confidence": 0.46852285,
+      "timestamp": "2025-07-04T05:07:24.560547",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I work with the awes. I walk a w x i walk with a w x vid deyar services, like sage maker e Si Tu Sam kind off an S3 buckets. Like aay diploid my python script aur ife u tu and from kind off upload Sam kind off documentation on D F3 bucket.",
+      "confidence": 0.43670952,
+      "timestamp": "2025-07-04T05:07:59.411580",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "I didn't use but I use a doctor to cost after building my hole python script. I created docker aur date docker included aur include Python varjan Python 3 quarter dental requirements and install Sam kind off packages and den Expo expos. I create an after FIR before installing live breaks your environment and create Den install library Sam dependency.",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T05:09:08.102970",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "Kya use cancer off flow Kah Raha Tu build seen and model objective model use D Sam property return model like ye ye log.",
+      "confidence": 0.35099766,
+      "timestamp": "2025-07-04T05:09:50.926327",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "FIR yas yas",
+      "full_response": "FIR yas yas"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:09:50.926336",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Akshay Sunil Patil",
+    "phone": "+919561649834",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:09:50.926728",
+  "completion_time": "2025-07-04T05:09:50.926733"
+}

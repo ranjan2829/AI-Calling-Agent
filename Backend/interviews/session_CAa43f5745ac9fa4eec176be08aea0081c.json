@@ -1,0 +1,28 @@
+{
+  "call_sid": "CAa43f5745ac9fa4eec176be08aea0081c",
+  "interview_id": "CAa43f5745ac9fa4eec176be08aea0081c",
+  "phone_number": "+918308264711",
+  "candidate_phone": "+918308264711",
+  "candidate_name": "Praful Avinashrao Maskar",
+  "name": "Praful Avinashrao Maskar",
+  "twilio_number": "+918308264711",
+  "start_time": "2025-07-04T05:01:56.561295",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T05:01:56.561300",
+  "bulk_call_id": "bulk_20250704_050130",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Praful Avinashrao Maskar",
+    "phone": "+918308264711",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

@@ -1,0 +1,29 @@
+{
+  "call_sid": "CA9627eb4ef60346c103e36edfb51b1976",
+  "interview_id": "CA9627eb4ef60346c103e36edfb51b1976",
+  "phone_number": "+918482923677",
+  "candidate_phone": "+918482923677",
+  "candidate_name": "AISHWARYA RANA",
+  "name": "AISHWARYA RANA",
+  "twilio_number": "+918482923677",
+  "start_time": "2025-07-04T04:56:43.838839",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:56:43.838847",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "AISHWARYA RANA",
+    "phone": "+918482923677",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T04:57:17.024003"
+}

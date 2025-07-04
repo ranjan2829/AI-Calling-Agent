@@ -1,0 +1,47 @@
+{
+  "call_sid": "CA643c5511b98842118dad5214ee0ea296",
+  "interview_id": "CA643c5511b98842118dad5214ee0ea296",
+  "phone_number": "+917773902239",
+  "candidate_phone": "+917773902239",
+  "candidate_name": "Akanksha Khode",
+  "name": "Akanksha Khode",
+  "twilio_number": "+917773902239",
+  "start_time": "2025-07-04T05:02:10.363909",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 1,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "yas",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T05:02:28.815593",
+      "question_number": 0
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "yas",
+      "full_response": "yas"
+    }
+  },
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T05:02:28.815601",
+  "bulk_call_id": "bulk_20250704_050130",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Akanksha Khode",
+    "phone": "+917773902239",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:02:49.451155"
+}

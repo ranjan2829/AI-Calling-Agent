@@ -1,0 +1,53 @@
+{
+  "call_sid": "CA0dd6925e99ad60dec941c745244b4464",
+  "interview_id": "CA0dd6925e99ad60dec941c745244b4464",
+  "phone_number": "+919518710423",
+  "candidate_phone": "+919518710423",
+  "candidate_name": "Somnath Kshirsagar",
+  "name": "Somnath Kshirsagar",
+  "twilio_number": "+919518710423",
+  "start_time": "2025-07-04T04:57:33.468383",
+  "status": "IN_PROGRESS",
+  "current_question": 2,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "all friends",
+      "confidence": 0.30768254,
+      "timestamp": "2025-07-04T04:57:52.862526",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Hello.",
+      "confidence": 0.6782143,
+      "timestamp": "2025-07-04T04:58:04.393374",
+      "question_number": 1
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "all friends",
+      "full_response": "all friends"
+    }
+  },
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:58:04.393384",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Somnath Kshirsagar",
+    "phone": "+919518710423",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

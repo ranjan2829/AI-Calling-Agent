@@ -1,0 +1,53 @@
+{
+  "call_id": "CAb4b5f802ea19cf5171cfe00fa3981ff7",
+  "candidate_name": "Yas_Its_Good",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [],
+    "missing_skills": [
+      "python"
+    ],
+    "skills_match_percentage": 0.0,
+    "experience_match_percentage": 50,
+    "overall_score": 10.0,
+    "comprehensive_score": 10.0,
+    "priority_score": 1,
+    "recommendation": "LOW MATCH",
+    "analysis_date": "2025-07-04 04:58:12",
+    "skill_mentions": {},
+    "experience_data": {
+      "years_mentioned": [],
+      "experience_score": 0
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+918208040480",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [],
+    "skills_found_count": 0,
+    "total_required_skills": 1,
+    "phone_number": "+918208040480"
+  },
+  "interview_summary": {
+    "questions_answered": 1,
+    "total_questions": 1,
+    "completion_rate": "1/1"
+  },
+  "source_file": "interviews/session_CAb4b5f802ea19cf5171cfe00fa3981ff7.json",
+  "candidate_phone": "+918208040480",
+  "candidate_data": {
+    "name": "Nainisha Sanjay Bhosale",
+    "phone": "+918208040480",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "analysis_created": "2025-07-04 04:58:12"
+}

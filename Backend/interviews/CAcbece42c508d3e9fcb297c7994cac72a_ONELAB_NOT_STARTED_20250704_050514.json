@@ -1,0 +1,41 @@
+{
+  "interview_id": "CAcbece42c508d3e9fcb297c7994cac72a",
+  "company": "Onelab Ventures",
+  "interviewer": "AI Assistant with Validation",
+  "completion_time": "20250704_050514",
+  "status": "NOT_STARTED",
+  "termination_reason": "not_available",
+  "questions_answered": 1,
+  "total_questions": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Ek data complete preparation bye topic coming or not",
+      "confidence": 0.34492838,
+      "timestamp": "2025-07-04T05:05:14.431118",
+      "question_number": 0
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": false,
+      "reason": "Candidate not available for interview",
+      "time_available": false,
+      "availability_status": "not_available",
+      "response": "Ek data complete preparation bye topic coming or not",
+      "full_response": "Ek data complete preparation bye topic coming or not"
+    }
+  },
+  "start_time": "2025-07-04T05:04:56.136818",
+  "end_time": "2025-07-04T05:05:14.434402",
+  "interview_type": "Interview Not Started - Candidate Unavailable",
+  "candidate_name": "Saurabh Vasant Bhosale",
+  "candidate_phone": "+918600757423",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "callback_requested": false,
+  "callback_response": "",
+  "callback_request_time": "",
+  "preferred_time": ""
+}

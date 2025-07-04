@@ -1,0 +1,104 @@
+{
+  "call_sid": "CAaaf46b93962625302915b577f1c99609",
+  "interview_id": "CAaaf46b93962625302915b577f1c99609",
+  "phone_number": "+918080422304",
+  "candidate_phone": "+918080422304",
+  "candidate_name": "PRANIL SAVALE",
+  "name": "PRANIL SAVALE",
+  "twilio_number": "+918080422304",
+  "start_time": "2025-07-04T04:56:54.058729",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yah city is a good time to speak.",
+      "confidence": 0.72240645,
+      "timestamp": "2025-07-04T04:57:10.029539",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Hello. My name is Anil Saware i m from Mumbai Maharashtra I completed my degree and diploma ine mechanical engineering and I recently completed my Mtech ine data science and air ine. 2025. I gave my exam ine may 2025 aur talking about my experience an join Dish TV financial age executive data science team ine, 2023 and 2022 and den ine June 23 aay joint an Yes Bank Limited EJ executive ine cyber, Sel froad control unit Nau I left my job ine Fab and Nau I M available for immediate joining.",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T04:57:55.686630",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "I M Veri good ine Python data science machine learning and data analysis. I have done ine lot off project ine data analysis and data science domain and also machines running top. And also I have an Dan project related Tu mechanical engineering and an machine learning also ITE waz my project ine degree and date time and dis and aay M an I work on various project related Tu finance related ine data sense domen.",
+      "confidence": 0.58879876,
+      "timestamp": "2025-07-04T04:58:28.315852",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "AZ I told U I love my job in Fab 2020 fry so der is no not experience. I can join immediately.",
+      "confidence": 0.6430744,
+      "timestamp": "2025-07-04T04:58:44.081043",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "To I vaj working as off roll position ine health Bank so my current surgery Vas around 18.5 thousand per month whitch is around 2.5 lakh per month and I M expecting around five lpa.",
+      "confidence": 0.6275962,
+      "timestamp": "2025-07-04T04:59:12.519147",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "Can u please repeat the question?",
+      "confidence": 0.8104226,
+      "timestamp": "2025-07-04T04:59:22.881599",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I work Tu ITE AWS actually els. I waz doing Mai M take ine data science and AI I work Dan I work from various project based related Tu AWS age. I Vil Call U started D courses related Tu dait and so I balls working ine and date and related Tu D project",
+      "confidence": 0.5172932,
+      "timestamp": "2025-07-04T04:59:57.578939",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "Deploying an project is an important task and for that I have used stimulate and Flag for an deployment but I had I dont use docker for dait.",
+      "confidence": 0.7134935,
+      "timestamp": "2025-07-04T05:00:22.463982",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "To talking about my experiences with data science domain. So I work on an projects related Tu data science and machines learning like loan scorecard preparation project ine whitch vi calculate width D person Vil Gate loan or not or how Mach loan D person Vil gate and best film dait an vi for dait vi have u Veri Mach and learning model and a deep learning models take artificial neural network ine order Tu product width D person Vil Gate loan or not and ah and how Mach loan ITE Vil Gate hi Vil gate and ITE waz an combination off both an ITE waz an combination off both regression and classification. So dis vans, my dis ise my experience related Tu date and Science",
+      "confidence": 0.40501878,
+      "timestamp": "2025-07-04T05:01:24.811077",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "Yah city is a good time to speak.",
+      "full_response": "Yah city is a good time to speak."
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:01:24.811085",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "PRANIL SAVALE",
+    "phone": "+918080422304",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:01:24.812022",
+  "completion_time": "2025-07-04T05:01:24.812027"
+}

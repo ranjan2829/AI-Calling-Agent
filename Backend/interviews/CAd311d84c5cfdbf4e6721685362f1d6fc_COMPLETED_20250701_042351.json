@@ -1,0 +1,147 @@
+{
+  "call_sid": "CAd311d84c5cfdbf4e6721685362f1d6fc",
+  "phone_number": "+14787807480",
+  "twilio_number": "+917387792437",
+  "start_time": "2025-07-01T04:21:01.497456",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Introduce yourself.",
+      "answer": "To he my name ise Ranjan shitole and have Bin rescent engineering student graduate from Pune University vid CGPA of 8.9.",
+      "confidence": 0.6834968,
+      "timestamp": "2025-07-01T04:21:22.853805",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "Velma ki skills R Python and Java Script",
+      "confidence": 0.5582911,
+      "timestamp": "2025-07-01T04:21:33.845481",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "Vel my current notice period is of zero days. I don't have any notice period",
+      "confidence": 0.87005514,
+      "timestamp": "2025-07-01T04:21:45.971490",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "Vel my current CTC is zero lpa. And my expectations are zero.",
+      "confidence": 0.8035555,
+      "timestamp": "2025-07-01T04:21:59.647738",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "Well, I have developed Mini fast APIs I have created Meni restful API for development. I have created API using fast AP and flask API and jingo for back and deployment age Vel",
+      "confidence": 0.72975165,
+      "timestamp": "2025-07-01T04:22:32.523509",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "yah Saheb Waqt AWS services Amazon Web Services Veri I have used d a w s ec2 service for deployment off my applications and have used AWS sage maker have used i w S3 and transcript so dis ise age Vel",
+      "confidence": 0.5344926,
+      "timestamp": "2025-07-01T04:23:02.244162",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "so he I have used docker and cubnet is Vel have used docker for container rising my apps and I have used Cuban ITE ise Tu deploy goes docker containers and manage Dem",
+      "confidence": 0.67079914,
+      "timestamp": "2025-07-01T04:23:25.331345",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "To Hai I have used LLM large language models and other different Technology ise like rag and deep learning techniques reinforcement learning and AI ml related Technology Jo hear",
+      "confidence": 0.7016931,
+      "timestamp": "2025-07-01T04:23:51.974578",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "2": {
+      "step": 2,
+      "passed": true,
+      "reason": "",
+      "skills_match": true,
+      "found_skills": [
+        "python"
+      ],
+      "match_percentage": 50.0
+    },
+    "3": {
+      "step": 3,
+      "passed": true,
+      "reason": "",
+      "notice_acceptable": true,
+      "notice_days": 0
+    },
+    "5": {
+      "step": 5,
+      "passed": true,
+      "reason": "",
+      "api_experience": true,
+      "found_api_skills": [
+        "api",
+        "rest",
+        "flask"
+      ]
+    },
+    "6": {
+      "step": 6,
+      "passed": true,
+      "reason": "",
+      "cloud_experience": true,
+      "found_platforms": {
+        "cloud": [
+          "aws",
+          "amazon web services"
+        ]
+      },
+      "cloud_concepts": [
+        "aws",
+        "amazon web services"
+      ]
+    },
+    "7": {
+      "step": 7,
+      "passed": true,
+      "reason": "",
+      "deployment_experience": true,
+      "docker_experience": true,
+      "kubernetes_experience": true,
+      "deployment_skills": [
+        "deploy",
+        "docker"
+      ]
+    },
+    "8": {
+      "step": 8,
+      "passed": true,
+      "reason": "",
+      "ai_experience": true,
+      "genai_experience": true,
+      "framework_experience": true,
+      "deep_learning_experience": true,
+      "ai_skills": [
+        "ai",
+        "ml",
+        "deep learning"
+      ]
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-01T04:23:51.974586",
+  "candidate_name": "Test Candidate",
+  "candidate_phone": "+917387792437",
+  "candidate_data": "",
+  "bulk_call_id": null,
+  "is_bulk_call": false,
+  "end_time": "2025-07-01T04:23:51.976972",
+  "completion_time": "2025-07-01T04:23:51.976979"
+}

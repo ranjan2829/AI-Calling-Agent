@@ -1,0 +1,28 @@
+{
+  "call_sid": "CA0a878526da1ccdb5c27e7c9f8f2d8c20",
+  "interview_id": "CA0a878526da1ccdb5c27e7c9f8f2d8c20",
+  "phone_number": "+918600576080",
+  "candidate_phone": "+918600576080",
+  "candidate_name": "Ishwar Ambad",
+  "name": "Ishwar Ambad",
+  "twilio_number": "+918600576080",
+  "start_time": "2025-07-04T04:55:03.106057",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:55:03.106065",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Ishwar Ambad",
+    "phone": "+918600576080",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

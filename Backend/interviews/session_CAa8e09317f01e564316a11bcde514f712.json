@@ -1,0 +1,29 @@
+{
+  "call_sid": "CAa8e09317f01e564316a11bcde514f712",
+  "interview_id": "CAa8e09317f01e564316a11bcde514f712",
+  "phone_number": "+916306239692",
+  "candidate_phone": "+916306239692",
+  "candidate_name": "Satyansh Rai",
+  "name": "Satyansh Rai",
+  "twilio_number": "+916306239692",
+  "start_time": "2025-07-04T05:02:46.663538",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T05:02:46.663547",
+  "bulk_call_id": "bulk_20250704_050130",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Satyansh Rai",
+    "phone": "+916306239692",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:03:19.693128"
+}

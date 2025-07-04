@@ -1,0 +1,29 @@
+{
+  "call_sid": "CA11ee3517ca9859b0f0e3d77c60c714b6",
+  "interview_id": "CA11ee3517ca9859b0f0e3d77c60c714b6",
+  "phone_number": "+919636745647",
+  "candidate_phone": "+919636745647",
+  "candidate_name": "HARSHIT SHARMA",
+  "name": "HARSHIT SHARMA",
+  "twilio_number": "+919636745647",
+  "start_time": "2025-07-04T04:56:47.698213",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:56:47.698221",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "HARSHIT SHARMA",
+    "phone": "+919636745647",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T04:57:20.678243"
+}

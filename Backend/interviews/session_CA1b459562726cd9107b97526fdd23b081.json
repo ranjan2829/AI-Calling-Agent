@@ -1,0 +1,28 @@
+{
+  "call_sid": "CA1b459562726cd9107b97526fdd23b081",
+  "interview_id": "CA1b459562726cd9107b97526fdd23b081",
+  "phone_number": "+919826666148",
+  "candidate_phone": "+919826666148",
+  "candidate_name": "VEDANSH SAINI",
+  "name": "VEDANSH SAINI",
+  "twilio_number": "+919826666148",
+  "start_time": "2025-07-04T05:04:48.771753",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T05:04:48.771758",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "VEDANSH SAINI",
+    "phone": "+919826666148",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

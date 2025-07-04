@@ -1,0 +1,88 @@
+{
+  "call_sid": "CA25de9d24919843f018896a42cdf2f7dc",
+  "interview_id": "CA25de9d24919843f018896a42cdf2f7dc",
+  "phone_number": "+917498317995",
+  "candidate_phone": "+917498317995",
+  "candidate_name": "ADITYA NAGARE",
+  "name": "ADITYA NAGARE",
+  "twilio_number": "+917498317995",
+  "start_time": "2025-07-04T04:54:47.844248",
+  "status": "IN_PROGRESS",
+  "current_question": 7,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Actually, I already company.",
+      "confidence": 0.6632678,
+      "timestamp": "2025-07-04T04:55:05.684333",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Mahine Mein Aditya Nagar I am this year third year student also third year student. I have three plus hear experiences learning and data scientist position",
+      "confidence": 0.64384204,
+      "timestamp": "2025-07-04T04:55:21.944699",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "main kis ki photo rollins Python machine learning deep learning NLP",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T04:55:35.242466",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "Main current notification 30 days but it can be negotiable up to 8 to 15 days.",
+      "confidence": 0.7547226,
+      "timestamp": "2025-07-04T04:55:46.494750",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "Is Karan City se 5.658 expected about 11 12?",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T04:55:59.599623",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "Note I don't have any experience.",
+      "confidence": 0.6043097,
+      "timestamp": "2025-07-04T04:56:10.933933",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I work with a w s but not into my",
+      "confidence": 0.63687664,
+      "timestamp": "2025-07-04T04:56:36.573331",
+      "question_number": 6
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "Actually, I already company.",
+      "full_response": "Actually, I already company."
+    }
+  },
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:56:36.573336",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "ADITYA NAGARE",
+    "phone": "+917498317995",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

@@ -1,0 +1,104 @@
+{
+  "call_sid": "CA6ad9b7193fb772e4b666329f228957ff",
+  "interview_id": "CA6ad9b7193fb772e4b666329f228957ff",
+  "phone_number": "+919826666148",
+  "candidate_phone": "+919826666148",
+  "candidate_name": "VEDANSH SAINI",
+  "name": "VEDANSH SAINI",
+  "twilio_number": "+919826666148",
+  "start_time": "2025-07-04T04:56:36.579490",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Aise Aise Pita ko time",
+      "confidence": 0.1889796,
+      "timestamp": "2025-07-04T04:57:06.963133",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Amazon I am from Indore Madhya Pradesh Mein graduation ine natural off Technology ine electronics and communication engineering and their after engineering",
+      "confidence": 0.6963832,
+      "timestamp": "2025-07-04T04:57:42.909889",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "main kis Khel se Python Django fast API aimal and data bases like post Karen SQL my school",
+      "confidence": 0.4184974,
+      "timestamp": "2025-07-04T04:58:01.079931",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "adress 30 days",
+      "confidence": 0.60714746,
+      "timestamp": "2025-07-04T04:58:10.804404",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "current CTC is 5.25 and expected is 9210",
+      "confidence": 0.7724793,
+      "timestamp": "2025-07-04T04:58:38.655518",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I have developed several API including rest API med E-commerce website name is velocity vend and also currently I M using API calling ine for D gen production PPT API and back and appears that all",
+      "confidence": 0.70630956,
+      "timestamp": "2025-07-04T04:59:07.933779",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "Aisa hai walk on a w s i have created through S2 ns3 instances also used Tu container D images and also deployment ml models.",
+      "confidence": 0.602896,
+      "timestamp": "2025-07-04T04:59:33.747590",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "I have not used docker and aur coconut for the deployment. Basically I have directly diploid on D server without containers.",
+      "confidence": 0.80365926,
+      "timestamp": "2025-07-04T04:59:58.513766",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "I have a vast experience ine ml. Technology includes aay haav med like MI ine, my team. I med an neural ate network ine whitch year use neural networks and Jain ise suggest dait GPT ine cloud and also perplexity. Ah and also and throw pic so hear vi have implemented an system ine Vich ife an person Vil right hij aur Har company name aur any off d company name vid shi, aur shi hazz, Tu bye D stocks ITE Vil bi all D reports vedar D stock. Shud. Bye aur hold aur ITE shud not bye.",
+      "confidence": 0.32778573,
+      "timestamp": "2025-07-04T05:00:55.722613",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "Aise Aise Pita ko time",
+      "full_response": "Aise Aise Pita ko time"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:00:55.722622",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "VEDANSH SAINI",
+    "phone": "+919826666148",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:00:55.722988",
+  "completion_time": "2025-07-04T05:00:55.722992"
+}

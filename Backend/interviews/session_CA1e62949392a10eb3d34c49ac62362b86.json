@@ -1,0 +1,28 @@
+{
+  "call_sid": "CA1e62949392a10eb3d34c49ac62362b86",
+  "interview_id": "CA1e62949392a10eb3d34c49ac62362b86",
+  "phone_number": "+919579046405",
+  "candidate_phone": "+919579046405",
+  "candidate_name": "Sanket Patil",
+  "name": "Sanket Patil",
+  "twilio_number": "+919579046405",
+  "start_time": "2025-07-04T04:57:11.133003",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T04:57:11.133010",
+  "bulk_call_id": "bulk_20250704_045617",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Sanket Patil",
+    "phone": "+919579046405",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

@@ -1,0 +1,148 @@
+{
+  "call_sid": "CA06ab87aa6fc2c01eab697eb3082ea33c",
+  "phone_number": "+14787807480",
+  "twilio_number": "+917387792437",
+  "start_time": "2025-06-30T07:23:32.223425",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Introduce yourself.",
+      "answer": "he my name ise D Ranjan shitole and rescent Engineering graduate from Pune University with CGPA of 8.9 and have Bin looking jobs related Tu AI and have Bin working vid ful strike development and cloud deployment age Vel",
+      "confidence": 0.63223517,
+      "timestamp": "2025-06-30T07:24:01.989527",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "So hello mike, kiske sath Python videshi basic programming language that I know the Python JavaScript Java Si plus plus types script and majorly and using Python only python.",
+      "confidence": 0.7423196,
+      "timestamp": "2025-06-30T07:24:25.536834",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "Agar Main current notice period is zero days. I don't have any notice period zero days.",
+      "confidence": 0.8005846,
+      "timestamp": "2025-06-30T07:24:39.434154",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "my current city se is 5lp and maxpe station per",
+      "confidence": 0.40063438,
+      "timestamp": "2025-06-30T07:24:52.891206",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "So I have Bin major ine world ine developing Mani recipe Ice and I have created Meni API deploid them on the cloud and created Meni restful API so dait I can get D data.",
+      "confidence": 0.6163105,
+      "timestamp": "2025-06-30T07:25:14.436964",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "Han yas I have work with AWS Amazon Web Services that is by using easy to Lambda Tej maker. S3 storage dynamo DBN multiple Meni resources tu use Cloud Computing power for diploma ine my web applications.",
+      "confidence": 0.7088747,
+      "timestamp": "2025-06-30T07:25:44.510886",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "So, well I have work document related thing very nice talk for container eyes off my app and website dait I have developed ine D rising D docker app and den have used ki Bin ITE is for orkestra off D stock off containers. Bye auto scaling. Bye. I D grading aur log grading D things",
+      "confidence": 0.51985663,
+      "timestamp": "2025-06-30T07:26:18.496740",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "mila hai use Mini air related Technology like artificial intelligence reinforcement learning and I have work Mor vid large language models for text generation and Smart view off answering D systems building Meni chat bots have used rack systems for efficient memory allocation off elements and have also built a I search engine Vel ine my project Vich includes Heartbeat Tu search over Di internet ride and den being lying on Google",
+      "confidence": 0.5782615,
+      "timestamp": "2025-06-30T07:27:01.150330",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "2": {
+      "step": 2,
+      "passed": true,
+      "reason": "",
+      "skills_match": true,
+      "found_skills": [
+        "python",
+        "javascript"
+      ],
+      "match_percentage": 100.0
+    },
+    "3": {
+      "step": 3,
+      "passed": true,
+      "reason": "",
+      "notice_acceptable": true,
+      "notice_days": 0
+    },
+    "5": {
+      "step": 5,
+      "passed": true,
+      "reason": "",
+      "api_experience": true,
+      "found_api_skills": [
+        "api",
+        "rest",
+        "get"
+      ]
+    },
+    "6": {
+      "step": 6,
+      "passed": true,
+      "reason": "",
+      "cloud_experience": true,
+      "found_platforms": {
+        "cloud": [
+          "aws",
+          "amazon web services",
+          "cloud"
+        ]
+      },
+      "cloud_concepts": [
+        "aws",
+        "amazon web services",
+        "cloud"
+      ]
+    },
+    "7": {
+      "step": 7,
+      "passed": true,
+      "reason": "",
+      "deployment_experience": true,
+      "docker_experience": true,
+      "kubernetes_experience": true,
+      "deployment_skills": [
+        "docker"
+      ]
+    },
+    "8": {
+      "step": 8,
+      "passed": true,
+      "reason": "",
+      "ai_experience": true,
+      "genai_experience": true,
+      "framework_experience": true,
+      "deep_learning_experience": true,
+      "ai_skills": [
+        "ai",
+        "artificial intelligence"
+      ]
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-06-30T07:27:01.150339",
+  "candidate_name": "Test Candidate",
+  "candidate_phone": "+917387792437",
+  "candidate_data": "",
+  "bulk_call_id": null,
+  "is_bulk_call": false,
+  "end_time": "2025-06-30T07:27:01.151947",
+  "completion_time": "2025-06-30T07:27:01.151954"
+}

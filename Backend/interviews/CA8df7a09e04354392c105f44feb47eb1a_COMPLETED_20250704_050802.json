@@ -1,0 +1,104 @@
+{
+  "call_sid": "CA8df7a09e04354392c105f44feb47eb1a",
+  "interview_id": "CA8df7a09e04354392c105f44feb47eb1a",
+  "phone_number": "+919330137341",
+  "candidate_phone": "+919330137341",
+  "candidate_name": "RITIKA NAYAK",
+  "name": "RITIKA NAYAK",
+  "twilio_number": "+919330137341",
+  "start_time": "2025-07-04T05:04:48.766435",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "good time",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T05:05:21.834538",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "My name ise Ritika nai. I M currently working ine atmos Technology with an experience holding off 2.3 ears off experience and my current Rul revolves around a ml engineer. I vo 11 Vin 14.",
+      "confidence": 0.5052525,
+      "timestamp": "2025-07-04T05:05:53.906071",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "main kis ke anusar machine learning deep learning LLM class 1st API friend",
+      "confidence": 0.41474006,
+      "timestamp": "2025-07-04T05:06:10.989545",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "Ah 60 days.",
+      "confidence": 0.5539208,
+      "timestamp": "2025-07-04T05:06:19.788483",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "Five selfie is my current city, and my expected is 8.5.",
+      "confidence": 0.67874354,
+      "timestamp": "2025-07-04T05:06:32.845238",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I have worked to build scalable vacants using fast API also class I have Bin provisions ine walking vid class Nau order. Tu build a bacon in order to communicate vid D front time. I have med an stpl post Gate option delete. Hello.",
+      "confidence": 0.5807877,
+      "timestamp": "2025-07-04T05:07:02.930767",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I dont have prior experience holding ine cloud platform, but why DU have n extensive knowledge?",
+      "confidence": 0.6153502,
+      "timestamp": "2025-07-04T05:07:26.743382",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "I have with doctor as a country.",
+      "confidence": 0.60169345,
+      "timestamp": "2025-07-04T05:07:44.820493",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "Ek minut Ek minut bus can u repeat",
+      "confidence": 0.2670724,
+      "timestamp": "2025-07-04T05:08:02.752603",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "good time",
+      "full_response": "good time"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:08:02.752612",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "RITIKA NAYAK",
+    "phone": "+919330137341",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:08:02.752987",
+  "completion_time": "2025-07-04T05:08:02.752992"
+}

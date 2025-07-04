@@ -1,0 +1,46 @@
+{
+  "call_sid": "CAd2743d4d04a5d0be7f800ef5c696a290",
+  "interview_id": "CAd2743d4d04a5d0be7f800ef5c696a290",
+  "phone_number": "+918080422304",
+  "candidate_phone": "+918080422304",
+  "candidate_name": "PRANIL SAVALE",
+  "name": "PRANIL SAVALE",
+  "twilio_number": "+918080422304",
+  "start_time": "2025-07-04T05:01:56.562737",
+  "status": "IN_PROGRESS",
+  "current_question": 1,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "But I just recently computer mein interview.",
+      "confidence": 0.7047397,
+      "timestamp": "2025-07-04T05:02:14.495275",
+      "question_number": 0
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "But I just recently computer mein interview.",
+      "full_response": "But I just recently computer mein interview."
+    }
+  },
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T05:02:14.495283",
+  "bulk_call_id": "bulk_20250704_050130",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "PRANIL SAVALE",
+    "phone": "+918080422304",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

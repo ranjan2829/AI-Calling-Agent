@@ -1,0 +1,67 @@
+{
+  "call_sid": "CA49a2bffd2f90e48e9e925fa13f22e921",
+  "interview_id": "CA49a2bffd2f90e48e9e925fa13f22e921",
+  "phone_number": "+917387485081",
+  "candidate_phone": "+917387485081",
+  "candidate_name": "MANSI DHAVALE",
+  "name": "MANSI DHAVALE",
+  "twilio_number": "+917387485081",
+  "start_time": "2025-07-04T04:54:49.486731",
+  "status": "IN_PROGRESS",
+  "current_question": 4,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "yas yas good time for MI",
+      "confidence": 0.45054272,
+      "timestamp": "2025-07-04T04:55:20.258231",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "Hello, good morning dis is Mansi Dave and I live ine today currently software junior software engineer width DMLT and priority date off birth operating media is a trade engineer, but my education and completed my Mtech from Pimpri Chinchwad college off engineering Pune and my under graduation from International Institute off Information Technology ine, 2020 and my text tags include Python sequel and Manual items deep learning algorithm stablo power bhi hai and LP ll models.",
+      "confidence": 0.5165374,
+      "timestamp": "2025-07-04T04:56:16.488599",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "to Mike ki skills r",
+      "confidence": 0.2564164,
+      "timestamp": "2025-07-04T04:56:36.575636",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "Anar position I M your interview I from Van lab ventures. Is this  a good time?",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T04:56:48.460594",
+      "question_number": 3
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "available",
+      "response": "yas yas good time for MI",
+      "full_response": "yas yas good time for MI"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T04:56:48.460606",
+  "bulk_call_id": "bulk_20250704_045420",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "MANSI DHAVALE",
+    "phone": "+917387485081",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": ""
+}

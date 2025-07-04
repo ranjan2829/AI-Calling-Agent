@@ -1,0 +1,104 @@
+{
+  "call_sid": "CA7621323caef50bd47001bdc01495b9a0",
+  "interview_id": "CA7621323caef50bd47001bdc01495b9a0",
+  "phone_number": "+919422604848",
+  "candidate_phone": "+919422604848",
+  "candidate_name": "Vaishnavi Patil",
+  "name": "Vaishnavi Patil",
+  "twilio_number": "+919422604848",
+  "start_time": "2025-07-04T05:05:11.410666",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "yas",
+      "confidence": 0.007917544,
+      "timestamp": "2025-07-04T05:05:45.411642",
+      "question_number": 0
+    },
+    {
+      "question": "Introduce yourself.",
+      "answer": "I M Vaishnavi Patil I am a big graduating come to the engineering I am from Pune and I have Dan courses and internship ine machin learning data science and computer vision.",
+      "confidence": 0.7276887,
+      "timestamp": "2025-07-04T05:06:06.232582",
+      "question_number": 1
+    },
+    {
+      "question": "What are your key skills for this role?",
+      "answer": "Nike skills R data science computer vision and machine learning",
+      "confidence": 0.69958484,
+      "timestamp": "2025-07-04T05:06:17.925712",
+      "question_number": 2
+    },
+    {
+      "question": "What is your current notice period?",
+      "answer": "main Karan notification",
+      "confidence": 0.021344528,
+      "timestamp": "2025-07-04T05:06:27.692937",
+      "question_number": 3
+    },
+    {
+      "question": "What is your current CTC and expected salary?",
+      "answer": "My current CTC is six selfie and my expected CTC is 7l.",
+      "confidence": 0.7234692,
+      "timestamp": "2025-07-04T05:06:41.792929",
+      "question_number": 4
+    },
+    {
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I have implemented class KPL and I have worked with an teacher and slash Tu create machine learning model and points Tu make prediction.",
+      "confidence": 0.7275588,
+      "timestamp": "2025-07-04T05:07:00.343620",
+      "question_number": 5
+    },
+    {
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "Yes, I have a good AWS have experienced with Amazon Web Services platform along width Amazon ETS Amazon ec2 and Amazon sage maker.",
+      "confidence": 0.735398,
+      "timestamp": "2025-07-04T05:07:22.360296",
+      "question_number": 6
+    },
+    {
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "Experience vid docker I have work also with Uber net is I have work Dan deploying MN models using docker and coconuts.",
+      "confidence": 0.7023753,
+      "timestamp": "2025-07-04T05:07:42.281877",
+      "question_number": 7
+    },
+    {
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "I have experience vid Jan air mainly vid lanche langra and red chamber and experienced deep learning computerisation and I have also experience vid words ine whitch genius dait is parameters find tuning Laura and Anpadh",
+      "confidence": 0.45601627,
+      "timestamp": "2025-07-04T05:08:15.210149",
+      "question_number": 8
+    }
+  ],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": true,
+      "reason": "",
+      "time_available": true,
+      "availability_status": "unclear",
+      "response": "yas",
+      "full_response": "yas"
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T05:08:15.210157",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Vaishnavi Patil",
+    "phone": "+919422604848",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:08:15.210511",
+  "completion_time": "2025-07-04T05:08:15.210515"
+}

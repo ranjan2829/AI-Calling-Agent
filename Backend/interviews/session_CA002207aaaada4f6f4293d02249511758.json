@@ -1,0 +1,29 @@
+{
+  "call_sid": "CA002207aaaada4f6f4293d02249511758",
+  "interview_id": "CA002207aaaada4f6f4293d02249511758",
+  "phone_number": "+919673949795",
+  "candidate_phone": "+919673949795",
+  "candidate_name": "Pankaj Baghele",
+  "name": "Pankaj Baghele",
+  "twilio_number": "+919673949795",
+  "start_time": "2025-07-04T05:04:52.657811",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T05:04:52.657820",
+  "bulk_call_id": "bulk_20250704_050429",
+  "is_bulk_call": true,
+  "candidate_data": {
+    "name": "Pankaj Baghele",
+    "phone": "+919673949795",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "end_time": "2025-07-04T05:05:25.647316"
+}
