@@ -156,8 +156,7 @@ export const InterviewResults: React.FC = () => {
         console.log('🔍 Processing interview:', interview.interview_id || interview.call_sid);
         
         const callId = interview.call_sid || interview.interview_id || 'unknown';
-        
-        // 🔥 FUCK IT - JUST USE CALL ID FOR EVERYTHING
+
         const candidateName = callId;
         const phoneNumber = callId;
         
