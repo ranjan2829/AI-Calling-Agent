@@ -462,7 +462,7 @@ def handle_no_response(call_sid: str):
                 language='en-IN',
                 enhanced=True,
                 profanityFilter=False,
-                speechModel='experimental_conversations'
+                speechModel='phone_calls'  # Changed to phone_calls for better accuracy
             )           
             resp.redirect(f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}')        
         

@@ -85,7 +85,7 @@ export const CallHistory: React.FC = () => {
       
       console.log('Raw interviews from API:', response.data.interviews);
       
-      // FIXED: More thorough filtering to remove ALL "N/A" records
+      // KEEP: existing filtering logic - no changes
       const filteredInterviews = (response.data.interviews || []).filter(interview => {
         // Keep all interviews that have basic data
         const hasBasicData = interview.interview_id || interview.call_sid;
@@ -111,8 +111,6 @@ export const CallHistory: React.FC = () => {
           });
           return false;
         }
-        
-        // Also filter out records with 0 responses AND no valid dates
         if ((!completionTime || !endTime || !startTime) && 
             (!interview.responses || interview.responses.length === 0)) {
           console.log(`Filtering out - no dates and no responses:`, {
@@ -140,6 +138,7 @@ export const CallHistory: React.FC = () => {
       setLoading(false);
     }
   };
+
   const getActualStatus = (interview: Interview) => {
     if (interview.status === 'TERMINATED' || interview.status === 'COMPLETED') {
       return interview.status;
@@ -161,8 +160,13 @@ export const CallHistory: React.FC = () => {
     
     return interview.status;
   };
+
   const getStatusChip = (interview: Interview) => {
     const actualStatus = getActualStatus(interview);
+    
+    // FIXED: Replace INCOMPLETE_SILENCE with "No Response"
+    const displayStatus = actualStatus === 'INCOMPLETE_SILENCE' ? 'No Response' : actualStatus;
+    
     switch (actualStatus) {
       case 'COMPLETED':
         return (
@@ -170,6 +174,16 @@ export const CallHistory: React.FC = () => {
             icon={<CheckCircle />}
             label="Completed"
             color="success"
+            size="small"
+            sx={{ fontWeight: 'bold' }}
+          />
+        );
+      case 'INCOMPLETE_SILENCE':
+        return (
+          <Chip
+            icon={<Phone />}
+            label="No Response"
+            color="warning"
             size="small"
             sx={{ fontWeight: 'bold' }}
           />
@@ -207,7 +221,7 @@ export const CallHistory: React.FC = () => {
       default:
         return (
           <Chip
-            label={actualStatus}
+            label={displayStatus}
             color="default"
             size="small"
             sx={{ fontWeight: 'bold' }}
@@ -554,9 +568,14 @@ export const CallHistory: React.FC = () => {
                 </Accordion>
               ))}
 
+              {/* FIXED: Replace INCOMPLETE_SILENCE with "No Response" */}
               {selectedInterview.termination_reason && (
                 <Alert severity="warning" sx={{ mt: 2 }}>
-                  <strong>Termination Reason:</strong> {selectedInterview.termination_reason}
+                  <strong>Termination Reason:</strong> {
+                    selectedInterview.termination_reason === 'INCOMPLETE_SILENCE' 
+                      ? 'No Response' 
+                      : selectedInterview.termination_reason
+                  }
                 </Alert>
               )}
             </Box>

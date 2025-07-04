@@ -26,7 +26,9 @@ import {
   Select,
   FormControl,
   InputLabel,
-  Divider
+  Divider,
+  Badge,
+  Tooltip
 } from '@mui/material';
 import {
   Upload,
@@ -39,7 +41,11 @@ import {
   Schedule,
   Pause,
   History,
-  Refresh
+  Refresh,
+  CallEnd,
+  PhoneInTalk,
+  Assessment,
+  Pending
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 
@@ -62,6 +68,11 @@ interface CallResult {
   timestamp?: string;
   message?: string;
   call_duration?: string;
+  // NEW: Call completion tracking
+  call_initiated?: boolean;
+  call_completed?: boolean;
+  interview_status?: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'TERMINATED' | 'CALLBACK_REQUESTED';
+  completion_time?: string;
 }
 
 interface BulkCallSession {
@@ -77,9 +88,14 @@ interface BulkCallSession {
   start_time?: string;
   created_at?: string;
   end_time?: string;
+  // NEW: Completion tracking
+  calls_initiated: number;
+  calls_completed: number;
+  calls_in_progress: number;
+  calls_terminated: number;
+  callbacks_requested: number;
 }
 
-// NEW: Saved bulk results interface
 interface SavedBulkResult {
   bulk_call_id: string;
   total_candidates: number;
@@ -88,6 +104,25 @@ interface SavedBulkResult {
   results: CallResult[];
   created_at: string;
   status: string;
+  // NEW: Completion stats
+  calls_completed?: number;
+  calls_in_progress?: number;
+  calls_terminated?: number;
+  callbacks_requested?: number;
+}
+
+// NEW: Interview data interface
+interface InterviewData {
+  interview_id: string;
+  call_sid: string;
+  candidate_name: string;
+  candidate_phone: string;
+  status: string;
+  questions_answered: number;
+  total_questions: number;
+  completion_time: string;
+  bulk_call_id?: string;
+  is_bulk_call?: boolean;
 }
 
 export const BulkCallDashboard: React.FC = () => {
@@ -96,19 +131,116 @@ export const BulkCallDashboard: React.FC = () => {
   const [isCalling, setIsCalling] = useState(false);
   const [bulkCallSession, setBulkCallSession] = useState<BulkCallSession | null>(null);
   const [showResults, setShowResults] = useState(false);
-  const [sortBy, setSortBy] = useState<'name' | 'status' | 'time'>('status');
+  const [sortBy, setSortBy] = useState<'name' | 'status' | 'time' | 'completion'>('status');
   
-  // NEW: Persistent bulk results state
   const [savedBulkResults, setSavedBulkResults] = useState<SavedBulkResult[]>([]);
   const [loadingSavedResults, setLoadingSavedResults] = useState(false);
   const [showHistoryDialog, setShowHistoryDialog] = useState(false);
+  
+  // NEW: Interview tracking
+  const [interviewData, setInterviewData] = useState<InterviewData[]>([]);
+  const [isLoadingInterviews, setIsLoadingInterviews] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
-  // NEW: Load saved bulk results on component mount
   useEffect(() => {
     loadSavedBulkResults();
+    loadInterviewData();
   }, []);
 
-  // NEW: Load saved bulk call results
+  // NEW: Auto-refresh for real-time updates
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (autoRefresh && bulkCallSession) {
+      interval = setInterval(() => {
+        loadInterviewData();
+      }, 10000); // Refresh every 10 seconds
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [autoRefresh, bulkCallSession]);
+
+  // NEW: Load interview data to track completions
+  const loadInterviewData = async () => {
+    try {
+      setIsLoadingInterviews(true);
+      const response = await fetch('http://13.204.76.229:8000/interviews-detailed');
+      const data = await response.json();
+      
+      if (data.success) {
+        setInterviewData(data.interviews || []);
+        console.log('✅ Loaded interview data:', data.interviews?.length || 0);
+        
+        // Update bulk call session with completion data
+        if (bulkCallSession) {
+          updateBulkCallSessionWithCompletions(data.interviews || []);
+        }
+      } else {
+        console.error('❌ Failed to load interview data:', data.error);
+      }
+    } catch (error) {
+      console.error('❌ Error loading interview data:', error);
+    } finally {
+      setIsLoadingInterviews(false);
+    }
+  };
+
+  // NEW: Update bulk call session with completion data
+  const updateBulkCallSessionWithCompletions = (interviews: InterviewData[]) => {
+    if (!bulkCallSession) return;
+
+    const bulkInterviews = interviews.filter(interview => 
+      interview.bulk_call_id === bulkCallSession.bulk_call_id || 
+      interview.is_bulk_call
+    );
+
+    const updatedResults = bulkCallSession.results.map(result => {
+      const matchingInterview = bulkInterviews.find(interview => 
+        interview.call_sid === result.call_sid || 
+        interview.candidate_phone === result.phone
+      );
+
+      if (matchingInterview) {
+        return {
+          ...result,
+          call_completed: matchingInterview.status === 'COMPLETED',
+          interview_status: matchingInterview.status as any,
+          completion_time: matchingInterview.completion_time,
+          call_initiated: true
+        };
+      }
+
+      return {
+        ...result,
+        call_initiated: result.success,
+        call_completed: false,
+        interview_status: result.success ? 'IN_PROGRESS' : 'NOT_STARTED' as any
+      };
+    });
+
+    // Calculate completion stats
+    const calls_completed = updatedResults.filter(r => r.call_completed).length;
+    const calls_in_progress = updatedResults.filter(r => 
+      r.call_initiated && !r.call_completed && r.interview_status === 'IN_PROGRESS'
+    ).length;
+    const calls_terminated = updatedResults.filter(r => 
+      r.interview_status === 'TERMINATED'
+    ).length;
+    const callbacks_requested = updatedResults.filter(r => 
+      r.interview_status === 'CALLBACK_REQUESTED'
+    ).length;
+
+    setBulkCallSession({
+      ...bulkCallSession,
+      results: updatedResults,
+      calls_initiated: updatedResults.filter(r => r.call_initiated).length,
+      calls_completed,
+      calls_in_progress,
+      calls_terminated,
+      callbacks_requested
+    });
+  };
+
   const loadSavedBulkResults = async () => {
     try {
       setLoadingSavedResults(true);
@@ -128,7 +260,6 @@ export const BulkCallDashboard: React.FC = () => {
     }
   };
 
-  // NEW: Save bulk call results
   const saveBulkResults = async (bulkData: BulkCallSession) => {
     try {
       const response = await fetch('http://13.204.76.229:8000/save-bulk-results', {
@@ -142,7 +273,6 @@ export const BulkCallDashboard: React.FC = () => {
       const result = await response.json();
       if (result.success) {
         console.log('✅ Bulk call results saved persistently');
-        // Reload saved results to include the new one
         await loadSavedBulkResults();
       } else {
         console.error('❌ Failed to save bulk results:', result.error);
@@ -172,38 +302,32 @@ export const BulkCallDashboard: React.FC = () => {
       const result = await response.json();
       console.log('📥 Upload response:', result);
       
-      if (result.success) {
-        // FIX: Always ensure contacts is an array and process properly
-        const processedContacts = Array.isArray(result.contacts) ? result.contacts : [];
-        
-        // Enhanced contact processing with safe array handling
-        const validContacts = processedContacts.map((contact: any) => ({
+      if (result.success && result.contacts && Array.isArray(result.contacts)) {
+        const validContacts = result.contacts.map((contact: any) => ({
           name: contact.name || contact.Name || `Contact_${Math.random().toString(36).substr(2, 4)}`,
           phone: contact.phone || contact.Phone || contact.mobile || contact.Mobile,
           email: contact.email || contact.Email || '',
-          experience: contact.experience || contact.Experience || '',
+          experience: contact.experience || contact.Experience || contact.data || '',
           skills: contact.skills || contact.Skills || '',
           data: contact.data || ''
-        })).filter((contact: any) => contact.phone && contact.phone.trim()); // Only include contacts with phone numbers
+        })).filter((contact: any) => contact.phone && contact.phone.trim());
         
         setContacts(validContacts);
         console.log('✅ Contacts loaded:', validContacts);
         
         toast.success(`✅ ${validContacts.length} contacts loaded successfully! Review the list and click "Start AI Bulk Interviews" to begin calling.`);
+        
       } else {
-        // FIX: Handle error case properly
-        setContacts([]); // Reset contacts on error
+        setContacts([]);
         toast.error(result.error || 'Failed to process CSV file');
         console.error('❌ CSV upload failed:', result.error);
       }
     } catch (error: any) {
-      // FIX: Reset contacts on error
       setContacts([]);
       toast.error('Failed to upload CSV: ' + error.message);
       console.error('❌ CSV upload error:', error);
     } finally {
       setIsUploading(false);
-      // Clear the file input
       event.target.value = '';
     }
   };
@@ -214,7 +338,6 @@ export const BulkCallDashboard: React.FC = () => {
       return;
     }
     
-    // FIX: Validate contacts have phone numbers
     const validContacts = contacts.filter(contact => contact.phone && contact.phone.trim());
     if (validContacts.length === 0) {
       toast.error('❌ No valid phone numbers found in contacts');
@@ -234,31 +357,47 @@ export const BulkCallDashboard: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(validContacts), // Use validContacts instead of contacts
+        body: JSON.stringify(validContacts),
       });
       
       const result = await response.json();
       console.log('📞 Bulk call response:', result);
       
-      if (result.success) {
+      if (result.success && result.bulk_call_id) {
         const newSession: BulkCallSession = {
           bulk_call_id: result.bulk_call_id,
-          status: 'COMPLETED', // Mark as completed since backend processes all calls
+          status: 'COMPLETED',
           total_candidates: result.total_candidates,
           successful_calls: result.successful_calls || 0,
           failed_calls: result.failed_calls || 0,
-          results: result.results || [],
+          results: (result.results || []).map((r: any) => ({
+            ...r,
+            call_initiated: r.success,
+            call_completed: false,
+            interview_status: r.success ? 'IN_PROGRESS' : 'NOT_STARTED'
+          })),
           start_time: new Date().toISOString(),
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          // NEW: Initialize completion tracking
+          calls_initiated: result.successful_calls || 0,
+          calls_completed: 0,
+          calls_in_progress: result.successful_calls || 0,
+          calls_terminated: 0,
+          callbacks_requested: 0
         };
         
         setBulkCallSession(newSession);
-        setShowResults(true); // Show results immediately
+        setShowResults(true);
+        setAutoRefresh(true); // Start auto-refresh
         
-        // NEW: Save results automatically
         await saveBulkResults(newSession);
         
-        toast.success(`🎉 Bulk calling completed! ${result.successful_calls}/${result.total_candidates} calls initiated successfully.`);
+        toast.success(`🎉 Bulk calling completed! ${result.successful_calls}/${result.total_candidates} calls initiated successfully. Tracking completion status...`);
+        
+        // Load interview data to start tracking
+        setTimeout(() => {
+          loadInterviewData();
+        }, 2000);
         
       } else {
         toast.error(result.error || 'Failed to start bulk calling');
@@ -276,6 +415,14 @@ export const BulkCallDashboard: React.FC = () => {
     const sortedResults = [...results];
     
     switch (sortBy) {
+      case 'completion':
+        return sortedResults.sort((a, b) => {
+          if (a.call_completed && !b.call_completed) return -1;
+          if (!a.call_completed && b.call_completed) return 1;
+          if (a.call_initiated && !b.call_initiated) return -1;
+          if (!a.call_initiated && b.call_initiated) return 1;
+          return 0;
+        });
       case 'status':
         return sortedResults.sort((a, b) => {
           if (a.success && !b.success) return -1;
@@ -287,10 +434,32 @@ export const BulkCallDashboard: React.FC = () => {
       case 'time':
       default:
         return sortedResults.sort((a, b) => {
-          const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-          const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+          const timeA = a.completion_time ? new Date(a.completion_time).getTime() : 0;
+          const timeB = b.completion_time ? new Date(b.completion_time).getTime() : 0;
           return timeB - timeA;
         });
+    }
+  };
+
+  // NEW: Get call status info
+  const getCallStatusInfo = (result: CallResult) => {
+    if (!result.call_initiated) {
+      return { icon: <Error />, color: 'error', label: 'NOT INITIATED', bgColor: 'error.50' };
+    }
+    
+    if (result.call_completed) {
+      return { icon: <CheckCircle />, color: 'success', label: 'COMPLETED', bgColor: 'success.50' };
+    }
+    
+    switch (result.interview_status) {
+      case 'IN_PROGRESS':
+        return { icon: <PhoneInTalk />, color: 'primary', label: 'IN PROGRESS', bgColor: 'primary.50' };
+      case 'TERMINATED':
+        return { icon: <CallEnd />, color: 'warning', label: 'TERMINATED', bgColor: 'warning.50' };
+      case 'CALLBACK_REQUESTED':
+        return { icon: <Schedule />, color: 'info', label: 'CALLBACK', bgColor: 'info.50' };
+      default:
+        return { icon: <Pending />, color: 'default', label: 'PENDING', bgColor: 'grey.50' };
     }
   };
 
@@ -303,10 +472,9 @@ export const BulkCallDashboard: React.FC = () => {
   };
 
   const getStatusLabel = (success: boolean) => {
-    return success ? 'SUCCESS' : 'FAILED';
+    return success ? 'INITIATED' : 'FAILED';
   };
 
-  // NEW: Load specific bulk result
   const loadBulkResult = (savedResult: SavedBulkResult) => {
     setBulkCallSession({
       bulk_call_id: savedResult.bulk_call_id,
@@ -315,10 +483,18 @@ export const BulkCallDashboard: React.FC = () => {
       successful_calls: savedResult.successful_calls,
       failed_calls: savedResult.failed_calls,
       results: savedResult.results,
-      created_at: savedResult.created_at
+      created_at: savedResult.created_at,
+      // NEW: Load completion data
+      calls_initiated: savedResult.successful_calls,
+      calls_completed: savedResult.calls_completed || 0,
+      calls_in_progress: savedResult.calls_in_progress || 0,
+      calls_terminated: savedResult.calls_terminated || 0,
+      callbacks_requested: savedResult.callbacks_requested || 0
     });
     setShowHistoryDialog(false);
     setShowResults(true);
+    setAutoRefresh(true);
+    loadInterviewData(); // Refresh completion data
   };
 
   return (
@@ -329,7 +505,7 @@ export const BulkCallDashboard: React.FC = () => {
           📞 AI Bulk Call Dashboard
         </Typography>
         <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-          Upload CSV and automatically call multiple candidates with AI interviewer
+          Upload CSV and automatically call multiple candidates with AI interviewer - Track call completion status
         </Typography>
       </Box>
 
@@ -347,13 +523,28 @@ export const BulkCallDashboard: React.FC = () => {
         <Button
           variant="outlined"
           startIcon={<Refresh />}
-          onClick={loadSavedBulkResults}
-          disabled={loadingSavedResults}
+          onClick={() => {
+            loadSavedBulkResults();
+            loadInterviewData();
+          }}
+          disabled={loadingSavedResults || isLoadingInterviews}
         >
-          {loadingSavedResults ? 'Loading...' : 'Refresh'}
+          {loadingSavedResults || isLoadingInterviews ? 'Loading...' : 'Refresh'}
         </Button>
 
-        {/* Stats */}
+        {/* NEW: Auto-refresh toggle */}
+        {bulkCallSession && (
+          <Button
+            variant={autoRefresh ? "contained" : "outlined"}
+            size="small"
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            startIcon={autoRefresh ? <Pause /> : <PlayArrow />}
+          >
+            {autoRefresh ? 'Pause Tracking' : 'Start Tracking'}
+          </Button>
+        )}
+
+        {/* Enhanced Stats */}
         {contacts.length > 0 && (
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', ml: 'auto' }}>
             <Chip 
@@ -365,24 +556,46 @@ export const BulkCallDashboard: React.FC = () => {
             {bulkCallSession && (
               <>
                 <Chip 
+                  icon={<Phone />} 
+                  label={`${bulkCallSession.calls_initiated} initiated`} 
+                  color="info" 
+                  size="small"
+                />
+                <Chip 
                   icon={<CheckCircle />} 
-                  label={`${bulkCallSession.successful_calls} successful`} 
+                  label={`${bulkCallSession.calls_completed} completed`} 
                   color="success" 
                   size="small"
                 />
                 <Chip 
-                  icon={<Error />} 
-                  label={`${bulkCallSession.failed_calls} failed`} 
-                  color="error" 
+                  icon={<PhoneInTalk />} 
+                  label={`${bulkCallSession.calls_in_progress} in progress`} 
+                  color="primary" 
                   size="small"
                 />
+                {bulkCallSession.calls_terminated > 0 && (
+                  <Chip 
+                    icon={<CallEnd />} 
+                    label={`${bulkCallSession.calls_terminated} terminated`} 
+                    color="warning" 
+                    size="small"
+                  />
+                )}
+                {bulkCallSession.callbacks_requested > 0 && (
+                  <Chip 
+                    icon={<Schedule />} 
+                    label={`${bulkCallSession.callbacks_requested} callbacks`} 
+                    color="info" 
+                    size="small"
+                  />
+                )}
               </>
             )}
           </Box>
         )}
       </Box>
 
-      {/* Upload Section */}
+      {/* Upload Section - Keep existing code */}
       <Card sx={{ mb: 4 }}>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -438,7 +651,7 @@ export const BulkCallDashboard: React.FC = () => {
                     Upload CSV File
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    CSV should contain: name, phone, email (optional), experience (optional), skills (optional)
+                    CSV format: name, phone, data (experience), additional_phone
                   </Typography>
                 </Box>
               )}
@@ -452,7 +665,7 @@ export const BulkCallDashboard: React.FC = () => {
                   <CheckCircle sx={{ mr: 1 }} />
                   <Typography>
                     ✅ {contacts.length} contacts loaded successfully! 
-                    Review the contact list below and click "Start AI Bulk Interviews" to begin calling.
+                    Primary data: name and phone. Click "Start AI Bulk Interviews" to begin calling.
                   </Typography>
                 </Box>
               </Box>
@@ -464,7 +677,7 @@ export const BulkCallDashboard: React.FC = () => {
       {/* Contact List and Control Panel */}
       {contacts.length > 0 && (
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          {/* Contact List */}
+          {/* Contact List - Keep existing but enhance */}
           <Grid item xs={12} md={8}>
             <Card>
               <CardContent>
@@ -493,36 +706,24 @@ export const BulkCallDashboard: React.FC = () => {
                             #{index + 1}
                           </Typography>
                         </Grid>
-                        <Grid item xs={12} sm={3}>
+                        <Grid item xs={12} sm={4}>
                           <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
                             👤 {contact.name}
                           </Typography>
                         </Grid>
-                        <Grid item xs={12} sm={3}>
+                        <Grid item xs={12} sm={4}>
                           <Typography variant="body2" color="textSecondary">
                             📞 {contact.phone}
                           </Typography>
                         </Grid>
-                        <Grid item xs={12} sm={2}>
-                          {contact.email && (
-                            <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.8rem' }}>
-                              ✉️ {contact.email.substring(0, 15)}{contact.email.length > 15 ? '...' : ''}
-                            </Typography>
-                          )}
-                        </Grid>
                         <Grid item xs={12} sm={3}>
-                          {contact.experience && (
+                          {contact.data && (
                             <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.8rem' }}>
-                              🎯 {contact.experience}
+                              💼 {contact.data.substring(0, 30)}{contact.data.length > 30 ? '...' : ''}
                             </Typography>
                           )}
                         </Grid>
                       </Grid>
-                      {contact.skills && (
-                        <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
-                          💼 Skills: {contact.skills}
-                        </Typography>
-                      )}
                     </Box>
                   ))}
                 </Box>
@@ -530,7 +731,7 @@ export const BulkCallDashboard: React.FC = () => {
             </Card>
           </Grid>
 
-          {/* Control Panel */}
+          {/* Enhanced Control Panel */}
           <Grid item xs={12} md={4}>
             <Card>
               <CardContent>
@@ -562,18 +763,21 @@ export const BulkCallDashboard: React.FC = () => {
                       variant="outlined"
                       fullWidth
                       onClick={() => setShowResults(true)}
+                      startIcon={<Assessment />}
                     >
                       View Results ({bulkCallSession.results.length})
                     </Button>
                   )}
                 </Box>
 
-                {/* Statistics */}
+                {/* Enhanced Statistics */}
                 <Divider sx={{ mb: 2 }} />
                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold' }}>
                   📊 Call Statistics
                 </Typography>
-                <Grid container spacing={2}>
+                
+                {/* Primary Stats */}
+                <Grid container spacing={2} sx={{ mb: 2 }}>
                   <Grid item xs={4}>
                     <Box sx={{ textAlign: 'center' }}>
                       <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
@@ -586,25 +790,75 @@ export const BulkCallDashboard: React.FC = () => {
                   </Grid>
                   <Grid item xs={4}>
                     <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'success.main' }}>
-                        {bulkCallSession?.successful_calls || 0}
+                      <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'info.main' }}>
+                        {bulkCallSession?.calls_initiated || 0}
                       </Typography>
                       <Typography variant="caption" color="textSecondary">
-                        Success
+                        Initiated
                       </Typography>
                     </Box>
                   </Grid>
                   <Grid item xs={4}>
                     <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'error.main' }}>
-                        {bulkCallSession?.failed_calls || 0}
+                      <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                        {bulkCallSession?.calls_completed || 0}
                       </Typography>
                       <Typography variant="caption" color="textSecondary">
-                        Failed
+                        Completed
                       </Typography>
                     </Box>
                   </Grid>
                 </Grid>
+
+                {/* Secondary Stats */}
+                {bulkCallSession && (
+                  <Grid container spacing={1} sx={{ mb: 2 }}>
+                    <Grid item xs={6}>
+                      <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'primary.50', borderRadius: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                          {bulkCallSession.calls_in_progress}
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary">
+                          In Progress
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'error.50', borderRadius: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'error.main' }}>
+                          {bulkCallSession.failed_calls}
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary">
+                          Failed
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    {bulkCallSession.calls_terminated > 0 && (
+                      <Grid item xs={6}>
+                        <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'warning.50', borderRadius: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'warning.main' }}>
+                            {bulkCallSession.calls_terminated}
+                          </Typography>
+                          <Typography variant="caption" color="textSecondary">
+                            Terminated
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    )}
+                    {bulkCallSession.callbacks_requested > 0 && (
+                      <Grid item xs={6}>
+                        <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'info.50', borderRadius: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'info.main' }}>
+                            {bulkCallSession.callbacks_requested}
+                          </Typography>
+                          <Typography variant="caption" color="textSecondary">
+                            Callbacks
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    )}
+                  </Grid>
+                )}
 
                 {/* Progress */}
                 {isCalling && (
@@ -619,15 +873,29 @@ export const BulkCallDashboard: React.FC = () => {
                   </Box>
                 )}
 
-                {/* Success Message */}
+                {/* Real-time tracking indicator */}
+                {autoRefresh && bulkCallSession && (
+                  <Box sx={{ mt: 2 }}>
+                    <Alert severity="info" sx={{ p: 1 }}>
+                      <Typography variant="caption">
+                        🔄 Real-time tracking active - Updates every 10 seconds
+                        {isLoadingInterviews && <CircularProgress size={12} sx={{ ml: 1 }} />}
+                      </Typography>
+                    </Alert>
+                  </Box>
+                )}
+
+                {/* Completion Summary */}
                 {bulkCallSession && !isCalling && (
                   <Alert severity="info" sx={{ mt: 2 }}>
                     <Typography variant="body2">
                       ✅ Bulk calling completed! 
                       <br />
-                      <strong>{bulkCallSession.successful_calls}/{bulkCallSession.total_candidates}</strong> calls initiated successfully.
+                      <strong>Initiated:</strong> {bulkCallSession.calls_initiated}/{bulkCallSession.total_candidates}
                       <br />
-                      Check the interview results dashboard for detailed analysis.
+                      <strong>Completed:</strong> {bulkCallSession.calls_completed}/{bulkCallSession.calls_initiated}
+                      <br />
+                      Check the results for detailed completion tracking.
                     </Typography>
                   </Alert>
                 )}
@@ -637,7 +905,7 @@ export const BulkCallDashboard: React.FC = () => {
         </Grid>
       )}
 
-      {/* Empty State */}
+      {/* Empty State - Keep existing */}
       {contacts.length === 0 && !isUploading && (
         <Card>
           <CardContent sx={{ textAlign: 'center', py: 6 }}>
@@ -649,42 +917,55 @@ export const BulkCallDashboard: React.FC = () => {
               Upload a CSV file with candidate information to start bulk AI interviews
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              CSV format: name, phone, email (optional), experience (optional), skills (optional)
+              CSV format: name, phone, data (experience), additional_phone
             </Typography>
           </CardContent>
         </Card>
       )}
 
-      {/* Results Dialog */}
-      <Dialog open={showResults} onClose={() => setShowResults(false)} maxWidth="lg" fullWidth>
+      {/* Enhanced Results Dialog */}
+      <Dialog open={showResults} onClose={() => setShowResults(false)} maxWidth="xl" fullWidth>
         <DialogTitle>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6">📊 AI Interview Results</Typography>
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Sort by</InputLabel>
-              <Select
-                value={sortBy}
-                label="Sort by"
-                onChange={(e) => setSortBy(e.target.value as 'name' | 'status' | 'time')}
+            <Typography variant="h6">📊 AI Interview Results - Call Completion Tracking</Typography>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <FormControl size="small" sx={{ minWidth: 140 }}>
+                <InputLabel>Sort by</InputLabel>
+                <Select
+                  value={sortBy}
+                  label="Sort by"
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                >
+                  <MenuItem value="completion">Completion Status</MenuItem>
+                  <MenuItem value="status">Initiation Status</MenuItem>
+                  <MenuItem value="name">Name</MenuItem>
+                  <MenuItem value="time">Time</MenuItem>
+                </Select>
+              </FormControl>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<Refresh />}
+                onClick={loadInterviewData}
+                disabled={isLoadingInterviews}
               >
-                <MenuItem value="status">Success First</MenuItem>
-                <MenuItem value="name">Name</MenuItem>
-                <MenuItem value="time">Time</MenuItem>
-              </Select>
-            </FormControl>
+                {isLoadingInterviews ? 'Loading...' : 'Refresh'}
+              </Button>
+            </Box>
           </Box>
         </DialogTitle>
         <DialogContent>
           {bulkCallSession && (
             <>
-              {/* Summary */}
+              {/* Enhanced Summary */}
               <Alert severity="info" sx={{ mb: 2 }}>
                 <Typography variant="body2">
                   <strong>Bulk Call ID:</strong> {bulkCallSession.bulk_call_id} | 
                   <strong> Total:</strong> {bulkCallSession.total_candidates} | 
-                  <strong> Success:</strong> {bulkCallSession.successful_calls} | 
-                  <strong> Failed:</strong> {bulkCallSession.failed_calls} | 
-                  <strong> Success Rate:</strong> {Math.round((bulkCallSession.successful_calls / bulkCallSession.total_candidates) * 100)}%
+                  <strong> Initiated:</strong> {bulkCallSession.calls_initiated} | 
+                  <strong> Completed:</strong> {bulkCallSession.calls_completed} | 
+                  <strong> In Progress:</strong> {bulkCallSession.calls_in_progress} | 
+                  <strong> Completion Rate:</strong> {Math.round((bulkCallSession.calls_completed / Math.max(bulkCallSession.calls_initiated, 1)) * 100)}%
                 </Typography>
               </Alert>
 
@@ -695,61 +976,86 @@ export const BulkCallDashboard: React.FC = () => {
                       <TableCell><strong>Rank</strong></TableCell>
                       <TableCell><strong>Name</strong></TableCell>
                       <TableCell><strong>Phone</strong></TableCell>
-                      <TableCell><strong>Status</strong></TableCell>
+                      <TableCell><strong>Call Status</strong></TableCell>
+                      <TableCell><strong>Interview Status</strong></TableCell>
                       <TableCell><strong>Call Details</strong></TableCell>
                       <TableCell><strong>Actions</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {getSortedResults(bulkCallSession.results).map((result, index) => (
-                      <TableRow key={index} sx={{ backgroundColor: result.success ? 'success.50' : 'inherit' }}>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                            #{index + 1}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-                            {result.name}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {result.phone}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            icon={getStatusIcon(result.success)}
-                            label={getStatusLabel(result.success)}
-                            color={getStatusColor(result.success) as any}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {result.call_sid || 'No Call ID'}
-                          </Typography>
-                          <Typography variant="caption" color="textSecondary">
-                            {result.success ? 'Interview initiated successfully' : (result.error || 'Call failed')}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          {result.success && result.call_sid && (
-                            <Button
+                    {getSortedResults(bulkCallSession.results).map((result, index) => {
+                      const statusInfo = getCallStatusInfo(result);
+                      return (
+                        <TableRow 
+                          key={index} 
+                          sx={{ 
+                            backgroundColor: statusInfo.bgColor,
+                            '&:hover': { backgroundColor: 'action.hover' }
+                          }}
+                        >
+                          <TableCell>
+                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                              #{index + 1}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                              {result.name}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">
+                              {result.phone}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              icon={getStatusIcon(result.success)}
+                              label={getStatusLabel(result.success)}
+                              color={getStatusColor(result.success) as any}
                               size="small"
-                              variant="outlined"
-                              onClick={() => {
-                                // Navigate to interview details
-                                window.open(`/interview-details/${result.call_sid}`, '_blank');
-                              }}
-                            >
-                              View Interview
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Tooltip title={`Last updated: ${result.completion_time || 'Unknown'}`}>
+                              <Chip
+                                icon={statusInfo.icon}
+                                label={statusInfo.label}
+                                color={statusInfo.color as any}
+                                size="small"
+                                variant={result.call_completed ? "filled" : "outlined"}
+                              />
+                            </Tooltip>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">
+                              {result.call_sid || 'No Call ID'}
+                            </Typography>
+                            <Typography variant="caption" color="textSecondary">
+                              {result.call_completed 
+                                ? `Completed: ${result.completion_time ? new Date(result.completion_time).toLocaleString() : 'Unknown'}`
+                                : result.success 
+                                  ? 'Interview in progress...' 
+                                  : (result.error || 'Call failed')
+                              }
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            {result.success && result.call_sid && (
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                onClick={() => {
+                                  window.open(`/interview-details/${result.call_sid}`, '_blank');
+                                }}
+                              >
+                                View Interview
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -757,11 +1063,12 @@ export const BulkCallDashboard: React.FC = () => {
           )}
         </DialogContent>
         <DialogActions>
+          <Button onClick={() => setAutoRefresh(false)}>Stop Tracking</Button>
           <Button onClick={() => setShowResults(false)}>Close</Button>
         </DialogActions>
       </Dialog>
 
-      {/* History Dialog */}
+      {/* History Dialog - Keep existing but enhance with completion data */}
       <Dialog open={showHistoryDialog} onClose={() => setShowHistoryDialog(false)} maxWidth="lg" fullWidth>
         <DialogTitle>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -786,9 +1093,10 @@ export const BulkCallDashboard: React.FC = () => {
                     <TableCell><strong>Bulk Call ID</strong></TableCell>
                     <TableCell><strong>Date</strong></TableCell>
                     <TableCell><strong>Total</strong></TableCell>
-                    <TableCell><strong>Success</strong></TableCell>
+                    <TableCell><strong>Initiated</strong></TableCell>
+                    <TableCell><strong>Completed</strong></TableCell>
                     <TableCell><strong>Failed</strong></TableCell>
-                    <TableCell><strong>Success Rate</strong></TableCell>
+                    <TableCell><strong>Completion Rate</strong></TableCell>
                     <TableCell><strong>Actions</strong></TableCell>
                   </TableRow>
                 </TableHead>
@@ -809,14 +1117,17 @@ export const BulkCallDashboard: React.FC = () => {
                         <Chip label={result.total_candidates} size="small" />
                       </TableCell>
                       <TableCell>
-                        <Chip label={result.successful_calls} color="success" size="small" />
+                        <Chip label={result.successful_calls} color="info" size="small" />
+                      </TableCell>
+                      <TableCell>
+                        <Chip label={result.calls_completed || 0} color="success" size="small" />
                       </TableCell>
                       <TableCell>
                         <Chip label={result.failed_calls} color="error" size="small" />
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                          {Math.round((result.successful_calls / result.total_candidates) * 100)}%
+                          {Math.round(((result.calls_completed || 0) / Math.max(result.successful_calls, 1)) * 100)}%
                         </Typography>
                       </TableCell>
                       <TableCell>
