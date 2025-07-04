@@ -1,0 +1,39 @@
+{
+  "interview_id": "CA85dddd1f409e73a3c6aae8ea4ba1e72c",
+  "call_sid": "CA85dddd1f409e73a3c6aae8ea4ba1e72c",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+917666911533",
+  "candidate_name": "Bankkawad Bhojanna Dattatraye",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_085321",
+  "start_time": "2025-07-04T08:54:10.450556",
+  "status": "IN_PROGRESS",
+  "current_question": 2,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Hello, sir?",
+      "confidence": 0.9790039,
+      "timestamp": "2025-07-04T08:54:50.571543"
+    },
+    {
+      "question_number": 1,
+      "question": "Introduce yourself.",
+      "answer": "So",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T08:55:02.044026"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T08:55:02.044033",
+  "recording_sid": "REe865a23c10063c3596533dfac8649d92",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/REe865a23c10063c3596533dfac8649d92",
+  "recording_duration": "51",
+  "recording_status": "completed"
+}

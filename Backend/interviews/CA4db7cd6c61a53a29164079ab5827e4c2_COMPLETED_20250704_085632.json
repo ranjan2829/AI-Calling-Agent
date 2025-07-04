@@ -1,0 +1,87 @@
+{
+  "interview_id": "CA4db7cd6c61a53a29164079ab5827e4c2",
+  "call_sid": "CA4db7cd6c61a53a29164079ab5827e4c2",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+917558460070",
+  "candidate_name": "Shubham Borase",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_085321",
+  "start_time": "2025-07-04T08:54:09.902331",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yes.",
+      "confidence": 0.7915039,
+      "timestamp": "2025-07-04T08:54:25.714467"
+    },
+    {
+      "question_number": 1,
+      "question": "Introduce yourself.",
+      "answer": "My name is. I completed my 10 10 from our state board. After that, I completed I completed my CDR after that in postgraduated diploma and advanced computing. And this is my 1 year graduate education as a software developer.",
+      "confidence": 0.90771484,
+      "timestamp": "2025-07-04T08:54:50.452426"
+    },
+    {
+      "question_number": 2,
+      "question": "What are your key skills for this role?",
+      "answer": "Manual testing Java",
+      "confidence": 0.9633789,
+      "timestamp": "2025-07-04T08:55:00.058856"
+    },
+    {
+      "question_number": 3,
+      "question": "What is your current notice period?",
+      "answer": "Hi there.",
+      "confidence": 0.7322998,
+      "timestamp": "2025-07-04T08:55:08.686597"
+    },
+    {
+      "question_number": 4,
+      "question": "What is your current CTC and expected salary?",
+      "answer": "It is 2.4.",
+      "confidence": 0.7680664,
+      "timestamp": "2025-07-04T08:55:18.485222"
+    },
+    {
+      "question_number": 5,
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I created most of the rest API.",
+      "confidence": 0.9951172,
+      "timestamp": "2025-07-04T08:55:29.335276"
+    },
+    {
+      "question_number": 6,
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I integrated. It has placed a service like e c 2, and it my, application.",
+      "confidence": 0.84033203,
+      "timestamp": "2025-07-04T08:55:46.886520"
+    },
+    {
+      "question_number": 7,
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "I created the Docker repository of my Python, API. And",
+      "confidence": 0.9921875,
+      "timestamp": "2025-07-04T08:56:03.098590"
+    },
+    {
+      "question_number": 8,
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "I work on LinkedIn. It connects the multiple Internet anyone. And, also, I work on the model. It is the CNN, unit, internally. And used to detect many",
+      "confidence": 0.95410156,
+      "timestamp": "2025-07-04T08:56:32.069040"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T08:56:32.069049",
+  "end_time": "2025-07-04T08:56:32.071127",
+  "completion_time": "2025-07-04T08:56:32.071133",
+  "name": "Shubham Borase"
+}

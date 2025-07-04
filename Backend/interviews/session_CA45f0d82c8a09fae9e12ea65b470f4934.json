@@ -1,0 +1,75 @@
+{
+  "interview_id": "CA45f0d82c8a09fae9e12ea65b470f4934",
+  "call_sid": "CA45f0d82c8a09fae9e12ea65b470f4934",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+919145446261",
+  "candidate_name": "Dhyeya Trivedi",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_085321",
+  "start_time": "2025-07-04T08:54:00.178964",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 7,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "8.",
+      "confidence": 0.66015625,
+      "timestamp": "2025-07-04T08:54:26.971604"
+    },
+    {
+      "question_number": 1,
+      "question": "Introduce yourself.",
+      "answer": "Your call is on hold.",
+      "confidence": 1.0,
+      "timestamp": "2025-07-04T08:54:36.307620"
+    },
+    {
+      "question_number": 2,
+      "question": "What are your key skills for this role?",
+      "answer": "Line",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T08:54:51.237003"
+    },
+    {
+      "question_number": 3,
+      "question": "What is your current notice period?",
+      "answer": "Back later.",
+      "confidence": 0.92456055,
+      "timestamp": "2025-07-04T08:54:57.578714"
+    },
+    {
+      "question_number": 4,
+      "question": "What is your current CTC and expected salary?",
+      "answer": "Line",
+      "confidence": 0.0,
+      "timestamp": "2025-07-04T08:55:27.627824"
+    },
+    {
+      "question_number": 5,
+      "question": "Tell us about your experience with APIs.",
+      "answer": "Your call is on hold.",
+      "confidence": 1.0,
+      "timestamp": "2025-07-04T08:55:49.001572"
+    },
+    {
+      "question_number": 6,
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "Your call is on hold.",
+      "confidence": 0.99902344,
+      "timestamp": "2025-07-04T08:56:07.322091"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T08:56:07.322098",
+  "end_time": "2025-07-04T08:56:38.447479",
+  "recording_sid": "REafb560b30175f87693b3ac9d2664900c",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/REafb560b30175f87693b3ac9d2664900c",
+  "recording_duration": "161",
+  "recording_status": "completed"
+}

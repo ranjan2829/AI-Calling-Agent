@@ -1,0 +1,77 @@
+{
+  "call_id": "CAff31578e9ff0ff80390b671e7e57a183",
+  "candidate_name": "Candidate_CAff3157",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python",
+      "Machine learning",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [
+      "Machine learning",
+      "LLM"
+    ],
+    "missing_skills": [
+      "python",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "skills_match_percentage": 25.0,
+    "experience_match_percentage": 100,
+    "overall_score": 40.0,
+    "comprehensive_score": 40.0,
+    "priority_score": 2,
+    "recommendation": "MODERATE MATCH",
+    "analysis_date": "2025-07-04 08:56:13",
+    "skill_mentions": {
+      "Machine learning": 6,
+      "LLM": 12
+    },
+    "experience_data": {
+      "years_mentioned": [
+        "4",
+        "4"
+      ],
+      "experience_score": 4
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+14787807480",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [
+      "Machine learning",
+      "LLM"
+    ],
+    "skills_found_count": 2,
+    "total_required_skills": 8,
+    "phone_number": "+14787807480"
+  },
+  "interview_summary": {
+    "questions_answered": 6,
+    "total_questions": 6,
+    "completion_rate": "6/6"
+  },
+  "source_file": "interviews/session_CAff31578e9ff0ff80390b671e7e57a183.json",
+  "candidate_phone": "+917447559079",
+  "candidate_data": {
+    "name": "Nita Vasram Jadhao",
+    "phone": "+917447559079",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "analysis_created": "2025-07-04 08:56:13"
+}

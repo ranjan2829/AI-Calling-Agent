@@ -1,0 +1,86 @@
+{
+  "call_id": "CAf3b923dc1673cc4788719d7205bad0f0",
+  "candidate_name": "Okay",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python",
+      "Machine learning",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [
+      "python",
+      "Machine learning",
+      "NLP",
+      "fast api"
+    ],
+    "missing_skills": [
+      "LLM",
+      "GenerativeAI",
+      "django",
+      "flask"
+    ],
+    "skills_match_percentage": 50.0,
+    "experience_match_percentage": 100,
+    "overall_score": 60.0,
+    "comprehensive_score": 60.0,
+    "priority_score": 3,
+    "recommendation": "GOOD MATCH",
+    "analysis_date": "2025-07-04 08:56:13",
+    "skill_mentions": {
+      "python": 4,
+      "Machine learning": 3,
+      "NLP": 8,
+      "fast api": 6
+    },
+    "experience_data": {
+      "years_mentioned": [
+        "5",
+        "5",
+        "2"
+      ],
+      "experience_score": 6
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+14787807480",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [
+      "python",
+      "Machine learning",
+      "NLP",
+      "fast api"
+    ],
+    "skills_found_count": 4,
+    "total_required_skills": 8,
+    "phone_number": "+14787807480"
+  },
+  "interview_summary": {
+    "questions_answered": 7,
+    "total_questions": 7,
+    "completion_rate": "7/7"
+  },
+  "source_file": "interviews/session_CAf3b923dc1673cc4788719d7205bad0f0.json",
+  "candidate_phone": "+919175490163",
+  "candidate_data": {
+    "name": "Nandkishor P Burkul",
+    "phone": "+919175490163",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "analysis_created": "2025-07-04 08:56:13",
+  "recording_sid": "RE78fcfb6f8ed0a9541e5d7d921bba6a8e",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/RE78fcfb6f8ed0a9541e5d7d921bba6a8e",
+  "recording_duration": "172",
+  "recording_status": "completed"
+}

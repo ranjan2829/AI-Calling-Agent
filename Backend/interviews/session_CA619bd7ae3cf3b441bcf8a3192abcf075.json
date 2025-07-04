@@ -1,0 +1,32 @@
+{
+  "interview_id": "CA619bd7ae3cf3b441bcf8a3192abcf075",
+  "call_sid": "CA619bd7ae3cf3b441bcf8a3192abcf075",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+919088223747",
+  "candidate_name": "PRATIKSHA JONDHALEKAR",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_085321",
+  "start_time": "2025-07-04T08:54:00.182124",
+  "status": "IN_PROGRESS",
+  "current_question": 1,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yes.",
+      "confidence": 1.0,
+      "timestamp": "2025-07-04T08:54:28.950221"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T08:54:28.950230",
+  "recording_sid": "RE07fa162fb4032bdf1f83c361cdfaeb43",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/RE07fa162fb4032bdf1f83c361cdfaeb43",
+  "recording_duration": "43",
+  "recording_status": "completed"
+}

@@ -1,0 +1,67 @@
+{
+  "call_id": "CA45f0d82c8a09fae9e12ea65b470f4934",
+  "candidate_name": "Candidate_CA45f0d8",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python",
+      "Machine learning",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [],
+    "missing_skills": [
+      "python",
+      "Machine learning",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "skills_match_percentage": 0.0,
+    "experience_match_percentage": 50,
+    "overall_score": 10.0,
+    "comprehensive_score": 10.0,
+    "priority_score": 1,
+    "recommendation": "LOW MATCH",
+    "analysis_date": "2025-07-04 08:56:13",
+    "skill_mentions": {},
+    "experience_data": {
+      "years_mentioned": [],
+      "experience_score": 0
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+14787807480",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [],
+    "skills_found_count": 0,
+    "total_required_skills": 8,
+    "phone_number": "+14787807480"
+  },
+  "interview_summary": {
+    "questions_answered": 7,
+    "total_questions": 7,
+    "completion_rate": "7/7"
+  },
+  "source_file": "interviews/session_CA45f0d82c8a09fae9e12ea65b470f4934.json",
+  "candidate_phone": "+919145446261",
+  "candidate_data": {
+    "name": "Dhyeya Trivedi",
+    "phone": "+919145446261",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "analysis_created": "2025-07-04 08:56:13"
+}

@@ -1,0 +1,34 @@
+{
+  "interview_id": "CA29a21fb55111f245233ee436daed3fed",
+  "call_sid": "CA29a21fb55111f245233ee436daed3fed",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+917387792437",
+  "candidate_name": "John Doe",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_083655",
+  "start_time": "2025-07-04T08:37:05.762562",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "validation_results": {
+    "0": {
+      "step": 0,
+      "passed": false,
+      "reason": "Candidate not available for interview",
+      "time_available": false,
+      "availability_status": "not_available",
+      "response": "No. Absolutely not.",
+      "full_response": "No. Absolutely not."
+    }
+  },
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T08:37:05.762572",
+  "recording_sid": "REb15579c481353539698c3c271efa29e1",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/REb15579c481353539698c3c271efa29e1",
+  "recording_duration": "21",
+  "recording_status": "completed"
+}

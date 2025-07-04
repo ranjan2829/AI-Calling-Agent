@@ -1,0 +1,87 @@
+{
+  "interview_id": "CAf3b923dc1673cc4788719d7205bad0f0",
+  "call_sid": "CAf3b923dc1673cc4788719d7205bad0f0",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+919175490163",
+  "candidate_name": "Nandkishor P Burkul",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_085321",
+  "start_time": "2025-07-04T08:54:12.236228",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Okay.",
+      "confidence": 0.98706055,
+      "timestamp": "2025-07-04T08:54:26.363514"
+    },
+    {
+      "question_number": 1,
+      "question": "Introduce yourself.",
+      "answer": "Okay. So my name is. I have 5 years of experience in data science domain. My expertise in include the machine learning, deep learning, NLP, and generative AI. And past 2 years, I'm mostly focusing on the Gen AI based projects.",
+      "confidence": 0.9902344,
+      "timestamp": "2025-07-04T08:54:48.844104"
+    },
+    {
+      "question_number": 2,
+      "question": "What are your key skills for this role?",
+      "answer": "My key skill is the pie Python data science, NLP generative AI, then, deep learning. In generative AI, line chain, drag box, rack, multimodal drag.",
+      "confidence": 0.6381836,
+      "timestamp": "2025-07-04T08:55:07.569978"
+    },
+    {
+      "question_number": 3,
+      "question": "What is your current notice period?",
+      "answer": "My last working day is 30 first July. And that is also negotiable.",
+      "confidence": 1.0,
+      "timestamp": "2025-07-04T08:55:18.561774"
+    },
+    {
+      "question_number": 4,
+      "question": "What is your current CTC and expected salary?",
+      "answer": "My current CTC is the 21 LPA, and my expectation is a 25 LPA.",
+      "confidence": 0.9926758,
+      "timestamp": "2025-07-04T08:55:31.479922"
+    },
+    {
+      "question_number": 5,
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I developed the various project in API by using the fast API and fast API.",
+      "confidence": 0.98095703,
+      "timestamp": "2025-07-04T08:55:44.400104"
+    },
+    {
+      "question_number": 6,
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I work with the AWS. We use the various services from the AWS, like Amazon Bedrock, Amazon SageMaker, Amazon Extract, then EC 2 Instance, s 3 bucket.",
+      "confidence": 0.8694661,
+      "timestamp": "2025-07-04T08:56:06.183036"
+    },
+    {
+      "question_number": 7,
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "Okay. I used the Docker for the deployment purpose. Like, 1 of the app I deploy on the virtual machine, by using the Docker.",
+      "confidence": 0.9038086,
+      "timestamp": "2025-07-04T08:56:23.242362"
+    },
+    {
+      "question_number": 8,
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "Okay. So I have complete, 4 years of experience in this technology, and, is a 2 plus years of experience. In Janae, we use, like, client chain, STAC, then line graph, then, rag, multimodal drag, 3 v I, the framework for the agents.",
+      "confidence": 0.7817383,
+      "timestamp": "2025-07-04T08:56:54.324319"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T08:56:54.324328",
+  "end_time": "2025-07-04T08:56:54.326327",
+  "completion_time": "2025-07-04T08:56:54.326333",
+  "name": "Nandkishor P Burkul"
+}

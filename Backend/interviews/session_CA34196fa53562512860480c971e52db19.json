@@ -1,0 +1,39 @@
+{
+  "interview_id": "CA34196fa53562512860480c971e52db19",
+  "call_sid": "CA34196fa53562512860480c971e52db19",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+919373834313",
+  "candidate_name": "Abhishek Eknath Sakhare",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_085321",
+  "start_time": "2025-07-04T08:54:03.077078",
+  "status": "IN_PROGRESS",
+  "current_question": 2,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yes.",
+      "confidence": 1.0,
+      "timestamp": "2025-07-04T08:54:18.688486"
+    },
+    {
+      "question_number": 1,
+      "question": "Introduce yourself.",
+      "answer": "Thank Which company is your name?",
+      "confidence": 0.99560547,
+      "timestamp": "2025-07-04T08:54:30.304861"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T08:54:30.304870",
+  "recording_sid": "REe59f2438e9ce285bc34ec6b3a61b5160",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/REe59f2438e9ce285bc34ec6b3a61b5160",
+  "recording_duration": "33",
+  "recording_status": "completed"
+}

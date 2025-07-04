@@ -1,0 +1,91 @@
+{
+  "interview_id": "CAff31578e9ff0ff80390b671e7e57a183",
+  "call_sid": "CAff31578e9ff0ff80390b671e7e57a183",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+917447559079",
+  "candidate_name": "Nita Vasram Jadhao",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_085321",
+  "start_time": "2025-07-04T08:54:00.174635",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yes.",
+      "confidence": 0.99853516,
+      "timestamp": "2025-07-04T08:54:16.253155"
+    },
+    {
+      "question_number": 1,
+      "question": "Introduce yourself.",
+      "answer": "Okay. My name is Nita Chandrata. Currently, I'm working as a data science VP to So, currently, I'm holding 4 years of experience as a data science executive. So I have a with a different different model predict to model, like, is the machine learning, natural language processing, deep learning. I work with the revision and classification program. I work with the LLM model also, like, a my LLM model to model model against its model. 37,000,000,000 model. I have worked with g mini model. I worked with the, whisper model, and this is a basically I work with the different different domain, retail domain. Finance domain, and service domain.",
+      "confidence": 0.99609375,
+      "timestamp": "2025-07-04T08:55:06.801708"
+    },
+    {
+      "question_number": 2,
+      "question": "What are your key skills for this role?",
+      "answer": "Like, using machine learning, I shall unleash processing, deep learning, LLM.",
+      "confidence": 0.9416504,
+      "timestamp": "2025-07-04T08:55:19.009836"
+    },
+    {
+      "question_number": 3,
+      "question": "What is your current notice period?",
+      "answer": "Well, I currently am serving notice period, like, 1838 is my last token day.",
+      "confidence": 0.30981445,
+      "timestamp": "2025-07-04T08:55:30.394248"
+    },
+    {
+      "question_number": 4,
+      "question": "What is your current CTC and expected salary?",
+      "answer": "7.3 is American City Center exhibit. 30%, like, on my current salary.",
+      "confidence": 0.9941406,
+      "timestamp": "2025-07-04T08:55:43.721771"
+    },
+    {
+      "question_number": 5,
+      "question": "Tell us about your experience with APIs.",
+      "answer": "Hey. I was with you. I'm just API. Basically, we send request using different different like, a using different different method, post method, post patch, delete, this type of. Basically.",
+      "confidence": 0.82177734,
+      "timestamp": "2025-07-04T08:56:09.746687"
+    },
+    {
+      "question_number": 6,
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I work with AWS agent.",
+      "confidence": 0.86572266,
+      "timestamp": "2025-07-04T08:56:22.974814"
+    },
+    {
+      "question_number": 7,
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "No. Correct. I'm good. Docker and Kubernetes. So basically, we create the 1 file. For the for for we have used the multi container for the Python as we build the Python image after database image after image. So after you create running that particular image with new data containerization using Docker Hub. We download run that image, particularly, and put that image in 2 cloud 5. Platform, we are using the image continue the registry.",
+      "confidence": 0.8293457,
+      "timestamp": "2025-07-04T08:57:07.533221"
+    },
+    {
+      "question_number": 8,
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "Our framework is by torch and tensor flow.",
+      "confidence": 0.828125,
+      "timestamp": "2025-07-04T08:57:24.061384"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T08:57:24.061392",
+  "end_time": "2025-07-04T08:57:24.063758",
+  "completion_time": "2025-07-04T08:57:24.063764",
+  "name": "Nita Vasram Jadhao",
+  "recording_sid": "REbcaf03441e1e86409772d0cba5780c65",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/REbcaf03441e1e86409772d0cba5780c65",
+  "recording_duration": "225",
+  "recording_status": "completed"
+}

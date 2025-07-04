@@ -1,0 +1,76 @@
+{
+  "call_id": "CA3310ae614b7dd966b0b8bdd43ba3d90f",
+  "candidate_name": "Candidate_CA3310ae",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python",
+      "Machine learning",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [
+      "NLP",
+      "fast api",
+      "flask"
+    ],
+    "missing_skills": [
+      "python",
+      "Machine learning",
+      "LLM",
+      "GenerativeAI",
+      "django"
+    ],
+    "skills_match_percentage": 37.5,
+    "experience_match_percentage": 50,
+    "overall_score": 40.0,
+    "comprehensive_score": 40.0,
+    "priority_score": 2,
+    "recommendation": "MODERATE MATCH",
+    "analysis_date": "2025-07-04 08:56:13",
+    "skill_mentions": {
+      "NLP": 4,
+      "fast api": 6,
+      "flask": 8
+    },
+    "experience_data": {
+      "years_mentioned": [],
+      "experience_score": 0
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+14787807480",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [
+      "NLP",
+      "fast api",
+      "flask"
+    ],
+    "skills_found_count": 3,
+    "total_required_skills": 8,
+    "phone_number": "+14787807480"
+  },
+  "interview_summary": {
+    "questions_answered": 6,
+    "total_questions": 6,
+    "completion_rate": "6/6"
+  },
+  "source_file": "interviews/session_CA3310ae614b7dd966b0b8bdd43ba3d90f.json",
+  "candidate_phone": "+918087582308",
+  "candidate_data": {
+    "name": "Tejaswini Nandan",
+    "phone": "+918087582308",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "analysis_created": "2025-07-04 08:56:13"
+}

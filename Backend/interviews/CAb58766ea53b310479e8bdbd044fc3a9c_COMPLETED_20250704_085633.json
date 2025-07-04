@@ -1,0 +1,91 @@
+{
+  "interview_id": "CAb58766ea53b310479e8bdbd044fc3a9c",
+  "call_sid": "CAb58766ea53b310479e8bdbd044fc3a9c",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+918851619511",
+  "candidate_name": "Aman Sharma",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_085321",
+  "start_time": "2025-07-04T08:54:00.185163",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yes.",
+      "confidence": 0.98657227,
+      "timestamp": "2025-07-04T08:54:16.645791"
+    },
+    {
+      "question_number": 1,
+      "question": "Introduce yourself.",
+      "answer": "Yeah. I'm Aman Sharma. I graduated from IIT last year with majors in electronics and communication engineering.",
+      "confidence": 0.9350586,
+      "timestamp": "2025-07-04T08:54:31.760879"
+    },
+    {
+      "question_number": 2,
+      "question": "What are your key skills for this role?",
+      "answer": "I have I have specialization in generative AI and using elements to solve practical LLB problems and computer vision problems as well. I worked on, I worked on diffusion models and building that building that pipelines as well as",
+      "confidence": 0.8198242,
+      "timestamp": "2025-07-04T08:54:59.414287"
+    },
+    {
+      "question_number": 3,
+      "question": "What is your current notice period?",
+      "answer": "20 days.",
+      "confidence": 0.9975586,
+      "timestamp": "2025-07-04T08:55:07.654401"
+    },
+    {
+      "question_number": 4,
+      "question": "What is your current CTC and expected salary?",
+      "answer": "26, lakhs.",
+      "confidence": 0.9906006,
+      "timestamp": "2025-07-04T08:55:17.426338"
+    },
+    {
+      "question_number": 5,
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I have been working with APIs for past 1.5 years. And, like, I have I build models and LLMs and we scale it using ClassKPI or some other API as well.",
+      "confidence": 0.9658203,
+      "timestamp": "2025-07-04T08:55:40.244883"
+    },
+    {
+      "question_number": 6,
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "Yes. I have worked both, on AWS, as well as GCP as well.",
+      "confidence": 0.9941406,
+      "timestamp": "2025-07-04T08:55:57.337763"
+    },
+    {
+      "question_number": 7,
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "Yeah. I have been working with Kubernetes and Docker. With my past, past",
+      "confidence": 0.9819336,
+      "timestamp": "2025-07-04T08:56:12.187266"
+    },
+    {
+      "question_number": 8,
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "Yeah. I have been using Hug and Face library and transformers and also other elements like mister and Claude.",
+      "confidence": 0.9550781,
+      "timestamp": "2025-07-04T08:56:33.892088"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T08:56:33.892096",
+  "end_time": "2025-07-04T08:56:33.893765",
+  "completion_time": "2025-07-04T08:56:33.893771",
+  "name": "Aman Sharma",
+  "recording_sid": "RE3a85eb5a5e98bcddce9be425b0bd0527",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/RE3a85eb5a5e98bcddce9be425b0bd0527",
+  "recording_duration": "164",
+  "recording_status": "completed"
+}

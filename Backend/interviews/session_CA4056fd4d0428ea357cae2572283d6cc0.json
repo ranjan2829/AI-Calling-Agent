@@ -1,0 +1,61 @@
+{
+  "interview_id": "CA4056fd4d0428ea357cae2572283d6cc0",
+  "call_sid": "CA4056fd4d0428ea357cae2572283d6cc0",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+917218736220",
+  "candidate_name": "Unnati Changole",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_085321",
+  "start_time": "2025-07-04T08:54:06.960141",
+  "status": "INCOMPLETE_SILENCE",
+  "current_question": 5,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yes.",
+      "confidence": 0.9902344,
+      "timestamp": "2025-07-04T08:54:23.712383"
+    },
+    {
+      "question_number": 1,
+      "question": "Introduce yourself.",
+      "answer": "Okay. My name is Umati Nitin Singh. I completed my bachelor's of engineering in computer science. From University. Then I joined WNS Global Services as a program analyst. I worked there for 1 year. After that, in 2023, I got admitted in the University of Liverpool for the course postgraduate diploma in advanced computer science. So I just passed out in 2024.",
+      "confidence": 0.9970703,
+      "timestamp": "2025-07-04T08:54:57.341584"
+    },
+    {
+      "question_number": 2,
+      "question": "What are your key skills for this role?",
+      "answer": "Can you please tell me the job role?",
+      "confidence": 0.9980469,
+      "timestamp": "2025-07-04T08:55:21.689944"
+    },
+    {
+      "question_number": 3,
+      "question": "What is your current notice period?",
+      "answer": "I'll be joining immediately.",
+      "confidence": 1.0,
+      "timestamp": "2025-07-04T08:55:30.214446"
+    },
+    {
+      "question_number": 4,
+      "question": "What is your current CTC and expected salary?",
+      "answer": "So, as I said earlier, I just passed out in 2024. So, my last current city was, 5 lakh 50,000, and I'm expecting between 6 to 7 LPA.",
+      "confidence": 0.99902344,
+      "timestamp": "2025-07-04T08:55:51.213975"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 1,
+  "last_activity": "2025-07-04T08:55:51.213983",
+  "end_time": "2025-07-04T08:56:17.026735",
+  "recording_sid": "RE205cb91b6acb71d254dea36b02587677",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/RE205cb91b6acb71d254dea36b02587677",
+  "recording_duration": "134",
+  "recording_status": "completed"
+}

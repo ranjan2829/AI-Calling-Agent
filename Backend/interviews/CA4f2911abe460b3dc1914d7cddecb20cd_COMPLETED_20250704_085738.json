@@ -1,0 +1,91 @@
+{
+  "interview_id": "CA4f2911abe460b3dc1914d7cddecb20cd",
+  "call_sid": "CA4f2911abe460b3dc1914d7cddecb20cd",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+919518766637",
+  "candidate_name": "Yash Raju Masane",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_085321",
+  "start_time": "2025-07-04T08:54:18.774048",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yes.",
+      "confidence": 0.7595215,
+      "timestamp": "2025-07-04T08:54:33.124483"
+    },
+    {
+      "question_number": 1,
+      "question": "Introduce yourself.",
+      "answer": "My name is. I am from.",
+      "confidence": 0.9863281,
+      "timestamp": "2025-07-04T08:54:45.506639"
+    },
+    {
+      "question_number": 2,
+      "question": "What are your key skills for this role?",
+      "answer": "My skill skills are the machine learning, deep learning, and I'm also familiar with the frameworks going to PyTorch, TensorFlow, and the engine for building the AI agents as well as the right applications. And, also, I'm familiar with the frameworks like the Lambda. For urgent applications.",
+      "confidence": 0.82128906,
+      "timestamp": "2025-07-04T08:55:06.341621"
+    },
+    {
+      "question_number": 3,
+      "question": "What is your current notice period?",
+      "answer": "I I'm not experience, so I'm an immediate joiner.",
+      "confidence": 0.98323566,
+      "timestamp": "2025-07-04T08:55:17.037511"
+    },
+    {
+      "question_number": 4,
+      "question": "What is your current CTC and expected salary?",
+      "answer": "Well, I do not have any current CDC, and expected salary will be according to the company's budget.",
+      "confidence": 0.9902344,
+      "timestamp": "2025-07-04T08:55:32.974081"
+    },
+    {
+      "question_number": 5,
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I have a good experience with the API. I'm also familiar with the frameworks like the fast API to build, the API which we can deploy for the productions.",
+      "confidence": 0.90283203,
+      "timestamp": "2025-07-04T08:55:51.127139"
+    },
+    {
+      "question_number": 6,
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I have some experience with the cloud platforms like AWS. I have built an, a machine learning application where I wrapped up with the API via the framework where the fast repair, and I deployed the particular application on the AWS batch setting up servers. Like the EC 2, and also setting up the servers manually and also setting up the load balancers also.",
+      "confidence": 0.9819336,
+      "timestamp": "2025-07-04T08:56:27.031514"
+    },
+    {
+      "question_number": 7,
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "I have built a machine learning application So after building that particular application, I wrapped up with with the help of the FastAPI. And after that, I'd authorize that particular applications. And by, using GitHub actions for the CICD pipeline. I deployed the particular application to the AWS EC 2 instance.",
+      "confidence": 0.98535156,
+      "timestamp": "2025-07-04T08:56:55.029408"
+    },
+    {
+      "question_number": 8,
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "I have a good experience with the machine learning. I'm learning this particular technology since last 2 years. I have good experience with machine learning libraries like the Scikit Learn, and I'm also a have the experience, and I have also built a model by using the Python and the TensorFlow. And currently, I'm learning as well as I'm also building the gen the gen AI applications like the RISE or the AGENTIC AI data application by using the frameworks, LinkedIn, and using the frameworks like the line graph.",
+      "confidence": 0.8730469,
+      "timestamp": "2025-07-04T08:57:38.822723"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T08:57:38.822731",
+  "end_time": "2025-07-04T08:57:38.824732",
+  "completion_time": "2025-07-04T08:57:38.824738",
+  "name": "Yash Raju Masane",
+  "recording_sid": "RE7126175e81e4ede16bc4833b870e236b",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/RE7126175e81e4ede16bc4833b870e236b",
+  "recording_duration": "211",
+  "recording_status": "completed"
+}

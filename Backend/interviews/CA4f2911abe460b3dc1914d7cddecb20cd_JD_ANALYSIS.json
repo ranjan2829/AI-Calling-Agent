@@ -1,0 +1,74 @@
+{
+  "call_id": "CA4f2911abe460b3dc1914d7cddecb20cd",
+  "candidate_name": "Candidate_CA4f2911",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python",
+      "Machine learning",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [
+      "Machine learning",
+      "fast api"
+    ],
+    "missing_skills": [
+      "python",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "flask"
+    ],
+    "skills_match_percentage": 25.0,
+    "experience_match_percentage": 50,
+    "overall_score": 30.0,
+    "comprehensive_score": 30.0,
+    "priority_score": 1,
+    "recommendation": "LOW MATCH",
+    "analysis_date": "2025-07-04 08:56:13",
+    "skill_mentions": {
+      "Machine learning": 3,
+      "fast api": 3
+    },
+    "experience_data": {
+      "years_mentioned": [],
+      "experience_score": 0
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+14787807480",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [
+      "Machine learning",
+      "fast api"
+    ],
+    "skills_found_count": 2,
+    "total_required_skills": 8,
+    "phone_number": "+14787807480"
+  },
+  "interview_summary": {
+    "questions_answered": 6,
+    "total_questions": 6,
+    "completion_rate": "6/6"
+  },
+  "source_file": "interviews/session_CA4f2911abe460b3dc1914d7cddecb20cd.json",
+  "candidate_phone": "+919518766637",
+  "candidate_data": {
+    "name": "Yash Raju Masane",
+    "phone": "+919518766637",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "analysis_created": "2025-07-04 08:56:13"
+}

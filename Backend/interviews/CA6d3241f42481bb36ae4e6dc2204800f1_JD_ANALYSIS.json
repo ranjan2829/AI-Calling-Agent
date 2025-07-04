@@ -1,0 +1,80 @@
+{
+  "call_id": "CA6d3241f42481bb36ae4e6dc2204800f1",
+  "candidate_name": "Candidate_CA6d3241",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python",
+      "Machine learning",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [
+      "python",
+      "Machine learning",
+      "flask"
+    ],
+    "missing_skills": [
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api"
+    ],
+    "skills_match_percentage": 37.5,
+    "experience_match_percentage": 50,
+    "overall_score": 40.0,
+    "comprehensive_score": 40.0,
+    "priority_score": 2,
+    "recommendation": "MODERATE MATCH",
+    "analysis_date": "2025-07-04 08:56:13",
+    "skill_mentions": {
+      "python": 4,
+      "Machine learning": 3,
+      "flask": 4
+    },
+    "experience_data": {
+      "years_mentioned": [],
+      "experience_score": 0
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+14787807480",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [
+      "python",
+      "Machine learning",
+      "flask"
+    ],
+    "skills_found_count": 3,
+    "total_required_skills": 8,
+    "phone_number": "+14787807480"
+  },
+  "interview_summary": {
+    "questions_answered": 8,
+    "total_questions": 8,
+    "completion_rate": "8/8"
+  },
+  "source_file": "interviews/session_CA6d3241f42481bb36ae4e6dc2204800f1.json",
+  "candidate_phone": "+918686863212",
+  "candidate_data": {
+    "name": "Tushar Raskar",
+    "phone": "+918686863212",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "analysis_created": "2025-07-04 08:56:13",
+  "recording_sid": "REf0e92c5c7013970606953441eec5de15",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/REf0e92c5c7013970606953441eec5de15",
+  "recording_duration": "161",
+  "recording_status": "completed"
+}

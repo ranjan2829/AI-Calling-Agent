@@ -1,0 +1,87 @@
+{
+  "interview_id": "CA5f0e20a83a4524369b15adb814e96172",
+  "call_sid": "CA5f0e20a83a4524369b15adb814e96172",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+919145446261",
+  "candidate_name": "Piyush Dinesh Zawar",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_085321",
+  "start_time": "2025-07-04T08:54:21.345489",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yes. Sure.",
+      "confidence": 0.94677734,
+      "timestamp": "2025-07-04T08:54:36.022765"
+    },
+    {
+      "question_number": 1,
+      "question": "Introduce yourself.",
+      "answer": "Myself. I'm currently working as a machine learning engineer. At Optimum data analytics in.",
+      "confidence": 0.9003906,
+      "timestamp": "2025-07-04T08:54:52.209809"
+    },
+    {
+      "question_number": 2,
+      "question": "What are your key skills for this role?",
+      "answer": "Much. I basically work on machine learning, deep learning, AI related workload.",
+      "confidence": 0.9951172,
+      "timestamp": "2025-07-04T08:55:06.171000"
+    },
+    {
+      "question_number": 3,
+      "question": "What is your current notice period?",
+      "answer": "My current notice period is 15 days.",
+      "confidence": 0.97094727,
+      "timestamp": "2025-07-04T08:55:15.654067"
+    },
+    {
+      "question_number": 4,
+      "question": "What is your current CTC and expected salary?",
+      "answer": "As I'm working as a intern, David was CTC currently. But, it can be full time, to",
+      "confidence": 0.9863281,
+      "timestamp": "2025-07-04T08:55:31.744533"
+    },
+    {
+      "question_number": 5,
+      "question": "Tell us about your experience with APIs.",
+      "answer": "How, I know about the technical details about the API, but, I I haven't done any work on a project related.",
+      "confidence": 0.9863281,
+      "timestamp": "2025-07-04T08:55:49.042234"
+    },
+    {
+      "question_number": 6,
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I'm currently working on Azure cloud, for our 3 d seismic and COVID regarding the company that we just which we use the Azure",
+      "confidence": 0.9428711,
+      "timestamp": "2025-07-04T08:56:10.036702"
+    },
+    {
+      "question_number": 7,
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "I have done a project, a simple project which I have deployed on AWS.",
+      "confidence": 0.8828125,
+      "timestamp": "2025-07-04T08:56:27.604610"
+    },
+    {
+      "question_number": 8,
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "I have 1 year of experience regarding the BME. I have 1 year of experience experience regarding the DME. I have worked",
+      "confidence": 0.9165039,
+      "timestamp": "2025-07-04T08:56:51.884206"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T08:56:51.884217",
+  "end_time": "2025-07-04T08:56:51.885824",
+  "completion_time": "2025-07-04T08:56:51.885831",
+  "name": "Piyush Dinesh Zawar"
+}

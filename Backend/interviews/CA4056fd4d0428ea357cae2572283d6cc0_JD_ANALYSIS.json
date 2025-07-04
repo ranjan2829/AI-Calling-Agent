@@ -1,0 +1,69 @@
+{
+  "call_id": "CA4056fd4d0428ea357cae2572283d6cc0",
+  "candidate_name": "Candidate_CA4056fd",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python",
+      "Machine learning",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [],
+    "missing_skills": [
+      "python",
+      "Machine learning",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "skills_match_percentage": 0.0,
+    "experience_match_percentage": 100,
+    "overall_score": 20.0,
+    "comprehensive_score": 20.0,
+    "priority_score": 1,
+    "recommendation": "LOW MATCH",
+    "analysis_date": "2025-07-04 08:56:13",
+    "skill_mentions": {},
+    "experience_data": {
+      "years_mentioned": [
+        "1"
+      ],
+      "experience_score": 2
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+14787807480",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [],
+    "skills_found_count": 0,
+    "total_required_skills": 8,
+    "phone_number": "+14787807480"
+  },
+  "interview_summary": {
+    "questions_answered": 5,
+    "total_questions": 5,
+    "completion_rate": "5/5"
+  },
+  "source_file": "interviews/session_CA4056fd4d0428ea357cae2572283d6cc0.json",
+  "candidate_phone": "+917218736220",
+  "candidate_data": {
+    "name": "Unnati Changole",
+    "phone": "+917218736220",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "analysis_created": "2025-07-04 08:56:13"
+}

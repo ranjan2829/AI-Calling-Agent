@@ -1,0 +1,91 @@
+{
+  "interview_id": "CAf2ba2a591be868b2ad2dc5959eba3fd6",
+  "call_sid": "CAf2ba2a591be868b2ad2dc5959eba3fd6",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+917387792437",
+  "candidate_name": "The Time To Speak",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": false,
+  "bulk_call_id": null,
+  "start_time": "2025-07-04T08:03:42.269297",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Oh, yes. This is the time to speak.",
+      "confidence": 0.9970703,
+      "timestamp": "2025-07-04T08:03:58.256644"
+    },
+    {
+      "question_number": 1,
+      "question": "Introduce yourself.",
+      "answer": "Yeah. So hello. I am Ranjan Chitole. From Pune University with AI engineering background.",
+      "confidence": 0.9753418,
+      "timestamp": "2025-07-04T08:04:11.326391"
+    },
+    {
+      "question_number": 2,
+      "question": "What are your key skills for this role?",
+      "answer": "Well, my key skills are Python.",
+      "confidence": 0.9873047,
+      "timestamp": "2025-07-04T08:04:20.503636"
+    },
+    {
+      "question_number": 3,
+      "question": "What is your current notice period?",
+      "answer": "My current phone is security is of 0 days.",
+      "confidence": 0.8930664,
+      "timestamp": "2025-07-04T08:04:29.735512"
+    },
+    {
+      "question_number": 4,
+      "question": "What is your current CTC and expected salary?",
+      "answer": "It's 0.",
+      "confidence": 0.9863281,
+      "timestamp": "2025-07-04T08:04:39.428169"
+    },
+    {
+      "question_number": 5,
+      "question": "Tell us about your experience with APIs.",
+      "answer": "So created many APIs using FastAPI and Django as well.",
+      "confidence": 0.9453125,
+      "timestamp": "2025-07-04T08:04:52.133508"
+    },
+    {
+      "question_number": 6,
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "Oh, yes. I have worked with AWS EC 2. AWS SageMaker, and DynamoDB.",
+      "confidence": 0.9819336,
+      "timestamp": "2025-07-04T08:05:09.921965"
+    },
+    {
+      "question_number": 7,
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "Oh, I have a good Docker in Kubernetes as well.",
+      "confidence": 0.9770508,
+      "timestamp": "2025-07-04T08:05:22.079378"
+    },
+    {
+      "question_number": 8,
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "So I've created the l l m's records and chatbots as well.",
+      "confidence": 0.83935547,
+      "timestamp": "2025-07-04T08:05:43.703241"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T08:05:43.703262",
+  "end_time": "2025-07-04T08:05:43.705716",
+  "completion_time": "2025-07-04T08:05:43.705722",
+  "name": "The Time To Speak",
+  "recording_sid": "REff4a6397bc22bdf828d3ef7c7163d726",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/REff4a6397bc22bdf828d3ef7c7163d726",
+  "recording_duration": "132",
+  "recording_status": "completed"
+}

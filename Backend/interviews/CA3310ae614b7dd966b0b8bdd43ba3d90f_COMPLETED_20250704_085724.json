@@ -1,0 +1,91 @@
+{
+  "interview_id": "CA3310ae614b7dd966b0b8bdd43ba3d90f",
+  "call_sid": "CA3310ae614b7dd966b0b8bdd43ba3d90f",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+918087582308",
+  "candidate_name": "Tejaswini Nandan",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_085321",
+  "start_time": "2025-07-04T08:54:00.172950",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yes.",
+      "confidence": 0.7233887,
+      "timestamp": "2025-07-04T08:54:17.776986"
+    },
+    {
+      "question_number": 1,
+      "question": "Introduce yourself.",
+      "answer": "Oh, so myself, Tejas. I completed my bachelor's of engineering. After that, I started working in data science domain. So I have worked on a multiple projects with the domain that is ML and P engineering. So I worked from start to end my each and every project. That is ML. I build the proper pipeline from EDA to model evaluation. In the Gen AI, I build the recommendation system. And in the NLP, I perform some tech and technical.",
+      "confidence": 0.34521484,
+      "timestamp": "2025-07-04T08:54:53.695110"
+    },
+    {
+      "question_number": 2,
+      "question": "What are your key skills for this role?",
+      "answer": "So I am good at MLP, Gen AI. I have the knowledge of deep learning also. I worked on AWS.",
+      "confidence": 0.99902344,
+      "timestamp": "2025-07-04T08:55:10.768092"
+    },
+    {
+      "question_number": 3,
+      "question": "What is your current notice period?",
+      "answer": "Hi. I'm Amy Jade Drainage.",
+      "confidence": 0.9074707,
+      "timestamp": "2025-07-04T08:55:19.023134"
+    },
+    {
+      "question_number": 4,
+      "question": "What is your current CTC and expected salary?",
+      "answer": "Oh, my current CTC is 7.5 LPA. And I'm expecting about 10 LPA.",
+      "confidence": 0.9967448,
+      "timestamp": "2025-07-04T08:55:39.329054"
+    },
+    {
+      "question_number": 5,
+      "question": "Tell us about your experience with APIs.",
+      "answer": "Oh, yes. 1 of my project where we use, like, Flask in ML project where we build, like, search on prediction model. So I have the knowledge of Flask. And the and the project in Gen AI, we use a fast API. So I have the knowledge of fast API also.",
+      "confidence": 0.99902344,
+      "timestamp": "2025-07-04T08:56:01.946277"
+    },
+    {
+      "question_number": 6,
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "Oh, yes. I worked on AWS where I worked on a h 3 bucket. SageMaker notebook, EC 2. Also, I have the knowledge of another AWS working platforms like AWS Lambda, or Bedrock,",
+      "confidence": 0.8541667,
+      "timestamp": "2025-07-04T08:56:30.304087"
+    },
+    {
+      "question_number": 7,
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "Oh, yes. I work on a deployment part where I have the knowledge of a deployment. So we deploy our model on EC 2 instances. Where, also, we create 1 container using the Docker",
+      "confidence": 1.0,
+      "timestamp": "2025-07-04T08:56:58.215345"
+    },
+    {
+      "question_number": 8,
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "Oh, yes. So in ML, I worked on a multiple project where I used, like, scikit learn, Python, NumPy, pandas, or Seaborn, MATLAB. In AI, I worked on a recommended use LLM",
+      "confidence": 0.93310547,
+      "timestamp": "2025-07-04T08:57:24.776066"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T08:57:24.776075",
+  "end_time": "2025-07-04T08:57:24.777727",
+  "completion_time": "2025-07-04T08:57:24.777733",
+  "name": "Tejaswini Nandan",
+  "recording_sid": "REbd421ff67e4f557be32abf33fadc8c9e",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/REbd421ff67e4f557be32abf33fadc8c9e",
+  "recording_duration": "230",
+  "recording_status": "completed"
+}

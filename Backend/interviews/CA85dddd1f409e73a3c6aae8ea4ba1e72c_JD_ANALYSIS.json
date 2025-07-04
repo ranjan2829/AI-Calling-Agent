@@ -1,0 +1,67 @@
+{
+  "call_id": "CA85dddd1f409e73a3c6aae8ea4ba1e72c",
+  "candidate_name": "Sir",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python",
+      "Machine learning",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [],
+    "missing_skills": [
+      "python",
+      "Machine learning",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "skills_match_percentage": 0.0,
+    "experience_match_percentage": 50,
+    "overall_score": 10.0,
+    "comprehensive_score": 10.0,
+    "priority_score": 1,
+    "recommendation": "LOW MATCH",
+    "analysis_date": "2025-07-04 08:56:13",
+    "skill_mentions": {},
+    "experience_data": {
+      "years_mentioned": [],
+      "experience_score": 0
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+14787807480",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [],
+    "skills_found_count": 0,
+    "total_required_skills": 8,
+    "phone_number": "+14787807480"
+  },
+  "interview_summary": {
+    "questions_answered": 2,
+    "total_questions": 2,
+    "completion_rate": "2/2"
+  },
+  "source_file": "interviews/session_CA85dddd1f409e73a3c6aae8ea4ba1e72c.json",
+  "candidate_phone": "+917666911533",
+  "candidate_data": {
+    "name": "Bankkawad Bhojanna Dattatraye",
+    "phone": "+917666911533",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "analysis_created": "2025-07-04 08:56:13"
+}

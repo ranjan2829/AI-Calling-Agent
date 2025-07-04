@@ -1,0 +1,78 @@
+{
+  "call_id": "CA4db7cd6c61a53a29164079ab5827e4c2",
+  "candidate_name": "Candidate_CA4db7cd",
+  "candidate_analysis": {
+    "job_title": "Software Developer",
+    "company": "Onelab Ventures",
+    "jd_required_skills": [
+      "python",
+      "Machine learning",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "experience_required": "1-2",
+    "matched_skills": [
+      "python"
+    ],
+    "missing_skills": [
+      "Machine learning",
+      "LLM",
+      "NLP",
+      "GenerativeAI",
+      "django",
+      "fast api",
+      "flask"
+    ],
+    "skills_match_percentage": 12.5,
+    "experience_match_percentage": 100,
+    "overall_score": 30.0,
+    "comprehensive_score": 30.0,
+    "priority_score": 1,
+    "recommendation": "LOW MATCH",
+    "analysis_date": "2025-07-04 08:56:13",
+    "skill_mentions": {
+      "python": 4
+    },
+    "experience_data": {
+      "years_mentioned": [
+        "1"
+      ],
+      "experience_score": 2
+    },
+    "candidate_metadata": {
+      "source": "voice_call",
+      "phone": "+14787807480",
+      "email": null,
+      "csv_data": null
+    },
+    "found_skills": [
+      "python"
+    ],
+    "skills_found_count": 1,
+    "total_required_skills": 8,
+    "phone_number": "+14787807480"
+  },
+  "interview_summary": {
+    "questions_answered": 8,
+    "total_questions": 8,
+    "completion_rate": "8/8"
+  },
+  "source_file": "interviews/session_CA4db7cd6c61a53a29164079ab5827e4c2.json",
+  "candidate_phone": "+917558460070",
+  "candidate_data": {
+    "name": "Shubham Borase",
+    "phone": "+917558460070",
+    "email": "",
+    "experience": "",
+    "skills": ""
+  },
+  "analysis_created": "2025-07-04 08:56:13",
+  "recording_sid": "RE9548a11d207c519ce2291c8bd836253f",
+  "recording_url": "https://api.twilio.com/2010-04-01/Accounts/ACb0a1a52767457b7cd5f899fbe32a213d/Recordings/RE9548a11d207c519ce2291c8bd836253f",
+  "recording_duration": "152",
+  "recording_status": "completed"
+}

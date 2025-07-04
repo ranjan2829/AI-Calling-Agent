@@ -1,0 +1,87 @@
+{
+  "interview_id": "CA6d3241f42481bb36ae4e6dc2204800f1",
+  "call_sid": "CA6d3241f42481bb36ae4e6dc2204800f1",
+  "candidate_phone": "+14787807480",
+  "phone_number": "+14787807480",
+  "twilio_number": "+918686863212",
+  "candidate_name": "Tushar Raskar",
+  "candidate_email": "",
+  "candidate_experience": "",
+  "candidate_skills": "",
+  "is_bulk_call": true,
+  "bulk_call_id": "bulk_20250704_085321",
+  "start_time": "2025-07-04T08:54:00.177437",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question_number": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Yes.",
+      "confidence": 0.9921875,
+      "timestamp": "2025-07-04T08:54:15.150819"
+    },
+    {
+      "question_number": 1,
+      "question": "Introduce yourself.",
+      "answer": "Okay.",
+      "confidence": 0.9577637,
+      "timestamp": "2025-07-04T08:54:23.436598"
+    },
+    {
+      "question_number": 2,
+      "question": "What are your key skills for this role?",
+      "answer": "My skill skill for this role is AI machine learning. Artificial intelligence, and Python for back end frameworks like the there's a design good HDPIs, Flask, Fast APIs, and the cloud based things like AWS, Bedrock, these are the my key pay.",
+      "confidence": 0.96972656,
+      "timestamp": "2025-07-04T08:54:54.588337"
+    },
+    {
+      "question_number": 3,
+      "question": "What is your current notice period?",
+      "answer": "30 days.",
+      "confidence": 0.9741211,
+      "timestamp": "2025-07-04T08:55:01.940399"
+    },
+    {
+      "question_number": 4,
+      "question": "What is your current CTC and expected salary?",
+      "answer": "My current CTC is 10 LPA and x expected around 12 LPA.",
+      "confidence": 0.98535156,
+      "timestamp": "2025-07-04T08:55:14.190872"
+    },
+    {
+      "question_number": 5,
+      "question": "Tell us about your experience with APIs.",
+      "answer": "Okay.",
+      "confidence": 0.99609375,
+      "timestamp": "2025-07-04T08:55:22.201826"
+    },
+    {
+      "question_number": 6,
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "I worked with the AWS.",
+      "confidence": 0.9589844,
+      "timestamp": "2025-07-04T08:55:35.758374"
+    },
+    {
+      "question_number": 7,
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "I mostly work with the only doctors, not",
+      "confidence": 0.9790039,
+      "timestamp": "2025-07-04T08:55:48.994284"
+    },
+    {
+      "question_number": 8,
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "Oh, I have here 2 years and 3 months of experience in machine learning. Around 1 and a half years of experience in only. In with lang change, lang graph, light LLM, like frameworks.",
+      "confidence": 0.9238281,
+      "timestamp": "2025-07-04T08:56:20.170524"
+    }
+  ],
+  "validation_results": {},
+  "silence_prompts": 0,
+  "last_activity": "2025-07-04T08:56:20.170539",
+  "end_time": "2025-07-04T08:56:20.172209",
+  "completion_time": "2025-07-04T08:56:20.172215",
+  "name": "Tushar Raskar"
+}
