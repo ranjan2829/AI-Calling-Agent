@@ -424,7 +424,7 @@ def ask_next_question_immediately(call_sid: str, question_index: int):
             language='en-IN',      
             enhanced=True,         
             profanityFilter=False,
-            speechModel='experimental_conversations'
+            speechModel='phone_calls'  # Changed to phone_calls for better accuracy
         )
         resp.redirect(f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}')      
         return str(resp)      
@@ -1510,7 +1510,7 @@ async def voice_webhook(request: Request):
             language='en-IN',
             enhanced=True,
             profanityFilter=False,
-            speechModel='experimental_conversations'
+            speechModel='phone_calls'
         )
         
         resp.redirect(f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}')
@@ -1586,197 +1586,75 @@ async def handle_speech(call_sid: str, request: Request):
         
         # Check if interview is complete
         if next_question > len(INTERVIEW_QUESTIONS) - 1:
-            return complete_interview(call_sid)
+            return Response(content=complete_interview(call_sid), media_type="application/xml")
         
-        # Ask the next question
-        question = INTERVIEW_QUESTIONS[next_question]
-        resp = VoiceResponse()
-        resp.say(f"Next question: {question}", voice='Polly.Aditi', rate='medium')
-        
-        gather = resp.gather(
-            input='speech',
-            action=f'{WEBHOOK_BASE_URL}/voice/speech/{call_sid}',
-            method='POST',
-            speechTimeout='auto',
-            timeout='6',
-            language='en-IN',
-            enhanced=True,
-            profanityFilter=False,
-            speechModel='experimental_conversations'
-        )
-        resp.redirect(f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}')
-        
-        return Response(content=str(resp), media_type="application/xml")
+        # Ask next question using the existing function
+        return Response(content=ask_next_question_immediately(call_sid, next_question), media_type="application/xml")
         
     except Exception as e:
-        print(f"[ERROR] Error handling speech for {call_sid}: {e}")
-        return handle_error("Sorry, there was an error processing your response.")
+        print(f"[SPEECH ERROR] ❌ Call {call_sid}: {e}")
+        return Response(content=handle_error("Sorry, there was an error processing your response."), media_type="application/xml")
+
+@app.post("/recording-status")
+async def recording_status_callback(request: Request):
+    """Handle Twilio recording status callbacks"""
+    try:
+        form_data = await request.form()
+        call_sid = form_data.get('CallSid')
+        recording_sid = form_data.get('RecordingSid')
+        recording_url = form_data.get('RecordingUrl')
+        recording_status = form_data.get('RecordingStatus')
+        recording_duration = form_data.get('RecordingDuration')
+        
+        print(f"[RECORDING] 🎙️ Call {call_sid}: Recording {recording_sid} status: {recording_status}")
+        
+        if recording_status == 'completed' and recording_url:
+            print(f"[RECORDING] ✅ Recording completed: {recording_url}")
+            
+            # Save recording info to interview session if it exists
+            try:
+                interview_data = load_interview_session(call_sid)
+                if interview_data:
+                    interview_data['recording_sid'] = recording_sid
+                    interview_data['recording_url'] = recording_url
+                    interview_data['recording_duration'] = recording_duration
+                    interview_data['recording_status'] = recording_status
+                    save_interview_session(call_sid, interview_data)
+                    print(f"[RECORDING] 💾 Saved recording info to session {call_sid}")
+                else:
+                    # Try to find completed interview file and update it
+                    pattern = f"interviews/*{call_sid}*.json"
+                    files = glob.glob(pattern)
+                    for file_path in files:
+                        if "session_" not in file_path:
+                            try:
+                                with open(file_path, 'r') as f:
+                                    data = json.load(f)
+                                data['recording_sid'] = recording_sid
+                                data['recording_url'] = recording_url
+                                data['recording_duration'] = recording_duration
+                                data['recording_status'] = recording_status
+                                with open(file_path, 'w') as f:
+                                    json.dump(data, f, indent=2)
+                                print(f"[RECORDING] 💾 Updated completed interview file: {file_path}")
+                                break
+                            except Exception as e:
+                                print(f"[RECORDING] ❌ Error updating file {file_path}: {e}")
+            except Exception as e:
+                print(f"[RECORDING] ❌ Error saving recording info: {e}")
+        
+        return {"status": "received"}
+        
+    except Exception as e:
+        print(f"[RECORDING ERROR] ❌ {e}")
+        return {"status": "error", "message": str(e)}
+
 @app.post("/voice/no-response/{call_sid}")
 async def handle_no_response_webhook(call_sid: str, request: Request):
-    """Handle no response from candidate"""
+    """Handle when candidate doesn't respond"""
     try:
-        form_data = await request.form()
-        call_sid = form_data.get('CallSid')
-        
-        print(f"[NO RESPONSE] Call {call_sid} - No response received")
-        
-        interview_data = load_interview_session(call_sid)
-        if not interview_data:
-            return handle_error("Interview session not found")
-        
-        # Increment silence prompt counter
-        silence_prompts = interview_data.get('silence_prompts', 0) + 1
-        interview_data['silence_prompts'] = silence_prompts
-        interview_data['last_activity'] = datetime.now().isoformat()
-        save_interview_session(call_sid, interview_data)
-        
-        resp = VoiceResponse()
-        if silence_prompts >= MAX_SILENCE_PROMPTS:
-            resp.say("We haven't received a response from you. If you're there, please say something.", voice='Polly.Aditi')
-            resp.pause(length=2)
-            resp.say("If you wish to end the interview, you can hang up. Otherwise, please respond to continue.", voice='Polly.Aditi')
-        else:
-            current_question = interview_data.get('current_question', 0)
-            question = INTERVIEW_QUESTIONS.get(current_question, "Unknown question")
-            resp.say(f"Please respond to the question: {question}", voice='Polly.Aditi')
-        
-        return Response(content=str(resp), media_type="application/xml")
-        
+        print(f"[NO RESPONSE] 🔇 Call {call_sid} - No response detected")
+        return Response(content=handle_no_response(call_sid), media_type="application/xml")
     except Exception as e:
-        print(f"[ERROR] Error handling no response for {call_sid}: {e}")
-        return handle_error("Technical difficulty occurred.")
-@app.post("/recording-status")
-async def handle_recording_status(request: Request):
-    """Handle Twilio recording status updates"""
-    try:
-        form_data = await request.form()
-        recording_sid = form_data.get('RecordingSid')
-        call_sid = form_data.get('CallSid')
-        status = form_data.get('Status')
-        duration = form_data.get('Duration')
-        file_url = form_data.get('RecordingUrl')
-        
-        print(f"[RECORDING STATUS] Recording {recording_sid} for call {call_sid} - Status: {status}, Duration: {duration}")
-        
-        # Update interview session with recording details
-        interview_data = load_interview_session(call_sid)
-        if interview_data:
-            interview_data['recording_sid'] = recording_sid
-            interview_data['recording_url'] = file_url
-            interview_data['recording_duration'] = duration
-            save_interview_session(call_sid, interview_data)
-        
-        return Response(status=200)
-    except Exception as e:
-        print(f"[ERROR] Error handling recording status: {e}")
-        return Response(status=500)
-@app.get("/transcribe-status/{job_id}")
-async def check_transcription_status(job_id: str):
-    """Check the status of a transcription job"""
-    try:
-        response = transcribe_client.get_transcription_job(TranscriptionJobName=job_id)
-        job_status = response['transcription_job']['status']
-        print(f"[TRANSCRIPTION STATUS] Job {job_id} - Status: {job_status}")
-        
-        return {
-            "success": True,
-            "job_id": job_id,
-            "status": job_status,
-            "message": f"Transcription job {job_id} is {job_status}"
-        }
-    except Exception as e:
-        print(f"[ERROR] Error checking transcription status for {job_id}: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "job_id": job_id,
-            "status": "failed",
-            "message": "Error checking transcription status"
-        }
-@app.post("/transcribe")
-async def transcribe_audio(request: Request):
-    """Transcribe audio from a recording URL"""
-    try:
-        data = await request.json()
-        recording_url = data.get("recording_url")
-        call_sid = data.get("call_sid")
-        
-        if not recording_url:
-            return {"success": False, "error": "Recording URL is required"}
-        
-        # Generate a unique job name
-        job_name = f"transcription_job_{call_sid}_{int(time.time())}"
-        
-        # Start the transcription job
-        response = transcribe_client.start_transcription_job(
-            TranscriptionJobName=job_name,
-            Media={'MediaFileUri': recording_url},
-            MediaFormat='wav',
-            LanguageCode='en-US',
-            Settings={
-                'VocabularyName': 'your-vocabulary-name',
-                'ShowSpeakerLabels': True,
-                'MaxSpeakerLabels': 2,
-                'ChannelIdentification': True
-            }
-        )
-        
-        print(f"[TRANSCRIPTION STARTED] Job {job_name} for call {call_sid}")
-        
-        return {
-            "success": True,
-            "job_id": job_name,
-            "status": "in_progress",
-            "message": "Transcription job started"
-        }
-    except Exception as e:
-        print(f"[ERROR] Error starting transcription for {call_sid}: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "job_id": None,
-            "status": "failed",
-            "message": "Error starting transcription job"
-        }
-@app.get("/transcription/{call_sid}")
-async def get_transcription(call_sid: str):
-    """Get the transcription text for a completed interview"""
-    try:
-        interview_data = load_interview_session(call_sid)
-        if not interview_data:
-            return {"success": False, "error": "Interview not found"}
-        
-        # Check if transcription exists
-        transcription_file = f"interviews/transcriptions/{call_sid}_transcription.json"
-        if os.path.exists(transcription_file):
-            with open(transcription_file, 'r') as f:
-                transcription_data = json.load(f)
-            return {
-                "success": True,
-                "call_sid": call_sid,
-                "transcription": transcription_data.get("transcription", ""),
-                "status": "completed",
-                "message": "Transcription retrieved successfully"
-            }
-        else:
-            return {
-                "success": False,
-                "call_sid": call_sid,
-                "transcription": "",
-                "status": "not_found",
-                "message": "Transcription not found"
-            }
-    except Exception as e:
-        print(f"[ERROR] Error getting transcription for {call_sid}: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "call_sid": call_sid,
-            "transcription": "",
-            "status": "failed",
-            "message": "Error retrieving transcription"
-        }
-@app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {"status": "ok", "message": "AI Interviewer service is running"}
+        print(f"[NO RESPONSE ERROR] ❌ Call {call_sid}: {e}")
+        return Response(content=handle_error("Technical difficulty occurred."), media_type="application/xml")
