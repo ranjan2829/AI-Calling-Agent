@@ -1765,45 +1765,101 @@ async def update_interview_questions(request: Request):
             "success": False,
             "error": str(e)
         }
-def load_questions_from_file():
+
+@app.get("/bulk-results")
+async def get_bulk_results():f get_bulk_results():
+    """Get all saved bulk call results"""
+    try:
+        results_folder = "bulk_results"lts"
+        if not os.path.exists(results_folder):
+            return {"success": True, "bulk_results": []}rn {"success": True, "bulk_results": []}
+
+        all_results = []lts = []
+        for filename in os.listdir(results_folder):
+            if filename.endswith(".json"):
+                try:
+                    with open(os.path.join(results_folder, filename), 'r') as f:    with open(os.path.join(results_folder, filename), 'r') as f:
+                        data = json.load(f)
+                        all_results.append(data)
+                except Exception as e:
+                    print(f"Error reading bulk result file {filename}: {e}")}: {e}")
+                    continue    continue
+        
+        # Sort by creation date, newest first
+        all_results.sort(key=lambda x: x.get("created_at", ""), reverse=True) reverse=True)
+        
+        return {"success": True, "bulk_results": all_results}n {"success": True, "bulk_results": all_results}
+    except Exception as e:
+        print(f"Error getting bulk results: {e}"))
+        return {"success": False, "error": str(e), "bulk_results": []}sults": []}
+
+def load_questions_from_file():le():
     """Load questions from file if it exists"""
     try:
-        if os.path.exists("interview_questions.json"):
-            with open("interview_questions.json", "r") as f:
-                data = json.load(f)
-                questions = data.get("questions", {})
+        if os.path.exists("interview_questions.json"):iew_questions.json"):
+            with open("interview_questions.json", "r") as f:erview_questions.json", "r") as f:
+                data = json.load(f).load(f)
+                questions = data.get("questions", {})a.get("questions", {})
                 
-                print(f"📂 Found saved questions file with {len(questions)} questions")
+                print(f"📂 Found saved questions file with {len(questions)} questions")        print(f"📂 Found saved questions file with {len(questions)} questions")
                 
-                # Convert string keys to integers and update global INTERVIEW_QUESTIONS
-                global INTERVIEW_QUESTIONS
-                old_questions = INTERVIEW_QUESTIONS.copy()
+                # Convert string keys to integers and update global INTERVIEW_QUESTIONSert string keys to integers and update global INTERVIEW_QUESTIONS
+                global INTERVIEW_QUESTIONSal INTERVIEW_QUESTIONS
+                old_questions = INTERVIEW_QUESTIONS.copy()TERVIEW_QUESTIONS.copy()
                 
-                for key, value in questions.items():
+                for key, value in questions.items():   for key, value in questions.items():
                     INTERVIEW_QUESTIONS[int(key)] = value
-                    if old_questions.get(int(key)) != value:
+                    if old_questions.get(int(key)) != value:            if old_questions.get(int(key)) != value:
                         print(f"🔄 Updated Q{key}: {value[:50]}...")
                 
-                print(f"✅ Loaded {len(questions)} interview questions from file")
-                print("📋 Questions loaded from file:")
-                for q_id in sorted(INTERVIEW_QUESTIONS.keys()):
-                    print(f"  Q{q_id}: {INTERVIEW_QUESTIONS[q_id][:60]}...")
+                print(f"✅ Loaded {len(questions)} interview questions from file")        print(f"✅ Loaded {len(questions)} interview questions from file")
+                print("📋 Questions loaded from file:")print("📋 Questions loaded from file:")
+                for q_id in sorted(INTERVIEW_QUESTIONS.keys()):sorted(INTERVIEW_QUESTIONS.keys()):
+                    print(f"  Q{q_id}: {INTERVIEW_QUESTIONS[q_id][:60]}...")EW_QUESTIONS[q_id][:60]}...")
         else:
-            print("📝 No saved questions file found - using default interview questions")
-            print("📋 Using default questions:")
-            for q_id in sorted(INTERVIEW_QUESTIONS.keys()):
-                print(f"  Q{q_id}: {INTERVIEW_QUESTIONS[q_id][:60]}...")
-    except Exception as e:
-        print(f"❌ Error loading questions from file: {e}")
-        print("📝 Using default interview questions")
-        print_current_questions()
+            print("📝 No saved questions file found - using default interview questions")ile found - using default interview questions")
+            print("📋 Using default questions:")   print("📋 Using default questions:")
+            for q_id in sorted(INTERVIEW_QUESTIONS.keys()):    for q_id in sorted(INTERVIEW_QUESTIONS.keys()):
+                print(f"  Q{q_id}: {INTERVIEW_QUESTIONS[q_id][:60]}...")Q{q_id}: {INTERVIEW_QUESTIONS[q_id][:60]}...")
+    except Exception as e:tion as e:
+        print(f"❌ Error loading questions from file: {e}")ng questions from file: {e}")
+        print("📝 Using default interview questions")ault interview questions")
+        print_current_questions()rint_current_questions()
 load_questions_from_file()
-@app.get("/twilio-balance")
+@app.get("/twilio-balance")balance")
 async def get_twilio_balance():
     """Get Twilio account balance"""
     try:
-        print("[TWILIO BALANCE] 💳 Fetching account balance...")
-        if not client:
+        print("[TWILIO BALANCE] 💳 Fetching account balance...")ount balance...")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)    load_questions_from_file()    print("📝 Loading saved interview questions...")    print("🚀 Starting AI Interview Bot Server...")    import uvicornif __name__ == "__main__":        }            "error": str(e)            "success": False,        return {    except Exception as e:                }            "raw_balance": balance.balance            "currency": balance.currency,            "balance": f"{balance_amount:.2f}",            "success": True,        return {                balance_amount = float(balance.balance)        print(f"[TWILIO BALANCE] ✅ Raw balance: {balance.balance} {balance.currency}")                balance = client.api.v2010.accounts(account_sid).balance.fetch()            }                "error": "Twilio client not initialized"                "success": False,             return {        if not client:        if not client:
             return {
                 "success": False, 
                 "error": "Twilio client not initialized"

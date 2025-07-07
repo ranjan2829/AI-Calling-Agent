@@ -336,9 +336,11 @@ export const CallDashboard: React.FC = () => {
           loading: false
         });
       } else {
-        throw new Error(result.error || 'Failed to fetch balance');
+        // FIX: Ensure the error message is always a string
+        const errorMessage = typeof result.error === 'object' ? JSON.stringify(result.error) : result.error;
+        throw new Error(errorMessage || 'Failed to fetch balance');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading Twilio balance:', error);
       setTwilioBalance({
         balance: 'Error',
