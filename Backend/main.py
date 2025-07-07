@@ -1658,7 +1658,7 @@ async def handle_no_response_webhook(call_sid: str, request: Request):
     except Exception as e:
         print(f"[NO RESPONSE ERROR] ❌ Call {call_sid}: {e}")
         return Response(content=handle_error("Technical difficulty occurred."), media_type="application/xml")
-@app.get("/api/contact-mappings")
+@app.get("/contact-mappings")
 async def get_contact_mappings():
     """Get contact mappings from contact_mappings.json"""
     try:
@@ -1670,7 +1670,9 @@ async def get_contact_mappings():
             
             # Debug: Print first few mappings
             for call_id, data in list(mappings.items())[:3]:
-                print(f"📋 Sample mapping: {call_id} -> {data.get('candidate_name', 'No Name')} ({data.get('candidate_phone', 'No Phone')})")
+                candidate_name = data.get('candidate_name') or (data.get('candidate_data', {}).get('name', 'No Name'))
+                candidate_phone = data.get('candidate_phone') or (data.get('candidate_data', {}).get('phone', 'No Phone'))
+                print(f"📋 Sample mapping: {call_id} -> {candidate_name} ({candidate_phone})")
             
             return {
                 'success': True,
