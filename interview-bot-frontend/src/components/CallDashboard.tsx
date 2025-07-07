@@ -815,31 +815,7 @@ export const CallDashboard: React.FC = () => {
                   ))}
                 </Grid>
 
-                <Card sx={{ mt: 3, bgcolor: 'grey.50' }}>
-                  <CardContent>
-                    <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                      📋 Interview Configuration Summary
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
-                        <Typography variant="body2" sx={{ mb: 1 }}>
-                          <strong>Total Questions:</strong> {questions.length}
-                        </Typography>
-                        <Typography variant="body2" sx={{ mb: 1 }}>
-                          <strong>Estimated Duration:</strong> 3-5 minutes
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} md={6}>
-                        <Typography variant="body2" sx={{ mb: 1 }}>
-                          <strong>Voice:</strong> Polly.Aditi (Medium Rate)
-                        </Typography>
-                        <Typography variant="body2">
-                          <strong>Character Count:</strong> {questions.reduce((acc, q) => acc + q.question.length, 0)}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
+                {/* REMOVED: Interview Configuration Summary Card */}
               </Box>
             </Box>
           )}
