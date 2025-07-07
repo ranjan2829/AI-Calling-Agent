@@ -1718,7 +1718,6 @@ async def get_interview_questions():
             "error": str(e),
             "questions": []
         }
-
 @app.post("/update-interview-questions")
 async def update_interview_questions(request: Request):
     """Update interview questions"""
@@ -1730,8 +1729,6 @@ async def update_interview_questions(request: Request):
         
         if not questions:
             return {"success": False, "error": "No questions provided"}
-        
-        # Update the global INTERVIEW_QUESTIONS dictionary
         global INTERVIEW_QUESTIONS
         
         for question in questions:
@@ -1740,8 +1737,6 @@ async def update_interview_questions(request: Request):
             if q_id is not None and q_text:
                 INTERVIEW_QUESTIONS[q_id] = q_text
                 print(f"📝 Updated Q{q_id}: {q_text[:50]}...")
-        
-        # Save to file for persistence
         try:
             questions_config = {
                 "questions": INTERVIEW_QUESTIONS,
@@ -1805,6 +1800,42 @@ def load_questions_from_file():
         print("📝 Using default interview questions")
         print_current_questions()
 load_questions_from_file()
+
+@app.get("/twilio-balance")
+async def get_twilio_balance():
+    """Get Twilio account balance"""
+    try:
+        print("[TWILIO BALANCE] 💳 Fetching account balance...")
+        
+        # Use existing Twilio client (already initialized)
+        if not client:
+            return {
+                "success": False, 
+                "error": "Twilio client not initialized"
+            }
+        
+        # Fetch account balance using existing credentials
+        balance = client.api.v2010.accounts(account_sid).balance.fetch()
+        
+        print(f"[TWILIO BALANCE] ✅ Raw balance: {balance.balance} {balance.currency}")
+        
+        # Convert balance to float for cleaner display
+        balance_amount = float(balance.balance)
+        
+        return {
+            "success": True,
+            "balance": f"{balance_amount:.2f}",  # Format to 2 decimal places
+            "currency": balance.currency,
+            "raw_balance": balance.balance  # Keep original for reference
+        }
+        
+    except Exception as e:
+        print(f"[TWILIO BALANCE] ❌ Error fetching balance: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
 if __name__ == "__main__":
     import uvicorn
     print("🚀 Starting AI Interview Bot Server...")

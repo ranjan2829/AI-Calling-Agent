@@ -153,11 +153,23 @@ export const CallDashboard: React.FC = () => {
   ]);
   const [savingQuestions, setSavingQuestions] = useState(false);
 
+  // Add new state for Twilio balance
+  const [twilioBalance, setTwilioBalance] = useState<{
+    balance: string;
+    currency: string;
+    loading: boolean;
+  }>({
+    balance: '0.00',
+    currency: 'USD',
+    loading: false
+  });
+
   useEffect(() => {
     loadCallStats();
     loadJobDescription();
     loadInterviews();
-    loadQuestions(); // Add this
+    loadQuestions(); 
+    loadTwilioBalance(); // Add this
   }, []);
 
   const loadCallStats = async () => {
@@ -288,6 +300,43 @@ export const CallDashboard: React.FC = () => {
       }
     } catch (error) {
       console.error('Error loading questions:', error);
+    }
+  };
+
+  // Add this function to load Twilio balance
+  const loadTwilioBalance = async () => {
+    try {
+      setTwilioBalance(prev => ({ ...prev, loading: true }));
+      
+      const response = await fetch('http://13.204.76.229:8000/twilio-balance', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setTwilioBalance({
+          balance: result.balance,
+          currency: result.currency || 'USD',
+          loading: false
+        });
+      } else {
+        throw new Error(result.error || 'Failed to fetch balance');
+      }
+    } catch (error) {
+      console.error('Error loading Twilio balance:', error);
+      setTwilioBalance({
+        balance: 'Error',
+        currency: 'USD',
+        loading: false
+      });
     }
   };
 
@@ -584,6 +633,37 @@ export const CallDashboard: React.FC = () => {
           </Card>
         </Grid>
 
+        {/* 🔥 UPDATED: Twilio Balance Card - More Accurate */}
+        <Grid item xs={12} md={2}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Phone sx={{ color: 'secondary.main', fontSize: 40, mr: 2 }} />
+                <Box>
+                  {twilioBalance.loading ? (
+                    <CircularProgress size={24} sx={{ mb: 1 }} />
+                  ) : (
+                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
+                      {twilioBalance.balance === 'Error' ? 'Error' : `$${parseFloat(twilioBalance.balance).toFixed(2)}`}
+                    </Typography>
+                  )}
+                  <Typography variant="body2" color="textSecondary">
+                    💰 Account Balance
+                  </Typography>
+                  <Button 
+                    size="small" 
+                    onClick={loadTwilioBalance}
+                    disabled={twilioBalance.loading}
+                    sx={{ mt: 1, fontSize: '0.7rem', minWidth: 'auto', p: 0.5 }}
+                  >
+                    🔄 Refresh
+                  </Button>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
         {/* 🔥 NEW: No Response Card */}
         <Grid item xs={12} md={2}>
           <Card>
@@ -633,24 +713,6 @@ export const CallDashboard: React.FC = () => {
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
                     Bulk Contacts
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={2}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <PlayArrow sx={{ color: 'secondary.main', fontSize: 40, mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
-                    {callStats.inProgress || 0}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    In Progress
                   </Typography>
                 </Box>
               </Box>
@@ -821,7 +883,7 @@ export const CallDashboard: React.FC = () => {
                         {(question.id === 3 || question.id === 4) && (
                           <Alert severity="info" sx={{ mt: 2 }}>
                             <Typography variant="body2">
-                              🔒 This is a standard question and cannot be modified.
+                               This is a standard question and cannot be modified.
                             </Typography>
                           </Alert>
                         )}
