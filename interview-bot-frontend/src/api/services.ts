@@ -181,6 +181,34 @@ export const callsApi = {
     const response = await fetch(`${API_BASE_URL}/contact-mappings`);
     return response.json();
   },
+
+  getInterviewQuestions: async () => {
+    try {
+      const response = await fetch('http://13.204.76.229:8000/interview-questions');
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error getting interview questions:', error);
+      return { success: false, questions: [] };
+    }
+  },
+
+  updateInterviewQuestions: async (questions: any[]) => {
+    try {
+      const response = await fetch('http://13.204.76.229:8000/update-interview-questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ questions }),
+      });
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error updating interview questions:', error);
+      return { success: false };
+    }
+  },
 };
 
 export default callsApi;

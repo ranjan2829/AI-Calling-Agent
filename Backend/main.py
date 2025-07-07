@@ -1694,3 +1694,111 @@ async def get_contact_mappings():
             'mappings': {},
             'count': 0
         }
+
+@app.get("/interview-questions")
+async def get_interview_questions():
+    """Get current interview questions"""
+    try:
+        questions = []
+        for q_id, question_text in INTERVIEW_QUESTIONS.items():
+            questions.append({
+                "id": q_id,
+                "question": question_text
+            })
+        
+        print(f"✅ Returning {len(questions)} interview questions")
+        return {
+            "success": True,
+            "questions": questions
+        }
+    except Exception as e:
+        print(f"❌ Error getting interview questions: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "questions": []
+        }
+
+@app.post("/update-interview-questions")
+async def update_interview_questions(request: Request):
+    """Update interview questions"""
+    try:
+        data = await request.json()
+        questions = data.get("questions", [])
+        
+        print(f"📝 Received {len(questions)} questions to update")
+        
+        if not questions:
+            return {"success": False, "error": "No questions provided"}
+        
+        # Update the global INTERVIEW_QUESTIONS dictionary
+        global INTERVIEW_QUESTIONS
+        
+        for question in questions:
+            q_id = question.get("id")
+            q_text = question.get("question", "").strip()
+            if q_id is not None and q_text:
+                INTERVIEW_QUESTIONS[q_id] = q_text
+                print(f"📝 Updated Q{q_id}: {q_text[:50]}...")
+        
+        # Save to file for persistence
+        try:
+            questions_config = {
+                "questions": INTERVIEW_QUESTIONS,
+                "updated_at": datetime.now().isoformat()
+            }
+            
+            with open("interview_questions.json", "w") as f:
+                json.dump(questions_config, f, indent=2)
+            
+            print(f"💾 Saved questions to interview_questions.json")
+            
+        except Exception as save_error:
+            print(f"⚠️ Warning: Could not save questions to file: {save_error}")
+        
+        print(f"✅ Successfully updated {len(questions)} interview questions")
+        
+        return {
+            "success": True,
+            "message": "Interview questions updated successfully",
+            "updated_count": len(questions)
+        }
+        
+    except Exception as e:
+        print(f"❌ Error updating interview questions: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+# Add function to load questions from file on startup
+def load_questions_from_file():
+    """Load questions from file if it exists"""
+    try:
+        if os.path.exists("interview_questions.json"):
+            with open("interview_questions.json", "r") as f:
+                data = json.load(f)
+                questions = data.get("questions", {})
+                
+                # Convert string keys to integers and update global INTERVIEW_QUESTIONS
+                global INTERVIEW_QUESTIONS
+                for key, value in questions.items():
+                    INTERVIEW_QUESTIONS[int(key)] = value
+                
+                print(f"✅ Loaded {len(questions)} interview questions from file")
+        else:
+            print("📝 Using default interview questions")
+    except Exception as e:
+        print(f"❌ Error loading questions from file: {e}")
+        print("📝 Using default interview questions")
+
+# Call this function to load saved questions
+load_questions_from_file()
+
+# Add this at the very end of main.py, just before if __name__ == "__main__":
+if __name__ == "__main__":
+    import uvicorn
+    print("🚀 Starting AI Interview Bot Server...")
+    print("📝 Loading saved interview questions...")
+    load_questions_from_file()
+    uvicorn.run(app, host="0.0.0.0", port=8000)

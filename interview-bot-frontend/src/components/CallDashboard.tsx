@@ -40,7 +40,9 @@ import {
   Stop,
   Error,
   CloudUpload,
-  PhoneInTalk
+  PhoneInTalk,
+  QuestionAnswer,  // Add this
+  Edit           // Add this
 } from '@mui/icons-material';
 import { getCallStats, getJobDescription, getAllInterviews, callsApi } from '../api/services';
 import { toast } from 'react-toastify';
@@ -100,6 +102,11 @@ const initiateCall = async (phoneNumber: string) => {
   }
 };
 
+interface InterviewQuestion {
+  id: number;
+  question: string;
+}
+
 export const CallDashboard: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [savingJD, setSavingJD] = useState(false);
@@ -132,10 +139,25 @@ export const CallDashboard: React.FC = () => {
   const [bulkCallSession, setBulkCallSession] = useState<BulkCallSession | null>(null);
   const [showResults, setShowResults] = useState(false);
 
+  // Add new state for questions
+  const [questions, setQuestions] = useState<InterviewQuestion[]>([
+    { id: 0, question: "Is this a good time to speak for a 3-4 minute interview?" },
+    { id: 1, question: "Introduce yourself." },
+    { id: 2, question: "What are your key skills for this role?" },
+    { id: 3, question: "What is your current notice period?" },
+    { id: 4, question: "What is your current CTC and expected salary?" },
+    { id: 5, question: "Tell us about your experience with APIs." },
+    { id: 6, question: "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?" },
+    { id: 7, question: "Describe your experience with deployments, including the use of Docker and Kubernetes." },
+    { id: 8, question: "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used." }
+  ]);
+  const [savingQuestions, setSavingQuestions] = useState(false);
+
   useEffect(() => {
     loadCallStats();
     loadJobDescription();
     loadInterviews();
+    loadQuestions(); // Add this
   }, []);
 
   const loadCallStats = async () => {
@@ -254,6 +276,18 @@ export const CallDashboard: React.FC = () => {
       console.error('Error loading interviews:', error);
       // FIX: Set empty array on error
       setInterviews([]);
+    }
+  };
+
+  // Add this function
+  const loadQuestions = async () => {
+    try {
+      const response = await callsApi.getInterviewQuestions();
+      if (response.success && response.questions) {
+        setQuestions(response.questions);
+      }
+    } catch (error) {
+      console.error('Error loading questions:', error);
     }
   };
 
@@ -464,6 +498,31 @@ export const CallDashboard: React.FC = () => {
     const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
     return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
   };
+  
+  // Add this function
+  const saveQuestions = async () => {
+    try {
+      setSavingQuestions(true);
+      const response = await callsApi.updateInterviewQuestions(questions);
+      if (response.success) {
+        toast.success('Questions updated successfully!');
+      } else {
+        toast.error('Failed to update questions');
+      }
+    } catch (error: any) {
+      toast.error('Failed to update questions: ' + error.message);
+    } finally {
+      setSavingQuestions(false);
+    }
+  };
+
+  // Add this function
+  const updateQuestion = (id: number, newText: string) => {
+    setQuestions(prev => prev.map(q => 
+      q.id === id ? { ...q, question: newText } : q
+    ));
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       {/* Header with Logo */}
@@ -607,11 +666,13 @@ export const CallDashboard: React.FC = () => {
             <Tab label="Single Call" />
             <Tab label="Bulk Calling" />
             <Tab label="Job Description" />
+            {/* Removed Interview Questions tab */}
           </Tabs>
 
           {/* Single Call Tab */}
           {tabValue === 0 && (
             <Box>
+              {/* Existing Single Call Section */}
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
                 <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3 }}>
                   AI Interview Call
@@ -670,6 +731,115 @@ export const CallDashboard: React.FC = () => {
                     )}
                   </Alert>
                 )}
+              </Box>
+
+              <Divider sx={{ my: 4 }} />
+
+              {/* NEW: Interview Questions Section - Moved Here */}
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <QuestionAnswer sx={{ color: 'primary.main', mr: 1 }} />
+                    <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                      Configure Interview Questions
+                    </Typography>
+                  </Box>
+                  <Button
+                    variant="contained"
+                    startIcon={savingQuestions ? <CircularProgress size={20} /> : <Save />}
+                    onClick={saveQuestions}
+                    disabled={savingQuestions}
+                  >
+                    {savingQuestions ? 'Saving...' : 'Save Questions'}
+                  </Button>
+                </Box>
+
+                <Alert severity="info" sx={{ mb: 3 }}>
+                  <Typography variant="body2">
+                    🎯 These questions will be asked during the AI interview. Question 0 is critical for availability checking.
+                  </Typography>
+                </Alert>
+
+                <Grid container spacing={2}>
+                  {questions.map((question) => (
+                    <Grid item xs={12} key={question.id}>
+                      <Card variant="outlined" sx={{ p: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <Chip 
+                            label={`Q${question.id}`} 
+                            color="primary" 
+                            size="small"
+                            sx={{ mr: 2, minWidth: 45 }}
+                          />
+                          <Typography variant="body2" color="textSecondary">
+                            Question {question.id}
+                            {question.id === 0 && " (Availability Check - Critical)"}
+                            {question.id === 2 && " (Skills Assessment)"}
+                          </Typography>
+                        </Box>
+                        
+                        <TextField
+                          fullWidth
+                          multiline
+                          rows={2}
+                          value={question.question}
+                          onChange={(e) => updateQuestion(question.id, e.target.value)}
+                          variant="outlined"
+                          placeholder={`Enter question ${question.id}...`}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <Edit sx={{ color: 'text.secondary' }} />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                        
+                        {question.id === 0 && (
+                          <Alert severity="warning" sx={{ mt: 2 }}>
+                            <Typography variant="body2">
+                              ⚠️ This question determines if the interview continues. Negative responses trigger callbacks.
+                            </Typography>
+                          </Alert>
+                        )}
+
+                        {question.id === 2 && (
+                          <Alert severity="info" sx={{ mt: 2 }}>
+                            <Typography variant="body2">
+                              🎯 This question is used for JD matching and skill extraction.
+                            </Typography>
+                          </Alert>
+                        )}
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+
+                <Card sx={{ mt: 3, bgcolor: 'grey.50' }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+                      📋 Interview Configuration Summary
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          <strong>Total Questions:</strong> {questions.length}
+                        </Typography>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          <strong>Estimated Duration:</strong> 3-5 minutes
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="body2" sx={{ mb: 1 }}>
+                          <strong>Voice:</strong> Polly.Aditi (Medium Rate)
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Character Count:</strong> {questions.reduce((acc, q) => acc + q.question.length, 0)}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
               </Box>
             </Box>
           )}
