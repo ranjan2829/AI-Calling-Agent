@@ -49,6 +49,10 @@ import { toast } from 'react-toastify';
 interface CallStats {
   totalCalls: number;
   completedCalls: number;
+  incompleteSilence?: number;
+  terminated?: number;
+  inProgress?: number;
+  callbackRequested?: number;
 }
 interface JobDescription {
   title: string;
@@ -115,7 +119,11 @@ export const CallDashboard: React.FC = () => {
   const [interviews, setInterviews] = useState<any[]>([]);
   const [callStats, setCallStats] = useState<CallStats>({
     totalCalls: 0,
-    completedCalls: 0
+    completedCalls: 0,
+    incompleteSilence: 0,
+    terminated: 0,
+    inProgress: 0,
+    callbackRequested: 0
   });
   const [jobDescription, setJobDescription] = useState<JobDescription>({
     title: '',
@@ -574,15 +582,19 @@ export const CallDashboard: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Header with Logo */}
+      {/* Header with Logo - FIX: Correct logo path */}
       <Box sx={{ mb: 4, display: 'flex', alignItems: 'center' }}>
         <img
-          src="/public/title-logo.svg"
+          src="/title-logo.svg"
           alt="Logo"
           style={{
             height: '48px',
             width: 'auto',
             marginRight: '16px'
+          }}
+          onError={(e) => {
+            console.warn('Logo not found, hiding image');
+            e.currentTarget.style.display = 'none';
           }}
         />
         <Box>
@@ -632,8 +644,6 @@ export const CallDashboard: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-
-        {/* 🔥 UPDATED: Twilio Balance Card - More Accurate */}
         <Grid item xs={12} md={2}>
           <Card>
             <CardContent>
@@ -720,21 +730,15 @@ export const CallDashboard: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
-
-      {/* Tabs for Single Call vs Bulk Call */}
       <Card sx={{ mb: 4 }}>
         <CardContent>
           <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
             <Tab label="Single Call" />
             <Tab label="Bulk Calling" />
             <Tab label="Job Description" />
-            {/* Removed Interview Questions tab */}
           </Tabs>
-
-          {/* Single Call Tab */}
           {tabValue === 0 && (
             <Box>
-              {/* Existing Single Call Section */}
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
                 <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3 }}>
                   AI Interview Call

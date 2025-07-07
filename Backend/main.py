@@ -1765,8 +1765,6 @@ async def update_interview_questions(request: Request):
             "success": False,
             "error": str(e)
         }
-# Replace your existing load_questions_from_file function with this enhanced version
-
 def load_questions_from_file():
     """Load questions from file if it exists"""
     try:
@@ -1800,42 +1798,33 @@ def load_questions_from_file():
         print("📝 Using default interview questions")
         print_current_questions()
 load_questions_from_file()
-
 @app.get("/twilio-balance")
 async def get_twilio_balance():
     """Get Twilio account balance"""
     try:
         print("[TWILIO BALANCE] 💳 Fetching account balance...")
-        
-        # Use existing Twilio client (already initialized)
         if not client:
             return {
                 "success": False, 
                 "error": "Twilio client not initialized"
             }
-        
-        # Fetch account balance using existing credentials
         balance = client.api.v2010.accounts(account_sid).balance.fetch()
         
         print(f"[TWILIO BALANCE] ✅ Raw balance: {balance.balance} {balance.currency}")
-        
-        # Convert balance to float for cleaner display
         balance_amount = float(balance.balance)
         
         return {
             "success": True,
-            "balance": f"{balance_amount:.2f}",  # Format to 2 decimal places
+            "balance": f"{balance_amount:.2f}",
             "currency": balance.currency,
-            "raw_balance": balance.balance  # Keep original for reference
+            "raw_balance": balance.balance
         }
         
     except Exception as e:
-        print(f"[TWILIO BALANCE] ❌ Error fetching balance: {e}")
         return {
             "success": False,
             "error": str(e)
         }
-
 if __name__ == "__main__":
     import uvicorn
     print("🚀 Starting AI Interview Bot Server...")
