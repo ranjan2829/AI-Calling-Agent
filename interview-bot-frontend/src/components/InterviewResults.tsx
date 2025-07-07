@@ -399,7 +399,9 @@ export const InterviewResults: React.FC = () => {
     if (recommendation.includes('EXCELLENT')) return 'success';
     if (recommendation.includes('STRONG')) return 'success';
     if (recommendation.includes('GOOD')) return 'primary';
-    if (recommendation.includes('MODERATE')) return 'warning';
+    if (recommendation.includes('MODERATE')) return 'success';
+    // 🔥 FIX: Make "INTERVIEW COMPLETED" green instead of red
+    if (recommendation.includes('INTERVIEW COMPLETED')) return 'success';
     return 'error';
   };
   const toggleRowExpansion = (callId: string) => {
