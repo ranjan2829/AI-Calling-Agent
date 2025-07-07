@@ -88,15 +88,24 @@ export const InterviewResults: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-  // 🔥 NEW: Contact mappings state
+  // 🔥 Contact mappings state
   const [contactMappings, setContactMappings] = useState<{[key: string]: any}>({});
 
   useEffect(() => {
-    loadInterviewData();
-    loadContactMappings(); // 🔥 Load contact mappings on component mount
+    loadContactMappings();
   }, []);
 
-  // 🔥 NEW: Load contact mappings
+  // Load interviews AFTER contact mappings are loaded
+  useEffect(() => {
+    if (Object.keys(contactMappings).length > 0) {
+      loadInterviewData();
+    } else {
+      // Load interviews even if no mappings (fallback)
+      setTimeout(() => loadInterviewData(), 1000);
+    }
+  }, [contactMappings]);
+
+  // 🔥 Load contact mappings FIRST
   const loadContactMappings = async () => {
     try {
       console.log('🔄 Loading contact mappings...');
@@ -104,6 +113,7 @@ export const InterviewResults: React.FC = () => {
       if (response.success) {
         setContactMappings(response.mappings || {});
         console.log('✅ Contact mappings loaded:', Object.keys(response.mappings || {}).length, 'mappings');
+        console.log('📋 Sample mappings:', response.mappings);
       }
     } catch (error) {
       console.error('❌ Error loading contact mappings:', error);
@@ -135,11 +145,12 @@ export const InterviewResults: React.FC = () => {
   const loadInterviewData = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Loading all interview data...');
+      console.log('🔄 Loading interview data with mappings:', Object.keys(contactMappings).length);
+      
       const interviewsResponse = await callsApi.getAllInterviewsDetailed();
       const allInterviews = interviewsResponse.data.interviews || [];
       console.log('📋 Raw interviews loaded:', allInterviews.length, 'interviews');
-      
+
       const validInterviews = allInterviews.filter((interview: any) => {
         const callId = interview.call_sid || interview.interview_id;
         const responses = interview.responses || [];
@@ -152,25 +163,36 @@ export const InterviewResults: React.FC = () => {
       console.log('✅ Valid interviews after filtering:', validInterviews.length);
       
       const processedInterviews = validInterviews.map((interview: any) => {
-        console.log('🔍 Processing interview:', interview.interview_id || interview.call_sid);
-        
         const callId = interview.call_sid || interview.interview_id || 'unknown';
+        console.log(`🔍 Processing interview: ${callId}`);
 
-        // 🔥 UPDATED: Get name from contact mappings first, then fallback to call ID
+        // 🔥 ENHANCED: Better mapping logic
         let candidateName = callId;
-        let phoneNumber = callId;
+        let phoneNumber = 'No Phone Available';
         
-        // Check contact mappings for real name and phone
+        // First check: Direct mapping from contact_mappings.json
         const contactMapping = contactMappings[callId];
         if (contactMapping) {
           candidateName = contactMapping.candidate_name || contactMapping.name || callId;
-          phoneNumber = contactMapping.candidate_phone || contactMapping.phone || callId;
-          console.log(`✅ Found mapping for ${callId}: ${candidateName} (${phoneNumber})`);
+          phoneNumber = contactMapping.candidate_phone || contactMapping.phone || 'No Phone Available';
+          console.log(`✅ Found direct mapping for ${callId}: ${candidateName} (${phoneNumber})`);
         } else {
-          console.log(`❌ No mapping found for ${callId}, using call ID`);
+          // Second check: Look in interview data itself
+          if (interview.candidate_name && interview.candidate_name !== 'Unknown') {
+            candidateName = interview.candidate_name;
+          }
+          
+          if (interview.candidate_phone && interview.candidate_phone !== 'Unknown') {
+            phoneNumber = interview.candidate_phone;
+          } else if (interview.phone_number && interview.phone_number !== 'Unknown') {
+            phoneNumber = interview.phone_number;
+          }
+          
+          console.log(`❌ No direct mapping for ${callId}, using interview data: ${candidateName} (${phoneNumber})`);
         }
         
-        console.log(`📋 Final name: ${candidateName}, phone: ${phoneNumber}`);
+        // 🔥 DEBUG: Log final values
+        console.log(`📋 Final processed: ${candidateName} | ${phoneNumber} | ID: ${callId}`);
         
         const safeInterview = {
           call_sid: callId,
@@ -241,7 +263,7 @@ export const InterviewResults: React.FC = () => {
           recommendation = 'MODERATE FIT';
         }
 
-        console.log(`📊 Processed interview: ${candidateName} (${callId})`);
+        console.log(`📊 Final interview data: ${candidateName} (${callId}) - ${phoneNumber}`);
 
         return {
           ...safeInterview,
@@ -261,12 +283,11 @@ export const InterviewResults: React.FC = () => {
         return b.skills_percentage - a.skills_percentage;
       });
     
-      console.log('Final sorted interviews:', sortedInterviews);
+      console.log('🎯 Final sorted interviews:', sortedInterviews.map(i => ({ name: i.candidate_name, phone: i.candidate_phone, id: i.call_sid })));
       setInterviews(sortedInterviews);
     
     } catch (error) {
       console.error('❌ Error loading interview data:', error);
-      toast.error('Failed to load interview data');
       setInterviews([]);
     } finally {
       setLoading(false);
@@ -425,10 +446,10 @@ export const InterviewResults: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {interviews.map((interview, index) => {
-                    // Extra safety for rendering
+                    // 🔥 UPDATED: Use the processed data directly
                     const safeCallSid = interview.call_sid || `unknown_${index}`;
                     const safeCandidateName = interview.candidate_name || 'Unknown Candidate';
-                    const safeCandidatePhone = interview.candidate_phone || interview.phone_number || 'Unknown';
+                    const safeCandidatePhone = interview.candidate_phone || interview.phone_number || 'No Phone Available';
                     
                     return (
                       <React.Fragment key={safeCallSid}>
@@ -444,6 +465,7 @@ export const InterviewResults: React.FC = () => {
                             <Box>
                               <Typography variant="body2" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', mb: 1 }}>
                                 <Phone sx={{ fontSize: 16, mr: 0.5, color: 'primary.main' }} />
+                                {/* 🔥 Show real phone number */}
                                 {safeCandidatePhone}
                               </Typography>
                               <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
@@ -459,6 +481,7 @@ export const InterviewResults: React.FC = () => {
                             <Box>
                               <Typography variant="body2" sx={{ fontWeight: 'medium', display: 'flex', alignItems: 'center', mb: 1 }}>
                                 <Person sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
+                                {/* 🔥 Show real candidate name */}
                                 {safeCandidateName}
                               </Typography>
                               <Typography variant="caption" sx={{ color: 'text.secondary' }}>

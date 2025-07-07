@@ -1658,31 +1658,32 @@ async def handle_no_response_webhook(call_sid: str, request: Request):
     except Exception as e:
         print(f"[NO RESPONSE ERROR] ❌ Call {call_sid}: {e}")
         return Response(content=handle_error("Technical difficulty occurred."), media_type="application/xml")
-
-@app.route('/api/contact-mappings', methods=['GET'])
-def get_contact_mappings():
+@app.get("/api/contact-mappings")
+async def get_contact_mappings():
     """Get contact mappings from contact_mappings.json"""
     try:
         mappings_file = 'contact_mappings.json'
         if os.path.exists(mappings_file):
             with open(mappings_file, 'r') as f:
                 mappings = json.load(f)
-            return jsonify({
+            print(f"✅ Loaded {len(mappings)} contact mappings")
+            return {
                 'success': True,
                 'mappings': mappings,
                 'count': len(mappings)
-            })
+            }
         else:
-            return jsonify({
+            print("❌ contact_mappings.json not found")
+            return {
                 'success': True,
                 'mappings': {},
                 'count': 0
-            })
+            }
     except Exception as e:
-        print(f"Error loading contact mappings: {e}")
-        return jsonify({
+        print(f"❌ Error loading contact mappings: {e}")
+        return {
             'success': False,
             'error': str(e),
             'mappings': {},
             'count': 0
-        })
+        }
