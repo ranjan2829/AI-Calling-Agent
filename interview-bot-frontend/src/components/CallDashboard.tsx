@@ -775,6 +775,7 @@ export const CallDashboard: React.FC = () => {
                             Question {question.id}
                             {question.id === 0 && " (Availability Check - Critical)"}
                             {question.id === 2 && " (Skills Assessment)"}
+                            {(question.id === 0 || question.id === 3 || question.id === 4) && " - Non-Editable"}
                           </Typography>
                         </Box>
                         
@@ -786,19 +787,26 @@ export const CallDashboard: React.FC = () => {
                           onChange={(e) => updateQuestion(question.id, e.target.value)}
                           variant="outlined"
                           placeholder={`Enter question ${question.id}...`}
+                          disabled={question.id === 0 || question.id === 3 || question.id === 4} // Disable editing for Q0, Q3, Q4
                           InputProps={{
                             startAdornment: (
                               <InputAdornment position="start">
-                                <Edit sx={{ color: 'text.secondary' }} />
+                                <Edit sx={{ color: (question.id === 0 || question.id === 3 || question.id === 4) ? 'text.disabled' : 'text.secondary' }} />
                               </InputAdornment>
                             ),
+                          }}
+                          sx={{
+                            '& .MuiInputBase-input.Mui-disabled': {
+                              WebkitTextFillColor: 'rgba(0, 0, 0, 0.6)', // Make disabled text more visible
+                              backgroundColor: 'rgba(0, 0, 0, 0.04)' // Light grey background for disabled fields
+                            }
                           }}
                         />
                         
                         {question.id === 0 && (
                           <Alert severity="warning" sx={{ mt: 2 }}>
                             <Typography variant="body2">
-                              ⚠️ This question determines if the interview continues. Negative responses trigger callbacks.
+                              ⚠️ This question determines if the interview continues or not as per the candidate's availability.
                             </Typography>
                           </Alert>
                         )}
@@ -806,7 +814,14 @@ export const CallDashboard: React.FC = () => {
                         {question.id === 2 && (
                           <Alert severity="info" sx={{ mt: 2 }}>
                             <Typography variant="body2">
-                              🎯 This question is used for JD matching and skill extraction.
+                              🎯 This question is used for JD matching.
+                            </Typography>
+                          </Alert>
+                        )}
+                        {(question.id === 3 || question.id === 4) && (
+                          <Alert severity="info" sx={{ mt: 2 }}>
+                            <Typography variant="body2">
+                              🔒 This is a standard question and cannot be modified.
                             </Typography>
                           </Alert>
                         )}
