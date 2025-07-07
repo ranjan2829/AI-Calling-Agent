@@ -72,11 +72,46 @@ export const CallHistory: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  // 🔥 NEW: Contact mappings state
+  const [contactMappings, setContactMappings] = useState<{[key: string]: any}>({});
   const navigate = useNavigate();
 
   useEffect(() => {
+    loadContactMappings();
     loadInterviews();
   }, []);
+
+  // 🔥 NEW: Load contact mappings
+  const loadContactMappings = async () => {
+    try {
+      console.log('🔄 Loading contact mappings...');
+      const response = await callsApi.getContactMappings();
+      if (response.success) {
+        setContactMappings(response.mappings || {});
+        console.log('✅ Contact mappings loaded:', Object.keys(response.mappings || {}).length, 'mappings');
+      }
+    } catch (error) {
+      console.error('❌ Error loading contact mappings:', error);
+    }
+  };
+
+  // 🔥 NEW: Helper function to get candidate info from mapping
+  const getCandidateInfo = (interview: Interview) => {
+    const callId = interview.interview_id || interview.call_sid;
+    const mapping = contactMappings[callId];
+    
+    if (mapping) {
+      return {
+        name: mapping.candidate_name || mapping.name || `ID: ${callId}`,
+        phone: mapping.candidate_phone || mapping.phone || interview.candidate_phone || 'Unknown'
+      };
+    }
+    
+    return {
+      name: `ID: ${callId}`,
+      phone: interview.candidate_phone || 'Unknown'
+    };
+  };
 
   const loadInterviews = async () => {
     try {
@@ -396,7 +431,7 @@ export const CallHistory: React.FC = () => {
         </Grid>
       </Grid>
 
-      {/* Interviews Table */}
+      {/* Interviews Table - UPDATED to show real names */}
       <Card>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold' }}>
@@ -422,74 +457,85 @@ export const CallHistory: React.FC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {interviews.map((interview) => (
-                    <TableRow key={interview.interview_id} hover>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
-                          {interview.interview_id}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        {getStatusChip(interview)}
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {formatDate(interview.completion_time)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Person sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                  {interviews.map((interview) => {
+                    // 🔥 UPDATED: Get real candidate info
+                    const candidateInfo = getCandidateInfo(interview);
+                    
+                    return (
+                      <TableRow key={interview.interview_id} hover>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
+                            {interview.interview_id}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          {getStatusChip(interview)}
+                        </TableCell>
+                        <TableCell>
                           <Typography variant="body2">
-                            {interview.candidate_phone || 'Not provided'}
+                            {formatDate(interview.completion_time)}
                           </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Typography variant="body2" sx={{ mr: 1 }}>
-                            {(() => {
-                              const formatted = formatCompletionRate(interview.questions_answered, interview.total_questions);
-                              return formatted.displayText;
-                            })()}
-                          </Typography>
-                          <Chip
-                            label={`${(() => {
-                              const formatted = formatCompletionRate(interview.questions_answered, interview.total_questions);
-                              return formatted.percentage;
-                            })()}%`}
-                            size="small"
-                            color={(() => {
-                              const formatted = formatCompletionRate(interview.questions_answered, interview.total_questions);
-                              return formatted.percentage >= 80 ? 'success' : 'warning';
-                            })()}
-                          />
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <AccessTime sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
-                          <Typography variant="body2">
-                            {interview.start_time && interview.end_time
-                              ? `${Math.round((new Date(interview.end_time).getTime() - new Date(interview.start_time).getTime()) / 60000)}m`
-                              : 'N/A'
-                            }
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Tooltip title="View Details">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleViewDetails(interview)}
-                            color="primary"
-                          >
-                            <Visibility />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                        <TableCell>
+                          {/* 🔥 UPDATED: Show real name and phone */}
+                          <Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Person sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                {candidateInfo.name}
+                              </Typography>
+                            </Box>
+                            <Typography variant="caption" sx={{ color: 'text.secondary', ml: 3 }}>
+                              📞 {candidateInfo.phone}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="body2" sx={{ mr: 1 }}>
+                              {(() => {
+                                const formatted = formatCompletionRate(interview.questions_answered, interview.total_questions);
+                                return formatted.displayText;
+                              })()}
+                            </Typography>
+                            <Chip
+                              label={`${(() => {
+                                const formatted = formatCompletionRate(interview.questions_answered, interview.total_questions);
+                                return formatted.percentage;
+                              })()}%`}
+                              size="small"
+                              color={(() => {
+                                const formatted = formatCompletionRate(interview.questions_answered, interview.total_questions);
+                                return formatted.percentage >= 80 ? 'success' : 'warning';
+                              })()}
+                            />
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <AccessTime sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                            <Typography variant="body2">
+                              {interview.start_time && interview.end_time
+                                ? `${Math.round((new Date(interview.end_time).getTime() - new Date(interview.start_time).getTime()) / 60000)}m`
+                                : 'N/A'
+                              }
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Tooltip title="View Details">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleViewDetails(interview)}
+                              color="primary"
+                            >
+                              <Visibility />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -497,7 +543,7 @@ export const CallHistory: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Interview Details Dialog */}
+      {/* Interview Details Dialog - UPDATED to show real name */}
       <Dialog
         open={detailsOpen}
         onClose={() => setDetailsOpen(false)}
@@ -507,7 +553,11 @@ export const CallHistory: React.FC = () => {
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <QuestionAnswer sx={{ mr: 2, color: 'primary.main' }} />
-            Interview Details - {selectedInterview?.interview_id}
+            {/* 🔥 UPDATED: Show real name in dialog title */}
+            Interview Details - {selectedInterview ? getCandidateInfo(selectedInterview).name : 'Unknown'}
+            <Typography variant="caption" sx={{ ml: 2, color: 'text.secondary' }}>
+              ({selectedInterview?.interview_id})
+            </Typography>
           </Box>
         </DialogTitle>
         <DialogContent>

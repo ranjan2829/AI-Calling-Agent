@@ -88,10 +88,27 @@ export const InterviewResults: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  // 🔥 NEW: Contact mappings state
+  const [contactMappings, setContactMappings] = useState<{[key: string]: any}>({});
 
   useEffect(() => {
     loadInterviewData();
+    loadContactMappings(); // 🔥 Load contact mappings on component mount
   }, []);
+
+  // 🔥 NEW: Load contact mappings
+  const loadContactMappings = async () => {
+    try {
+      console.log('🔄 Loading contact mappings...');
+      const response = await callsApi.getContactMappings();
+      if (response.success) {
+        setContactMappings(response.mappings || {});
+        console.log('✅ Contact mappings loaded:', Object.keys(response.mappings || {}).length, 'mappings');
+      }
+    } catch (error) {
+      console.error('❌ Error loading contact mappings:', error);
+    }
+  };
 
   const extractSkillsFromText = (text: string): string[] => {
     const skillKeywords = [
@@ -123,24 +140,6 @@ export const InterviewResults: React.FC = () => {
       const allInterviews = interviewsResponse.data.interviews || [];
       console.log('📋 Raw interviews loaded:', allInterviews.length, 'interviews');
       
-      if (allInterviews.length > 0) {
-        console.log('🔍 Sample interview structure:', JSON.stringify(allInterviews[0], null, 2));
-        console.log('🔍 Available fields in first interview:', Object.keys(allInterviews[0]));
-        
-        // Enhanced debug logging for CSV data
-        const sample = allInterviews[0];
-        console.log('📊 CSV/Contact Data Check:', {
-          candidate_name: sample.candidate_name,
-          candidate_phone: sample.candidate_phone,
-          candidate_email: sample.candidate_email,
-          candidate_experience: sample.candidate_experience,
-          candidate_skills: sample.candidate_skills,
-          candidate_data: sample.candidate_data,
-          is_bulk_call: sample.is_bulk_call,
-          bulk_call_id: sample.bulk_call_id
-        });
-      }
-
       const validInterviews = allInterviews.filter((interview: any) => {
         const callId = interview.call_sid || interview.interview_id;
         const responses = interview.responses || [];
@@ -157,19 +156,30 @@ export const InterviewResults: React.FC = () => {
         
         const callId = interview.call_sid || interview.interview_id || 'unknown';
 
-        const candidateName = callId;
-        const phoneNumber = callId;
+        // 🔥 UPDATED: Get name from contact mappings first, then fallback to call ID
+        let candidateName = callId;
+        let phoneNumber = callId;
         
-        console.log(`📋 Using Call ID: ${callId}`);
+        // Check contact mappings for real name and phone
+        const contactMapping = contactMappings[callId];
+        if (contactMapping) {
+          candidateName = contactMapping.candidate_name || contactMapping.name || callId;
+          phoneNumber = contactMapping.candidate_phone || contactMapping.phone || callId;
+          console.log(`✅ Found mapping for ${callId}: ${candidateName} (${phoneNumber})`);
+        } else {
+          console.log(`❌ No mapping found for ${callId}, using call ID`);
+        }
+        
+        console.log(`📋 Final name: ${candidateName}, phone: ${phoneNumber}`);
         
         const safeInterview = {
           call_sid: callId,
           phone_number: phoneNumber,
           candidate_name: candidateName,
           candidate_phone: phoneNumber,
-          candidate_email: interview.candidate_email || '',
-          candidate_experience: interview.candidate_experience || '',
-          candidate_skills: interview.candidate_skills || '',
+          candidate_email: interview.candidate_email || contactMapping?.candidate_email || '',
+          candidate_experience: interview.candidate_experience || contactMapping?.candidate_experience || '',
+          candidate_skills: interview.candidate_skills || contactMapping?.candidate_skills || '',
           twilio_number: interview.twilio_number || '+14787807480',
           start_time: interview.start_time || new Date().toISOString(),
           end_time: interview.end_time,
@@ -177,8 +187,8 @@ export const InterviewResults: React.FC = () => {
           current_question: interview.current_question || interview.questions_answered || 7,
           responses: interview.responses || [],
           validation_results: interview.validation_results || {},
-          is_bulk_call: interview.is_bulk_call || false,
-          bulk_call_id: interview.bulk_call_id || null,
+          is_bulk_call: interview.is_bulk_call || contactMapping?.is_bulk_call || false,
+          bulk_call_id: interview.bulk_call_id || contactMapping?.bulk_call_id || null,
           ...interview
         };
 
@@ -231,7 +241,7 @@ export const InterviewResults: React.FC = () => {
           recommendation = 'MODERATE FIT';
         }
 
-        console.log(`📊 Processed interview: ${callId}`);
+        console.log(`📊 Processed interview: ${candidateName} (${callId})`);
 
         return {
           ...safeInterview,
@@ -262,6 +272,14 @@ export const InterviewResults: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // 🔥 UPDATE: Re-process interviews when contact mappings are loaded
+  useEffect(() => {
+    if (Object.keys(contactMappings).length > 0 && interviews.length > 0) {
+      console.log('🔄 Re-processing interviews with contact mappings...');
+      loadInterviewData();
+    }
+  }, [contactMappings]);
 
   const runJDAnalysis = async () => {
     try {

@@ -175,7 +175,12 @@ export const callsApi = {
       },
     });
     return response;
-  }
+  },
+
+  getContactMappings: async () => {
+    const response = await fetch(`${BASE_URL}/contact-mappings`);
+    return response.json();
+  },
 };
 
 export default callsApi;
