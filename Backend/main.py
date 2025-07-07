@@ -1666,7 +1666,12 @@ async def get_contact_mappings():
         if os.path.exists(mappings_file):
             with open(mappings_file, 'r') as f:
                 mappings = json.load(f)
-            print(f"✅ Loaded {len(mappings)} contact mappings")
+            print(f"✅ Loaded {len(mappings)} contact mappings from file")
+            
+            # Debug: Print first few mappings
+            for call_id, data in list(mappings.items())[:3]:
+                print(f"📋 Sample mapping: {call_id} -> {data.get('candidate_name', 'No Name')} ({data.get('candidate_phone', 'No Phone')})")
+            
             return {
                 'success': True,
                 'mappings': mappings,
