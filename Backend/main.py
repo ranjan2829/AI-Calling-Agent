@@ -1770,8 +1770,8 @@ async def update_interview_questions(request: Request):
             "success": False,
             "error": str(e)
         }
+# Replace your existing load_questions_from_file function with this enhanced version
 
-# Add function to load questions from file on startup
 def load_questions_from_file():
     """Load questions from file if it exists"""
     try:
@@ -1780,22 +1780,31 @@ def load_questions_from_file():
                 data = json.load(f)
                 questions = data.get("questions", {})
                 
+                print(f"📂 Found saved questions file with {len(questions)} questions")
+                
                 # Convert string keys to integers and update global INTERVIEW_QUESTIONS
                 global INTERVIEW_QUESTIONS
+                old_questions = INTERVIEW_QUESTIONS.copy()
+                
                 for key, value in questions.items():
                     INTERVIEW_QUESTIONS[int(key)] = value
+                    if old_questions.get(int(key)) != value:
+                        print(f"🔄 Updated Q{key}: {value[:50]}...")
                 
                 print(f"✅ Loaded {len(questions)} interview questions from file")
+                print("📋 Questions loaded from file:")
+                for q_id in sorted(INTERVIEW_QUESTIONS.keys()):
+                    print(f"  Q{q_id}: {INTERVIEW_QUESTIONS[q_id][:60]}...")
         else:
-            print("📝 Using default interview questions")
+            print("📝 No saved questions file found - using default interview questions")
+            print("📋 Using default questions:")
+            for q_id in sorted(INTERVIEW_QUESTIONS.keys()):
+                print(f"  Q{q_id}: {INTERVIEW_QUESTIONS[q_id][:60]}...")
     except Exception as e:
         print(f"❌ Error loading questions from file: {e}")
         print("📝 Using default interview questions")
-
-# Call this function to load saved questions
+        print_current_questions()
 load_questions_from_file()
-
-# Add this at the very end of main.py, just before if __name__ == "__main__":
 if __name__ == "__main__":
     import uvicorn
     print("🚀 Starting AI Interview Bot Server...")
