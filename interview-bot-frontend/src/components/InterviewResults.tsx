@@ -88,35 +88,57 @@ export const InterviewResults: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-  // 🔥 Contact mappings state
   const [contactMappings, setContactMappings] = useState<{[key: string]: any}>({});
 
   useEffect(() => {
     loadContactMappings();
   }, []);
-
-  // Load interviews AFTER contact mappings are loaded
   useEffect(() => {
     if (Object.keys(contactMappings).length > 0) {
+      console.log('🔄 Contact mappings loaded, now loading interviews...');
       loadInterviewData();
     } else {
-      // Load interviews even if no mappings (fallback)
-      setTimeout(() => loadInterviewData(), 1000);
+      const timer = setTimeout(() => {
+        console.log('⏰ Loading interviews without mappings (timeout fallback)');
+        loadInterviewData();
+      }, 3000);
+      return () => clearTimeout(timer);
     }
   }, [contactMappings]);
 
-  // 🔥 Load contact mappings FIRST
   const loadContactMappings = async () => {
     try {
-      console.log('🔄 Loading contact mappings...');
+      console.log('🔄 Loading contact mappings from backend...');
       const response = await callsApi.getContactMappings();
-      if (response.success) {
-        setContactMappings(response.mappings || {});
-        console.log('✅ Contact mappings loaded:', Object.keys(response.mappings || {}).length, 'mappings');
-        console.log('📋 Sample mappings:', response.mappings);
+      console.log('📡 Backend response:', response);
+      
+      if (response.success && response.mappings && Object.keys(response.mappings).length > 0) {
+        setContactMappings(response.mappings);
+        console.log('✅ Contact mappings loaded successfully:', Object.keys(response.mappings).length);
+
+        const testCallIds = [
+          'CA5f0e20a83a4524369b15adb814e96172',
+          'CAd16e725703b0659f3bfd074a4b078ae7',
+          'CAdba6aaa07c7ed7effd7998b6b9645798'
+        ];
+        
+        testCallIds.forEach(callId => {
+          const mapping = response.mappings[callId];
+          if (mapping) {
+            const name = mapping.candidate_name || mapping.candidate_data?.name || 'No Name';
+            const phone = mapping.candidate_phone || mapping.candidate_data?.phone || 'No Phone';
+            console.log(`🎯 Found mapping for ${callId}: ${name} (${phone})`);
+          } else {
+            console.log(`❌ No mapping found for ${callId}`);
+          }
+        });
+      } else {
+        console.log('⚠️ No contact mappings received from backend');
+        setContactMappings({});
       }
     } catch (error) {
       console.error('❌ Error loading contact mappings:', error);
+      setContactMappings({});
     }
   };
 
@@ -145,7 +167,7 @@ export const InterviewResults: React.FC = () => {
   const loadInterviewData = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Loading interview data with mappings:', Object.keys(contactMappings).length);
+      console.log('🔄 Loading interview data with', Object.keys(contactMappings).length, 'contact mappings available');
       
       const interviewsResponse = await callsApi.getAllInterviewsDetailed();
       const allInterviews = interviewsResponse.data.interviews || [];
@@ -154,10 +176,7 @@ export const InterviewResults: React.FC = () => {
       const validInterviews = allInterviews.filter((interview: any) => {
         const callId = interview.call_sid || interview.interview_id;
         const responses = interview.responses || [];
-        const hasBasicData = callId && responses.length > 0;
-        
-        console.log(`Checking interview: ${callId}, responses: ${responses.length}`);
-        return hasBasicData;
+        return callId && responses.length > 0;
       });
       
       console.log('✅ Valid interviews after filtering:', validInterviews.length);
@@ -166,34 +185,82 @@ export const InterviewResults: React.FC = () => {
         const callId = interview.call_sid || interview.interview_id || 'unknown';
         console.log(`🔍 Processing interview: ${callId}`);
 
-        // 🔥 ENHANCED: Better mapping logic
-        let candidateName = callId;
+        // 🔥 ENHANCED MAPPING LOGIC - Check both formats
+        let candidateName = `Unknown Candidate`;
         let phoneNumber = 'No Phone Available';
         
-        // First check: Direct mapping from contact_mappings.json
+        // Priority 1: Check contact mappings
         const contactMapping = contactMappings[callId];
         if (contactMapping) {
-          candidateName = contactMapping.candidate_name || contactMapping.name || callId;
-          phoneNumber = contactMapping.candidate_phone || contactMapping.phone || 'No Phone Available';
-          console.log(`✅ Found direct mapping for ${callId}: ${candidateName} (${phoneNumber})`);
+          console.log(`📋 Found mapping data for ${callId}:`, contactMapping);
+          
+          // Check direct fields first
+          if (contactMapping.candidate_name) {
+            candidateName = contactMapping.candidate_name;
+            console.log(`✅ Using candidate_name: ${candidateName}`);
+          }
+          if (contactMapping.candidate_phone) {
+            phoneNumber = contactMapping.candidate_phone;
+            console.log(`✅ Using candidate_phone: ${phoneNumber}`);
+          }
+          
+          // Check nested candidate_data
+          if (contactMapping.candidate_data) {
+            if (contactMapping.candidate_data.name && !contactMapping.candidate_name) {
+              candidateName = contactMapping.candidate_data.name;
+              console.log(`✅ Using candidate_data.name: ${candidateName}`);
+            }
+            if (contactMapping.candidate_data.phone && !contactMapping.candidate_phone) {
+              phoneNumber = contactMapping.candidate_data.phone;
+              console.log(`✅ Using candidate_data.phone: ${phoneNumber}`);
+            }
+          }
         } else {
-          // Second check: Look in interview data itself
+          console.log(`❌ No mapping found for ${callId} in contact mappings`);
+          
+          // Priority 2: Check interview data directly
           if (interview.candidate_name && interview.candidate_name !== 'Unknown') {
             candidateName = interview.candidate_name;
+            console.log(`📝 Using interview.candidate_name: ${candidateName}`);
           }
-          
           if (interview.candidate_phone && interview.candidate_phone !== 'Unknown') {
             phoneNumber = interview.candidate_phone;
-          } else if (interview.phone_number && interview.phone_number !== 'Unknown') {
-            phoneNumber = interview.phone_number;
+            console.log(`📝 Using interview.candidate_phone: ${phoneNumber}`);
           }
           
-          console.log(`❌ No direct mapping for ${callId}, using interview data: ${candidateName} (${phoneNumber})`);
+          // Priority 3: Extract from responses
+          const responses = interview.responses || [];
+          if (responses.length > 0 && candidateName === 'Unknown Candidate') {
+            const introText = responses[0].answer || '';
+            // 🔥 FIX: Use proper JavaScript regex syntax instead of Python r"..." strings
+            const namePatterns = [
+              /(?:my name is|i'?m|i am|this is)\s+([a-zA-Z][a-zA-Z\s]{1,25})/i,
+              /^([a-zA-Z][a-zA-Z\s]{1,25}?)(?:\s+speaking|\s+here|\s*$)/i
+            ];
+            
+            for (const pattern of namePatterns) {
+              const match = introText.match(pattern);
+              if (match) {
+                const extractedName = match[1].trim();
+                if (extractedName.length > 2 && !extractedName.toLowerCase().includes('from')) {
+                  candidateName = extractedName;
+                  console.log(`🎯 Extracted name from intro: ${candidateName}`);
+                  break;
+                }
+              }
+            }
+          }
         }
         
-        // 🔥 DEBUG: Log final values
-        console.log(`📋 Final processed: ${candidateName} | ${phoneNumber} | ID: ${callId}`);
+        // Final fallback if still no good name
+        if (candidateName === 'Unknown Candidate' || candidateName.includes('Candidate_')) {
+          const phoneDigits = phoneNumber.replace(/\D/g, '').slice(-4);
+          candidateName = phoneDigits ? `Candidate_${phoneDigits}` : `ID_${callId.slice(-8)}`;
+        }
         
+        console.log(`📊 FINAL for ${callId}: Name="${candidateName}" | Phone="${phoneNumber}"`);
+        
+        // Build safe interview object
         const safeInterview = {
           call_sid: callId,
           phone_number: phoneNumber,
@@ -263,8 +330,6 @@ export const InterviewResults: React.FC = () => {
           recommendation = 'MODERATE FIT';
         }
 
-        console.log(`📊 Final interview data: ${candidateName} (${callId}) - ${phoneNumber}`);
-
         return {
           ...safeInterview,
           overall_score,
@@ -283,7 +348,12 @@ export const InterviewResults: React.FC = () => {
         return b.skills_percentage - a.skills_percentage;
       });
     
-      console.log('🎯 Final sorted interviews:', sortedInterviews.map(i => ({ name: i.candidate_name, phone: i.candidate_phone, id: i.call_sid })));
+      console.log('🎯 Final interviews with real names:', sortedInterviews.slice(0, 5).map(i => ({ 
+        name: i.candidate_name, 
+        phone: i.candidate_phone, 
+        id: i.call_sid 
+      })));
+      
       setInterviews(sortedInterviews);
     
     } catch (error) {
