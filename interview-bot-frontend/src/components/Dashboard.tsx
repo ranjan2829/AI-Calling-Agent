@@ -315,10 +315,29 @@ const Dashboard: React.FC = () => {
 
     setIsSubmittingInterview(true);
     try {
-      // First create a user or use the interview ID as user ID
-      // The backend will need to handle this properly
-      const userId = candidateData.interview_id; // Using interview ID as user ID
+      // Step 1: Create a user with the interview ID first
+      const userId = candidateData.interview_id;
       
+      // First, try to create a user with the interview ID
+      try {
+        await fetch(`${PRODUCTION_API_URL}/users`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify({
+            id: userId,
+            name: candidateData.candidate_name,
+            email: interviewFormData.candidateEmail
+          })
+        });
+      } catch (userError) {
+        // User might already exist, continue with interview creation
+        console.log('User might already exist, continuing...');
+      }
+
+      // Step 2: Create the interview
       const response = await fetch(`${PRODUCTION_API_URL}/interview/create-interview/${userId}`, {
         method: 'POST',
         headers: {
