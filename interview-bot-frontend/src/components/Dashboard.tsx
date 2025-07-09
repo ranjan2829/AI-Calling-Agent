@@ -430,6 +430,19 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const copyInterviewLinkDirect = async (interviewId: string) => {
+    try {
+      // Create the interview link using the same format as the backend
+      const interviewLink = `https://onelabceo.com/interview/${interviewId}`;
+      
+      await navigator.clipboard.writeText(interviewLink);
+      toast.success('📋 Interview link copied to clipboard!');
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+      toast.error('Failed to copy link. Please try again.');
+    }
+  };
+
   const handleCloseDialog = () => {
     setShowInterviewForm(null);
     setCreatedInterviewLink(null); // Reset the link when closing
@@ -542,13 +555,14 @@ const Dashboard: React.FC = () => {
                   <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Candidate</TableCell>
                   <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Phone</TableCell>
                   <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}> Next Actions</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Copy Link</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Next Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {filteredInterviews.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
                         <Person sx={{ fontSize: 48, mb: 1 }} />
                         <Typography color="text.secondary">
@@ -579,6 +593,22 @@ const Dashboard: React.FC = () => {
                           size="small"
                           sx={{ fontSize: '0.75rem' }}
                         />
+                      </TableCell>
+                      <TableCell sx={{ py: 1.5 }}>
+                        <Button
+                          onClick={() => copyInterviewLinkDirect(interview.interview_id)}
+                          variant="outlined"
+                          size="small"
+                          sx={{ 
+                            fontSize: '0.75rem',
+                            py: 0.5,
+                            px: 1.5,
+                            borderRadius: 2,
+                            minWidth: 'auto'
+                          }}
+                        >
+                          📋 Copy Link
+                        </Button>
                       </TableCell>
                       <TableCell sx={{ py: 1.5 }}>
                         <Button
