@@ -315,7 +315,7 @@ const Dashboard: React.FC = () => {
 
     setIsSubmittingInterview(true);
     try {
-      const response = await fetch(`${PRODUCTION_API_URL}/dashboard/create-interview`, {
+      const response = await fetch(`${PRODUCTION_API_URL}/create-interview`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
