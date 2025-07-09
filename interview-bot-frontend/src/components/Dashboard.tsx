@@ -315,7 +315,11 @@ const Dashboard: React.FC = () => {
 
     setIsSubmittingInterview(true);
     try {
-      const response = await fetch(`${PRODUCTION_API_URL}/interview/create-interview/${candidateData.interview_id}`, {
+      // First create a user or use the interview ID as user ID
+      // The backend will need to handle this properly
+      const userId = candidateData.interview_id; // Using interview ID as user ID
+      
+      const response = await fetch(`${PRODUCTION_API_URL}/interview/create-interview/${userId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
