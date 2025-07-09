@@ -335,8 +335,7 @@ const Dashboard: React.FC = () => {
           yearsOfExperience: parseInt(interviewFormData.yearsOfExperience.toString()),
           startTime: interviewFormData.startTime?.toISOString(),
           expiryTime: interviewFormData.expiryTime?.toISOString(),
-          duration: parseInt(interviewFormData.duration.toString()),
-          totalQuestion: parseInt(interviewFormData.totalQuestion.toString())
+          duration: parseInt(interviewFormData.duration.toString())
         })
       });
 
