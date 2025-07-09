@@ -133,6 +133,7 @@ const Dashboard: React.FC = () => {
   const [jobDescription, setJobDescription] = useState<JobDescription | null>(null);
   const [loadingJD, setLoadingJD] = useState(false);
   const [isSubmittingInterview, setIsSubmittingInterview] = useState(false);
+  const [createdInterviewLink, setCreatedInterviewLink] = useState<string | null>(null);
 
   useEffect(() => {
     loadInterviews();
@@ -317,7 +318,8 @@ const Dashboard: React.FC = () => {
     try {
       // Use the provided user ID
       const userId = "f8087c1d-72ba-414b-aea9-f7a0bce9a48a";
-      console.log("hi",candidateData.candidate_name)
+      console.log("hi", candidateData.candidate_name);
+      
       const response = await fetch(`${PRODUCTION_API_URL}/interview/create-interview/${userId}`, {
         method: 'POST',
         headers: {
@@ -327,7 +329,7 @@ const Dashboard: React.FC = () => {
         body: JSON.stringify({
           title: interviewFormData.title,
           role: interviewFormData.role,
-          candidateName:candidateData.candidate_name,
+          candidateName: candidateData.candidate_name,
           candidateEmail: interviewFormData.candidateEmail,
           resume: interviewFormData.resume,
           jobDescription: interviewFormData.jobDescription,
@@ -347,9 +349,13 @@ const Dashboard: React.FC = () => {
       const result = await response.json();
       console.log('✅ Interview created successfully:', result);
       
+      // Store the interview link for copying
+      setCreatedInterviewLink(result.link);
+      
       toast.success('🚀 AI Interview scheduled successfully! The candidate will receive instructions via email.');
       
-      setShowInterviewForm(null);
+      // Don't close the dialog immediately - let user copy the link first
+      // Reset form data
       setInterviewFormData({
         title: '',
         role: '',
@@ -410,6 +416,23 @@ const Dashboard: React.FC = () => {
       }));
       toast.success('Job description applied to form');
     }
+  };
+
+  const copyInterviewLink = async () => {
+    if (createdInterviewLink) {
+      try {
+        await navigator.clipboard.writeText(createdInterviewLink);
+        toast.success('📋 Interview link copied to clipboard!');
+      } catch (err) {
+        console.error('Failed to copy link:', err);
+        toast.error('Failed to copy link. Please copy manually.');
+      }
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setShowInterviewForm(null);
+    setCreatedInterviewLink(null); // Reset the link when closing
   };
 
   if (loading) {
@@ -794,6 +817,43 @@ const Dashboard: React.FC = () => {
             </Grid>
           </Grid>
 
+          {/* Success message and link section */}
+          {createdInterviewLink && (
+            <Box sx={{ mt: 3, p: 2, backgroundColor: '#e8f5e8', borderRadius: 1, border: '1px solid #4caf50' }}>
+              <Typography variant="h6" sx={{ color: '#2e7d32', mb: 2, display: 'flex', alignItems: 'center' }}>
+                <CheckCircle sx={{ mr: 1 }} />
+                🎉 Interview Created Successfully!
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Share this link with the candidate to start their interview:
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 2 }}>
+                <TextField
+                  fullWidth
+                  value={createdInterviewLink}
+                  variant="outlined"
+                  size="small"
+                  InputProps={{
+                    readOnly: true,
+                    style: { fontSize: '0.9rem' }
+                  }}
+                />
+                <Button
+                  onClick={copyInterviewLink}
+                  variant="contained"
+                  size="small"
+                  sx={{ minWidth: 'auto', px: 2 }}
+                >
+                  📋 Copy
+                </Button>
+              </Box>
+              <Typography variant="body2" color="text.secondary">
+                The candidate will receive this link via email as well.
+              </Typography>
+            </Box>
+          )}
+
+          {/* Submit error message */}
           {formErrors.submit && (
             <Alert severity="error" sx={{ mt: 2 }}>
               {formErrors.submit}
@@ -802,17 +862,19 @@ const Dashboard: React.FC = () => {
         </DialogContent>
 
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setShowInterviewForm(null)}>
-            Cancel
+          <Button onClick={handleCloseDialog}>
+            {createdInterviewLink ? 'Close' : 'Cancel'}
           </Button>
-          <Button
-            onClick={() => handleStartInterview(filteredInterviews.find(i => i.interview_id === showInterviewForm)!)}
-            disabled={isSubmittingInterview || uploading}
-            variant="contained"
-            startIcon={isSubmittingInterview ? <CircularProgress size={20} /> : <PlayArrow />}
-          >
-            {isSubmittingInterview ? 'Starting Interview...' : '🚀 Start AI Interview'}
-          </Button>
+          {!createdInterviewLink && (
+            <Button
+              onClick={() => handleStartInterview(filteredInterviews.find(i => i.interview_id === showInterviewForm)!)}
+              disabled={isSubmittingInterview || uploading}
+              variant="contained"
+              startIcon={isSubmittingInterview ? <CircularProgress size={20} /> : <PlayArrow />}
+            >
+              {isSubmittingInterview ? 'Starting Interview...' : '🚀 Start AI Interview'}
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </Box>
