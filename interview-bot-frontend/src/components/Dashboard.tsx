@@ -479,7 +479,17 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <Box sx={{ p: 3, maxWidth: '1200px', mx: 'auto' }}>
+    <Box
+      sx={{
+        p: 3,
+        maxWidth: '1200px',
+        mx: 'auto', // centers the content
+        minHeight: '100vh',
+        boxSizing: 'border-box',
+        backgroundColor: '#f9f9f9',
+        overflowX: 'auto'
+      }}
+    >
       {/* Compact Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
