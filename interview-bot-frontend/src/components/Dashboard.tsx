@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -134,6 +134,7 @@ const Dashboard: React.FC = () => {
   const [loadingJD, setLoadingJD] = useState(false);
   const [isSubmittingInterview, setIsSubmittingInterview] = useState(false);
   const [createdInterviewLink, setCreatedInterviewLink] = useState<string | null>(null);
+  const linkInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadInterviews();
@@ -424,8 +425,14 @@ const Dashboard: React.FC = () => {
         await navigator.clipboard.writeText(createdInterviewLink);
         toast.success('📋 Interview link copied to clipboard!');
       } catch (err) {
-        console.error('Failed to copy link:', err);
-        toast.error('Failed to copy link. Please copy manually.');
+        // Fallback: select and copy manually
+        if (linkInputRef.current) {
+          linkInputRef.current.select();
+          document.execCommand('copy');
+          toast.success('📋 Interview link copied (fallback)!');
+        } else {
+          toast.error('Failed to copy link. Please copy manually.');
+        }
       }
     }
   };
@@ -861,6 +868,7 @@ const Dashboard: React.FC = () => {
                 <TextField
                   fullWidth
                   value={createdInterviewLink}
+                  inputRef={linkInputRef}
                   variant="outlined"
                   size="small"
                   InputProps={{
