@@ -315,10 +315,9 @@ const Dashboard: React.FC = () => {
 
     setIsSubmittingInterview(true);
     try {
-      // Use the interview ID directly as user ID
-      const userId = candidateData.interview_id;
+      // Use the provided user ID
+      const userId = "f8087c1d-72ba-414b-aea9-f7a0bce9a48a";
       
-      // Create the interview directly - no user creation step
       const response = await fetch(`${PRODUCTION_API_URL}/interview/create-interview/${userId}`, {
         method: 'POST',
         headers: {
@@ -335,7 +334,8 @@ const Dashboard: React.FC = () => {
           yearsOfExperience: parseInt(interviewFormData.yearsOfExperience.toString()),
           startTime: interviewFormData.startTime?.toISOString(),
           expiryTime: interviewFormData.expiryTime?.toISOString(),
-          duration: parseInt(interviewFormData.duration.toString())
+          duration: parseInt(interviewFormData.duration.toString()),
+          totalQuestion: parseInt(interviewFormData.totalQuestion.toString())
         })
       });
 
