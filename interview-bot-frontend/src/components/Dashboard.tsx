@@ -24,7 +24,10 @@ import {
   Alert,
   Divider,
   InputAdornment,
-  Avatar
+  Avatar,
+  Tooltip,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import {
   Search,
@@ -38,7 +41,11 @@ import {
   Schedule,
   Assignment,
   TrendingUp,
-  Person
+  Person,
+  Assessment,
+  StarRate,
+  ContentCopy,
+  Timeline
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 
@@ -53,6 +60,29 @@ interface InterviewDetails {
   end_time: string;
   completion_rate: string;
   interviewer: string;
+  // Add new fields for interview results
+  current_status?: string;
+  score?: number;
+  interview_result?: any;
+  last_updated?: string;
+}
+
+interface InterviewResult {
+  interview: {
+    id: string;
+    status: string;
+    result?: {
+      score?: number;
+      feedback?: string;
+      overall_rating?: string;
+      strengths?: string[];
+      weaknesses?: string[];
+    };
+    isCompleted: boolean;
+    endedAt?: string;
+    timeRemaining?: number;
+    fullScreenExitCount?: number;
+  };
 }
 
 interface DashboardStats {
@@ -103,6 +133,10 @@ const fetchAllInterviews = async () => {
 };
 
 const Dashboard: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
+  
   const [interviews, setInterviews] = useState<InterviewDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -135,6 +169,8 @@ const Dashboard: React.FC = () => {
   const [isSubmittingInterview, setIsSubmittingInterview] = useState(false);
   const [createdInterviewLink, setCreatedInterviewLink] = useState<string | null>(null);
   const linkInputRef = useRef<HTMLInputElement>(null);
+  const [interviewResults, setInterviewResults] = useState<{[key: string]: InterviewResult}>({});
+  const [loadingResults, setLoadingResults] = useState<{[key: string]: boolean}>({});
 
   useEffect(() => {
     loadInterviews();
@@ -455,10 +491,254 @@ const Dashboard: React.FC = () => {
     setCreatedInterviewLink(null); // Reset the link when closing
   };
 
+  // Function to fetch interview results from the other server
+  const fetchInterviewResults = async (interviewId: string) => {
+    try {
+      setLoadingResults(prev => ({ ...prev, [interviewId]: true }));
+      
+      const response = await fetch(`${PRODUCTION_API_URL}/interview/get-interview-results/${interviewId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const resultData: InterviewResult = await response.json();
+        setInterviewResults(prev => ({ ...prev, [interviewId]: resultData }));
+        return resultData;
+      } else {
+        console.log(`No results found for interview ${interviewId}`);
+        return null;
+      }
+    } catch (error) {
+      console.error(`Error fetching results for interview ${interviewId}:`, error);
+      return null;
+    } finally {
+      setLoadingResults(prev => ({ ...prev, [interviewId]: false }));
+    }
+  };
+
+  // Function to refresh interview results
+  const refreshInterviewResults = async (interviewId: string) => {
+    await fetchInterviewResults(interviewId);
+  };
+
+  // Load interview results on component mount
+  useEffect(() => {
+    if (interviews.length > 0) {
+      interviews.forEach(interview => {
+        fetchInterviewResults(interview.interview_id);
+      });
+    }
+  }, [interviews]);
+
+  // Function to get score color based on score value
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return '#4caf50'; // Green
+    if (score >= 60) return '#ff9800'; // Orange
+    if (score >= 40) return '#ff5722'; // Deep Orange
+    return '#f44336'; // Red
+  };
+
+  // Function to render interview score
+  const renderInterviewScore = (interview: InterviewDetails) => {
+    const interviewId = interview.interview_id;
+    const resultData = interviewResults[interviewId];
+    const isLoading = loadingResults[interviewId];
+
+    if (isLoading) {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <CircularProgress size={16} />
+          <Typography variant="body2">Loading...</Typography>
+        </Box>
+      );
+    }
+
+    if (!resultData || !resultData.interview) {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            No results
+          </Typography>
+          <IconButton 
+            size="small" 
+            onClick={() => refreshInterviewResults(interviewId)}
+            title="Refresh results"
+          >
+            <Refresh sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Box>
+      );
+    }
+
+    const { interview: interviewData } = resultData;
+    const score = interviewData.result?.score || 0;
+    const feedback = interviewData.result?.feedback || '';
+    const overallRating = interviewData.result?.overall_rating || '';
+
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Tooltip title={`Score: ${score}%`}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <StarRate sx={{ fontSize: 16, color: getScoreColor(score) }} />
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  fontWeight: 'bold',
+                  color: getScoreColor(score)
+                }}
+              >
+                {score}%
+              </Typography>
+            </Box>
+          </Tooltip>
+          <IconButton 
+            size="small" 
+            onClick={() => refreshInterviewResults(interviewId)}
+            title="Refresh results"
+          >
+            <Refresh sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Box>
+        
+        {overallRating && (
+          <Typography variant="caption" color="text.secondary">
+            Rating: {overallRating}
+          </Typography>
+        )}
+        
+        {feedback && (
+          <Tooltip title={feedback}>
+            <Typography variant="caption" color="text.secondary" sx={{ 
+              maxWidth: 150,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}>
+              {feedback.substring(0, 30)}...
+            </Typography>
+          </Tooltip>
+        )}
+        
+        {interviewData.endedAt && (
+          <Typography variant="caption" color="text.secondary">
+            Completed: {new Date(interviewData.endedAt).toLocaleDateString()}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  // Function to render current interview status
+  const renderCurrentInterviewStatus = (interview: InterviewDetails) => {
+    const interviewId = interview.interview_id;
+    const resultData = interviewResults[interviewId];
+    const isLoading = loadingResults[interviewId];
+
+    if (isLoading) {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <CircularProgress size={16} />
+          <Typography variant="body2">Loading...</Typography>
+        </Box>
+      );
+    }
+
+    if (!resultData || !resultData.interview) {
+      return (
+        <Chip
+          label="No Status"
+          size="small"
+          color="default"
+          sx={{ fontSize: '0.7rem' }}
+        />
+      );
+    }
+
+    const { interview: interviewData } = resultData;
+    const status = interviewData.status;
+    const isCompleted = interviewData.isCompleted;
+
+    const getStatusChip = () => {
+      if (isCompleted || status === 'COMPLETED') {
+        return (
+          <Chip
+            label="Completed"
+            size="small"
+            color="success"
+            sx={{ fontSize: '0.7rem' }}
+          />
+        );
+      }
+
+      switch (status?.toLowerCase()) {
+        case 'in_progress':
+        case 'ongoing':
+          return (
+            <Chip
+              label="In Progress"
+              size="small"
+              color="warning"
+              sx={{ fontSize: '0.7rem' }}
+            />
+          );
+        case 'scheduled':
+        case 'pending':
+          return (
+            <Chip
+              label="Scheduled"
+              size="small"
+              color="info"
+              sx={{ fontSize: '0.7rem' }}
+            />
+          );
+        case 'terminated':
+        case 'cancelled':
+          return (
+            <Chip
+              label="Terminated"
+              size="small"
+              color="error"
+              sx={{ fontSize: '0.7rem' }}
+            />
+          );
+        default:
+          return (
+            <Chip
+              label={status || 'Unknown'}
+              size="small"
+              color="default"
+              sx={{ fontSize: '0.7rem' }}
+            />
+          );
+      }
+    };
+
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {getStatusChip()}
+        {interviewData.timeRemaining && (
+          <Typography variant="caption" color="text.secondary">
+            Time Left: {Math.floor(interviewData.timeRemaining / 60)}min
+          </Typography>
+        )}
+        {interviewData.fullScreenExitCount > 0 && (
+          <Typography variant="caption" color="error">
+            Exits: {interviewData.fullScreenExitCount}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress size={40} />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
         <Typography sx={{ ml: 2 }}>Loading dashboard...</Typography>
       </Box>
     );
@@ -466,8 +746,8 @@ const Dashboard: React.FC = () => {
 
   if (error) {
     return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="error" sx={{ mb: 2 }}>
+      <Box sx={{ p: 3, maxWidth: '800px', mx: 'auto' }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
           <Typography variant="h6">Error Loading Dashboard</Typography>
           <Typography>{error}</Typography>
         </Alert>
@@ -479,105 +759,134 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <Box
-      sx={{
-        p: 3,
-        maxWidth: '1200px',
-        mx: 'auto', // centers the content
-        minHeight: '100vh',
-        boxSizing: 'border-box',
-        backgroundColor: '#f9f9f9',
-        overflowX: 'auto'
-      }}
-    >
-      {/* Compact Header */}
+    <Box sx={{ p: 3, maxWidth: '1400px', mx: 'auto', minHeight: '100vh', backgroundColor: '#f9f9f9' }}>
+      {/* Simple Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 0.5 }}>
-            Interview Dashboard
+          <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
+            AI Interview Dashboard
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body1" color="text.secondary">
             Manage completed interviews and schedule new ones
           </Typography>
         </Box>
         <Button
           onClick={loadInterviews}
-          variant="outlined"
+          variant="contained"
           startIcon={<Refresh />}
-          size="small"
-          sx={{ height: 'fit-content' }}
+          sx={{ borderRadius: 2 }}
         >
-          Refresh
+          Refresh Data
         </Button>
       </Box>
 
-      {/* Compact Stats Card */}
-      <Box sx={{ mb: 3 }}>
-        <Card 
-          sx={{ 
-            background: 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)',
-            color: 'white',
-            boxShadow: '0 4px 20px rgba(76, 175, 80, 0.3)'
-          }}
-        >
-          <CardContent sx={{ p: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', mr: 2 }}>
+      {/* Simple Stats Card */}
+      <Card sx={{ mb: 3, boxShadow: 2 }}>
+        <CardContent>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Avatar sx={{ bgcolor: '#4caf50', width: 56, height: 56 }}>
                   <CheckCircle />
                 </Avatar>
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+                  <Typography variant="h3" sx={{ fontWeight: 'bold', color: '#4caf50' }}>
                     {stats.completedInterviews}
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                  <Typography variant="h6" color="text.secondary">
                     Completed Interviews
                   </Typography>
                 </Box>
               </Box>
-              <TrendingUp sx={{ fontSize: 40, opacity: 0.3 }} />
-            </Box>
-          </CardContent>
-        </Card>
-      </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box sx={{ display: 'flex', gap: 4 }}>
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                    {stats.totalInterviews}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Total
+                  </Typography>
+                </Box>
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                    {stats.inProgressInterviews}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    In Progress
+                  </Typography>
+                </Box>
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                    {stats.terminatedInterviews}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Terminated
+                  </Typography>
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
       {/* Search and Table Section */}
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            Completed Interviews ({filteredInterviews.length})
+            Interview Results ({filteredInterviews.length})
           </Typography>
           <TextField
             placeholder="Search interviews..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             size="small"
-            sx={{ width: 300 }}
+            sx={{ width: { xs: '100%', md: 300 } }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Search sx={{ color: 'text.secondary', fontSize: 20 }} />
+                  <Search />
                 </InputAdornment>
               ),
             }}
           />
         </Box>
         
-        <Card sx={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-          <TableContainer>
-            <Table size="small">
+        <Card sx={{ boxShadow: 2 }}>
+          <TableContainer sx={{ maxHeight: '70vh' }}>
+            <Table stickyHeader size="small">
               <TableHead>
-                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                  <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Interview ID</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Candidate</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Phone</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Status</TableCell>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                    Interview ID
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                    Candidate
+                  </TableCell>
+                  {!isMobile && (
+                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                      Phone
+                    </TableCell>
+                  )}
+                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                    Status
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                    Current Status
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                    Score & Results
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                    Actions
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {filteredInterviews.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={isMobile ? 6 : 7} sx={{ textAlign: 'center', py: 4 }}>
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
                         <Person sx={{ fontSize: 48, mb: 1 }} />
                         <Typography color="text.secondary">
@@ -589,19 +898,41 @@ const Dashboard: React.FC = () => {
                 ) : (
                   filteredInterviews.map((interview) => (
                     <TableRow key={interview.interview_id} hover>
-                      <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.85rem', py: 1.5 }}>
-                        {interview.interview_id}
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 'medium', py: 1.5 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Avatar sx={{ width: 32, height: 32, mr: 1, fontSize: '0.8rem' }}>
-                            {interview.candidate_name?.charAt(0)?.toUpperCase()}
-                          </Avatar>
-                          {interview.candidate_name}
+                      <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                        <Box sx={{ 
+                          maxWidth: isMobile ? 80 : 120,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {interview.interview_id}
                         </Box>
                       </TableCell>
-                      <TableCell sx={{ py: 1.5 }}>{interview.candidate_phone}</TableCell>
-                      <TableCell sx={{ py: 1.5 }}>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Avatar sx={{ width: 32, height: 32, fontSize: '0.8rem' }}>
+                            {interview.candidate_name?.charAt(0)?.toUpperCase()}
+                          </Avatar>
+                          <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                              {interview.candidate_name}
+                            </Typography>
+                            {isMobile && (
+                              <Typography variant="caption" color="text.secondary">
+                                {interview.candidate_phone}
+                              </Typography>
+                            )}
+                          </Box>
+                        </Box>
+                      </TableCell>
+                      {!isMobile && (
+                        <TableCell>
+                          <Typography variant="body2">
+                            {interview.candidate_phone}
+                          </Typography>
+                        </TableCell>
+                      )}
+                      <TableCell>
                         <Chip
                           label={interview.status?.replace('_', ' ')}
                           color={getStatusColor(interview.status)}
@@ -609,7 +940,17 @@ const Dashboard: React.FC = () => {
                           sx={{ fontSize: '0.75rem' }}
                         />
                       </TableCell>
-                      <TableCell sx={{ py: 1.5 }}>
+                      <TableCell>
+                        <Box sx={{ minWidth: 100 }}>
+                          {renderCurrentInterviewStatus(interview)}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ minWidth: 120 }}>
+                          {renderInterviewScore(interview)}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
                         <Button
                           onClick={() => {
                             setShowInterviewForm(interview.interview_id);
@@ -621,14 +962,9 @@ const Dashboard: React.FC = () => {
                           variant="contained"
                           size="small"
                           startIcon={<PlayArrow />}
-                          sx={{ 
-                            fontSize: '0.75rem',
-                            py: 0.5,
-                            px: 1.5,
-                            borderRadius: 2
-                          }}
+                          sx={{ fontSize: '0.75rem' }}
                         >
-                          Schedule Interview
+                          {isMobile ? 'Schedule' : 'Schedule Interview'}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -640,21 +976,19 @@ const Dashboard: React.FC = () => {
         </Card>
       </Box>
 
-      {/* Interview Form Dialog */}
+      {/* Simple Interview Form Dialog */}
       <Dialog 
         open={!!showInterviewForm} 
         onClose={() => setShowInterviewForm(null)}
         maxWidth="md"
         fullWidth
+        fullScreen={isMobile}
       >
         <DialogTitle>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box>
-              <Typography variant="h6">🚀 Start AI Interview</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Configure interview settings for {interviewFormData.candidateName}
-              </Typography>
-            </Box>
+            <Typography variant="h6">
+              Start AI Interview
+            </Typography>
             <IconButton onClick={() => setShowInterviewForm(null)}>
               <Close />
             </IconButton>
@@ -664,22 +998,22 @@ const Dashboard: React.FC = () => {
         <DialogContent>
           {/* Job Description Section */}
           {jobDescription && (
-            <Card sx={{ mb: 3, p: 2, backgroundColor: '#f8fafc' }}>
+            <Card sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
                   <Assignment sx={{ mr: 1 }} />
-                  📋 Current Job Description
+                  Current Job Description
                 </Typography>
-                <Button onClick={handleUseJD} variant="outlined" size="small">
+                <Button onClick={handleUseJD} variant="contained" size="small">
                   Apply Current JD
                 </Button>
               </Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
                 {jobDescription.title}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
-                <Business sx={{ mr: 1, fontSize: 16 }} />
-                at {jobDescription.company}
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <Business sx={{ mr: 1, fontSize: 16, verticalAlign: 'middle' }} />
+                {jobDescription.company}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
                 <strong>Required Skills:</strong> {jobDescription.required_skills}
@@ -695,7 +1029,7 @@ const Dashboard: React.FC = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Interview Title*"
+                label="Interview Title"
                 name="title"
                 value={interviewFormData.title}
                 onChange={handleInterviewFormChange}
@@ -707,7 +1041,7 @@ const Dashboard: React.FC = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Job Role*"
+                label="Job Role"
                 name="role"
                 value={interviewFormData.role}
                 onChange={handleInterviewFormChange}
@@ -720,8 +1054,8 @@ const Dashboard: React.FC = () => {
               <TextField
                 fullWidth
                 multiline
-                rows={4}
-                label="Job Description*"
+                rows={3}
+                label="Job Description"
                 name="jobDescription"
                 value={interviewFormData.jobDescription}
                 onChange={handleInterviewFormChange}
@@ -733,7 +1067,7 @@ const Dashboard: React.FC = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Candidate Email*"
+                label="Candidate Email"
                 name="candidateEmail"
                 type="email"
                 value={interviewFormData.candidateEmail}
@@ -757,7 +1091,13 @@ const Dashboard: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <Box sx={{ border: '2px dashed #e0e0e0', borderRadius: 1, p: 2, textAlign: 'center' }}>
+              <Box sx={{ 
+                border: '2px dashed #ccc', 
+                borderRadius: 1, 
+                p: 2, 
+                textAlign: 'center',
+                backgroundColor: '#fafafa'
+              }}>
                 <input
                   type="file"
                   accept=".pdf,.doc,.docx"
@@ -769,15 +1109,17 @@ const Dashboard: React.FC = () => {
                 <label htmlFor="resume-upload">
                   <Button
                     component="span"
-                    variant="outlined"
+                    variant="contained"
                     startIcon={uploading ? <CircularProgress size={20} /> : <Upload />}
                     disabled={uploading}
                   >
-                    {uploading ? 'Uploading...' : interviewFormData.resume ? '✅ Resume Uploaded' : 'Upload Resume*'}
+                    {uploading ? 'Uploading...' : 
+                     interviewFormData.resume ? 'Resume Uploaded' : 
+                     'Upload Resume'}
                   </Button>
                 </label>
                 {formErrors.resume && (
-                  <Typography color="error" variant="caption" sx={{ display: 'block', mt: 1 }}>
+                  <Typography color="error" variant="body2" sx={{ mt: 1 }}>
                     {formErrors.resume}
                   </Typography>
                 )}
@@ -789,7 +1131,7 @@ const Dashboard: React.FC = () => {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                label="Duration (minutes)*"
+                label="Duration (minutes)"
                 name="duration"
                 type="number"
                 value={interviewFormData.duration}
@@ -802,7 +1144,7 @@ const Dashboard: React.FC = () => {
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
-                label="Total Questions*"
+                label="Total Questions"
                 name="totalQuestion"
                 type="number"
                 value={interviewFormData.totalQuestion}
@@ -815,7 +1157,7 @@ const Dashboard: React.FC = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Start Time*"
+                label="Start Time"
                 name="startTime"
                 type="datetime-local"
                 value={interviewFormData.startTime ? interviewFormData.startTime.toISOString().slice(0, 16) : ''}
@@ -831,7 +1173,7 @@ const Dashboard: React.FC = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Expiry Time*"
+                label="Expiry Time"
                 name="expiryTime"
                 type="datetime-local"
                 value={interviewFormData.expiryTime ? interviewFormData.expiryTime.toISOString().slice(0, 16) : ''}
@@ -846,44 +1188,41 @@ const Dashboard: React.FC = () => {
             </Grid>
           </Grid>
 
-          {/* Success message and link section */}
+          {/* Success message with copy link */}
           {createdInterviewLink && (
-            <Box sx={{ mt: 3, p: 2, backgroundColor: '#e8f5e8', borderRadius: 1, border: '1px solid #4caf50' }}>
-              <Typography variant="h6" sx={{ color: '#2e7d32', mb: 2, display: 'flex', alignItems: 'center' }}>
-                <CheckCircle sx={{ mr: 1 }} />
-                🎉 Interview Created Successfully!
+            <Box sx={{ mt: 3, p: 2, backgroundColor: '#e8f5e8', borderRadius: 1 }}>
+              <Typography variant="h6" sx={{ color: '#2e7d32', mb: 2 }}>
+                <CheckCircle sx={{ mr: 1, verticalAlign: 'middle' }} />
+                Interview Created Successfully!
               </Typography>
               <Typography variant="body2" sx={{ mb: 2 }}>
                 Share this link with the candidate to start their interview:
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 2 }}>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                 <TextField
                   fullWidth
                   value={createdInterviewLink}
                   inputRef={linkInputRef}
                   variant="outlined"
                   size="small"
-                  InputProps={{
-                    readOnly: true,
-                    style: { fontSize: '0.9rem' }
-                  }}
+                  InputProps={{ readOnly: true }}
                 />
                 <Button
                   onClick={copyInterviewLink}
                   variant="contained"
-                  size="small"
-                  sx={{ minWidth: 'auto', px: 2 }}
+                  startIcon={<ContentCopy />}
+                  sx={{ minWidth: 120 }}
                 >
-                  📋 Copy
+                  Copy Link
                 </Button>
               </Box>
-              <Typography variant="body2" color="text.secondary">
-                The candidate will receive this link via email as well.
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                The candidate will also receive this link via email.
               </Typography>
             </Box>
           )}
 
-          {/* Submit error message */}
+          {/* Error message */}
           {formErrors.submit && (
             <Alert severity="error" sx={{ mt: 2 }}>
               {formErrors.submit}
@@ -902,7 +1241,7 @@ const Dashboard: React.FC = () => {
               variant="contained"
               startIcon={isSubmittingInterview ? <CircularProgress size={20} /> : <PlayArrow />}
             >
-              {isSubmittingInterview ? 'Starting Interview...' : '🚀 Start AI Interview'}
+              {isSubmittingInterview ? 'Starting...' : 'Start Interview'}
             </Button>
           )}
         </DialogActions>
