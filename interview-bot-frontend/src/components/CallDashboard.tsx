@@ -609,18 +609,18 @@ export const CallDashboard: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={2}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Phone sx={{ color: 'primary.main', fontSize: 40, mr: 2 }} />
+      {/* Stats Cards - MUCH SMALLER */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={6} sm={4} md={2}>
+          <Card sx={{ height: '100px' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Phone sx={{ color: 'primary.main', fontSize: 24, mr: 1 }} />
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
                     {callStats.totalCalls}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary">
+                  <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
                     Total Interviews
                   </Typography>
                 </Box>
@@ -629,16 +629,16 @@ export const CallDashboard: React.FC = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={2}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <CheckCircle sx={{ color: 'success.main', fontSize: 40, mr: 2 }} />
+        <Grid item xs={6} sm={4} md={2}>
+          <Card sx={{ height: '100px' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <CheckCircle sx={{ color: 'success.main', fontSize: 24, mr: 1 }} />
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'success.main', fontSize: '1.25rem' }}>
                     {callStats.completedCalls}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary">
+                  <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
                     Completed
                   </Typography>
                 </Box>
@@ -646,48 +646,56 @@ export const CallDashboard: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={2}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Phone sx={{ color: 'secondary.main', fontSize: 40, mr: 2 }} />
+
+        <Grid item xs={6} sm={4} md={2}>
+          <Card sx={{ height: '100px' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Phone sx={{ color: 'secondary.main', fontSize: 24, mr: 1 }} />
                 <Box>
-                  {twilioBalance.loading ? (
-                    <CircularProgress size={24} sx={{ mb: 1 }} />
-                  ) : (
-                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
-                      {twilioBalance.balance === 'Error' ? 'Error' : `$${parseFloat(twilioBalance.balance).toFixed(2)}`}
-                    </Typography>
-                  )}
-                  <Typography variant="body2" color="textSecondary">
-                    💰 Account Balance
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'secondary.main', fontSize: '1.25rem' }}>
+                    {twilioBalance.loading ? (
+                      <CircularProgress size={16} />
+                    ) : twilioBalance.balance === 'Error' ? (
+                      'Error'
+                    ) : (
+                      `$${parseFloat(twilioBalance.balance).toFixed(2)}`
+                    )}
                   </Typography>
-                  <Button 
-                    size="small" 
-                    onClick={loadTwilioBalance}
-                    disabled={twilioBalance.loading}
-                    sx={{ mt: 1, fontSize: '0.7rem', minWidth: 'auto', p: 0.5 }}
-                  >
-                    🔄 Refresh
-                  </Button>
+                  <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
+                    Balance
+                  </Typography>
                 </Box>
               </Box>
+              <Button 
+                size="small" 
+                variant="text"
+                onClick={loadTwilioBalance}
+                disabled={twilioBalance.loading}
+                sx={{ 
+                  fontSize: '0.6rem', 
+                  minWidth: 'auto', 
+                  p: 0.5,
+                  mt: 0.5
+                }}
+              >
+                Refresh
+              </Button>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* 🔥 NEW: No Response Card */}
-        <Grid item xs={12} md={2}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Phone sx={{ color: 'warning.main', fontSize: 40, mr: 2 }} />
+        <Grid item xs={6} sm={4} md={2}>
+          <Card sx={{ height: '100px' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Phone sx={{ color: 'warning.main', fontSize: 24, mr: 1 }} />
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'warning.main' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'warning.main', fontSize: '1.25rem' }}>
                     {callStats.incompleteSilence || 0}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    🔇 No Response
+                  <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
+                    No Response
                   </Typography>
                 </Box>
               </Box>
@@ -695,17 +703,16 @@ export const CallDashboard: React.FC = () => {
           </Card>
         </Grid>
 
-        {/* 🔥 NEW: Terminated Card */}
-        <Grid item xs={12} md={2}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Error sx={{ color: 'error.main', fontSize: 40, mr: 2 }} />
+        <Grid item xs={6} sm={4} md={2}>
+          <Card sx={{ height: '100px' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Error sx={{ color: 'error.main', fontSize: 24, mr: 1 }} />
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'error.main' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'error.main', fontSize: '1.25rem' }}>
                     {callStats.terminated || 0}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary">
+                  <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
                     Terminated
                   </Typography>
                 </Box>
@@ -714,17 +721,17 @@ export const CallDashboard: React.FC = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={2}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <People sx={{ color: 'info.main', fontSize: 40, mr: 2 }} />
+        <Grid item xs={6} sm={4} md={2}>
+          <Card sx={{ height: '100px' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <People sx={{ color: 'info.main', fontSize: 24, mr: 1 }} />
                 <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'info.main' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'info.main', fontSize: '1.25rem' }}>
                     {contacts.length}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Bulk Contacts
+                  <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
+                    Contacts
                   </Typography>
                 </Box>
               </Box>

@@ -19,18 +19,20 @@ import {
   Chip
 } from '@mui/material';
 import {
-  Dashboard,
+  Dashboard as DashboardIcon,
   History,
   Assessment,
   GroupAdd,
   Menu,
-  ExitToApp
+  ExitToApp,
+  Phone
 } from '@mui/icons-material';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Import components
 import SignIn from './components/SignIn';
+import Dashboard from './components/Dashboard';
 import { CallDashboard } from './components/CallDashboard';
 import { CallHistory } from './components/CallHistory';
 import { InterviewDetails } from './components/InterviewDetails';
@@ -157,7 +159,8 @@ const Sidebar: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClo
   };
 
   const menuItems = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
+    { text: 'Main Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+    { text: 'Call Dashboard', icon: <Phone />, path: '/call-dashboard' },
     { text: 'Call History', icon: <History />, path: '/history' },
     { text: 'Interview Results', icon: <Assessment />, path: '/results' },
     { text: 'Bulk Calling', icon: <GroupAdd />, path: '/bulk-call', showBadge: isCalling },
@@ -469,6 +472,39 @@ function App() {
             {/* Protected Routes */}
             <Route
               path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                    <TopProgressBar />
+                    <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        ml: { md: `${drawerWidth}px` },
+                        backgroundColor: 'background.default',
+                        minHeight: '100vh',
+                        pt: isCalling ? '60px' : 0,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          height: '4px',
+                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
+                          width: '100%'
+                        }}
+                      />
+                      <TopBar onMenuClick={handleDrawerToggle} />
+                      <Box sx={{ p: { xs: 2, md: 4 } }}>
+                        <Dashboard />
+                      </Box>
+                    </Box>
+                  </Box>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/call-dashboard"
               element={
                 <ProtectedRoute>
                   <Box sx={{ display: 'flex', minHeight: '100vh' }}>
