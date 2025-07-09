@@ -171,6 +171,8 @@ const Dashboard: React.FC = () => {
   const linkInputRef = useRef<HTMLInputElement>(null);
   const [interviewResults, setInterviewResults] = useState<{[key: string]: InterviewResult}>({});
   const [loadingResults, setLoadingResults] = useState<{[key: string]: boolean}>({});
+  // Add mapping state to track old ID -> new ID
+  const [interviewIdMapping, setInterviewIdMapping] = useState<{[oldId: string]: string}>({});
 
   useEffect(() => {
     loadInterviews();
@@ -353,9 +355,7 @@ const Dashboard: React.FC = () => {
 
     setIsSubmittingInterview(true);
     try {
-      // Use the provided user ID
       const userId = "f8087c1d-72ba-414b-aea9-f7a0bce9a48a";
-      console.log("hi", candidateData.candidate_name);
       
       const response = await fetch(`${PRODUCTION_API_URL}/interview/create-interview/${userId}`, {
         method: 'POST',
@@ -386,10 +386,24 @@ const Dashboard: React.FC = () => {
       const result = await response.json();
       console.log('✅ Interview created successfully:', result);
       
-      // Store the interview link for copying
-      setCreatedInterviewLink(result.link);
+      // Extract the new interview ID from the response
+      const newInterviewId = result.interviewId || result.id || result.interview_id;
       
-      toast.success('🚀 AI Interview scheduled successfully! The candidate will receive instructions via email.');
+      if (newInterviewId) {
+        // Map old ID to new ID
+        setInterviewIdMapping(prev => ({
+          ...prev,
+          [candidateData.interview_id]: newInterviewId
+        }));
+        
+        // Immediately fetch results for the new interview
+        fetchInterviewResults(newInterviewId);
+        
+        console.log(`🔗 Mapped old ID ${candidateData.interview_id} to new ID ${newInterviewId}`);
+      }
+      
+      setCreatedInterviewLink(result.link);
+      toast.success('🚀 AI Interview scheduled successfully!');
       
       // Don't close the dialog immediately - let user copy the link first
       // Reset form data
@@ -491,6 +505,11 @@ const Dashboard: React.FC = () => {
     setCreatedInterviewLink(null); // Reset the link when closing
   };
 
+  // Add the missing getActualInterviewId function
+  const getActualInterviewId = (originalId: string): string => {
+    return interviewIdMapping[originalId] || originalId;
+  };
+
   // Function to fetch interview results from the other server
   const fetchInterviewResults = async (interviewId: string) => {
     try {
@@ -529,10 +548,11 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (interviews.length > 0) {
       interviews.forEach(interview => {
-        fetchInterviewResults(interview.interview_id);
+        const actualId = getActualInterviewId(interview.interview_id);
+        fetchInterviewResults(actualId);
       });
     }
-  }, [interviews]);
+  }, [interviews, interviewIdMapping]);
 
   // Function to get score color based on score value
   const getScoreColor = (score: number) => {
@@ -544,9 +564,9 @@ const Dashboard: React.FC = () => {
 
   // Function to render interview score
   const renderInterviewScore = (interview: InterviewDetails) => {
-    const interviewId = interview.interview_id;
-    const resultData = interviewResults[interviewId];
-    const isLoading = loadingResults[interviewId];
+    const actualInterviewId = getActualInterviewId(interview.interview_id);
+    const resultData = interviewResults[actualInterviewId];
+    const isLoading = loadingResults[actualInterviewId];
 
     if (isLoading) {
       return (
@@ -561,11 +581,11 @@ const Dashboard: React.FC = () => {
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant="body2" color="text.secondary">
-            No results
+            {interviewIdMapping[interview.interview_id] ? 'No results' : 'Not scheduled'}
           </Typography>
           <IconButton 
             size="small" 
-            onClick={() => refreshInterviewResults(interviewId)}
+            onClick={() => refreshInterviewResults(actualInterviewId)}
             title="Refresh results"
           >
             <Refresh sx={{ fontSize: 16 }} />
@@ -598,7 +618,7 @@ const Dashboard: React.FC = () => {
           </Tooltip>
           <IconButton 
             size="small" 
-            onClick={() => refreshInterviewResults(interviewId)}
+            onClick={() => refreshInterviewResults(actualInterviewId)}
             title="Refresh results"
           >
             <Refresh sx={{ fontSize: 16 }} />
@@ -635,9 +655,9 @@ const Dashboard: React.FC = () => {
 
   // Function to render current interview status
   const renderCurrentInterviewStatus = (interview: InterviewDetails) => {
-    const interviewId = interview.interview_id;
-    const resultData = interviewResults[interviewId];
-    const isLoading = loadingResults[interviewId];
+    const actualInterviewId = getActualInterviewId(interview.interview_id);
+    const resultData = interviewResults[actualInterviewId];
+    const isLoading = loadingResults[actualInterviewId];
 
     if (isLoading) {
       return (
@@ -651,7 +671,7 @@ const Dashboard: React.FC = () => {
     if (!resultData || !resultData.interview) {
       return (
         <Chip
-          label="No Status"
+          label={interviewIdMapping[interview.interview_id] ? "No Status" : "Not Scheduled"}
           size="small"
           color="default"
           sx={{ fontSize: '0.7rem' }}
@@ -676,6 +696,15 @@ const Dashboard: React.FC = () => {
       }
 
       switch (status?.toLowerCase()) {
+        case 'not_started':
+          return (
+            <Chip
+              label="Not Started"
+              size="small"
+              color="default"
+              sx={{ fontSize: '0.7rem' }}
+            />
+          );
         case 'in_progress':
         case 'ongoing':
           return (
@@ -735,6 +764,23 @@ const Dashboard: React.FC = () => {
     );
   };
 
+  // Add a function to save mapping to localStorage for persistence
+  useEffect(() => {
+    const savedMapping = localStorage.getItem('interviewIdMapping');
+    if (savedMapping) {
+      try {
+        setInterviewIdMapping(JSON.parse(savedMapping));
+      } catch (error) {
+        console.error('Error parsing saved mapping:', error);
+        localStorage.removeItem('interviewIdMapping');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('interviewIdMapping', JSON.stringify(interviewIdMapping));
+  }, [interviewIdMapping]);
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
@@ -779,8 +825,6 @@ const Dashboard: React.FC = () => {
           Refresh Data
         </Button>
       </Box>
-
-      {/* Simple Stats Card */}
       <Card sx={{ mb: 3, boxShadow: 2 }}>
         <CardContent>
           <Grid container spacing={3}>
@@ -852,7 +896,6 @@ const Dashboard: React.FC = () => {
             }}
           />
         </Box>
-        
         <Card sx={{ boxShadow: 2 }}>
           <TableContainer sx={{ maxHeight: '70vh' }}>
             <Table stickyHeader size="small">
