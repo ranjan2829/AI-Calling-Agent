@@ -317,7 +317,7 @@ const Dashboard: React.FC = () => {
     try {
       // Use the provided user ID
       const userId = "f8087c1d-72ba-414b-aea9-f7a0bce9a48a";
-      
+      console.log(interviewFormData)
       const response = await fetch(`${PRODUCTION_API_URL}/interview/create-interview/${userId}`, {
         method: 'POST',
         headers: {
