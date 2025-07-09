@@ -826,52 +826,20 @@ const Dashboard: React.FC = () => {
         </Button>
       </Box>
       <Card sx={{ mb: 3, boxShadow: 2 }}>
-        <CardContent>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Avatar sx={{ bgcolor: '#4caf50', width: 56, height: 56 }}>
-                  <CheckCircle />
-                </Avatar>
-                <Box>
-                  <Typography variant="h3" sx={{ fontWeight: 'bold', color: '#4caf50' }}>
-                    {stats.completedInterviews}
-                  </Typography>
-                  <Typography variant="h6" color="text.secondary">
-                    Completed Interviews
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box sx={{ display: 'flex', gap: 4 }}>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                    {stats.totalInterviews}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Total
-                  </Typography>
-                </Box>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                    {stats.inProgressInterviews}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    In Progress
-                  </Typography>
-                </Box>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                    {stats.terminatedInterviews}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Terminated
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
+        <CardContent sx={{ py: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Avatar sx={{ bgcolor: '#4caf50', width: 48, height: 48 }}>
+              <CheckCircle sx={{ fontSize: 24 }} />
+            </Avatar>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#4caf50', mb: 0.5 }}>
+                {stats.completedInterviews}
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Completed Interviews
+              </Typography>
+            </Box>
+          </Box>
         </CardContent>
       </Card>
 
