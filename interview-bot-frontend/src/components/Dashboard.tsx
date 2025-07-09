@@ -324,19 +324,15 @@ const Dashboard: React.FC = () => {
         body: JSON.stringify({
           title: interviewFormData.title,
           role: interviewFormData.role,
-          jobDescription: interviewFormData.jobDescription,
           candidateName: candidateData.candidate_name,
           candidateEmail: interviewFormData.candidateEmail,
-          candidatePhone: candidateData.candidate_phone,
           resume: interviewFormData.resume,
-          resumeText: interviewFormData.resumeText,
+          jobDescription: interviewFormData.jobDescription,
           yearsOfExperience: parseInt(interviewFormData.yearsOfExperience.toString()),
-          totalQuestion: parseInt(interviewFormData.totalQuestion.toString()),
-          duration: parseInt(interviewFormData.duration.toString()),
           startTime: interviewFormData.startTime?.toISOString(),
           expiryTime: interviewFormData.expiryTime?.toISOString(),
-          interviewId: candidateData.interview_id,
-          status: 'SCHEDULED'
+          duration: parseInt(interviewFormData.duration.toString()),
+          totalQuestion: parseInt(interviewFormData.totalQuestion.toString())
         })
       });
 
