@@ -327,7 +327,7 @@ const Dashboard: React.FC = () => {
         body: JSON.stringify({
           title: interviewFormData.title,
           role: interviewFormData.role,
-          candidateName:interviewFormData.candidateName,
+          candidateName:candidateData.candidate_name,
           candidateEmail: interviewFormData.candidateEmail,
           resume: interviewFormData.resume,
           jobDescription: interviewFormData.jobDescription,
