@@ -86,7 +86,7 @@ interface JobDescription {
 }
 
 const API_BASE_URL = 'http://13.204.76.229:8000';
-const PRODUCTION_API_URL = 'https://onelabceo.com';
+const PRODUCTION_API_URL = 'https://onelabceo.com/api';
 
 const fetchAllInterviews = async () => {
   const response = await fetch(`${API_BASE_URL}/interviews-detailed`, {
@@ -520,7 +520,7 @@ const Dashboard: React.FC = () => {
                   <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Candidate</TableCell>
                   <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Phone</TableCell>
                   <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Actions</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}> Next Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
