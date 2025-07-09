@@ -562,8 +562,6 @@ const Dashboard: React.FC = () => {
                   <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Candidate</TableCell>
                   <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Phone</TableCell>
                   <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Copy Link</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', py: 1.5 }}>Next Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -603,22 +601,6 @@ const Dashboard: React.FC = () => {
                       </TableCell>
                       <TableCell sx={{ py: 1.5 }}>
                         <Button
-                          onClick={() => copyInterviewLinkDirect(interview.interview_id)}
-                          variant="outlined"
-                          size="small"
-                          sx={{ 
-                            fontSize: '0.75rem',
-                            py: 0.5,
-                            px: 1.5,
-                            borderRadius: 2,
-                            minWidth: 'auto'
-                          }}
-                        >
-                          📋 Copy Link
-                        </Button>
-                      </TableCell>
-                      <TableCell sx={{ py: 1.5 }}>
-                        <Button
                           onClick={() => {
                             setShowInterviewForm(interview.interview_id);
                             setInterviewFormData(prev => ({
@@ -636,7 +618,7 @@ const Dashboard: React.FC = () => {
                             borderRadius: 2
                           }}
                         >
-                          Start Interview
+                          Schedule Interview
                         </Button>
                       </TableCell>
                     </TableRow>
