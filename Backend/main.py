@@ -13,6 +13,10 @@ import asyncio
 import re
 from summary import run_jd_analysis
 import glob
+from email.message import EmailMessage
+import smtplib
+from pydantic import BaseModel
+from typing import Optional
 from typing import List
 import csv
 import io
@@ -38,6 +42,11 @@ app.add_middleware(
     allow_headers=["*"],)
 client = Client(account_sid, auth_token)
 executor = ThreadPoolExecutor(max_workers=10)
+class EmailLinkRequest(BaseModel):
+    email: str
+    link: str
+    candidate_name: Optional[str] = None
+    role: Optional[str] = None
 def create_folders():
     folders = [
         "interviews/audio_recordings",
@@ -1854,9 +1863,109 @@ async def get_twilio_balance():
             "success": False,
             "error": str(e)
         }
+
+# Add this near your other imports
+from email.message import EmailMessage
+import smtplib
+from pydantic import BaseModel
+from typing import Optional
+
+# Define a model for the request data
+class EmailLinkRequest(BaseModel):
+    email: str
+    link: str
+    candidate_name: Optional[str] = None
+    role: Optional[str] = None
+
+@app.post("/send-interview-link")
+async def send_interview_link(request: EmailLinkRequest):
+    """Send interview link to candidate via email"""
+    try:
+        print(f"[EMAIL] 📧 Sending interview link to {request.email}")
+        
+        # Create email message
+        msg = EmailMessage()
+        
+        # Format candidate name
+        candidate_name = request.candidate_name or "Candidate"
+        
+        # Set email headers
+        msg['Subject'] = f"Your AI Interview Link - Onelab Ventures"
+        msg['From'] = "ranjan.shitole3129@gmail.com"
+        msg['To'] = request.email
+        
+        # Prepare a professional email body
+        role_text = f" for the {request.role} position" if request.role else ""
+        
+        # Create HTML content for better formatting
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                <h2 style="color: #1976d2;">AI Interview - Onelab Ventures</h2>
+                <p>Hello {candidate_name},</p>
+                <p>Thank you for your interest in Onelab Ventures{role_text}. Your AI interview has been scheduled.</p>
+                <p>Please click the button below to start your interview:</p>
+                <div style="text-align: center; margin: 25px 0;">
+                    <a href="{request.link}" style="background-color: #1976d2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                        Start Your Interview
+                    </a>
+                </div>
+                <p>Alternatively, you can copy and paste this link into your browser:</p>
+                <p style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all;">
+                    {request.link}
+                </p>
+                <p>Important tips for your interview:</p>
+                <ul>
+                    <li>Make sure you have a stable internet connection</li>
+                    <li>Use a quiet space with minimal background noise</li>
+                    <li>Ensure your webcam and microphone are working properly</li>
+                    <li>Have your resume handy for reference</li>
+                </ul>
+                <p>Best of luck with your interview!</p>
+                <p>Regards,<br>Onelab Ventures Team</p>
+            </div>
+        </body>
+        </html>
+        """
+        msg.set_content(f"""Hello {candidate_name},
+
+Thank you for your interest in Onelab Ventures{role_text}. Your AI interview has been scheduled.
+
+Please use this link to start your interview: {request.link}
+
+Best of luck with your interview!
+
+Regards,
+Onelab Ventures Team
+""")
+        
+        # Add HTML version
+        msg.add_alternative(html_content, subtype='html')
+        
+        # Send the email
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login("ranjan.shitole3129@gmail.com", "mikcnsvzyyjshozh")
+            smtp.send_message(msg)
+        
+        print(f"[EMAIL] ✅ Successfully sent interview link to {request.email}")
+        
+        return {
+            "success": True,
+            "message": f"Interview link sent to {request.email} successfully"
+        }
+        
+    except Exception as e:
+        print(f"[EMAIL ERROR] ❌ Failed to send email: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to send interview link email"
+        }
 if __name__ == "__main__":
     import uvicorn
     print("🚀 Starting AI Interview Bot Server...")
     print("📝 Loading saved interview questions...")
     load_questions_from_file()
     uvicorn.run(app, host="0.0.0.0", port=8000)
+

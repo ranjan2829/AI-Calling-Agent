@@ -45,7 +45,8 @@ import {
   Assessment,
   StarRate,
   ContentCopy,
-  Timeline
+  Timeline,
+  Email as EmailIcon
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 
@@ -60,13 +61,11 @@ interface InterviewDetails {
   end_time: string;
   completion_rate: string;
   interviewer: string;
-  // Add new fields for interview results
   current_status?: string;
   score?: number;
   interview_result?: any;
   last_updated?: string;
 }
-
 interface InterviewResult {
   interview: {
     id: string;
@@ -385,28 +384,20 @@ const Dashboard: React.FC = () => {
 
       const result = await response.json();
       console.log('✅ Interview created successfully:', result);
-      
-      // Extract the new interview ID from the response
       const newInterviewId = result.interviewId || result.id || result.interview_id;
       
       if (newInterviewId) {
-        // Map old ID to new ID
         setInterviewIdMapping(prev => ({
           ...prev,
           [candidateData.interview_id]: newInterviewId
         }));
-        
-        // Immediately fetch results for the new interview
         fetchInterviewResults(newInterviewId);
         
-        console.log(`🔗 Mapped old ID ${candidateData.interview_id} to new ID ${newInterviewId}`);
+        console.log(` ${candidateData.interview_id} to new ID ${newInterviewId}`);
       }
       
       setCreatedInterviewLink(result.link);
       toast.success('🚀 AI Interview scheduled successfully!');
-      
-      // Don't close the dialog immediately - let user copy the link first
-      // Reset form data
       setInterviewFormData({
         title: '',
         role: '',
@@ -652,8 +643,6 @@ const Dashboard: React.FC = () => {
       </Box>
     );
   };
-
-  // Function to render current interview status
   const renderCurrentInterviewStatus = (interview: InterviewDetails) => {
     const actualInterviewId = getActualInterviewId(interview.interview_id);
     const resultData = interviewResults[actualInterviewId];
@@ -806,7 +795,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <Box sx={{ p: 3, maxWidth: '1400px', mx: 'auto', minHeight: '100vh', backgroundColor: '#f9f9f9' }}>
-      {/* Simple Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
@@ -842,8 +830,6 @@ const Dashboard: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
-
-      {/* Search and Table Section */}
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
@@ -986,8 +972,6 @@ const Dashboard: React.FC = () => {
           </TableContainer>
         </Card>
       </Box>
-
-      {/* Simple Interview Form Dialog */}
       <Dialog 
         open={!!showInterviewForm} 
         onClose={() => setShowInterviewForm(null)}
@@ -1225,6 +1209,15 @@ const Dashboard: React.FC = () => {
                   sx={{ minWidth: 120 }}
                 >
                   Copy Link
+                </Button>
+                <Button
+                  onClick={sendInterviewLinkViaEmail}
+                  variant="contained"
+                  color="primary"
+                  startIcon={<EmailIcon />}
+                  sx={{ minWidth: 160 }}
+                >
+                  Send Email
                 </Button>
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
