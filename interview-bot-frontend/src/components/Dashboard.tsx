@@ -398,12 +398,19 @@ const Dashboard: React.FC = () => {
       
       setCreatedInterviewLink(result.link);
       toast.success('🚀 AI Interview scheduled successfully!');
-      setInterviewFormData({
+      
+      // Save important data for email sending before resetting form
+      const savedData = {
+        candidateName: interviewFormData.candidateName,
+        candidateEmail: interviewFormData.candidateEmail,
+        role: interviewFormData.role
+      };
+      
+      // Reset only non-essential form fields, preserving what we need for email
+      setInterviewFormData(prev => ({
+        ...prev,
         title: '',
-        role: '',
         jobDescription: '',
-        candidateName: '',
-        candidateEmail: '',
         resume: '',
         resumeText: 'Resume text',
         yearsOfExperience: 0,
@@ -411,7 +418,12 @@ const Dashboard: React.FC = () => {
         startTime: null,
         expiryTime: null,
         duration: 60,
-      });
+        // Keep these fields
+        candidateName: savedData.candidateName,
+        candidateEmail: savedData.candidateEmail,
+        role: savedData.role
+      }));
+      
       setFormErrors({});
       
       loadInterviews();
