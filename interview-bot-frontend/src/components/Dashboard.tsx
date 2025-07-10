@@ -398,15 +398,11 @@ const Dashboard: React.FC = () => {
       
       setCreatedInterviewLink(result.link);
       toast.success('🚀 AI Interview scheduled successfully!');
-      
-      // Save important data for email sending before resetting form
       const savedData = {
         candidateName: interviewFormData.candidateName,
         candidateEmail: interviewFormData.candidateEmail,
         role: interviewFormData.role
       };
-      
-      // Reset only non-essential form fields, preserving what we need for email
       setInterviewFormData(prev => ({
         ...prev,
         title: '',
@@ -418,7 +414,6 @@ const Dashboard: React.FC = () => {
         startTime: null,
         expiryTime: null,
         duration: 60,
-        // Keep these fields
         candidateName: savedData.candidateName,
         candidateEmail: savedData.candidateEmail,
         role: savedData.role
@@ -800,8 +795,9 @@ const Dashboard: React.FC = () => {
     );
   };
 
-  // Add a function to save mapping to localStorage for persistence
+  // Load interview results and mappings from localStorage on component mount
   useEffect(() => {
+    // Load interviewIdMapping from localStorage
     const savedMapping = localStorage.getItem('interviewIdMapping');
     if (savedMapping) {
       try {
@@ -811,11 +807,28 @@ const Dashboard: React.FC = () => {
         localStorage.removeItem('interviewIdMapping');
       }
     }
+    
+    // Load interviewResults from localStorage
+    const savedResults = localStorage.getItem('interviewResults');
+    if (savedResults) {
+      try {
+        setInterviewResults(JSON.parse(savedResults));
+      } catch (error) {
+        console.error('Error parsing saved results:', error);
+        localStorage.removeItem('interviewResults');
+      }
+    }
   }, []);
-
+  
+  // Save interviewIdMapping to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('interviewIdMapping', JSON.stringify(interviewIdMapping));
   }, [interviewIdMapping]);
+  
+  // Save interviewResults to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('interviewResults', JSON.stringify(interviewResults));
+  }, [interviewResults]);
 
   if (loading) {
     return (
