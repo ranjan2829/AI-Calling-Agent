@@ -491,6 +491,41 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const sendInterviewLinkViaEmail = async () => {
+    if (!createdInterviewLink || !interviewFormData.candidateEmail) {
+      toast.error('Missing link or candidate email');
+      return;
+    }
+    
+    try {
+      toast.info('Sending email...');
+      
+      const response = await fetch(`${API_BASE_URL}/send-interview-link`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: interviewFormData.candidateEmail,
+          link: createdInterviewLink,
+          candidate_name: interviewFormData.candidateName,
+          role: interviewFormData.role,
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        toast.success('Interview link sent via email!');
+      } else {
+        toast.error(result.message || 'Failed to send email');
+      }
+    } catch (err) {
+      console.error('Error sending email:', err);
+      toast.error('Failed to send email');
+    }
+  };
+
   const handleCloseDialog = () => {
     setShowInterviewForm(null);
     setCreatedInterviewLink(null); // Reset the link when closing
