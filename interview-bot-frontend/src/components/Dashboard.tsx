@@ -387,13 +387,21 @@ const Dashboard: React.FC = () => {
       const newInterviewId = result.interviewId || result.id || result.interview_id;
       
       if (newInterviewId) {
-        setInterviewIdMapping(prev => ({
-          ...prev,
+        // Update the mapping with the new interview ID
+        const updatedMapping = {
+          ...interviewIdMapping,
           [candidateData.interview_id]: newInterviewId
-        }));
-        fetchInterviewResults(newInterviewId);
+        };
         
-        console.log(` ${candidateData.interview_id} to new ID ${newInterviewId}`);
+        setInterviewIdMapping(updatedMapping);
+        
+        // Immediately save to localStorage to prevent loss on refresh
+        localStorage.setItem('interviewIdMapping', JSON.stringify(updatedMapping));
+        
+        console.log(`✅ Mapped interview ID ${candidateData.interview_id} to new ID ${newInterviewId}`);
+        
+        // Fetch the results for the new interview
+        fetchInterviewResults(newInterviewId);
       }
       
       setCreatedInterviewLink(result.link);
@@ -424,7 +432,7 @@ const Dashboard: React.FC = () => {
       loadInterviews();
       
     } catch (error: unknown) {
-      console.error('❌ Error creating interview:', error);
+      console.error('Error creating interview:', error);
       
       let errorMessage = 'Failed to schedule interview. Please try again.';
       
@@ -538,12 +546,47 @@ const Dashboard: React.FC = () => {
     setCreatedInterviewLink(null); // Reset the link when closing
   };
 
-  // Add the missing getActualInterviewId function
-  const getActualInterviewId = (originalId: string): string => {
-    return interviewIdMapping[originalId] || originalId;
+  // Function to save mappings and results to localStorage
+  const saveDataToLocalStorage = () => {
+    try {
+      localStorage.setItem('interviewIdMapping', JSON.stringify(interviewIdMapping));
+      localStorage.setItem('interviewResults', JSON.stringify(interviewResults));
+      console.log('✅ Saved interview mappings and results to localStorage');
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
   };
 
-  // Function to fetch interview results from the other server
+  // Function to consistently check for interview ID in mappings
+  const getActualInterviewId = (originalId: string): string => {
+    // First check in the state mapping
+    if (interviewIdMapping[originalId]) {
+      return interviewIdMapping[originalId];
+    }
+    
+    // Then try to get from localStorage as fallback
+    try {
+      const savedMapping = localStorage.getItem('interviewIdMapping');
+      if (savedMapping) {
+        const mappings = JSON.parse(savedMapping);
+        if (mappings[originalId]) {
+          // Update the state with the mapping from localStorage
+          setInterviewIdMapping(prev => ({
+            ...prev,
+            [originalId]: mappings[originalId]
+          }));
+          return mappings[originalId];
+        }
+      }
+    } catch (err) {
+      console.error('Error reading mapping from localStorage:', err);
+    }
+    
+    // Default to original ID if no mapping found
+    return originalId;
+  };
+
+  // Modify fetchInterviewResults to save results immediately
   const fetchInterviewResults = async (interviewId: string) => {
     try {
       setLoadingResults(prev => ({ ...prev, [interviewId]: true }));
@@ -558,7 +601,15 @@ const Dashboard: React.FC = () => {
 
       if (response.ok) {
         const resultData: InterviewResult = await response.json();
-        setInterviewResults(prev => ({ ...prev, [interviewId]: resultData }));
+        
+        // Update state with new results
+        const updatedResults = { ...interviewResults, [interviewId]: resultData };
+        setInterviewResults(updatedResults);
+        
+        // Immediately save to localStorage
+        localStorage.setItem('interviewResults', JSON.stringify(updatedResults));
+        
+        console.log(`✅ Fetched and saved results for interview ${interviewId}`);
         return resultData;
       } else {
         console.log(`No results found for interview ${interviewId}`);
@@ -570,11 +621,6 @@ const Dashboard: React.FC = () => {
     } finally {
       setLoadingResults(prev => ({ ...prev, [interviewId]: false }));
     }
-  };
-
-  // Function to refresh interview results
-  const refreshInterviewResults = async (interviewId: string) => {
-    await fetchInterviewResults(interviewId);
   };
 
   // Load interview results on component mount
@@ -794,10 +840,7 @@ const Dashboard: React.FC = () => {
       </Box>
     );
   };
-
-  // Load interview results and mappings from localStorage on component mount
   useEffect(() => {
-    // Load interviewIdMapping from localStorage
     const savedMapping = localStorage.getItem('interviewIdMapping');
     if (savedMapping) {
       try {
@@ -807,8 +850,6 @@ const Dashboard: React.FC = () => {
         localStorage.removeItem('interviewIdMapping');
       }
     }
-    
-    // Load interviewResults from localStorage
     const savedResults = localStorage.getItem('interviewResults');
     if (savedResults) {
       try {
@@ -819,17 +860,12 @@ const Dashboard: React.FC = () => {
       }
     }
   }, []);
-  
-  // Save interviewIdMapping to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('interviewIdMapping', JSON.stringify(interviewIdMapping));
   }, [interviewIdMapping]);
-  
-  // Save interviewResults to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('interviewResults', JSON.stringify(interviewResults));
   }, [interviewResults]);
-
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
