@@ -90,7 +90,6 @@ interface DashboardStats {
   inProgressInterviews: number;
   terminatedInterviews: number;
 }
-
 interface InterviewFormData {
   title: string;
   role: string;
@@ -105,7 +104,6 @@ interface InterviewFormData {
   expiryTime: Date | null;
   duration: number;
 }
-
 interface JobDescription {
   title: string;
   company: string;
@@ -116,7 +114,6 @@ interface JobDescription {
 
 const API_BASE_URL = 'http://13.204.76.229:8000';
 const PRODUCTION_API_URL = 'https://onelabceo.com/api';
-
 const fetchAllInterviews = async () => {
   const response = await fetch(`${API_BASE_URL}/interviews-detailed`, {
     method: 'GET',
@@ -130,12 +127,10 @@ const fetchAllInterviews = async () => {
   }
   return await response.json();
 };
-
 const Dashboard: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
-  
   const [interviews, setInterviews] = useState<InterviewDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -170,9 +165,7 @@ const Dashboard: React.FC = () => {
   const linkInputRef = useRef<HTMLInputElement>(null);
   const [interviewResults, setInterviewResults] = useState<{[key: string]: InterviewResult}>({});
   const [loadingResults, setLoadingResults] = useState<{[key: string]: boolean}>({});
-  // Add mapping state to track old ID -> new ID
   const [interviewIdMapping, setInterviewIdMapping] = useState<{[oldId: string]: string}>({});
-
   useEffect(() => {
     loadInterviews();
     loadJobDescription();
@@ -278,11 +271,9 @@ const Dashboard: React.FC = () => {
           fileType: file.type,
         }),
       });
-
       if (!presignedUrlResponse.ok) {
         throw new Error('Failed to get upload URL from server');
       }
-
       const uploadData = await presignedUrlResponse.json();
       const { uploadUrl, readUrl } = uploadData;
 
@@ -387,20 +378,15 @@ const Dashboard: React.FC = () => {
       const newInterviewId = result.interviewId || result.id || result.interview_id;
       
       if (newInterviewId) {
-        // Update the mapping with the new interview ID
         const updatedMapping = {
           ...interviewIdMapping,
           [candidateData.interview_id]: newInterviewId
         };
         
         setInterviewIdMapping(updatedMapping);
-        
-        // Immediately save to localStorage to prevent loss on refresh
         localStorage.setItem('interviewIdMapping', JSON.stringify(updatedMapping));
         
         console.log(`✅ Mapped interview ID ${candidateData.interview_id} to new ID ${newInterviewId}`);
-        
-        // Fetch the results for the new interview
         fetchInterviewResults(newInterviewId);
       }
       
