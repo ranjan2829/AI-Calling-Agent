@@ -998,12 +998,13 @@ const Dashboard: React.FC = () => {
   const refreshInterviewResults = async (interviewId: string) => {
     await fetchInterviewResults(interviewId);
   };
-  // Add this function to fetch assessment data
+  // Update the fetchAssessments function to use the working API endpoint
   const fetchAssessments = async (page = 1, limit = 10, searchTerm = '') => {
     try {
       setLoadingAssessments(true);
       const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
-      const response = await fetch(`https://dev.d23pi31x94e0bg.amplifyapp.com/api/assessment/?page=${page}&limit=${limit}&sortOrder=DESC&sortBy=createdAt&searchBy=${searchParam}`, {
+      
+      const response = await fetch(`https://api.onelabventur.us/node/api/assessment/?page=${page}&limit=${limit}&sortOrder=DESC&sortBy=createdAt&searchBy=${searchParam}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -1015,13 +1016,47 @@ const Dashboard: React.FC = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: AssessmentResponse = await response.json();
-      setAssessments(data.assessments || []);
-      return data;
+      const data = await response.json();
+      console.log('✅ API Response:', data);
+      
+      // Extract assessments from the response structure
+      const assessments = data.result?.assessments || [];
+      
+      // Map the API response to our AssessmentData interface
+      const mappedAssessments: AssessmentData[] = assessments.map((assessment: any) => ({
+        id: assessment.id,
+        testName: assessment.title,
+        jobRole: assessment.designation,
+        candidateCount: assessment.candidateCount,
+        createdAt: assessment.createdAt,
+        status: assessment.isActive ? 'active' : 'inactive',
+        description: assessment.description,
+        experience: assessment.experience,
+        duration: assessment.duration,
+        totalTopics: assessment.totalTopics,
+        allowVideoRecording: assessment.allowVideoRecording,
+        createdBy: assessment.createdBy
+      }));
+
+      setAssessments(mappedAssessments);
+      console.log('✅ Mapped assessments:', mappedAssessments);
+      
+      return {
+        assessments: mappedAssessments,
+        totalCount: data.result?.totalItems || 0,
+        currentPage: data.result?.currentPage || 1,
+        totalPages: data.result?.totalPages || 1
+      };
     } catch (error) {
       console.error('Error fetching assessments:', error);
       toast.error('Failed to load assessments');
-      return null;
+      setAssessments([]);
+      return {
+        assessments: [],
+        totalCount: 0,
+        currentPage: page,
+        totalPages: 1
+      };
     } finally {
       setLoadingAssessments(false);
     }
@@ -1129,6 +1164,16 @@ const Dashboard: React.FC = () => {
                           <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
                             {assessment.jobRole}
                           </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0.5 }}>
+                            <Typography variant="caption" color="text.secondary">
+                              <Work sx={{ fontSize: 14, mr: 0.5 }} />
+                              {assessment.experience} years exp
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              <Assignment sx={{ fontSize: 14, mr: 0.5 }} />
+                              {assessment.totalTopics} topics
+                            </Typography>
+                          </Box>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <Typography variant="caption" color="text.secondary">
                               <Person sx={{ fontSize: 14, mr: 0.5 }} />
@@ -1165,7 +1210,7 @@ const Dashboard: React.FC = () => {
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Assessment Management
+              Assessment Management ({assessments.length})
             </Typography>
             <Button
               onClick={() => fetchAssessments()}
@@ -1183,65 +1228,104 @@ const Dashboard: React.FC = () => {
                 <TableRow>
                   <TableCell sx={{ fontWeight: 'bold' }}>Test Name</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Job Role</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Candidate Count</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Create Date</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Experience</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Topics</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Duration</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Candidates</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Created Date</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {assessments.map((assessment) => (
-                  <TableRow key={assessment.id} hover>
-                    <TableCell>
-                      <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                        {assessment.testName}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {assessment.jobRole}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Person sx={{ fontSize: 16 }} />
-                        <Typography variant="body2">
-                          {assessment.candidateCount}
+                {assessments.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={9} sx={{ textAlign: 'center', py: 4 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
+                        <Assessment sx={{ fontSize: 48, mb: 1 }} />
+                        <Typography color="text.secondary">
+                          No assessments found
                         </Typography>
                       </Box>
                     </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {new Date(assessment.createdAt).toLocaleDateString()}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          startIcon={<Assessment />}
-                          onClick={() => {
-                            // Handle view report
-                            toast.info(`Viewing report for ${assessment.testName}`);
-                          }}
-                        >
-                          View Report
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          color="error"
-                          onClick={() => {
-                            // Handle deactivate
-                            toast.info(`Deactivating ${assessment.testName}`);
-                          }}
-                        >
-                          Deactivate
-                        </Button>
-                      </Box>
-                    </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  assessments.map((assessment) => (
+                    <TableRow key={assessment.id} hover>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                          {assessment.testName}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {assessment.jobRole}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {assessment.experience} years
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {assessment.totalTopics || 'N/A'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {assessment.duration ? `${Math.floor(assessment.duration / 60)} min` : 'N/A'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Person sx={{ fontSize: 16 }} />
+                          <Typography variant="body2">
+                            {assessment.candidateCount}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {new Date(assessment.createdAt).toLocaleDateString()}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={assessment.status}
+                          color={assessment.status === 'active' ? 'success' : 'default'}
+                          size="small"
+                          sx={{ fontSize: '0.7rem' }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<Assessment />}
+                            onClick={() => {
+                              toast.info(`Viewing report for ${assessment.testName}`);
+                            }}
+                          >
+                            View Report
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color={assessment.status === 'active' ? 'error' : 'success'}
+                            onClick={() => {
+                              const action = assessment.status === 'active' ? 'Deactivating' : 'Activating';
+                              toast.info(`${action} ${assessment.testName}`);
+                            }}
+                          >
+                            {assessment.status === 'active' ? 'Deactivate' : 'Activate'}
+                          </Button>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>
