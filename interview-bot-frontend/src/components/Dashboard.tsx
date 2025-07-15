@@ -49,6 +49,8 @@ import {
   Email as EmailIcon
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
+import AssessmentManager from './AssessmentManager';
+
 interface InterviewDetails {
   interview_id: string;
   candidate_name: string;
@@ -138,6 +140,11 @@ interface AssessmentData {
   createdAt: string;
   status: 'active' | 'inactive';
   description?: string;
+  experience?: number;
+  duration?: number;
+  totalTopics?: number;
+  allowVideoRecording?: string;
+  createdBy?: string;
 }
 
 interface AssessmentResponse {
@@ -980,7 +987,6 @@ const Dashboard: React.FC = () => {
       }
     }
   };
-
   const sendAssessmentLinkViaEmail = async () => {
     if (!createdAssessmentLink) {
       toast.error('No assessment link available');
@@ -994,25 +1000,44 @@ const Dashboard: React.FC = () => {
       toast.error('Failed to send email');
     }
   };
-
   const refreshInterviewResults = async (interviewId: string) => {
     await fetchInterviewResults(interviewId);
   };
-  // Update the fetchAssessments function to use the working API endpoint
   const fetchAssessments = async (page = 1, limit = 10, searchTerm = '') => {
     try {
       setLoadingAssessments(true);
       const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
-      
       const response = await fetch(`https://api.onelabventur.us/node/api/assessment/?page=${page}&limit=${limit}&sortOrder=DESC&sortBy=createdAt&searchBy=${searchParam}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
+        credentials: 'include',
       });
-
       if (!response.ok) {
+        if (response.status === 404) {
+          console.log('Assessment API endpoint not found, using fallback');
+          setAssessments([]);
+          return {
+            assessments: [],
+            totalCount: 0,
+            currentPage: page,
+            totalPages: 1
+          };
+        }
+        
+        if (response.status === 401) {
+          console.log('Session expired for assessments');
+          setAssessments([]);
+          return {
+            assessments: [],
+            totalCount: 0,
+            currentPage: page,
+            totalPages: 1
+          };
+        }
+        
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -1049,8 +1074,10 @@ const Dashboard: React.FC = () => {
       };
     } catch (error) {
       console.error('Error fetching assessments:', error);
-      toast.error('Failed to load assessments');
+      
+      // Don't show error toasts for 404 - just set empty data
       setAssessments([]);
+      
       return {
         assessments: [],
         totalCount: 0,
@@ -1062,9 +1089,14 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Add this useEffect to load assessments on component mount
+  // Update the useEffect to not fail if assessments fail
   useEffect(() => {
-    fetchAssessments();
+    loadInterviews();
+    loadJobDescription();
+    // Make assessment fetching optional - don't block dashboard if it fails
+    fetchAssessments().catch(err => {
+      console.log('Assessment loading failed, continuing without assessments:', err);
+    });
   }, []);
 
   // Add this function to handle assessment selection
@@ -1082,6 +1114,18 @@ const Dashboard: React.FC = () => {
 
   // Add this function to render the assessment dropdown
   const renderAssessmentDropdown = () => {
+    // Don't render if we have no assessments and failed to load
+    if (!loadingAssessments && assessments.length === 0) {
+      return (
+        <Card sx={{ mb: 3, p: 2, backgroundColor: '#fff3cd', border: '1px solid #ffeaa7' }}>
+          <Typography variant="body2" color="text.secondary">
+            <Assessment sx={{ mr: 1, verticalAlign: 'middle' }} />
+            Assessment management is temporarily unavailable
+          </Typography>
+        </Card>
+      );
+    }
+
     return (
       <Box sx={{ position: 'relative', mb: 3 }}>
         <Button
@@ -1203,8 +1247,13 @@ const Dashboard: React.FC = () => {
     );
   };
 
-  // Add this function to render the assessment management table
+  // Update the renderAssessmentTable to handle empty assessments gracefully
   const renderAssessmentTable = () => {
+    // Don't render the table if we have no assessments and failed to load
+    if (!loadingAssessments && assessments.length === 0) {
+      return null; // Don't render anything
+    }
+
     return (
       <Card sx={{ boxShadow: 2, mb: 3 }}>
         <CardContent>
@@ -1458,7 +1507,7 @@ const Dashboard: React.FC = () => {
               <TableBody>
                 {filteredInterviews.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={isMobile ? 6 : 7} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={isMobile ? 6 : 8} sx={{ textAlign: 'center', py: 4 }}>
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
                         <Person sx={{ fontSize: 48, mb: 1 }} />
                         <Typography color="text.secondary">
@@ -1567,6 +1616,7 @@ const Dashboard: React.FC = () => {
           </TableContainer>
         </Card>
       </Box>
+
       <Dialog 
         open={!!showInterviewForm} 
         onClose={() => setShowInterviewForm(null)}
@@ -1873,7 +1923,7 @@ const Dashboard: React.FC = () => {
                   <Assignment sx={{ mr: 1 }} />
                   Current Job Description
                 </Typography>
-                <Button onClick={handleApplyJDToCoding} variant="contained" size="small">
+                <Button onClick={handleUseJD} variant="contained" size="small">
                   Apply Current JD
                 </Button>
               </Box>
@@ -1892,134 +1942,6 @@ const Dashboard: React.FC = () => {
               </Typography>
             </Card>
           )}
-
-          {/* Form Fields */}
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Title"
-                name="title"
-                value={codingAssessmentFormData.title}
-                onChange={handleCodingAssessmentFormChange}
-                error={!!codingAssessmentErrors.title}
-                helperText={codingAssessmentErrors.title}
-                placeholder="e.g., Senior Developer Assessment"
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Designation"
-                name="designation"
-                value={codingAssessmentFormData.designation}
-                onChange={handleCodingAssessmentFormChange}
-                error={!!codingAssessmentErrors.designation}
-                helperText={codingAssessmentErrors.designation}
-                placeholder="e.g., Senior Full Stack Developer"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                label="Job Description"
-                name="jobDescription"
-                value={codingAssessmentFormData.jobDescription}
-                onChange={handleCodingAssessmentFormChange}
-                error={!!codingAssessmentErrors.jobDescription}
-                helperText={codingAssessmentErrors.jobDescription}
-                placeholder="Enter detailed job description..."
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Experience (years)"
-                name="experience"
-                type="number"
-                value={codingAssessmentFormData.experience}
-                onChange={handleCodingAssessmentFormChange}
-                error={!!codingAssessmentErrors.experience}
-                helperText={codingAssessmentErrors.experience}
-                inputProps={{ min: 0 }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Total Questions"
-                name="totalQuestions"
-                type="number"
-                value={codingAssessmentFormData.totalQuestions}
-                onChange={handleCodingAssessmentFormChange}
-                error={!!codingAssessmentErrors.totalQuestions}
-                helperText={codingAssessmentErrors.totalQuestions}
-                inputProps={{ min: 1 }}
-              />
-            </Grid>
-            
-            {/* Skills Section */}
-            <Grid item xs={12}>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="h6" sx={{ mb: 1 }}>Skills</Typography>
-                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                  <TextField
-                    fullWidth
-                    label="Add Skill"
-                    value={newSkill}
-                    onChange={(e) => setNewSkill(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleAddSkill()}
-                    placeholder="e.g., JavaScript, Python, React"
-                  />
-                  <Button onClick={handleAddSkill} variant="contained">
-                    Add
-                  </Button>
-                </Box>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {codingAssessmentFormData.skills.map((skill, index) => (
-                    <Chip
-                      key={index}
-                      label={skill}
-                      onDelete={() => handleRemoveSkill(skill)}
-                      color="primary"
-                      variant="outlined"
-                    />
-                  ))}
-                </Box>
-                {codingAssessmentErrors.skills && (
-                  <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                    {codingAssessmentErrors.skills}
-                  </Typography>
-                )}
-              </Box>
-            </Grid>
-
-            {/* Question Types Section */}
-            <Grid item xs={12}>
-              <Box>
-                <Typography variant="h6" sx={{ mb: 1 }}>Question Types</Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {['Multiple Choice', 'Coding Problem', 'System Design', 'Algorithm', 'Data Structure', 'Database'].map((type) => (
-                    <Chip
-                      key={type}
-                      label={type}
-                      onClick={() => handleQuestionTypeChange(type)}
-                      color={codingAssessmentFormData.questionTypes.includes(type) ? 'primary' : 'default'}
-                      variant={codingAssessmentFormData.questionTypes.includes(type) ? 'filled' : 'outlined'}
-                      sx={{ cursor: 'pointer' }}
-                    />
-                  ))}
-                </Box>
-                {codingAssessmentErrors.questionTypes && (
-                  <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                    {codingAssessmentErrors.questionTypes}
-                  </Typography>
-                )}
-              </Box>
-            </Grid>
-          </Grid>
 
           {/* Success message with copy link */}
           {createdAssessmentLink && (
@@ -2057,6 +1979,9 @@ const Dashboard: React.FC = () => {
                   Send Email
                 </Button>
               </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                The candidate will also receive this link via email.
+              </Typography>
             </Box>
           )}
 
@@ -2084,6 +2009,9 @@ const Dashboard: React.FC = () => {
           )}
         </DialogActions>
       </Dialog>
+
+      {/* Add the Assessment Manager */}
+      <AssessmentManager />
     </Box>
   );
 };

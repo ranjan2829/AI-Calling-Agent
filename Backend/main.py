@@ -1962,6 +1962,186 @@ Onelab Ventures Team
             "error": str(e),
             "message": "Failed to send interview link email"
         }
+# Add these simplified endpoints to your main.py
+# Add these endpoints to your main.py file
+
+@app.get("/api/assessments")
+async def get_assessments():
+    """Get all assessments from external API"""
+    try:
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
+        
+        response = requests.get(
+            "https://api.onelabventur.us/node/api/assessment/?page=1&limit=100&sortOrder=DESC&sortBy=createdAt",
+            headers=headers,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            assessments = data.get("result", {}).get("assessments", [])
+            
+            # Process assessments
+            processed_assessments = []
+            for assessment in assessments:
+                processed_assessments.append({
+                    "id": assessment["id"],
+                    "testName": assessment["title"],
+                    "jobRole": assessment["designation"],
+                    "experience": assessment.get("experience", 0),
+                    "duration": assessment.get("duration", 0),
+                    "totalTopics": assessment.get("totalTopics", 0),
+                    "status": "active" if assessment["isActive"] else "inactive",
+                    "assessmentLink": f"https://api.onelabventur.us/assessment/{assessment['id']}"
+                })
+            
+            return {"success": True, "assessments": processed_assessments}
+        else:
+            return {"success": False, "error": "Failed to fetch assessments", "assessments": []}
+            
+    except Exception as e:
+        print(f"[ASSESSMENTS ERROR] ❌ {e}")
+        return {"success": False, "error": str(e), "assessments": []}
+
+@app.get("/api/candidates")
+async def get_candidates():
+    """Get candidates from interviews"""
+    try:
+        # Get interviews data using your existing function
+        interviews_data = []
+        try:
+            response = requests.get(f"{API_BASE_URL}/interviews-detailed", timeout=30)
+            if response.status_code == 200:
+                data = response.json()
+                interviews_data = data.get("interviews", [])
+        except Exception as e:
+            print(f"Error fetching interviews: {e}")
+            return {"success": False, "error": "Failed to fetch interviews", "candidates": []}
+        
+        # Process candidates
+        candidates = []
+        for interview in interviews_data:
+            candidate_email = interview.get("candidate_email")
+            if not candidate_email:
+                phone = interview.get("candidate_phone", "")
+                clean_phone = phone.replace("+", "").replace("-", "").replace(" ", "")
+                candidate_email = f"candidate{clean_phone[-6:] if len(clean_phone) >= 6 else interview['interview_id'][-6:]}@example.com"
+            
+            candidates.append({
+                "id": interview["interview_id"],
+                "name": interview["candidate_name"],
+                "phone": interview["candidate_phone"],
+                "email": candidate_email,
+                "status": interview["status"]
+            })
+        
+        return {"success": True, "candidates": candidates}
+        
+    except Exception as e:
+        print(f"[CANDIDATES ERROR] ❌ {e}")
+        return {"success": False, "error": str(e), "candidates": []}
+
+@app.post("/api/send-assessment-bulk")
+async def send_assessment_bulk(request: Request):
+    """Send assessment link to all candidates"""
+    try:
+        data = await request.json()
+        
+        assessment_name = data.get('assessmentName')
+        job_role = data.get('jobRole')
+        assessment_link = data.get('assessmentLink')
+        candidates = data.get('candidates', [])
+        
+        if not assessment_link or not candidates:
+            return {"success": False, "error": "Assessment link and candidates are required"}
+        
+        results = []
+        success_count = 0
+        failed_count = 0
+        
+        for candidate in candidates:
+            try:
+                # Create personalized email
+                subject = f"{assessment_name} - Assessment Invitation"
+                message = f"""Hello {candidate['name']},
+
+You have been invited to take the {assessment_name} assessment for the {job_role} position.
+
+Please click the link below to start your assessment:
+{assessment_link}
+
+Best regards,
+Onelab Ventures Team"""
+                
+                # Create email
+                msg = EmailMessage()
+                msg['Subject'] = subject
+                msg['From'] = "ranjan.shitole3129@gmail.com"
+                msg['To'] = candidate['email']
+                
+                # HTML version
+                html_content = f"""
+                <html>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #1976d2;">Assessment Invitation</h2>
+                        <p>Hello {candidate['name']},</p>
+                        <p>You have been invited to take the <strong>{assessment_name}</strong> assessment for the <strong>{job_role}</strong> position.</p>
+                        <div style="text-align: center; margin: 25px 0;">
+                            <a href="{assessment_link}" style="background-color: #1976d2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                                Start Assessment
+                            </a>
+                        </div>
+                        <p>Direct link: <a href="{assessment_link}">{assessment_link}</a></p>
+                        <p>Best regards,<br>Onelab Ventures Team</p>
+                    </div>
+                </body>
+                </html>
+                """
+                
+                msg.set_content(message)
+                msg.add_alternative(html_content, subtype='html')
+                
+                # Send email
+                with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                    smtp.login("ranjan.shitole3129@gmail.com", "mikcnsvzyyjshozh")
+                    smtp.send_message(msg)
+                
+                results.append({
+                    "name": candidate['name'],
+                    "email": candidate['email'],
+                    "status": "sent"
+                })
+                success_count += 1
+                print(f"✅ Email sent to {candidate['name']} ({candidate['email']})")
+                
+            except Exception as e:
+                results.append({
+                    "name": candidate['name'],
+                    "email": candidate['email'],
+                    "status": "failed",
+                    "error": str(e)
+                })
+                failed_count += 1
+                print(f"❌ Failed to send email to {candidate['name']}: {e}")
+        
+        return {
+            "success": True,
+            "message": f"Sent {success_count} emails, {failed_count} failed",
+            "results": results,
+            "stats": {
+                "total": len(candidates),
+                "sent": success_count,
+                "failed": failed_count
+            }
+        }
+        
+    except Exception as e:
+        print(f"[BULK EMAIL ERROR] ❌ {e}")
+        return {"success": False, "error": str(e)}
 if __name__ == "__main__":
     import uvicorn
     print("🚀 Starting AI Interview Bot Server...")
