@@ -153,7 +153,6 @@ interface AssessmentResponse {
   currentPage: number;
   totalPages: number;
 }
-
 const API_BASE_URL = 'http://13.204.76.229:8000';
 const PRODUCTION_API_URL = 'https://onelabceo.com/api';
 const fetchAllInterviews = async () => {
@@ -253,7 +252,6 @@ const Dashboard: React.FC = () => {
       setLoading(false);
     }
   };
-
   const loadJobDescription = async () => {
     try {
       setLoadingJD(true);
