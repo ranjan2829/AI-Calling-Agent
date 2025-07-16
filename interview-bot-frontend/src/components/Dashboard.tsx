@@ -154,7 +154,7 @@ interface AssessmentResponse {
   totalPages: number;
 }
 
-const API_BASE_URL = 'http://13.204.76.229:8000';
+const API_BASE_URL = 'http://13.204.76.229:3000';
 const PRODUCTION_API_URL = 'https://onelabceo.com/api';
 const fetchAllInterviews = async () => {
   const response = await fetch(`${API_BASE_URL}/interviews-detailed`, {
