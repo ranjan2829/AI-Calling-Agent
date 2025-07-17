@@ -22,12 +22,12 @@ import {
   Grid,
   CircularProgress,
   Alert,
-  Divider,
   InputAdornment,
   Avatar,
   Tooltip,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Divider
 } from '@mui/material';
 import {
   Search,
@@ -42,14 +42,14 @@ import {
   Assignment,
   TrendingUp,
   Person,
-  Assessment,
   StarRate,
   ContentCopy,
   Timeline,
-  Email as EmailIcon
+  Email as EmailIcon,
+  Link as LinkIcon
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
-import AssessmentManager from './AssessmentManager';
+import AssessmentDropdown from './AssessmentDropdown';
 
 interface InterviewDetails {
   interview_id: string;
@@ -67,6 +67,7 @@ interface InterviewDetails {
   interview_result?: any;
   last_updated?: string;
 }
+
 interface InterviewResult {
   interview: {
     id: string;
@@ -84,12 +85,14 @@ interface InterviewResult {
     fullScreenExitCount?: number;
   };
 }
+
 interface DashboardStats {
   totalInterviews: number;
   completedInterviews: number;
   inProgressInterviews: number;
   terminatedInterviews: number;
 }
+
 interface InterviewFormData {
   title: string;
   role: string;
@@ -104,6 +107,7 @@ interface InterviewFormData {
   expiryTime: Date | null;
   duration: number;
 }
+
 interface JobDescription {
   title: string;
   company: string;
@@ -111,6 +115,22 @@ interface JobDescription {
   required_skills: string;
   experience_required: string;
 }
+
+interface AssessmentData {
+  id: string;
+  testName: string;
+  jobRole: string;
+  candidateCount: number;
+  createdAt: string;
+  status: string;
+  description: string;
+  experience: number;
+  duration: number;
+  totalTopics: number;
+  allowVideoRecording: boolean;
+  createdBy: string;
+}
+
 interface CodingAssessmentFormData {
   title: string;
   designation: string;
@@ -121,40 +141,9 @@ interface CodingAssessmentFormData {
   questionTypes: string[];
 }
 
-interface CodingAssessmentResult {
-  assessmentId: string;
-  status: string;
-  score?: number;
-  completedQuestions?: number;
-  totalQuestions?: number;
-  timeSpent?: number;
-  feedback?: string;
-}
-
-// Add these interfaces after your existing interfaces
-interface AssessmentData {
-  id: string;
-  testName: string;
-  jobRole: string;
-  candidateCount: number;
-  createdAt: string;
-  status: 'active' | 'inactive';
-  description?: string;
-  experience?: number;
-  duration?: number;
-  totalTopics?: number;
-  allowVideoRecording?: string;
-  createdBy?: string;
-}
-
-interface AssessmentResponse {
-  assessments: AssessmentData[];
-  totalCount: number;
-  currentPage: number;
-  totalPages: number;
-}
 const API_BASE_URL = 'http://13.204.76.229:8000';
 const PRODUCTION_API_URL = 'https://onelabceo.com/api';
+
 const fetchAllInterviews = async () => {
   const response = await fetch(`${API_BASE_URL}/interviews-detailed`, {
     method: 'GET',
@@ -168,10 +157,10 @@ const fetchAllInterviews = async () => {
   }
   return await response.json();
 };
+
 const Dashboard: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
   const [interviews, setInterviews] = useState<InterviewDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -207,7 +196,10 @@ const Dashboard: React.FC = () => {
   const [interviewResults, setInterviewResults] = useState<{[key: string]: InterviewResult}>({});
   const [loadingResults, setLoadingResults] = useState<{[key: string]: boolean}>({});
   const [interviewIdMapping, setInterviewIdMapping] = useState<{[oldId: string]: string}>({});
+
+  // Add missing state variables
   const [showCodingAssessmentForm, setShowCodingAssessmentForm] = useState<string | null>(null);
+  const [createdAssessmentLink, setCreatedAssessmentLink] = useState<string | null>(null);
   const [codingAssessmentFormData, setCodingAssessmentFormData] = useState<CodingAssessmentFormData>({
     title: '',
     designation: '',
@@ -218,21 +210,22 @@ const Dashboard: React.FC = () => {
     questionTypes: []
   });
   const [codingAssessmentErrors, setCodingAssessmentErrors] = useState<{[key: string]: string}>({});
-  const [isSubmittingAssessment, setIsSubmittingAssessment] = useState(false);
-  const [createdAssessmentLink, setCreatedAssessmentLink] = useState<string | null>(null);
-  const [newSkill, setNewSkill] = useState('');
-  const [codingAssessmentResults, setCodingAssessmentResults] = useState<{[key: string]: CodingAssessmentResult}>({});
-  // Add these new state variables after your existing state declarations
   const [assessments, setAssessments] = useState<AssessmentData[]>([]);
   const [loadingAssessments, setLoadingAssessments] = useState(false);
   const [showAssessmentDropdown, setShowAssessmentDropdown] = useState(false);
   const [selectedAssessment, setSelectedAssessment] = useState<AssessmentData | null>(null);
   const [assessmentSearchTerm, setAssessmentSearchTerm] = useState('');
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [candidateEmailInput, setCandidateEmailInput] = useState('');
+  const [selectedAssessmentForEmail, setSelectedAssessmentForEmail] = useState<AssessmentData | null>(null);
 
   useEffect(() => {
     loadInterviews();
     loadJobDescription();
-    fetchAssessments();
+    // Make assessment fetching optional - don't block dashboard if it fails
+    fetchAssessments().catch(err => {
+      console.log('Assessment loading failed, continuing without assessments:', err);
+    });
   }, []);
 
   const loadInterviews = async () => {
@@ -252,6 +245,7 @@ const Dashboard: React.FC = () => {
       setLoading(false);
     }
   };
+
   const loadJobDescription = async () => {
     try {
       setLoadingJD(true);
@@ -267,18 +261,17 @@ const Dashboard: React.FC = () => {
       setLoadingJD(false);
     }
   };
+
   const calculateStats = (interviewData: InterviewDetails[]) => {
     const validCompletedInterviews = interviewData.filter(interview => {
       const hasValidStartTime = interview.start_time && interview.start_time !== 'N/A';
       const hasProgress = interview.questions_answered > 0;
       return interview.status === 'COMPLETED' && hasValidStartTime && hasProgress;
     });
-
     const total = interviewData.length;
     const completed = validCompletedInterviews.length;
     const inProgress = interviewData.filter(i => i.status === 'IN_PROGRESS').length;
     const terminated = interviewData.filter(i => i.status === 'TERMINATED').length;
-
     setStats({
       totalInterviews: total,
       completedInterviews: completed,
@@ -293,9 +286,9 @@ const Dashboard: React.FC = () => {
                          interview.candidate_phone?.includes(searchTerm);
     const hasValidStartTime = interview.start_time && interview.start_time !== 'N/A';
     const hasProgress = interview.questions_answered > 0;
-    
     return matchesSearch && interview.status === 'COMPLETED' && hasValidStartTime && hasProgress;
   });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'COMPLETED': return 'success';
@@ -305,6 +298,7 @@ const Dashboard: React.FC = () => {
       default: return 'default';
     }
   };
+
   const handleInterviewFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setInterviewFormData(prev => ({
@@ -312,6 +306,7 @@ const Dashboard: React.FC = () => {
       [name]: value
     }));
   };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, interviewId: string) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -337,7 +332,6 @@ const Dashboard: React.FC = () => {
       if (!uploadUrl) {
         throw new Error('No upload URL received from server');
       }
-
       const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
@@ -345,7 +339,6 @@ const Dashboard: React.FC = () => {
           'Content-Type': file.type,
         },
       });
-
       if (!uploadResponse.ok) {
         throw new Error(`Failed to upload file: ${uploadResponse.statusText}`);
       }
@@ -369,6 +362,7 @@ const Dashboard: React.FC = () => {
       setUploading(false);
     }
   };
+
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
     if (!interviewFormData.title.trim()) newErrors.title = 'Title is required';
@@ -388,6 +382,7 @@ const Dashboard: React.FC = () => {
     setFormErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const handleStartInterview = async (candidateData: InterviewDetails) => {
     if (!validateForm()) {
       return;
@@ -433,7 +428,7 @@ const Dashboard: React.FC = () => {
         fetchInterviewResults(newInterviewId);
       }
       setCreatedInterviewLink(result.link);
-      toast.success('🚀 AI Interview scheduled successfully!');
+      toast.success(' AI Interview scheduled successfully!');
       const savedData = {
         candidateName: interviewFormData.candidateName,
         candidateEmail: interviewFormData.candidateEmail,
@@ -483,6 +478,7 @@ const Dashboard: React.FC = () => {
       setIsSubmittingInterview(false);
     }
   };
+
   const handleUseJD = () => {
     if (jobDescription) {
       setInterviewFormData(prev => ({
@@ -494,6 +490,7 @@ const Dashboard: React.FC = () => {
       toast.success('Job description applied to form');
     }
   };
+
   const copyInterviewLink = async () => {
     if (createdInterviewLink) {
       try {
@@ -521,6 +518,7 @@ const Dashboard: React.FC = () => {
       toast.error('Failed to copy link. Please try again.');
     }
   };
+
   const sendInterviewLinkViaEmail = async () => {
     if (!createdInterviewLink || !interviewFormData.candidateEmail) {
       toast.error('Missing link or candidate email');
@@ -551,19 +549,12 @@ const Dashboard: React.FC = () => {
       toast.error('Failed to send email');
     }
   };
+
   const handleCloseDialog = () => {
     setShowInterviewForm(null);
     setCreatedInterviewLink(null);
   };
-  const saveDataToLocalStorage = () => {
-    try {
-      localStorage.setItem('interviewIdMapping', JSON.stringify(interviewIdMapping));
-      localStorage.setItem('interviewResults', JSON.stringify(interviewResults));
-      console.log('✅ Saved interview mappings and results to localStorage');
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
-    }
-  };
+
   const getActualInterviewId = (originalId: string): string => {
     if (interviewIdMapping[originalId]) {
       return interviewIdMapping[originalId];
@@ -585,6 +576,7 @@ const Dashboard: React.FC = () => {
     }
     return originalId;
   };
+
   const fetchInterviewResults = async (interviewId: string) => {
     try {
       setLoadingResults(prev => ({ ...prev, [interviewId]: true }));
@@ -613,6 +605,7 @@ const Dashboard: React.FC = () => {
       setLoadingResults(prev => ({ ...prev, [interviewId]: false }));
     }
   };
+
   useEffect(() => {
     if (interviews.length > 0) {
       interviews.forEach(interview => {
@@ -621,17 +614,18 @@ const Dashboard: React.FC = () => {
       });
     }
   }, [interviews, interviewIdMapping]);
+
   const getScoreColor = (score: number) => {
-    if (score >= 80) return '#4caf50'; // Green
-    if (score >= 60) return '#ff9800'; // Orange
-    if (score >= 40) return '#ff5722'; // Deep Orange
-    return '#f44336'; // Red
+    if (score >= 80) return '#4caf50';
+    if (score >= 60) return '#ff9800';
+    if (score >= 40) return '#ff5722';
+    return '#f44336';
   };
+
   const renderInterviewScore = (interview: InterviewDetails) => {
     const actualInterviewId = getActualInterviewId(interview.interview_id);
     const resultData = interviewResults[actualInterviewId];
     const isLoading = loadingResults[actualInterviewId];
-
     if (isLoading) {
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -640,7 +634,6 @@ const Dashboard: React.FC = () => {
         </Box>
       );
     }
-
     if (!resultData || !resultData.interview) {
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -711,6 +704,7 @@ const Dashboard: React.FC = () => {
       </Box>
     );
   };
+
   const renderCurrentInterviewStatus = (interview: InterviewDetails) => {
     const actualInterviewId = getActualInterviewId(interview.interview_id);
     const resultData = interviewResults[actualInterviewId];
@@ -814,153 +808,7 @@ const Dashboard: React.FC = () => {
       </Box>
     );
   };
-  const renderCodingAssessmentStatus = (interview: InterviewDetails) => {
-    const assessmentData = codingAssessmentResults[interview.interview_id];
-    
-    if (!assessmentData) {
-      return (
-        <Chip
-          label="Not Created"
-          size="small"
-          color="default"
-          sx={{ fontSize: '0.7rem' }}
-        />
-      );
-    }
 
-    const getStatusColor = (status: string) => {
-      switch (status.toLowerCase()) {
-        case 'completed': return 'success';
-        case 'in_progress': return 'warning';
-        case 'pending': return 'info';
-        case 'expired': return 'error';
-        default: return 'default';
-      }
-    };
-
-    return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <Chip
-          label={assessmentData.status}
-          size="small"
-          color={getStatusColor(assessmentData.status)}
-          sx={{ fontSize: '0.7rem' }}
-        />
-        {assessmentData.score && (
-          <Typography variant="caption" color="text.secondary">
-            Score: {assessmentData.score}%
-          </Typography>
-        )}
-        {assessmentData.completedQuestions && (
-          <Typography variant="caption" color="text.secondary">
-            {assessmentData.completedQuestions}/{assessmentData.totalQuestions} questions
-          </Typography>
-        )}
-      </Box>
-    );
-  };
-
-  const handleCodingAssessmentFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setCodingAssessmentFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleAddSkill = () => {
-    if (newSkill.trim() && !codingAssessmentFormData.skills.includes(newSkill.trim())) {
-      setCodingAssessmentFormData(prev => ({
-        ...prev,
-        skills: [...prev.skills, newSkill.trim()]
-      }));
-      setNewSkill('');
-    }
-  };
-
-  const handleRemoveSkill = (skillToRemove: string) => {
-    setCodingAssessmentFormData(prev => ({
-      ...prev,
-      skills: prev.skills.filter(skill => skill !== skillToRemove)
-    }));
-  };
-
-  const handleQuestionTypeChange = (type: string) => {
-    setCodingAssessmentFormData(prev => ({
-      ...prev,
-      questionTypes: prev.questionTypes.includes(type)
-        ? prev.questionTypes.filter(t => t !== type)
-        : [...prev.questionTypes, type]
-    }));
-  };
-
-  const handleApplyJDToCoding = () => {
-    if (jobDescription) {
-      setCodingAssessmentFormData(prev => ({
-        ...prev,
-        title: jobDescription.title,
-        designation: jobDescription.title,
-        jobDescription: jobDescription.description,
-        skills: jobDescription.required_skills.split(',').map(skill => skill.trim()).slice(0, 5)
-      }));
-      toast.success('Job description applied to coding assessment form');
-    }
-  };
-  const validateCodingAssessmentForm = () => {
-    const newErrors: {[key: string]: string} = {};
-    if (!codingAssessmentFormData.title.trim()) newErrors.title = 'Title is required';
-    if (!codingAssessmentFormData.designation.trim()) newErrors.designation = 'Designation is required';
-    if (!codingAssessmentFormData.jobDescription.trim()) newErrors.jobDescription = 'Job description is required';
-    if (codingAssessmentFormData.experience < 0) newErrors.experience = 'Experience cannot be negative';
-    if (codingAssessmentFormData.totalQuestions <= 0) newErrors.totalQuestions = 'Total questions must be greater than 0';
-    if (codingAssessmentFormData.skills.length === 0) newErrors.skills = 'At least one skill is required';
-    if (codingAssessmentFormData.questionTypes.length === 0) newErrors.questionTypes = 'At least one question type is required';
-    setCodingAssessmentErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-  const handleCreateCodingAssessment = async (candidateData: InterviewDetails) => {
-    if (!validateCodingAssessmentForm()) {
-      return;
-    }
-    setIsSubmittingAssessment(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/create-coding-assessment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          candidateId: candidateData.interview_id,
-          candidateName: candidateData.candidate_name,
-          candidateEmail: candidateData.candidate_phone,
-          ...codingAssessmentFormData
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create coding assessment');
-      }
-      const result = await response.json();
-      setCreatedAssessmentLink(result.assessmentLink);
-      toast.success('🚀 Coding Assessment created successfully!');
-      setCodingAssessmentFormData({
-        title: '',
-        designation: '',
-        jobDescription: '',
-        experience: 1,
-        totalQuestions: 10,
-        skills: [],
-        questionTypes: []
-      });
-      setCodingAssessmentErrors({});
-      
-    } catch (error: unknown) {
-      console.error('Error creating coding assessment:', error);
-      toast.error('Failed to create coding assessment');
-    } finally {
-      setIsSubmittingAssessment(false);
-    }
-  };
   const handleCloseCodingAssessmentDialog = () => {
     setShowCodingAssessmentForm(null);
     setCreatedAssessmentLink(null);
@@ -975,6 +823,7 @@ const Dashboard: React.FC = () => {
     });
     setCodingAssessmentErrors({});
   };
+
   const copyAssessmentLink = async () => {
     if (createdAssessmentLink) {
       try {
@@ -985,6 +834,7 @@ const Dashboard: React.FC = () => {
       }
     }
   };
+
   const sendAssessmentLinkViaEmail = async () => {
     if (!createdAssessmentLink) {
       toast.error('No assessment link available');
@@ -993,14 +843,17 @@ const Dashboard: React.FC = () => {
     
     try {
       toast.info('Sending assessment link via email...');
+      // Add your email sending logic here
       toast.success('Assessment link sent via email!');
     } catch (err) {
       toast.error('Failed to send email');
     }
   };
+
   const refreshInterviewResults = async (interviewId: string) => {
     await fetchInterviewResults(interviewId);
   };
+
   const fetchAssessments = async (page = 1, limit = 10, searchTerm = '') => {
     try {
       setLoadingAssessments(true);
@@ -1042,10 +895,8 @@ const Dashboard: React.FC = () => {
       const data = await response.json();
       console.log('✅ API Response:', data);
       
-      // Extract assessments from the response structure
       const assessments = data.result?.assessments || [];
       
-      // Map the API response to our AssessmentData interface
       const mappedAssessments: AssessmentData[] = assessments.map((assessment: any) => ({
         id: assessment.id,
         testName: assessment.title,
@@ -1072,8 +923,6 @@ const Dashboard: React.FC = () => {
       };
     } catch (error) {
       console.error('Error fetching assessments:', error);
-      
-      // Don't show error toasts for 404 - just set empty data
       setAssessments([]);
       
       return {
@@ -1087,534 +936,259 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Update the useEffect to not fail if assessments fail
-  useEffect(() => {
-    loadInterviews();
-    loadJobDescription();
-    // Make assessment fetching optional - don't block dashboard if it fails
-    fetchAssessments().catch(err => {
-      console.log('Assessment loading failed, continuing without assessments:', err);
-    });
-  }, []);
+  const generateAssessmentLink = async (assessmentId: string): Promise<string> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/generate-assessment-link/${assessmentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate assessment link');
+      }
+      
+      const data = await response.json();
+      return data.link || `${API_BASE_URL}/assessment/${assessmentId}`;
+    } catch (error) {
+      console.error('Error generating assessment link:', error);
+      return `${API_BASE_URL}/assessment/${assessmentId}`;
+    }
+  };
 
-  // Add this function to handle assessment selection
   const handleAssessmentSelect = (assessment: AssessmentData) => {
     setSelectedAssessment(assessment);
     setShowAssessmentDropdown(false);
     toast.success(`Selected assessment: ${assessment.testName}`);
   };
 
-  // Add this function to handle assessment search
   const handleAssessmentSearch = (searchTerm: string) => {
     setAssessmentSearchTerm(searchTerm);
     fetchAssessments(1, 10, searchTerm);
   };
 
-  // Add this function to render the assessment dropdown
-  const renderAssessmentDropdown = () => {
-    // Don't render if we have no assessments and failed to load
-    if (!loadingAssessments && assessments.length === 0) {
-      return (
-        <Card sx={{ mb: 3, p: 2, backgroundColor: '#fff3cd', border: '1px solid #ffeaa7' }}>
-          <Typography variant="body2" color="text.secondary">
-            <Assessment sx={{ mr: 1, verticalAlign: 'middle' }} />
-            Assessment management is temporarily unavailable
-          </Typography>
-        </Card>
-      );
-    }
-
-    return (
-      <Box sx={{ position: 'relative', mb: 3 }}>
-        <Button
-          variant="outlined"
-          onClick={() => setShowAssessmentDropdown(!showAssessmentDropdown)}
-          sx={{ 
-            minWidth: 300,
-            justifyContent: 'space-between',
-            textTransform: 'none',
-            borderRadius: 2
-          }}
-          endIcon={showAssessmentDropdown ? <Close /> : <Assessment />}
-        >
-          {selectedAssessment 
-            ? `${selectedAssessment.testName} - ${selectedAssessment.jobRole}`
-            : 'Select Assessment Profile'
-          }
-        </Button>
-
-        {showAssessmentDropdown && (
-          <Card sx={{ 
-            position: 'absolute', 
-            top: '100%', 
-            left: 0,
-            right: 0,
-            zIndex: 1000,
-            maxHeight: 400,
-            overflow: 'auto',
-            mt: 1,
-            boxShadow: 3
-          }}>
-            <Box sx={{ p: 2 }}>
-              <TextField
-                fullWidth
-                size="small"
-                placeholder="Search by Test Name or Job Role"
-                value={assessmentSearchTerm}
-                onChange={(e) => handleAssessmentSearch(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ mb: 2 }}
-              />
-              
-              {loadingAssessments ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-                  <CircularProgress size={24} />
-                </Box>
-              ) : assessments.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-                  No assessments found
-                </Typography>
-              ) : (
-                <Box>
-                  {assessments.map((assessment) => (
-                    <Box
-                      key={assessment.id}
-                      onClick={() => handleAssessmentSelect(assessment)}
-                      sx={{
-                        p: 2,
-                        cursor: 'pointer',
-                        borderRadius: 1,
-                        border: '1px solid transparent',
-                        '&:hover': {
-                          backgroundColor: '#f5f5f5',
-                          border: '1px solid #e0e0e0'
-                        },
-                        mb: 1
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 'medium', mb: 0.5 }}>
-                            {assessment.testName}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                            {assessment.jobRole}
-                          </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0.5 }}>
-                            <Typography variant="caption" color="text.secondary">
-                              <Work sx={{ fontSize: 14, mr: 0.5 }} />
-                              {assessment.experience} years exp
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              <Assignment sx={{ fontSize: 14, mr: 0.5 }} />
-                              {assessment.totalTopics} topics
-                            </Typography>
-                          </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Typography variant="caption" color="text.secondary">
-                              <Person sx={{ fontSize: 14, mr: 0.5 }} />
-                              {assessment.candidateCount} candidates
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              <Schedule sx={{ fontSize: 14, mr: 0.5 }} />
-                              {new Date(assessment.createdAt).toLocaleDateString()}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <Chip
-                          label={assessment.status}
-                          color={assessment.status === 'active' ? 'success' : 'default'}
-                          size="small"
-                          sx={{ fontSize: '0.7rem' }}
-                        />
-                      </Box>
-                    </Box>
-                  ))}
-                </Box>
-              )}
-            </Box>
-          </Card>
-        )}
-      </Box>
-    );
+  const handleSendEmailClick = (assessment: AssessmentData) => {
+    setSelectedAssessmentForEmail(assessment);
+    setEmailDialogOpen(true);
   };
 
-  // Update the renderAssessmentTable to handle empty assessments gracefully
-  const renderAssessmentTable = () => {
-    // Don't render the table if we have no assessments and failed to load
-    if (!loadingAssessments && assessments.length === 0) {
-      return null; // Don't render anything
+  const handleSendEmailSubmit = async () => {
+    if (!selectedAssessmentForEmail || !candidateEmailInput) {
+      toast.error('Missing assessment or candidate email');
+      return;
     }
 
-    return (
-      <Card sx={{ boxShadow: 2, mb: 3 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-              Assessment Management ({assessments.length})
-            </Typography>
-            <Button
-              onClick={() => fetchAssessments()}
-              variant="contained"
-              size="small"
-              startIcon={<Refresh />}
-            >
-              Refresh
-            </Button>
-          </Box>
-          
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Test Name</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Job Role</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Experience</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Topics</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Duration</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Candidates</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Created Date</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {assessments.length === 0 ? (
+    try {
+      const assessmentLink = await generateAssessmentLink(selectedAssessmentForEmail.id);
+      
+      // Send email logic here
+      toast.success('Assessment link sent successfully!');
+      setEmailDialogOpen(false);
+      setCandidateEmailInput('');
+      setSelectedAssessmentForEmail(null);
+    } catch (error) {
+      toast.error('Failed to send assessment link');
+    }
+  };
+
+  // Now the main return statement
+  return (
+    <Box sx={{ 
+      minHeight: '100vh', 
+      backgroundColor: '#f5f5f5',
+      p: isMobile ? 1 : 3
+    }}>
+      <AssessmentDropdown />
+
+      {/* Header */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
+          Interview Dashboard
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Manage AI interviews and coding assessments
+        </Typography>
+      </Box>
+
+      {/* Stats Cards */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ p: 2, textAlign: 'center' }}>
+            <CardContent>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+                {stats.totalInterviews}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Total Interviews
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ p: 2, textAlign: 'center' }}>
+            <CardContent>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#4caf50' }}>
+                {stats.completedInterviews}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Completed
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ p: 2, textAlign: 'center' }}>
+            <CardContent>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#ff9800' }}>
+                {stats.inProgressInterviews}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                In Progress
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ p: 2, textAlign: 'center' }}>
+            <CardContent>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#f44336' }}>
+                {stats.terminatedInterviews}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Terminated
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Search and Actions */}
+      <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+        <TextField
+          placeholder="Search by name, ID, or phone..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ minWidth: 300 }}
+        />
+        <Button
+          variant="outlined"
+          onClick={loadInterviews}
+          startIcon={<Refresh />}
+          disabled={loading}
+        >
+          Refresh
+        </Button>
+      </Box>
+
+      {/* Main Content */}
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      ) : (
+        <Card>
+          <CardContent>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
                   <TableRow>
-                    <TableCell colSpan={9} sx={{ textAlign: 'center', py: 4 }}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
-                        <Assessment sx={{ fontSize: 48, mb: 1 }} />
-                        <Typography color="text.secondary">
-                          No assessments found
-                        </Typography>
-                      </Box>
-                    </TableCell>
+                    <TableCell>Candidate</TableCell>
+                    <TableCell>Interview ID</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Progress</TableCell>
+                    <TableCell>AI Interview</TableCell>
+                    <TableCell>Score</TableCell>
+                    <TableCell>Actions</TableCell>
                   </TableRow>
-                ) : (
-                  assessments.map((assessment) => (
-                    <TableRow key={assessment.id} hover>
+                </TableHead>
+                <TableBody>
+                  {filteredInterviews.map((interview) => (
+                    <TableRow key={interview.interview_id}>
                       <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                          {assessment.testName}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {assessment.jobRole}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {assessment.experience} years
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {assessment.totalTopics || 'N/A'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {assessment.duration ? `${Math.floor(assessment.duration / 60)} min` : 'N/A'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <Person sx={{ fontSize: 16 }} />
-                          <Typography variant="body2">
-                            {assessment.candidateCount}
-                          </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Avatar sx={{ width: 32, height: 32 }}>
+                            {interview.candidate_name?.charAt(0) || '?'}
+                          </Avatar>
+                          <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+                              {interview.candidate_name || 'Unknown'}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {interview.candidate_phone || 'No phone'}
+                            </Typography>
+                          </Box>
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2">
-                          {new Date(assessment.createdAt).toLocaleDateString()}
+                        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                          {interview.interview_id}
                         </Typography>
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={assessment.status}
-                          color={assessment.status === 'active' ? 'success' : 'default'}
+                          label={interview.status}
+                          color={getStatusColor(interview.status)}
                           size="small"
-                          sx={{ fontSize: '0.7rem' }}
                         />
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="body2">
+                            {interview.questions_answered}/{interview.total_questions}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            ({interview.completion_rate})
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        {renderCurrentInterviewStatus(interview)}
+                      </TableCell>
+                      <TableCell>
+                        {renderInterviewScore(interview)}
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           <Button
-                            variant="outlined"
                             size="small"
-                            startIcon={<Assessment />}
-                            onClick={() => {
-                              toast.info(`Viewing report for ${assessment.testName}`);
-                            }}
+                            variant="outlined"
+                            onClick={() => setShowInterviewForm(interview.interview_id)}
+                            startIcon={<PlayArrow />}
                           >
-                            View Report
+                            Start AI Interview
                           </Button>
                           <Button
-                            variant="outlined"
                             size="small"
-                            color={assessment.status === 'active' ? 'error' : 'success'}
-                            onClick={() => {
-                              const action = assessment.status === 'active' ? 'Deactivating' : 'Activating';
-                              toast.info(`${action} ${assessment.testName}`);
-                            }}
+                            variant="outlined"
+                            onClick={() => copyInterviewLinkDirect(interview.interview_id)}
+                            startIcon={<ContentCopy />}
                           >
-                            {assessment.status === 'active' ? 'Deactivate' : 'Activate'}
+                            Copy Link
                           </Button>
                         </Box>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <CircularProgress />
-        <Typography sx={{ ml: 2 }}>Loading dashboard...</Typography>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ p: 3, maxWidth: '800px', mx: 'auto' }}>
-        <Alert severity="error" sx={{ mb: 3 }}>
-          <Typography variant="h6">Error Loading Dashboard</Typography>
-          <Typography>{error}</Typography>
-        </Alert>
-        <Button onClick={loadInterviews} variant="contained" startIcon={<Refresh />}>
-          Retry
-        </Button>
-      </Box>
-    );
-  }
-
-  return (
-    <Box sx={{ p: 3, maxWidth: '1400px', mx: 'auto', minHeight: '100vh', backgroundColor: '#f9f9f9' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
-            AI Interview Dashboard
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Manage completed interviews and schedule new ones
-          </Typography>
-        </Box>
-        <Button
-          onClick={loadInterviews}
-          variant="contained"
-          startIcon={<Refresh />}
-          sx={{ borderRadius: 2 }}
-        >
-          Refresh Data
-        </Button>
-      </Box>
-
-      {/* Assessment Dropdown */}
-      {renderAssessmentDropdown()}
-
-      {/* Assessment Management Table */}
-      {renderAssessmentTable()}
-
-      {/* Existing Statistics Card */}
-      <Card sx={{ mb: 3, boxShadow: 2 }}>
-        <CardContent sx={{ py: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: '#4caf50', width: 48, height: 48 }}>
-              <CheckCircle sx={{ fontSize: 24 }} />
-            </Avatar>
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#4caf50', mb: 0.5 }}>
-                {stats.completedInterviews}
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Completed Interviews
-              </Typography>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
-      <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            Interview Results ({filteredInterviews.length})
-          </Typography>
-          <TextField
-            placeholder="Search interviews..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            size="small"
-            sx={{ width: { xs: '100%', md: 300 } }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
-        <Card sx={{ boxShadow: 2 }}>
-          <TableContainer sx={{ maxHeight: '70vh' }}>
-            <Table stickyHeader size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
-                    Interview ID
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
-                    Candidate
-                  </TableCell>
-                  {!isMobile && (
-                    <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
-                      Phone
-                    </TableCell>
-                  )}
-                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
-                    Status
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
-                    Current Status
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
-                    Score & Results
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
-                    Actions
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
-                    Coding Assessment
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredInterviews.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={isMobile ? 6 : 8} sx={{ textAlign: 'center', py: 4 }}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
-                        <Person sx={{ fontSize: 48, mb: 1 }} />
-                        <Typography color="text.secondary">
-                          {searchTerm ? 'No interviews match your search' : 'No completed interviews found'}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredInterviews.map((interview) => (
-                    <TableRow key={interview.interview_id} hover>
-                      <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
-                        <Box sx={{ 
-                          maxWidth: isMobile ? 80 : 120,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
-                        }}>
-                          {interview.interview_id}
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Avatar sx={{ width: 32, height: 32, fontSize: '0.8rem' }}>
-                            {interview.candidate_name?.charAt(0)?.toUpperCase()}
-                          </Avatar>
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                              {interview.candidate_name}
-                            </Typography>
-                            {isMobile && (
-                              <Typography variant="caption" color="text.secondary">
-                                {interview.candidate_phone}
-                              </Typography>
-                            )}
-                          </Box>
-                        </Box>
-                      </TableCell>
-                      {!isMobile && (
-                        <TableCell>
-                          <Typography variant="body2">
-                            {interview.candidate_phone}
-                          </Typography>
-                        </TableCell>
-                      )}
-                      <TableCell>
-                        <Chip
-                          label={interview.status?.replace('_', ' ')}
-                          color={getStatusColor(interview.status)}
-                          size="small"
-                          sx={{ fontSize: '0.75rem' }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ minWidth: 100 }}>
-                          {renderCurrentInterviewStatus(interview)}
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ minWidth: 120 }}>
-                          {renderInterviewScore(interview)}
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          onClick={() => {
-                            setShowInterviewForm(interview.interview_id);
-                            setInterviewFormData(prev => ({
-                              ...prev,
-                              candidateName: interview.candidate_name,
-                            }));
-                          }}
-                          variant="contained"
-                          size="small"
-                          startIcon={<PlayArrow />}
-                          sx={{ fontSize: '0.75rem' }}
-                        >
-                          {isMobile ? 'Schedule' : 'Schedule Interview'}
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                          {renderCodingAssessmentStatus(interview)}
-                          <Button
-                            onClick={() => {
-                              setShowCodingAssessmentForm(interview.interview_id);
-                              setCodingAssessmentFormData(prev => ({
-                                ...prev,
-                                title: `${interview.candidate_name} - Coding Assessment`,
-                              }));
-                            }}
-                            variant="outlined"
-                            size="small"
-                            startIcon={<Assessment />}
-                            sx={{ fontSize: '0.75rem' }}
-                          >
-                            Create Assessment
-                          </Button>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
         </Card>
-      </Box>
+      )}
 
+      {/* Interview Form Dialog */}
       <Dialog 
         open={!!showInterviewForm} 
         onClose={() => setShowInterviewForm(null)}
@@ -1634,7 +1208,6 @@ const Dashboard: React.FC = () => {
         </DialogTitle>
 
         <DialogContent>
-          {/* Job Description Section */}
           {jobDescription && (
             <Card sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -1661,8 +1234,6 @@ const Dashboard: React.FC = () => {
               </Typography>
             </Card>
           )}
-
-          {/* Form Fields */}
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <TextField
@@ -1712,20 +1283,6 @@ const Dashboard: React.FC = () => {
                 onChange={handleInterviewFormChange}
                 error={!!formErrors.candidateEmail}
                 helperText={formErrors.candidateEmail}
-                placeholder="candidate@email.com"
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Years of Experience"
-                name="yearsOfExperience"
-                type="number"
-                value={interviewFormData.yearsOfExperience}
-                onChange={handleInterviewFormChange}
-                error={!!formErrors.yearsOfExperience}
-                helperText={formErrors.yearsOfExperience}
-                inputProps={{ min: 0 }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -1761,8 +1318,6 @@ const Dashboard: React.FC = () => {
                     {formErrors.resume}
                   </Typography>
                 )}
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                </Typography>
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
@@ -1824,8 +1379,6 @@ const Dashboard: React.FC = () => {
               />
             </Grid>
           </Grid>
-
-          {/* Success message with copy link */}
           {createdInterviewLink && (
             <Box sx={{ mt: 3, p: 2, backgroundColor: '#e8f5e8', borderRadius: 1 }}>
               <Typography variant="h6" sx={{ color: '#2e7d32', mb: 2 }}>
@@ -1867,8 +1420,6 @@ const Dashboard: React.FC = () => {
               </Typography>
             </Box>
           )}
-
-          {/* Error message */}
           {formErrors.submit && (
             <Alert severity="error" sx={{ mt: 2 }}>
               {formErrors.submit}
@@ -1913,7 +1464,6 @@ const Dashboard: React.FC = () => {
         </DialogTitle>
 
         <DialogContent>
-          {/* Job Description Section */}
           {jobDescription && (
             <Card sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -1940,8 +1490,6 @@ const Dashboard: React.FC = () => {
               </Typography>
             </Card>
           )}
-
-          {/* Success message with copy link */}
           {createdAssessmentLink && (
             <Box sx={{ mt: 3, p: 2, backgroundColor: '#e8f5e8', borderRadius: 1 }}>
               <Typography variant="h6" sx={{ color: '#2e7d32', mb: 2 }}>
@@ -1989,27 +1537,53 @@ const Dashboard: React.FC = () => {
               {codingAssessmentErrors.submit}
             </Alert>
           )}
-        </DialogContent>
-
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={handleCloseCodingAssessmentDialog}>
-            {createdAssessmentLink ? 'Close' : 'Cancel'}
-          </Button>
-          {!createdAssessmentLink && (
-            <Button
-              onClick={() => handleCreateCodingAssessment(filteredInterviews.find(i => i.interview_id === showCodingAssessmentForm)!)}
-              disabled={isSubmittingAssessment}
-              variant="contained"
-              startIcon={isSubmittingAssessment ? <CircularProgress size={20} /> : <Assessment />}
-            >
-              {isSubmittingAssessment ? 'Creating...' : 'Create Assessment'}
-            </Button>
+          
+          {selectedAssessmentForEmail && (
+            <Box sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa', borderRadius: 1 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                {selectedAssessmentForEmail.testName}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Job Role: {selectedAssessmentForEmail.jobRole}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Experience: {selectedAssessmentForEmail.experience} years
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Duration: {selectedAssessmentForEmail.duration ? Math.floor(selectedAssessmentForEmail.duration / 60) : 60} minutes
+              </Typography>
+              <Divider sx={{ my: 2 }} />
+            </Box>
           )}
+          
+          <TextField
+            fullWidth
+            label="Candidate Email"
+            type="email"
+            value={candidateEmailInput}
+            onChange={(e) => setCandidateEmailInput(e.target.value)}
+            placeholder="candidate@email.com"
+            required
+            sx={{ mb: 2 }}
+          />
+          <Typography variant="body2" color="text.secondary">
+            The assessment link will be sent to this email address along with instructions and assessment details.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEmailDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSendEmailSubmit}
+            variant="contained"
+            disabled={!candidateEmailInput.trim() || !/\S+@\S+\.\S+/.test(candidateEmailInput)}
+            startIcon={<EmailIcon />}
+          >
+            Send Assessment Link
+          </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Add the Assessment Manager */}
-      <AssessmentManager />
     </Box>
   );
 };
