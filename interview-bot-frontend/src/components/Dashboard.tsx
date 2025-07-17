@@ -143,6 +143,7 @@ interface CodingAssessmentFormData {
 
 const API_BASE_URL = 'http://13.204.76.229:8000';
 const PRODUCTION_API_URL = 'https://onelabceo.com/api';
+const ASSESSMENT_API_URL = 'https://api.onelabventur.us/node/api'; // Add this new URL
 
 const fetchAllInterviews = async () => {
   const response = await fetch(`${API_BASE_URL}/interviews-detailed`, {
@@ -197,7 +198,7 @@ const Dashboard: React.FC = () => {
   const [loadingResults, setLoadingResults] = useState<{[key: string]: boolean}>({});
   const [interviewIdMapping, setInterviewIdMapping] = useState<{[oldId: string]: string}>({});
 
-  // Add missing state variables
+  // Assessment related state
   const [showCodingAssessmentForm, setShowCodingAssessmentForm] = useState<string | null>(null);
   const [createdAssessmentLink, setCreatedAssessmentLink] = useState<string | null>(null);
   const [codingAssessmentFormData, setCodingAssessmentFormData] = useState<CodingAssessmentFormData>({
@@ -289,7 +290,7 @@ const Dashboard: React.FC = () => {
     return matchesSearch && interview.status === 'COMPLETED' && hasValidStartTime && hasProgress;
   });
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string): "success" | "warning" | "error" | "info" | "default" => {
     switch (status) {
       case 'COMPLETED': return 'success';
       case 'IN_PROGRESS': return 'warning';
@@ -310,6 +311,7 @@ const Dashboard: React.FC = () => {
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, interviewId: string) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    
     setUploading(true);
     try {
       const presignedUrlResponse = await fetch(`${PRODUCTION_API_URL}/proctor/create-upload-url`, {
@@ -323,15 +325,18 @@ const Dashboard: React.FC = () => {
           fileType: file.type,
         }),
       });
+      
       if (!presignedUrlResponse.ok) {
         throw new Error('Failed to get upload URL from server');
       }
+      
       const uploadData = await presignedUrlResponse.json();
       const { uploadUrl, readUrl } = uploadData;
 
       if (!uploadUrl) {
         throw new Error('No upload URL received from server');
       }
+      
       const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
@@ -339,17 +344,21 @@ const Dashboard: React.FC = () => {
           'Content-Type': file.type,
         },
       });
+      
       if (!uploadResponse.ok) {
         throw new Error(`Failed to upload file: ${uploadResponse.statusText}`);
       }
+      
       setInterviewFormData(prev => ({
         ...prev,
         resume: readUrl || URL.createObjectURL(file)
       }));
+      
       setFormErrors(prev => ({
         ...prev,
         resume: ''
       }));
+      
       toast.success('Resume uploaded successfully');
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -365,6 +374,7 @@ const Dashboard: React.FC = () => {
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
+    
     if (!interviewFormData.title.trim()) newErrors.title = 'Title is required';
     if (!interviewFormData.role.trim()) newErrors.role = 'Role is required';
     if (!interviewFormData.jobDescription.trim()) newErrors.jobDescription = 'Job description is required';
@@ -379,6 +389,7 @@ const Dashboard: React.FC = () => {
       newErrors.expiryTime = 'Expiry time must be after start time';
     }
     if (interviewFormData.duration <= 0) newErrors.duration = 'Duration must be greater than 0';
+    
     setFormErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -387,6 +398,7 @@ const Dashboard: React.FC = () => {
     if (!validateForm()) {
       return;
     }
+    
     setIsSubmittingInterview(true);
     try {
       const userId = "f8087c1d-72ba-414b-aea9-f7a0bce9a48a";
@@ -410,12 +422,15 @@ const Dashboard: React.FC = () => {
           totalQuestion: parseInt(interviewFormData.totalQuestion.toString())
         })
       });
+      
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `HTTP ${response.status}` }));
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
+      
       const result = await response.json();
       console.log('✅ Interview created successfully:', result);
+      
       const newInterviewId = result.interviewId || result.id || result.interview_id;
       if (newInterviewId) {
         const updatedMapping = {
@@ -427,13 +442,17 @@ const Dashboard: React.FC = () => {
         console.log(`✅ Mapped interview ID ${candidateData.interview_id} to new ID ${newInterviewId}`);
         fetchInterviewResults(newInterviewId);
       }
+      
       setCreatedInterviewLink(result.link);
-      toast.success(' AI Interview scheduled successfully!');
+      toast.success('AI Interview scheduled successfully!');
+      
+      // Reset form but keep candidate data
       const savedData = {
         candidateName: interviewFormData.candidateName,
         candidateEmail: interviewFormData.candidateEmail,
         role: interviewFormData.role
       };
+      
       setInterviewFormData(prev => ({
         ...prev,
         title: '',
@@ -449,11 +468,13 @@ const Dashboard: React.FC = () => {
         candidateEmail: savedData.candidateEmail,
         role: savedData.role
       }));
+      
       setFormErrors({});
       loadInterviews();
     } catch (error: unknown) {
       console.error('Error creating interview:', error);
       let errorMessage = 'Failed to schedule interview. Please try again.';
+      
       if (error instanceof Error) {
         if (error.message.includes('fetch') || error.message.includes('network')) {
           errorMessage = 'Network error. Please check your connection and try again.';
@@ -469,6 +490,7 @@ const Dashboard: React.FC = () => {
           errorMessage = `Error: ${error.message}`;
         }
       }
+      
       toast.error(errorMessage);
       setFormErrors(prev => ({
         ...prev,
@@ -524,6 +546,7 @@ const Dashboard: React.FC = () => {
       toast.error('Missing link or candidate email');
       return;
     }
+    
     try {
       toast.info('Sending email...');
       const response = await fetch(`${API_BASE_URL}/send-interview-link`, {
@@ -538,6 +561,7 @@ const Dashboard: React.FC = () => {
           role: interviewFormData.role,
         }),
       });
+      
       const result = await response.json();
       if (result.success) {
         toast.success('Interview link sent via email!');
@@ -559,6 +583,7 @@ const Dashboard: React.FC = () => {
     if (interviewIdMapping[originalId]) {
       return interviewIdMapping[originalId];
     }
+    
     try {
       const savedMapping = localStorage.getItem('interviewIdMapping');
       if (savedMapping) {
@@ -574,6 +599,7 @@ const Dashboard: React.FC = () => {
     } catch (err) {
       console.error('Error reading mapping from localStorage:', err);
     }
+    
     return originalId;
   };
 
@@ -587,6 +613,7 @@ const Dashboard: React.FC = () => {
           'Accept': 'application/json',
         },
       });
+      
       if (response.ok) {
         const resultData: InterviewResult = await response.json();
         const updatedResults = { ...interviewResults, [interviewId]: resultData };
@@ -626,6 +653,7 @@ const Dashboard: React.FC = () => {
     const actualInterviewId = getActualInterviewId(interview.interview_id);
     const resultData = interviewResults[actualInterviewId];
     const isLoading = loadingResults[actualInterviewId];
+    
     if (isLoading) {
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -634,6 +662,7 @@ const Dashboard: React.FC = () => {
         </Box>
       );
     }
+    
     if (!resultData || !resultData.interview) {
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -650,10 +679,12 @@ const Dashboard: React.FC = () => {
         </Box>
       );
     }
+    
     const { interview: interviewData } = resultData;
     const score = interviewData.result?.score || 0;
     const feedback = interviewData.result?.feedback || '';
     const overallRating = interviewData.result?.overall_rating || '';
+    
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -709,6 +740,7 @@ const Dashboard: React.FC = () => {
     const actualInterviewId = getActualInterviewId(interview.interview_id);
     const resultData = interviewResults[actualInterviewId];
     const isLoading = loadingResults[actualInterviewId];
+    
     if (isLoading) {
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -717,6 +749,7 @@ const Dashboard: React.FC = () => {
         </Box>
       );
     }
+    
     if (!resultData || !resultData.interview) {
       return (
         <Chip
@@ -727,9 +760,11 @@ const Dashboard: React.FC = () => {
         />
       );
     }
+    
     const { interview: interviewData } = resultData;
     const status = interviewData.status;
     const isCompleted = interviewData.isCompleted;
+    
     const getStatusChip = () => {
       if (isCompleted || status === 'COMPLETED') {
         return (
@@ -741,6 +776,7 @@ const Dashboard: React.FC = () => {
           />
         );
       }
+      
       switch (status?.toLowerCase()) {
         case 'not_started':
           return (
@@ -792,6 +828,7 @@ const Dashboard: React.FC = () => {
           );
       }
     };
+    
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         {getStatusChip()}
@@ -800,7 +837,7 @@ const Dashboard: React.FC = () => {
             Time Left: {Math.floor(interviewData.timeRemaining / 60)}min
           </Typography>
         )}
-        {interviewData.fullScreenExitCount > 0 && (
+        {interviewData.fullScreenExitCount && interviewData.fullScreenExitCount > 0 && (
           <Typography variant="caption" color="error">
             Exits: {interviewData.fullScreenExitCount}
           </Typography>
@@ -858,7 +895,9 @@ const Dashboard: React.FC = () => {
     try {
       setLoadingAssessments(true);
       const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
-      const response = await fetch(`https://api.onelabventur.us/node/api/assessment/?page=${page}&limit=${limit}&sortOrder=DESC&sortBy=createdAt&searchBy=${searchParam}`, {
+      
+      // Use the onelabventur.us API directly (same as AssessmentDropdown)
+      const response = await fetch(`${ASSESSMENT_API_URL}/assessment/?page=${page}&limit=${limit}&sortOrder=DESC&sortBy=createdAt&searchBy=${searchParam}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -866,6 +905,7 @@ const Dashboard: React.FC = () => {
         },
         credentials: 'include',
       });
+
       if (!response.ok) {
         if (response.status === 404) {
           console.log('Assessment API endpoint not found, using fallback');
@@ -936,41 +976,115 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const generateAssessmentLink = async (assessmentId: string): Promise<string> => {
+  const getAssessmentDetails = async (assessmentId: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/generate-assessment-link/${assessmentId}`, {
+      const response = await fetch(`${ASSESSMENT_API_URL}/assessment/details/${assessmentId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to generate assessment link');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
-      const data = await response.json();
-      return data.link || `${API_BASE_URL}/assessment/${assessmentId}`;
+
+      return await response.json();
     } catch (error) {
-      console.error('Error generating assessment link:', error);
-      return `${API_BASE_URL}/assessment/${assessmentId}`;
+      console.error('Error fetching assessment details:', error);
+      return null;
     }
   };
 
-  const handleAssessmentSelect = (assessment: AssessmentData) => {
+  const getCandidatesForAssessment = async (assessmentId: string) => {
+    try {
+      const response = await fetch(`${ASSESSMENT_API_URL}/report/${assessmentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching candidates for assessment:', error);
+      return null;
+    }
+  };
+
+  const getVideoPermission = async (assessmentId: string) => {
+    try {
+      const response = await fetch(`${ASSESSMENT_API_URL}/assessment/getVideoPermission/${assessmentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching video permission:', error);
+      return null;
+    }
+  };
+
+  const generateAssessmentLink = async (assessmentId: string): Promise<string> => {
+    try {
+      // The actual assessment link format based on your URLs
+      const assessmentLink = `https://dev.d23pi31x94e0bg.amplifyapp.com/assessment/${assessmentId}`;
+      
+      // Verify the assessment exists by checking the API
+      const response = await fetch(`${ASSESSMENT_API_URL}/assessment/details/${assessmentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        console.log(`✅ Assessment ${assessmentId} exists, generating link: ${assessmentLink}`);
+        return assessmentLink;
+      } else {
+        console.log(`⚠️ Assessment ${assessmentId} not found, but returning link anyway`);
+        return assessmentLink;
+      }
+    } catch (error) {
+      console.error('Error generating assessment link:', error);
+      // Return the direct link even if verification fails
+      return `https://dev.d23pi31x94e0bg.amplifyapp.com/assessment/${assessmentId}`;
+    }
+  };
+
+  const handleAssessmentSelect = async (assessment: AssessmentData) => {
     setSelectedAssessment(assessment);
     setShowAssessmentDropdown(false);
+    
+    // Fetch additional details when assessment is selected
+    const details = await getAssessmentDetails(assessment.id);
+    const videoPermission = await getVideoPermission(assessment.id);
+    
+    if (details) {
+      console.log('Assessment details:', details);
+    }
+    
+    if (videoPermission) {
+      console.log('Video permission settings:', videoPermission);
+    }
+    
     toast.success(`Selected assessment: ${assessment.testName}`);
-  };
-
-  const handleAssessmentSearch = (searchTerm: string) => {
-    setAssessmentSearchTerm(searchTerm);
-    fetchAssessments(1, 10, searchTerm);
-  };
-
-  const handleSendEmailClick = (assessment: AssessmentData) => {
-    setSelectedAssessmentForEmail(assessment);
-    setEmailDialogOpen(true);
   };
 
   const handleSendEmailSubmit = async () => {
@@ -982,17 +1096,42 @@ const Dashboard: React.FC = () => {
     try {
       const assessmentLink = await generateAssessmentLink(selectedAssessmentForEmail.id);
       
-      // Send email logic here
-      toast.success('Assessment link sent successfully!');
+      // Send email using the fallback API
+      const response = await fetch(`${API_BASE_URL}/send-assessment-link`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: candidateEmailInput,
+          assessmentLink: assessmentLink,
+          assessmentTitle: selectedAssessmentForEmail.testName,
+          jobRole: selectedAssessmentForEmail.jobRole,
+          candidateName: candidateEmailInput.split('@')[0],
+          experience: selectedAssessmentForEmail.experience,
+          duration: selectedAssessmentForEmail.duration ? Math.floor(selectedAssessmentForEmail.duration / 60) : 60,
+          totalQuestions: selectedAssessmentForEmail.totalTopics || 10
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        toast.success('Assessment link sent successfully!');
+      } else {
+        toast.error(result.message || 'Failed to send assessment link');
+      }
+      
       setEmailDialogOpen(false);
       setCandidateEmailInput('');
       setSelectedAssessmentForEmail(null);
     } catch (error) {
+      console.error('Error sending assessment link:', error);
       toast.error('Failed to send assessment link');
     }
   };
 
-  // Now the main return statement
+  // Main render
   return (
     <Box sx={{ 
       minHeight: '100vh', 
@@ -1129,7 +1268,7 @@ const Dashboard: React.FC = () => {
             </IconButton>
           </Box>
         </DialogTitle>
-
+        
         <DialogContent>
           {jobDescription && (
             <Card sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa' }}>
@@ -1157,6 +1296,7 @@ const Dashboard: React.FC = () => {
               </Typography>
             </Card>
           )}
+          
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <TextField
@@ -1302,6 +1442,7 @@ const Dashboard: React.FC = () => {
               />
             </Grid>
           </Grid>
+          
           {createdInterviewLink && (
             <Box sx={{ mt: 3, p: 2, backgroundColor: '#e8f5e8', borderRadius: 1 }}>
               <Typography variant="h6" sx={{ color: '#2e7d32', mb: 2 }}>
@@ -1343,13 +1484,14 @@ const Dashboard: React.FC = () => {
               </Typography>
             </Box>
           )}
+          
           {formErrors.submit && (
             <Alert severity="error" sx={{ mt: 2 }}>
               {formErrors.submit}
             </Alert>
           )}
         </DialogContent>
-
+        
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={handleCloseDialog}>
             {createdInterviewLink ? 'Close' : 'Cancel'}
@@ -1367,97 +1509,25 @@ const Dashboard: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Coding Assessment Dialog */}
+      {/* Email Dialog */}
       <Dialog 
-        open={!!showCodingAssessmentForm} 
-        onClose={handleCloseCodingAssessmentDialog}
-        maxWidth="lg"
+        open={emailDialogOpen} 
+        onClose={() => setEmailDialogOpen(false)}
+        maxWidth="sm"
         fullWidth
-        fullScreen={isMobile}
       >
         <DialogTitle>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6">
-              Create Coding Assessment
+              Send Assessment Link
             </Typography>
-            <IconButton onClick={handleCloseCodingAssessmentDialog}>
+            <IconButton onClick={() => setEmailDialogOpen(false)}>
               <Close />
             </IconButton>
           </Box>
         </DialogTitle>
-
+        
         <DialogContent>
-          {jobDescription && (
-            <Card sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Assignment sx={{ mr: 1 }} />
-                  Current Job Description
-                </Typography>
-                <Button onClick={handleUseJD} variant="contained" size="small">
-                  Apply Current JD
-                </Button>
-              </Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                {jobDescription.title}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <Business sx={{ mr: 1, fontSize: 16, verticalAlign: 'middle' }} />
-                {jobDescription.company}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                <strong>Required Skills:</strong> {jobDescription.required_skills}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Experience:</strong> {jobDescription.experience_required}
-              </Typography>
-            </Card>
-          )}
-          {createdAssessmentLink && (
-            <Box sx={{ mt: 3, p: 2, backgroundColor: '#e8f5e8', borderRadius: 1 }}>
-              <Typography variant="h6" sx={{ color: '#2e7d32', mb: 2 }}>
-                <CheckCircle sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Coding Assessment Created Successfully!
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                Share this link with the candidate to start their coding assessment:
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <TextField
-                  fullWidth
-                  value={createdAssessmentLink}
-                  variant="outlined"
-                  size="small"
-                  InputProps={{ readOnly: true }}
-                />
-                <Button
-                  onClick={copyAssessmentLink}
-                  variant="contained"
-                  startIcon={<ContentCopy />}
-                  sx={{ minWidth: 120 }}
-                >
-                  Copy Link
-                </Button>
-                <Button
-                  onClick={sendAssessmentLinkViaEmail}
-                  variant="contained"
-                  color="primary"
-                  startIcon={<EmailIcon />}
-                  sx={{ minWidth: 160 }}
-                >
-                  Send Email
-                </Button>
-              </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                The candidate will also receive this link via email.
-              </Typography>
-            </Box>
-          )}
-          {codingAssessmentErrors.submit && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {codingAssessmentErrors.submit}
-            </Alert>
-          )}
           {selectedAssessmentForEmail && (
             <Box sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa', borderRadius: 1 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
@@ -1471,6 +1541,9 @@ const Dashboard: React.FC = () => {
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 Duration: {selectedAssessmentForEmail.duration ? Math.floor(selectedAssessmentForEmail.duration / 60) : 60} minutes
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Topics: {selectedAssessmentForEmail.totalTopics || 0} topics
               </Typography>
               <Divider sx={{ my: 2 }} />
             </Box>
@@ -1490,6 +1563,7 @@ const Dashboard: React.FC = () => {
             The assessment link will be sent to this email address along with instructions and assessment details.
           </Typography>
         </DialogContent>
+        
         <DialogActions>
           <Button onClick={() => setEmailDialogOpen(false)}>
             Cancel

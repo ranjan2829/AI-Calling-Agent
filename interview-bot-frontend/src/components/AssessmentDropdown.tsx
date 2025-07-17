@@ -43,7 +43,9 @@ interface AssessmentData {
   createdBy?: string;
 }
 
-const API_BASE_URL = 'http://13.204.76.229:8000';
+// Updated API URLs to use the onelabventur.us server directly
+const API_BASE_URL = 'https://api.onelabventur.us/node/api';
+const FALLBACK_API_URL = 'http://13.204.76.229:8000';
 
 const AssessmentDropdown: React.FC = () => {
   const [assessments, setAssessments] = useState<AssessmentData[]>([]);
@@ -60,7 +62,9 @@ const AssessmentDropdown: React.FC = () => {
     try {
       setLoadingAssessments(true);
       const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
-      const response = await fetch(`https://api.onelabventur.us/node/api/assessment/?page=${page}&limit=${limit}&sortOrder=DESC&sortBy=createdAt&searchBy=${searchParam}`, {
+      
+      // Use the onelabventur.us API directly
+      const response = await fetch(`${API_BASE_URL}/assessment/?page=${page}&limit=${limit}&sortOrder=DESC&sortBy=createdAt&searchBy=${searchParam}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -104,24 +108,97 @@ const AssessmentDropdown: React.FC = () => {
     }
   };
 
-  const generateAssessmentLink = async (assessmentId: string): Promise<string> => {
+  // Get assessment details using the new API
+  const getAssessmentDetails = async (assessmentId: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/generate-assessment-link/${assessmentId}`, {
+      // First try to get assessment details from the API
+      const response = await fetch(`${API_BASE_URL}/assessment/details/${assessmentId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to generate assessment link');
+
+      if (response.ok) {
+        const details = await response.json();
+        console.log(`✅ Assessment details for ${assessmentId}:`, details);
+        return details;
+      } else {
+        console.log(`⚠️ Assessment details not found for ${assessmentId}`);
+        return null;
       }
+    } catch (error) {
+      console.error('Error fetching assessment details:', error);
+      return null;
+    }
+  };
+
+  // Generate assessment link using the direct API
+  const generateAssessmentLink = async (assessmentId: string): Promise<string> => {
+    try {
+      // The correct assessment link format
+      const assessmentLink = `https://dev.d23pi31x94e0bg.amplifyapp.com/assessment/${assessmentId}`;
       
-      const data = await response.json();
-      return data.link || `${API_BASE_URL}/assessment/${assessmentId}`;
+      // Verify the assessment exists by getting details
+      const assessmentDetails = await getAssessmentDetails(assessmentId);
+      
+      if (assessmentDetails) {
+        console.log(`✅ Assessment ${assessmentId} verified, link: ${assessmentLink}`);
+        return assessmentLink;
+      } else {
+        console.log(`⚠️ Assessment ${assessmentId} details not found, but returning link`);
+        return assessmentLink;
+      }
     } catch (error) {
       console.error('Error generating assessment link:', error);
-      return `${API_BASE_URL}/assessment/${assessmentId}`;
+      // Always return the correct format even if there's an error
+      return `https://dev.d23pi31x94e0bg.amplifyapp.com/assessment/${assessmentId}`;
+    }
+  };
+
+  // Get candidates for assessment using the new API
+  const getCandidatesForAssessment = async (assessmentId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/report/${assessmentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching candidates for assessment:', error);
+      return null;
+    }
+  };
+
+  // Get video permission settings for assessment
+  const getVideoPermission = async (assessmentId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/assessment/getVideoPermission/${assessmentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching video permission:', error);
+      return null;
     }
   };
 
@@ -131,7 +208,8 @@ const AssessmentDropdown: React.FC = () => {
     try {
       const link = assessmentLink || await generateAssessmentLink(assessment.id);
       
-      const response = await fetch(`${API_BASE_URL}/send-assessment-link`, {
+      // Try to send via the fallback API first
+      const response = await fetch(`${FALLBACK_API_URL}/send-assessment-link`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,9 +241,22 @@ const AssessmentDropdown: React.FC = () => {
     }
   };
 
-  const handleAssessmentSelect = (assessment: AssessmentData) => {
+  const handleAssessmentSelect = async (assessment: AssessmentData) => {
     setSelectedAssessment(assessment);
     setShowAssessmentDropdown(false);
+    
+    // Fetch additional details when assessment is selected
+    const details = await getAssessmentDetails(assessment.id);
+    const videoPermission = await getVideoPermission(assessment.id);
+    
+    if (details) {
+      console.log('Assessment details:', details);
+    }
+    
+    if (videoPermission) {
+      console.log('Video permission settings:', videoPermission);
+    }
+    
     toast.success(`Selected assessment: ${assessment.testName}`);
   };
 
@@ -187,6 +278,28 @@ const AssessmentDropdown: React.FC = () => {
       setEmailDialogOpen(false);
       setSelectedAssessmentForEmail(null);
       setCandidateEmailInput('');
+    }
+  };
+
+  const handleCopyAssessmentLink = async (assessment: AssessmentData) => {
+    try {
+      const link = await generateAssessmentLink(assessment.id);
+      await navigator.clipboard.writeText(link);
+      toast.success(`Assessment link copied for ${assessment.testName}!`);
+    } catch (error) {
+      toast.error('Failed to copy link');
+    }
+  };
+
+  const handleViewCandidates = async (assessment: AssessmentData) => {
+    try {
+      const candidates = await getCandidatesForAssessment(assessment.id);
+      if (candidates) {
+        console.log('Candidates for assessment:', candidates);
+        toast.info(`Found ${candidates.length || 0} candidates for ${assessment.testName}`);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch candidates');
     }
   };
 
@@ -236,15 +349,7 @@ const AssessmentDropdown: React.FC = () => {
               <Button
                 variant="outlined"
                 startIcon={<ContentCopy />}
-                onClick={async () => {
-                  try {
-                    const link = await generateAssessmentLink(selectedAssessment.id);
-                    await navigator.clipboard.writeText(link);
-                    toast.success(`Assessment link copied for ${selectedAssessment.testName}!`);
-                  } catch (error) {
-                    toast.error('Failed to copy link');
-                  }
-                }}
+                onClick={() => handleCopyAssessmentLink(selectedAssessment)}
               >
                 Copy Link
               </Button>
@@ -254,6 +359,13 @@ const AssessmentDropdown: React.FC = () => {
                 onClick={() => handleSendEmailClick(selectedAssessment)}
               >
                 Send to Candidate
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<Person />}
+                onClick={() => handleViewCandidates(selectedAssessment)}
+              >
+                View Candidates ({selectedAssessment.candidateCount})
               </Button>
             </Box>
           </Box>

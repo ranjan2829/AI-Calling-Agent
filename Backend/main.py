@@ -2010,7 +2010,6 @@ async def get_assessments():
 async def get_candidates():
     """Get candidates from interviews"""
     try:
-        # Get interviews data using your existing function
         interviews_data = []
         try:
             response = requests.get(f"{API_BASE_URL}/interviews-detailed", timeout=30)
@@ -2140,7 +2139,7 @@ Onelab Ventures Team"""
         }
         
     except Exception as e:
-        print(f"[BULK EMAIL ERROR] ❌ {e}")
+        print(f"[BULK EMAIL ERROR]  {e}")
         return {"success": False, "error": str(e)}
 if __name__ == "__main__":
     import uvicorn
