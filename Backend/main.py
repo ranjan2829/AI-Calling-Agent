@@ -2113,4 +2113,177 @@ async def upload_csv(file: UploadFile = File(...)):
             "total_contacts": 0,
             "message": "Failed to process CSV file"
         }
+@app.get("/contact-mappings")
+async def get_contact_mappings():
+    """Get all contact mappings stored in contact_mappings.json"""
+    try:
+        contact_mappings_file = "contact_mappings.json"
+        
+        if not os.path.exists(contact_mappings_file):
+            return {
+                "success": True,
+                "mappings": {},
+                "total_count": 0,
+                "message": "No contact mappings found"
+            }
+        
+        with open(contact_mappings_file, 'r') as f:
+            all_mappings = json.load(f)
+        
+        print(f"[CONTACT MAPPINGS] 📊 Returning {len(all_mappings)} contact mappings")
+        
+        return {
+            "success": True,
+            "mappings": all_mappings,
+            "total_count": len(all_mappings),
+            "message": f"Found {len(all_mappings)} contact mappings"
+        }
+        
+    except Exception as e:
+        print(f"[CONTACT MAPPINGS ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "mappings": {},
+            "total_count": 0
+        }
 
+@app.post("/contact-mappings")
+async def save_contact_mappings(request: Request):
+    """Save contact mappings to contact_mappings.json"""
+    try:
+        mappings_data = await request.json()
+        contact_mappings_file = "contact_mappings.json"
+        
+        # Load existing mappings
+        if os.path.exists(contact_mappings_file):
+            with open(contact_mappings_file, 'r') as f:
+                existing_mappings = json.load(f)
+        else:
+            existing_mappings = {}
+        
+        # Update with new mappings
+        existing_mappings.update(mappings_data)
+        
+        # Save updated mappings
+        with open(contact_mappings_file, 'w') as f:
+            json.dump(existing_mappings, f, indent=2)
+        
+        print(f"[CONTACT MAPPINGS] 💾 Saved {len(mappings_data)} contact mappings")
+        
+        return {
+            "success": True,
+            "message": f"Successfully saved {len(mappings_data)} contact mappings",
+            "total_mappings": len(existing_mappings)
+        }
+        
+    except Exception as e:
+        print(f"[CONTACT MAPPINGS SAVE ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@app.get("/contact-mappings/{call_sid}")
+async def get_contact_mapping(call_sid: str):
+    """Get specific contact mapping by call_sid"""
+    try:
+        contact_mappings_file = "contact_mappings.json"
+        
+        if not os.path.exists(contact_mappings_file):
+            return {
+                "success": False,
+                "error": "Contact mappings file not found",
+                "mapping": None
+            }
+        
+        with open(contact_mappings_file, 'r') as f:
+            all_mappings = json.load(f)
+        
+        mapping = all_mappings.get(call_sid)
+        
+        if mapping:
+            print(f"[CONTACT MAPPING] 📊 Found mapping for call_sid: {call_sid}")
+            return {
+                "success": True,
+                "mapping": mapping,
+                "call_sid": call_sid
+            }
+        else:
+            return {
+                "success": False,
+                "error": "Mapping not found for this call_sid",
+                "mapping": None
+            }
+        
+    except Exception as e:
+        print(f"[CONTACT MAPPING ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "mapping": None
+        }
+
+@app.delete("/contact-mappings/{call_sid}")
+async def delete_contact_mapping(call_sid: str):
+    """Delete specific contact mapping by call_sid"""
+    try:
+        contact_mappings_file = "contact_mappings.json"
+        
+        if not os.path.exists(contact_mappings_file):
+            return {
+                "success": False,
+                "error": "Contact mappings file not found"
+            }
+        
+        with open(contact_mappings_file, 'r') as f:
+            all_mappings = json.load(f)
+        
+        if call_sid in all_mappings:
+            del all_mappings[call_sid]
+            
+            # Save updated mappings
+            with open(contact_mappings_file, 'w') as f:
+                json.dump(all_mappings, f, indent=2)
+            
+            print(f"[CONTACT MAPPING] 🗑️ Deleted mapping for call_sid: {call_sid}")
+            return {
+                "success": True,
+                "message": f"Successfully deleted mapping for {call_sid}",
+                "remaining_mappings": len(all_mappings)
+            }
+        else:
+            return {
+                "success": False,
+                "error": "Mapping not found for this call_sid"
+            }
+        
+    except Exception as e:
+        print(f"[CONTACT MAPPING DELETE ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@app.delete("/contact-mappings")
+async def clear_all_contact_mappings():
+    """Clear all contact mappings"""
+    try:
+        contact_mappings_file = "contact_mappings.json"
+        
+        if os.path.exists(contact_mappings_file):
+            os.remove(contact_mappings_file)
+        
+        print(f"[CONTACT MAPPINGS] 🗑️ Cleared all contact mappings")
+        
+        return {
+            "success": True,
+            "message": "All contact mappings cleared successfully"
+        }
+        
+    except Exception as e:
+        print(f"[CONTACT MAPPINGS CLEAR ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
