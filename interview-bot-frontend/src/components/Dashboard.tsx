@@ -55,6 +55,7 @@ interface InterviewDetails {
   interview_id: string;
   candidate_name: string;
   candidate_phone: string;
+  candidate_email?: string;
   status: string;
   questions_answered: number;
   total_questions: number;
@@ -66,6 +67,11 @@ interface InterviewDetails {
   score?: number;
   interview_result?: any;
   last_updated?: string;
+  assessment_completed?: boolean;
+  assessment_score?: number;
+  assessment_test_taken?: 'taken' | 'not_given' | 'pending';
+  email_sent?: boolean;
+  email_sent_at?: string;
 }
 
 interface InterviewResult {
@@ -143,7 +149,7 @@ interface CodingAssessmentFormData {
 
 const API_BASE_URL = 'http://13.204.76.229:8000';
 const PRODUCTION_API_URL = 'https://onelabceo.com/api';
-const ASSESSMENT_API_URL = 'https://api.onelabventur.us/node/api'; // Add this new URL
+const ASSESSMENT_API_URL = 'https://api.onelabventur.us/node/api';
 
 const fetchAllInterviews = async () => {
   const response = await fetch(`${API_BASE_URL}/interviews-detailed`, {
@@ -219,11 +225,21 @@ const Dashboard: React.FC = () => {
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [candidateEmailInput, setCandidateEmailInput] = useState('');
   const [selectedAssessmentForEmail, setSelectedAssessmentForEmail] = useState<AssessmentData | null>(null);
+  const [assessmentStatuses, setAssessmentStatuses] = useState<{[key: string]: {
+    testTaken: 'taken' | 'not_given' | 'pending';
+    score?: number;
+    emailSent: boolean;
+    emailSentAt?: string;
+    candidateEmail?: string;
+    completed?: boolean;
+  }}>({});
+  const [sendingEmails, setSendingEmails] = useState<{[key: string]: boolean}>({});
+  const [sendingBulkEmails, setSendingBulkEmails] = useState(false);
+
 
   useEffect(() => {
     loadInterviews();
     loadJobDescription();
-    // Make assessment fetching optional - don't block dashboard if it fails
     fetchAssessments().catch(err => {
       console.log('Assessment loading failed, continuing without assessments:', err);
     });
@@ -446,7 +462,6 @@ const Dashboard: React.FC = () => {
       setCreatedInterviewLink(result.link);
       toast.success('AI Interview scheduled successfully!');
       
-      // Reset form but keep candidate data
       const savedData = {
         candidateName: interviewFormData.candidateName,
         candidateEmail: interviewFormData.candidateEmail,
@@ -846,6 +861,279 @@ const Dashboard: React.FC = () => {
     );
   };
 
+  const renderAssessmentScore = (interview: InterviewDetails) => {
+    const status = assessmentStatuses[interview.interview_id];
+    
+    if (!status) {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            No assessment
+          </Typography>
+        </Box>
+      );
+    }
+    
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        {status.completed && status.score ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <StarRate sx={{ fontSize: 16, color: getScoreColor(status.score) }} />
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                fontWeight: 'bold',
+                color: getScoreColor(status.score)
+              }}
+            >
+              {status.score}%
+            </Typography>
+          </Box>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            {status.testTaken === 'taken' ? 'Completed' : 'Not taken'}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  const renderEmailSent = (interview: InterviewDetails) => {
+    const status = assessmentStatuses[interview.interview_id];
+    const isSending = sendingEmails[interview.interview_id];
+    
+    if (isSending) {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <CircularProgress size={16} />
+          <Typography variant="body2">Sending...</Typography>
+        </Box>
+      );
+    }
+    
+    if (!status || !status.emailSent) {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            Not sent
+          </Typography>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => sendAssessmentEmail(interview.interview_id)}
+            startIcon={<EmailIcon />}
+            disabled={!selectedAssessment}
+          >
+            Send
+          </Button>
+        </Box>
+      );
+    }
+    
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+        <Chip
+          label="Sent"
+          size="small"
+          color="success"
+          sx={{ fontSize: '0.7rem' }}
+        />
+        {status.emailSentAt && (
+          <Typography variant="caption" color="text.secondary">
+            {new Date(status.emailSentAt).toLocaleDateString()}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  const extractCandidateEmail = (interview: InterviewDetails): string => {
+    return interview.candidate_email || assessmentStatuses[interview.interview_id]?.candidateEmail || 'No email';
+  };
+
+  const sendAssessmentEmail = async (interviewId: string) => {
+    if (!selectedAssessment) {
+      toast.error('Please select an assessment first');
+      return;
+    }
+    
+    const interview = interviews.find(i => i.interview_id === interviewId);
+    if (!interview) {
+      toast.error('Interview not found');
+      return;
+    }
+
+    const candidateEmail = extractCandidateEmail(interview);
+    if (!candidateEmail || candidateEmail === 'No email') {
+      toast.error('Candidate email not found');
+      return;
+    }
+    
+    setSendingEmails(prev => ({ ...prev, [interviewId]: true }));
+    
+    try {
+      const assessmentLink = await generateAssessmentLink(selectedAssessment.id);
+      const response = await fetch(`${API_BASE_URL}/send-assessment-link`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: candidateEmail,
+          assessmentLink: assessmentLink,
+          assessmentTitle: selectedAssessment.testName,
+          jobRole: selectedAssessment.jobRole,
+          candidateName: interview.candidate_name,
+          experience: selectedAssessment.experience,
+          duration: selectedAssessment.duration ? Math.floor(selectedAssessment.duration / 60) : 60,
+          totalQuestions: selectedAssessment.totalTopics || 10
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        toast.success('Assessment link sent successfully!');
+        setAssessmentStatuses(prev => ({
+          ...prev,
+          [interviewId]: {
+            ...prev[interviewId],
+            emailSent: true,
+            emailSentAt: new Date().toISOString(),
+            candidateEmail: candidateEmail,
+            testTaken: 'pending'
+          }
+        }));
+      } else {
+        toast.error(result.message || 'Failed to send assessment link');
+      }
+    } catch (error) {
+      console.error('Error sending assessment link:', error);
+      toast.error('Failed to send assessment link');
+    } finally {
+      setSendingEmails(prev => ({ ...prev, [interviewId]: false }));
+    }
+  };
+
+  const sendBulkAssessmentEmails = async () => {
+    if (!selectedAssessment) {
+      toast.error('Please select an assessment first');
+      return;
+    }
+
+    if (filteredInterviews.length === 0) {
+      toast.error('No interviews found to send emails');
+      return;
+    }
+
+    setSendingBulkEmails(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    try {
+      for (const interview of filteredInterviews) {
+        const candidateEmail = extractCandidateEmail(interview);
+        if (!candidateEmail || candidateEmail === 'No email') {
+          failCount++;
+          continue;
+        }
+
+        try {
+          const assessmentLink = await generateAssessmentLink(selectedAssessment.id);
+          const response = await fetch(`${API_BASE_URL}/send-assessment-link`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: candidateEmail,
+              assessmentLink: assessmentLink,
+              assessmentTitle: selectedAssessment.testName,
+              jobRole: selectedAssessment.jobRole,
+              candidateName: interview.candidate_name,
+              experience: selectedAssessment.experience,
+              duration: selectedAssessment.duration ? Math.floor(selectedAssessment.duration / 60) : 60,
+              totalQuestions: selectedAssessment.totalTopics || 10
+            }),
+          });
+
+          const result = await response.json();
+          
+          if (response.ok && result.success) {
+            successCount++;
+            setAssessmentStatuses(prev => ({
+              ...prev,
+              [interview.interview_id]: {
+                ...prev[interview.interview_id],
+                emailSent: true,
+                emailSentAt: new Date().toISOString(),
+                candidateEmail: candidateEmail,
+                testTaken: 'pending'
+              }
+            }));
+          } else {
+            failCount++;
+          }
+        } catch (error) {
+          failCount++;
+        }
+
+        // Add delay between emails to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      if (successCount > 0) {
+        toast.success(`Successfully sent ${successCount} assessment links`);
+      }
+      if (failCount > 0) {
+        toast.error(`Failed to send ${failCount} assessment links`);
+      }
+    } catch (error) {
+      console.error('Error sending bulk emails:', error);
+      toast.error('Failed to send bulk emails');
+    } finally {
+      setSendingBulkEmails(false);
+    }
+  };
+
+  const updateAssessmentStatuses = async () => {
+    if (!selectedAssessment) {
+      toast.error('Please select an assessment first');
+      return;
+    }
+    
+    try {
+      const candidatesData = await getCandidatesForAssessment(selectedAssessment.id);
+      
+      if (candidatesData && candidatesData.result) {
+        const newStatuses: typeof assessmentStatuses = {};
+        
+        candidatesData.result.forEach((candidate: any) => {
+          const matchingInterview = interviews.find(
+            interview => extractCandidateEmail(interview) === candidate.email
+          );
+          
+          if (matchingInterview) {
+            newStatuses[matchingInterview.interview_id] = {
+              completed: candidate.status === 'completed',
+              score: candidate.score || 0,
+              emailSent: true,
+              emailSentAt: candidate.createdAt,
+              candidateEmail: candidate.email,
+              testTaken: candidate.status === 'completed' ? 'taken' : 'pending'
+            };
+          }
+        });
+        
+        setAssessmentStatuses(prev => ({ ...prev, ...newStatuses }));
+        toast.success('Assessment statuses updated');
+      }
+    } catch (error) {
+      console.error('Error updating assessment statuses:', error);
+      toast.error('Failed to update assessment statuses');
+    }
+  };
+
   const handleCloseCodingAssessmentDialog = () => {
     setShowCodingAssessmentForm(null);
     setCreatedAssessmentLink(null);
@@ -880,7 +1168,6 @@ const Dashboard: React.FC = () => {
     
     try {
       toast.info('Sending assessment link via email...');
-      // Add your email sending logic here
       toast.success('Assessment link sent via email!');
     } catch (err) {
       toast.error('Failed to send email');
@@ -896,7 +1183,6 @@ const Dashboard: React.FC = () => {
       setLoadingAssessments(true);
       const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
       
-      // Use the onelabventur.us API directly (same as AssessmentDropdown)
       const response = await fetch(`${ASSESSMENT_API_URL}/assessment/?page=${page}&limit=${limit}&sortOrder=DESC&sortBy=createdAt&searchBy=${searchParam}`, {
         method: 'GET',
         headers: {
@@ -1042,10 +1328,8 @@ const Dashboard: React.FC = () => {
 
   const generateAssessmentLink = async (assessmentId: string): Promise<string> => {
     try {
-      // The actual assessment link format based on your URLs
       const assessmentLink = `https://dev.d23pi31x94e0bg.amplifyapp.com/assessment/${assessmentId}`;
       
-      // Verify the assessment exists by checking the API
       const response = await fetch(`${ASSESSMENT_API_URL}/assessment/details/${assessmentId}`, {
         method: 'GET',
         headers: {
@@ -1063,28 +1347,28 @@ const Dashboard: React.FC = () => {
       }
     } catch (error) {
       console.error('Error generating assessment link:', error);
-      // Return the direct link even if verification fails
       return `https://dev.d23pi31x94e0bg.amplifyapp.com/assessment/${assessmentId}`;
     }
   };
 
-  const handleAssessmentSelect = async (assessment: AssessmentData) => {
+  const handleAssessmentSelect = async (assessment: AssessmentData | null) => {
     setSelectedAssessment(assessment);
     setShowAssessmentDropdown(false);
     
-    // Fetch additional details when assessment is selected
-    const details = await getAssessmentDetails(assessment.id);
-    const videoPermission = await getVideoPermission(assessment.id);
-    
-    if (details) {
-      console.log('Assessment details:', details);
+    if (assessment) {
+      const details = await getAssessmentDetails(assessment.id);
+      const videoPermission = await getVideoPermission(assessment.id);
+      
+      if (details) {
+        console.log('Assessment details:', details);
+      }
+      
+      if (videoPermission) {
+        console.log('Video permission settings:', videoPermission);
+      }
+      
+      toast.success(`Selected assessment: ${assessment.testName}`);
     }
-    
-    if (videoPermission) {
-      console.log('Video permission settings:', videoPermission);
-    }
-    
-    toast.success(`Selected assessment: ${assessment.testName}`);
   };
 
   const handleSendEmailSubmit = async () => {
@@ -1095,8 +1379,6 @@ const Dashboard: React.FC = () => {
 
     try {
       const assessmentLink = await generateAssessmentLink(selectedAssessmentForEmail.id);
-      
-      // Send email using the fallback API
       const response = await fetch(`${API_BASE_URL}/send-assessment-link`, {
         method: 'POST',
         headers: {
@@ -1131,14 +1413,16 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Main render
   return (
     <Box sx={{ 
       minHeight: '100vh', 
       backgroundColor: '#f5f5f5',
       p: isMobile ? 1 : 3
     }}>
-      <AssessmentDropdown />
+      <AssessmentDropdown 
+        onAssessmentSelect={handleAssessmentSelect}
+        selectedAssessment={selectedAssessment}
+      />
 
       {/* Header */}
       <Box sx={{ mb: 3 }}>
@@ -1173,6 +1457,26 @@ const Dashboard: React.FC = () => {
         >
           Refresh
         </Button>
+        <Button
+          variant="outlined"
+          onClick={updateAssessmentStatuses}
+          startIcon={<Timeline />}
+          disabled={!selectedAssessment}
+        >
+          Refresh Assessment Status
+        </Button>
+        <Button
+          variant="contained"
+          onClick={sendBulkAssessmentEmails}
+          startIcon={<EmailIcon />}
+          disabled={!selectedAssessment || filteredInterviews.length === 0 || sendingBulkEmails}
+          sx={{ 
+            backgroundColor: '#4caf50',
+            '&:hover': { backgroundColor: '#45a049' }
+          }}
+        >
+          {sendingBulkEmails ? 'Sending...' : `Send Bulk Emails (${filteredInterviews.length})`}
+        </Button>
       </Box>
 
       {/* Main Content */}
@@ -1192,9 +1496,10 @@ const Dashboard: React.FC = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell>Candidate</TableCell>
-                    <TableCell>Status</TableCell>
+                    <TableCell>Assessment Score</TableCell>
+                    <TableCell>Email Sent</TableCell>
                     <TableCell>AI Interview</TableCell>
-                    <TableCell>Score</TableCell>
+                    <TableCell>Interview Score</TableCell>
                     <TableCell>Actions</TableCell>
                   </TableRow>
                 </TableHead>
@@ -1213,15 +1518,17 @@ const Dashboard: React.FC = () => {
                             <Typography variant="caption" color="text.secondary">
                               {interview.candidate_phone || 'No phone'}
                             </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                              {extractCandidateEmail(interview)}
+                            </Typography>
                           </Box>
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <Chip
-                          label={interview.status}
-                          color={getStatusColor(interview.status)}
-                          size="small"
-                        />
+                        {renderAssessmentScore(interview)}
+                      </TableCell>
+                      <TableCell>
+                        {renderEmailSent(interview)}
                       </TableCell>
                       <TableCell>
                         {renderCurrentInterviewStatus(interview)}
@@ -1267,8 +1574,8 @@ const Dashboard: React.FC = () => {
               <Close />
             </IconButton>
           </Box>
-        </DialogTitle>
-        
+        </DialogTitle>      
+
         <DialogContent>
           {jobDescription && (
             <Card sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa' }}>
@@ -1296,7 +1603,7 @@ const Dashboard: React.FC = () => {
               </Typography>
             </Card>
           )}
-          
+
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
               <TextField
@@ -1382,6 +1689,19 @@ const Dashboard: React.FC = () => {
                   </Typography>
                 )}
               </Box>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                label="Years of Experience"
+                name="yearsOfExperience"
+                type="number"
+                value={interviewFormData.yearsOfExperience}
+                onChange={handleInterviewFormChange}
+                error={!!formErrors.yearsOfExperience}
+                helperText={formErrors.yearsOfExperience}
+                inputProps={{ min: 0 }}
+              />
             </Grid>
             <Grid item xs={12} md={4}>
               <TextField
@@ -1491,7 +1811,7 @@ const Dashboard: React.FC = () => {
             </Alert>
           )}
         </DialogContent>
-        
+
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={handleCloseDialog}>
             {createdInterviewLink ? 'Close' : 'Cancel'}
@@ -1526,7 +1846,7 @@ const Dashboard: React.FC = () => {
             </IconButton>
           </Box>
         </DialogTitle>
-        
+
         <DialogContent>
           {selectedAssessmentForEmail && (
             <Box sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa', borderRadius: 1 }}>
@@ -1548,7 +1868,7 @@ const Dashboard: React.FC = () => {
               <Divider sx={{ my: 2 }} />
             </Box>
           )}
-          
+
           <TextField
             fullWidth
             label="Candidate Email"
@@ -1563,7 +1883,7 @@ const Dashboard: React.FC = () => {
             The assessment link will be sent to this email address along with instructions and assessment details.
           </Typography>
         </DialogContent>
-        
+
         <DialogActions>
           <Button onClick={() => setEmailDialogOpen(false)}>
             Cancel

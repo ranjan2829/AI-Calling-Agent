@@ -21,8 +21,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-
-# Virtual environments
+__pycache__/
+*.pyc
 .env
 .venv
 env/

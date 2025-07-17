@@ -1138,12 +1138,8 @@ async def upload_csv(file: UploadFile = File(...)):
                 "total_contacts": 0,
                 "message": "Invalid file format"
             }
-        
-        # Read CSV content
         content = await file.read()
         csv_data = content.decode('utf-8')
-        
-        # Parse CSV
         csv_reader = csv.DictReader(io.StringIO(csv_data))
         candidates = list(csv_reader)
         
@@ -1156,8 +1152,6 @@ async def upload_csv(file: UploadFile = File(...)):
                 "total_contacts": 0,
                 "message": "Empty CSV file"
             }
-        
-        # ⚠️ CRITICAL: ONLY PROCESS CSV DATA - ABSOLUTELY NO CALLING!
         processed_contacts = []
         for candidate in candidates:
             name = candidate.get("name", candidate.get("Name", "")).strip()
@@ -1181,35 +1175,17 @@ async def upload_csv(file: UploadFile = File(...)):
                 elif len(clean_phone) == 10:
                     clean_phone = f"+91{clean_phone}"
             
-            # Generate email if not provided
-            if not email:
-                if name:
-                    email_name = name.lower().replace(' ', '.').replace('-', '.')
-                    # Remove any special characters except dots
-                    email_name = re.sub(r'[^a-z0-9.]', '', email_name)
-                    email = ""
-                elif clean_phone:
-                    phone_suffix = clean_phone.replace('+', '').replace('-', '').replace(' ', '')[-6:]
-                    email = ""
-                else:
-                    email = ""
-            
-            # Generate name if not provided
             if not name and clean_phone:
                 phone_suffix = clean_phone.replace('+', '')[-4:] if len(clean_phone) >= 4 else "0000"
                 name = f"Candidate_{phone_suffix}"
-            elif not name:
-                name = f"Candidate_{len(processed_contacts)+1}"
             
             processed_contacts.append({
-                "name": name,
+                "name": name or "Unknown",
                 "phone": clean_phone or "",
                 "email": email,
                 "experience": experience,
                 "skills": skills
             })
-            
-            print(f"[CSV PROCESS] 📋 {name} | 📞 {clean_phone} | 📧 {email}")
         
         print(f"[CSV UPLOAD] ✅ Successfully processed {len(processed_contacts)} contacts")
         print(f"[CSV UPLOAD] 📋 Data parsed and ready for frontend display")
@@ -1269,7 +1245,7 @@ async def start_bulk_calling(request: Request):
                 experience = contact.get("experience", "").strip()
                 skills = contact.get("skills", "").strip()
                 
-                print(f"[BULK CALL] 📞 Processing {index + 1}/{len(contacts)}: {name} ({phone}) - {email}")
+                print(f"[BULK CALL] 📞 Processing {index + 1}/{len(contacts)}: {name} ({phone})")
                 
                 if not phone:
                     print(f"[BULK CALL] ⚠️  Skipping {name} - No phone number")
@@ -1277,7 +1253,6 @@ async def start_bulk_calling(request: Request):
                     results.append({
                         "name": name or "Unknown",
                         "phone": "N/A",
-                        "email": email,
                         "success": False,
                         "error": "No phone number",
                         "call_sid": None,
@@ -1289,16 +1264,6 @@ async def start_bulk_calling(request: Request):
                 if not name:
                     phone_suffix = phone.replace('+', '')[-4:] if len(phone) >= 4 else "0000"
                     name = f"Candidate_{phone_suffix}"
-                
-                # Generate email if missing
-                if not email:
-                    if name and not name.startswith("Candidate_"):
-                        email_name = name.lower().replace(' ', '.').replace('-', '.')
-                        email_name = re.sub(r'[^a-z0-9.]', '', email_name)
-                        email = f"{email_name}@example.com"
-                    else:
-                        phone_suffix = phone.replace('+', '').replace('-', '').replace(' ', '')[-6:]
-                        email = f"candidate{phone_suffix}@example.com"
                 
                 # 🔥 MAKE ACTUAL TWILIO CALL HERE 🔥
                 try:
@@ -1315,7 +1280,7 @@ async def start_bulk_calling(request: Request):
                     
                     print(f"[TWILIO] ✅ Call created successfully: {call.sid}")
                     
-                    # Store contact mapping for the interview with EMAIL
+                    # Store contact mapping for the interview
                     contact_mappings_file = "contact_mappings.json"
                     try:
                         if os.path.exists(contact_mappings_file):
@@ -1327,7 +1292,7 @@ async def start_bulk_calling(request: Request):
                         all_mappings[call.sid] = {
                             "candidate_name": name,
                             "candidate_phone": phone,
-                            "candidate_email": email,  # ✅ NOW STORING EMAIL
+                            "candidate_email": email,
                             "candidate_experience": experience,
                             "candidate_skills": skills,
                             "is_bulk_call": True,
@@ -1336,7 +1301,7 @@ async def start_bulk_calling(request: Request):
                             "candidate_data": {
                                 "name": name,
                                 "phone": phone,
-                                "email": email,  # ✅ NOW STORING EMAIL IN CANDIDATE DATA
+                                "email": email,
                                 "experience": experience,
                                 "skills": skills
                             }
@@ -1345,7 +1310,7 @@ async def start_bulk_calling(request: Request):
                         with open(contact_mappings_file, 'w') as f:
                             json.dump(all_mappings, f, indent=2)
                             
-                        print(f"[BULK MAPPING] 💾 Stored data for {name} ({phone}) - {email}")
+                        print(f"[BULK MAPPING] 💾 Stored data for {name} ({phone})")
                         
                     except Exception as mapping_error:
                         print(f"[MAPPING ERROR] ❌ {mapping_error}")
@@ -1354,14 +1319,13 @@ async def start_bulk_calling(request: Request):
                     results.append({
                         "name": name,
                         "phone": phone,
-                        "email": email,  # ✅ NOW RETURNING EMAIL IN RESULTS
                         "success": True,
                         "call_sid": call.sid,
                         "status": call.status,
                         "error": None
                     })
                     
-                    print(f"[BULK SUCCESS] ✅ {name} ({phone}) - {email}: Call SID {call.sid}")
+                    print(f"[BULK SUCCESS] ✅ {name} ({phone}): Call SID {call.sid}")
                     
                     # Small delay between calls to avoid rate limiting
                     import time
@@ -1373,7 +1337,6 @@ async def start_bulk_calling(request: Request):
                     results.append({
                         "name": name,
                         "phone": phone,
-                        "email": email,  # ✅ NOW RETURNING EMAIL EVEN IN ERRORS
                         "success": False,
                         "error": str(call_error),
                         "call_sid": None,
@@ -1386,7 +1349,6 @@ async def start_bulk_calling(request: Request):
                 results.append({
                     "name": contact.get("name", "Unknown"),
                     "phone": contact.get("phone", "N/A"),
-                    "email": contact.get("email", "N/A"),  # ✅ NOW HANDLING EMAIL IN ERRORS
                     "success": False,
                     "error": str(contact_error),
                     "call_sid": None,
@@ -1439,7 +1401,55 @@ async def start_bulk_calling(request: Request):
             "successful_calls": 0,
             "failed_calls": 0
         }
-
+@app.post("/make-call")
+async def make_single_call(request: Request):
+    """Make a single AI interview call"""
+    try:
+        data = await request.json()
+        phone_number = data.get("phone_number", "").strip()
+        
+        if not phone_number:
+            return {"success": False, "error": "Phone number is required"}
+        
+        # Clean phone number format
+        clean_phone = phone_number
+        if phone_number.startswith('+'):
+            clean_phone = phone_number
+        elif phone_number.startswith('91') and len(phone_number) == 12:
+            clean_phone = f"+{phone_number}"
+        elif len(phone_number) == 10:
+            clean_phone = f"+91{phone_number}"
+        
+        print(f"[SINGLE CALL] 📞 Making call to {clean_phone}")
+        
+        # Make the actual Twilio call
+        call = client.calls.create(
+            url=f"{WEBHOOK_BASE_URL}/voice",
+            to=clean_phone,
+            from_="+14787807480",
+            record=True,
+            recording_channels="dual",
+            recording_status_callback=f"{WEBHOOK_BASE_URL}/recording-status"
+        )
+        
+        print(f"[SINGLE CALL] ✅ Call created: {call.sid}")
+        
+        return {
+            "success": True,
+            "call_sid": call.sid,
+            "status": call.status,
+            "to": clean_phone,
+            "from": "+14787807480",
+            "message": f"Call initiated successfully to {clean_phone}"
+        }
+        
+    except Exception as e:
+        print(f"[SINGLE CALL ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "call_sid": None
+        }
 @app.post("/voice")
 async def voice_webhook(request: Request):
     """Handle incoming Twilio voice calls"""
@@ -1462,7 +1472,7 @@ async def voice_webhook(request: Request):
         except Exception as e:
             print(f"[VOICE] Error loading contact mappings: {e}")
         
-        # Initialize interview session with EMAIL
+        # Initialize interview session
         interview_data = {
             "interview_id": call_sid,
             "call_sid": call_sid,
@@ -1470,7 +1480,7 @@ async def voice_webhook(request: Request):
             "phone_number": from_number,
             "twilio_number": to_number,
             "candidate_name": contact_info.get("candidate_name", f"Candidate_{call_sid[-8:]}"),
-            "candidate_email": contact_info.get("candidate_email", ""),  # ✅ NOW STORING EMAIL
+            "candidate_email": contact_info.get("candidate_email", ""),
             "candidate_experience": contact_info.get("candidate_experience", ""),
             "candidate_skills": contact_info.get("candidate_skills", ""),
             "is_bulk_call": contact_info.get("is_bulk_call", False),
@@ -1483,19 +1493,6 @@ async def voice_webhook(request: Request):
             "silence_prompts": 0,
             "last_activity": datetime.now().isoformat()
         }
-        
-        # Generate email if not found in mapping
-        if not interview_data["candidate_email"]:
-            name = interview_data["candidate_name"]
-            if name and not name.startswith("Candidate_"):
-                email_name = name.lower().replace(' ', '.').replace('-', '.')
-                email_name = re.sub(r'[^a-z0-9.]', '', email_name)
-                interview_data["candidate_email"] = f"{email_name}@example.com"
-            else:
-                phone_suffix = from_number.replace('+', '').replace('-', '').replace(' ', '')[-6:]
-                interview_data["candidate_email"] = f"candidate{phone_suffix}@example.com"
-        
-        print(f"[VOICE SESSION] 📧 Interview session for {interview_data['candidate_name']} - {interview_data['candidate_email']}")
         
         save_interview_session(call_sid, interview_data)
         conversation_state[call_sid] = interview_data
@@ -1530,13 +1527,486 @@ async def voice_webhook(request: Request):
         resp.hangup()
         return Response(content=str(resp), media_type="application/xml")
 
+@app.post("/voice/speech/{call_sid}")
+async def handle_speech(call_sid: str, request: Request):
+    """Handle speech responses from candidates"""
+    try:
+        form_data = await request.form()
+        speech_result = form_data.get('SpeechResult', '')
+        confidence = form_data.get('Confidence', '0')
+        
+        print(f"[SPEECH] 🎤 Call {call_sid}: '{speech_result}' (confidence: {confidence})")
+        
+        interview_data = load_interview_session(call_sid)
+        if not interview_data:
+            return Response(content=handle_error("Interview session not found"), media_type="application/xml")
+        
+        current_question = interview_data.get('current_question', 0)
+        
+        # Save response
+        response_data = {
+            "question_number": current_question,
+            "question": INTERVIEW_QUESTIONS.get(current_question, "Unknown question"),
+            "answer": speech_result,
+            "confidence": float(confidence) if confidence else 0.0,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        interview_data['responses'].append(response_data)
+        interview_data['last_activity'] = datetime.now().isoformat()
+        interview_data['silence_prompts'] = 0  # Reset silence counter
+        
+        # Validate response
+        is_valid, action, reason = validate_response_selected_questions(call_sid, current_question, speech_result)
+        
+        if not is_valid:
+            if action == "call_later":
+                resp = VoiceResponse()
+                resp.say("I understand you'd like to reschedule. We'll call you back at a more convenient time. Thank you!", 
+                        voice='Polly.Aditi')
+                resp.hangup()
+                
+                interview_data['status'] = 'CALLBACK_REQUESTED'
+                interview_data['end_time'] = datetime.now().isoformat()
+                save_incomplete_interview(call_sid, interview_data, "call_later")
+                return Response(content=str(resp), media_type="application/xml")
+                
+            elif action == "not_available":
+                resp = VoiceResponse()
+                resp.say("I understand this isn't a good time. Thank you for your time. Have a great day!", 
+                        voice='Polly.Aditi')
+                resp.hangup()
+                
+                interview_data['status'] = 'NOT_STARTED'
+                interview_data['end_time'] = datetime.now().isoformat()
+                save_incomplete_interview(call_sid, interview_data, "not_available")
+                return Response(content=str(resp), media_type="application/xml")
+        
+        # Move to next question
+        next_question = current_question + 1
+        interview_data['current_question'] = next_question
+        save_interview_session(call_sid, interview_data)
+        
+        # Check if interview is complete
+        if next_question > len(INTERVIEW_QUESTIONS) - 1:
+            return Response(content=complete_interview(call_sid), media_type="application/xml")
+        
+        # Ask next question using the existing function
+        return Response(content=ask_next_question_immediately(call_sid, next_question), media_type="application/xml")
+        
+    except Exception as e:
+        print(f"[SPEECH ERROR] ❌ Call {call_sid}: {e}")
+        return Response(content=handle_error("Sorry, there was an error processing your response."), media_type="application/xml")
+
+@app.post("/recording-status")
+async def recording_status_callback(request: Request):
+    """Handle Twilio recording status callbacks"""
+    try:
+        form_data = await request.form()
+        call_sid = form_data.get('CallSid')
+        recording_sid = form_data.get('RecordingSid')
+        recording_url = form_data.get('RecordingUrl')
+        recording_status = form_data.get('RecordingStatus')
+        recording_duration = form_data.get('RecordingDuration')
+        
+        print(f"[RECORDING] 🎙️ Call {call_sid}: Recording {recording_sid} status: {recording_status}")
+        
+        if recording_status == 'completed' and recording_url:
+            print(f"[RECORDING] ✅ Recording completed: {recording_url}")
+            
+            # Save recording info to interview session if it exists
+            try:
+                interview_data = load_interview_session(call_sid)
+                if interview_data:
+                    interview_data['recording_sid'] = recording_sid
+                    interview_data['recording_url'] = recording_url
+                    interview_data['recording_duration'] = recording_duration
+                    interview_data['recording_status'] = recording_status
+                    save_interview_session(call_sid, interview_data)
+                    print(f"[RECORDING] 💾 Saved recording info to session {call_sid}")
+                else:
+                    # Try to find completed interview file and update it
+                    pattern = f"interviews/*{call_sid}*.json"
+                    files = glob.glob(pattern)
+                    for file_path in files:
+                        if "session_" not in file_path:
+                            try:
+                                with open(file_path, 'r') as f:
+                                    data = json.load(f)
+                                data['recording_sid'] = recording_sid
+                                data['recording_url'] = recording_url
+                                data['recording_duration'] = recording_duration
+                                data['recording_status'] = recording_status
+                                with open(file_path, 'w') as f:
+                                    json.dump(data, f, indent=2)
+                                print(f"[RECORDING] 💾 Updated completed interview file: {file_path}")
+                                break
+                            except Exception as e:
+                                print(f"[RECORDING] ❌ Error updating file {file_path}: {e}")
+            except Exception as e:
+                print(f"[RECORDING] ❌ Error saving recording info: {e}")
+        
+        return {"status": "received"}
+        
+    except Exception as e:
+        print(f"[RECORDING ERROR] ❌ {e}")
+        return {"status": "error", "message": str(e)}
+
+@app.post("/voice/no-response/{call_sid}")
+async def handle_no_response_webhook(call_sid: str, request: Request):
+    """Handle when candidate doesn't respond"""
+    try:
+        print(f"[NO RESPONSE] 🔇 Call {call_sid} - No response detected")
+        return Response(content=handle_no_response(call_sid), media_type="application/xml")
+    except Exception as e:
+        print(f"[NO RESPONSE ERROR] ❌ Call {call_sid}: {e}")
+        return Response(content=handle_error("Technical difficulty occurred."), media_type="application/xml")
+@app.get("/contact-mappings")
+async def get_contact_mappings():
+    """Get contact mappings from contact_mappings.json"""
+    try:
+        mappings_file = 'contact_mappings.json'
+        if os.path.exists(mappings_file):
+            with open(mappings_file, 'r') as f:
+                mappings = json.load(f)
+            print(f"✅ Loaded {len(mappings)} contact mappings from file")
+            
+            # Debug: Print first few mappings
+            for call_id, data in list(mappings.items())[:3]:
+                candidate_name = data.get('candidate_name') or (data.get('candidate_data', {}).get('name', 'No Name'))
+                candidate_phone = data.get('candidate_phone') or (data.get('candidate_data', {}).get('phone', 'No Phone'))
+                print(f"📋 Sample mapping: {call_id} -> {candidate_name} ({candidate_phone})")
+            
+            return {
+                'success': True,
+                'mappings': mappings,
+                'count': len(mappings)
+            }
+        else:
+            print("❌ contact_mappings.json not found")
+            return {
+                'success': True,
+                'mappings': {},
+                'count': 0
+            }
+    except Exception as e:
+        print(f"❌ Error loading contact mappings: {e}")
+        return {
+            'success': False,
+            'error': str(e),
+            'mappings': {},
+            'count': 0
+        }
+
+@app.get("/interview-questions")
+async def get_interview_questions():
+    """Get current interview questions"""
+    try:
+        questions = []
+        for q_id, question_text in INTERVIEW_QUESTIONS.items():
+            questions.append({
+                "id": q_id,
+                "question": question_text
+            })
+        
+        print(f"✅ Returning {len(questions)} interview questions")
+        return {
+            "success": True,
+            "questions": questions
+        }
+    except Exception as e:
+        print(f"❌ Error getting interview questions: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "questions": []
+        }
+@app.post("/update-interview-questions")
+async def update_interview_questions(request: Request):
+    """Update interview questions"""
+    try:
+        data = await request.json()
+        questions = data.get("questions", [])
+        
+        print(f"📝 Received {len(questions)} questions to update")
+        
+        if not questions:
+            return {"success": False, "error": "No questions provided"}
+        global INTERVIEW_QUESTIONS
+        
+        for question in questions:
+            q_id = question.get("id")
+            q_text = question.get("question", "").strip()
+            if q_id is not None and q_text:
+                INTERVIEW_QUESTIONS[q_id] = q_text
+                print(f"📝 Updated Q{q_id}: {q_text[:50]}...")
+        try:
+            questions_config = {
+                "questions": INTERVIEW_QUESTIONS,
+                "updated_at": datetime.now().isoformat()
+            }
+            
+            with open("interview_questions.json", "w") as f:
+                json.dump(questions_config, f, indent=2)
+            
+            print(f"💾 Saved questions to interview_questions.json")
+            
+        except Exception as save_error:
+            print(f"⚠️ Warning: Could not save questions to file: {save_error}")
+        
+        print(f"✅ Successfully updated {len(questions)} interview questions")
+        
+        return {
+            "success": True,
+            "message": "Interview questions updated successfully",
+            "updated_count": len(questions)
+        }
+        
+    except Exception as e:
+        print(f"❌ Error updating interview questions: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@app.get("/bulk-results")
+async def get_bulk_results():
+    """Get all saved bulk call results"""
+    try:
+        results_folder = "bulk_results"
+        if not os.path.exists(results_folder):
+            return {"success": True, "bulk_results": []}
+
+        all_results = []
+        for filename in os.listdir(results_folder):
+            if filename.endswith(".json"):
+                try:
+                    with open(os.path.join(results_folder, filename), 'r') as f:
+                        data = json.load(f)
+                        all_results.append(data)
+                except Exception as e:
+                    print(f"Error reading bulk result file {filename}: {e}")
+                    continue
+        
+        # Sort by creation date, newest first
+        all_results.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+        
+        return {"success": True, "bulk_results": all_results}
+    except Exception as e:
+        print(f"Error getting bulk results: {e}")
+        return {"success": False, "error": str(e)}
+
+def load_questions_from_file():
+    """Load questions from file if it exists"""
+    try:
+        if os.path.exists("interview_questions.json"):
+            with open("interview_questions.json", "r") as f:
+                data = json.load(f)
+                questions = data.get("questions", {})
+                
+                print(f"📂 Found saved questions file with {len(questions)} questions")
+                
+                # Convert string keys to integers and update global INTERVIEW_QUESTIONS
+                global INTERVIEW_QUESTIONS
+                old_questions = INTERVIEW_QUESTIONS.copy()
+                
+                for key, value in questions.items():
+                    INTERVIEW_QUESTIONS[int(key)] = value
+                    if old_questions.get(int(key)) != value:
+                        print(f"🔄 Updated Q{key}: {value[:50]}...")
+                
+                print(f"✅ Loaded {len(questions)} interview questions from file")
+                print("📋 Questions loaded from file:")
+                for q_id in sorted(INTERVIEW_QUESTIONS.keys()):
+                    print(f"  Q{q_id}: {INTERVIEW_QUESTIONS[q_id][:60]}...")
+        else:
+            print("📝 No saved questions file found - using default interview questions")
+            print("📋 Using default questions:")
+            for q_id in sorted(INTERVIEW_QUESTIONS.keys()):
+                print(f"  Q{q_id}: {INTERVIEW_QUESTIONS[q_id][:60]}...")
+    except Exception as e:
+        print(f"❌ Error loading questions from file: {e}")
+        print("📝 Using default interview questions")
+
+@app.get("/twilio-balance")
+async def get_twilio_balance():
+    """Get Twilio account balance"""
+    try:
+        print("[TWILIO BALANCE] 💳 Fetching account balance...")
+        
+        if not client:
+            return {
+                "success": False,
+                "error": "Twilio client not initialized"
+            }
+        
+        balance = client.api.v2010.accounts(account_sid).balance.fetch()
+        
+        print(f"[TWILIO BALANCE] ✅ Raw balance: {balance.balance} {balance.currency}")
+        balance_amount = float(balance.balance)
+        
+        return {
+            "success": True,
+            "balance": f"{balance_amount:.2f}",
+            "currency": balance.currency,
+            "raw_balance": balance.balance
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+# Add this near your other imports
+from email.message import EmailMessage
+import smtplib
+from pydantic import BaseModel
+from typing import Optional
+
+# Define a model for the request data
+class EmailLinkRequest(BaseModel):
+    email: str
+    link: str
+    candidate_name: Optional[str] = None
+    role: Optional[str] = None
+
+@app.post("/send-interview-link")
+async def send_interview_link(request: EmailLinkRequest):
+    """Send interview link to candidate via email"""
+    try:
+        print(f"[EMAIL] 📧 Sending interview link to {request.email}")
+        
+        # Create email message
+        msg = EmailMessage()
+        
+        # Format candidate name
+        candidate_name = request.candidate_name or "Candidate"
+        
+        # Set email headers
+        msg['Subject'] = f"Your AI Interview Link - Onelab Ventures"
+        msg['From'] = "ranjan.shitole3129@gmail.com"
+        msg['To'] = request.email
+        
+        # Prepare a professional email body
+        role_text = f" for the {request.role} position" if request.role else ""
+        
+        # Create HTML content for better formatting
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                <h2 style="color: #1976d2;">AI Interview - Onelab Ventures</h2>
+                <p>Hello {candidate_name},</p>
+                <p>Thank you for your interest in Onelab Ventures{role_text}. Your AI interview has been scheduled.</p>
+                <p>Please click the button below to start your interview:</p>
+                <div style="text-align: center; margin: 25px 0;">
+                    <a href="{request.link}" style="background-color: #1976d2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                        Start Your Interview
+                    </a>
+                </div>
+                <p>Alternatively, you can copy and paste this link into your browser:</p>
+                <p style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all;">
+                    {request.link}
+                </p>
+                <p>Important tips for your interview:</p>
+                <ul>
+                    <li>Make sure you have a stable internet connection</li>
+                    <li>Use a quiet space with minimal background noise</li>
+                    <li>Ensure your webcam and microphone are working properly</li>
+                    <li>Have your resume handy for reference</li>
+                </ul>
+                <p>Best of luck with your interview!</p>
+                <p>Regards,<br>Onelab Ventures Team</p>
+            </div>
+        </body>
+        </html>
+        """
+        msg.set_content(f"""Hello {candidate_name},
+
+Thank you for your interest in Onelab Ventures{role_text}. Your AI interview has been scheduled.
+
+Please use this link to start your interview: {request.link}
+
+Best of luck with your interview!
+
+Regards,
+Onelab Ventures Team
+""")
+        
+        # Add HTML version
+        msg.add_alternative(html_content, subtype='html')
+        
+        # Send the email
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login("ranjan.shitole3129@gmail.com", "mikcnsvzyyjshozh")
+            smtp.send_message(msg)
+        
+        print(f"[EMAIL] ✅ Successfully sent interview link to {request.email}")
+        
+        return {
+            "success": True,
+            "message": f"Interview link sent to {request.email} successfully"
+        }
+        
+    except Exception as e:
+        print(f"[EMAIL ERROR] ❌ Failed to send email: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to send interview link email"
+        }
+# Add these simplified endpoints to your main.py
+# Add these endpoints to your main.py file
+
+@app.get("/api/assessments")
+async def get_assessments():
+    """Get all assessments from external API"""
+    try:
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        }
+        
+        response = requests.get(
+            "https://api.onelabventur.us/node/api/assessment/?page=1&limit=100&sortOrder=DESC&sortBy=createdAt",
+            headers=headers,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            assessments = data.get("result", {}).get("assessments", [])
+            
+            # Process assessments
+            processed_assessments = []
+            for assessment in assessments:
+                processed_assessments.append({
+                    "id": assessment["id"],
+                    "testName": assessment["title"],
+                    "jobRole": assessment["designation"],
+                    "experience": assessment.get("experience", 0),
+                    "duration": assessment.get("duration", 0),
+                    "totalTopics": assessment.get("totalTopics", 0),
+                    "status": "active" if assessment["isActive"] else "inactive",
+                    "assessmentLink": f"https://api.onelabventur.us/assessment/{assessment['id']}"
+                })
+            
+            return {"success": True, "assessments": processed_assessments}
+        else:
+            return {"success": False, "error": "Failed to fetch assessments", "assessments": []}
+            
+    except Exception as e:
+        print(f"[ASSESSMENTS ERROR] ❌ {e}")
+        return {"success": False, "error": str(e), "assessments": []}
+
 @app.get("/api/candidates")
 async def get_candidates():
-    """Get candidates from interviews with email addresses"""
+    """Get candidates from interviews"""
     try:
         interviews_data = []
         try:
-            response = requests.get(f"http://13.204.76.229:8000/interviews-detailed", timeout=30)
+            response = requests.get(f"{API_BASE_URL}/interviews-detailed", timeout=30)
             if response.status_code == 200:
                 data = response.json()
                 interviews_data = data.get("interviews", [])
@@ -1544,37 +2014,245 @@ async def get_candidates():
             print(f"Error fetching interviews: {e}")
             return {"success": False, "error": "Failed to fetch interviews", "candidates": []}
         
-        # Process candidates with proper email handling
+        # Process candidates
         candidates = []
         for interview in interviews_data:
             candidate_email = interview.get("candidate_email")
-            
-            # If no email found, generate one
             if not candidate_email:
-                name = interview.get("candidate_name", "")
                 phone = interview.get("candidate_phone", "")
-                
-                if name and not name.startswith("Candidate_"):
-                    email_name = name.lower().replace(' ', '.').replace('-', '.')
-                    email_name = re.sub(r'[^a-z0-9.]', '', email_name)
-                    candidate_email = f"{email_name}@example.com"
-                else:
-                    clean_phone = phone.replace("+", "").replace("-", "").replace(" ", "")
-                    candidate_email = f"candidate{clean_phone[-6:] if len(clean_phone) >= 6 else interview['interview_id'][-6:]}@example.com"
+                clean_phone = phone.replace("+", "").replace("-", "").replace(" ", "")
+                candidate_email = f"candidate{clean_phone[-6:] if len(clean_phone) >= 6 else interview['interview_id'][-6:]}@example.com"
             
             candidates.append({
                 "id": interview["interview_id"],
                 "name": interview["candidate_name"],
                 "phone": interview["candidate_phone"],
-                "email": candidate_email,  # ✅ NOW PROPERLY RETURNING EMAIL
+                "email": candidate_email,
                 "status": interview["status"]
             })
-        
-        print(f"[CANDIDATES] 📧 Processed {len(candidates)} candidates with emails")
         
         return {"success": True, "candidates": candidates}
         
     except Exception as e:
         print(f"[CANDIDATES ERROR] ❌ {e}")
         return {"success": False, "error": str(e), "candidates": []}
+
+@app.post("/api/send-assessment-bulk")
+async def send_assessment_bulk(request: Request):
+    """Send assessment link to all candidates"""
+    try:
+        data = await request.json()
+        
+        assessment_name = data.get('assessmentName')
+        job_role = data.get('jobRole')
+        assessment_link = data.get('assessmentLink')
+        candidates = data.get('candidates', [])
+        
+        if not assessment_link or not candidates:
+            return {"success": False, "error": "Assessment link and candidates are required"}
+        
+        results = []
+        success_count = 0
+        failed_count = 0
+        
+        for candidate in candidates:
+            try:
+                # Create personalized email
+                subject = f"{assessment_name} - Assessment Invitation"
+                message = f"""Hello {candidate['name']},
+
+You have been invited to take the {assessment_name} assessment for the {job_role} position.
+
+Please click the link below to start your assessment:
+{assessment_link}
+
+Best regards,
+Onelab Ventures Team"""
+                
+                # Create email
+                msg = EmailMessage()
+                msg['Subject'] = subject
+                msg['From'] = "ranjan.shitole3129@gmail.com"
+                msg['To'] = candidate['email']
+                
+                # HTML version
+                html_content = f"""
+                <html>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #1976d2;">Assessment Invitation</h2>
+                        <p>Hello {candidate['name']},</p>
+                        <p>You have been invited to take the <strong>{assessment_name}</strong> assessment for the <strong>{job_role}</strong> position.</p>
+                        <div style="text-align: center; margin: 25px 0;">
+                            <a href="{assessment_link}" style="background-color: #1976d2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                                Start Assessment
+                            </a>
+                        </div>
+                        <p>Direct link: <a href="{assessment_link}">{assessment_link}</a></p>
+                        <p>Best regards,<br>Onelab Ventures Team</p>
+                    </div>
+                </body>
+                </html>
+                """
+                
+                msg.set_content(message)
+                msg.add_alternative(html_content, subtype='html')
+                
+                # Send email
+                with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                    smtp.login("ranjan.shitole3129@gmail.com", "mikcnsvzyyjshozh")
+                    smtp.send_message(msg)
+                
+                results.append({
+                    "name": candidate['name'],
+                    "email": candidate['email'],
+                    "status": "sent"
+                })
+                success_count += 1
+                print(f"✅ Email sent to {candidate['name']} ({candidate['email']})")
+                
+            except Exception as e:
+                results.append({
+                    "name": candidate['name'],
+                    "email": candidate['email'],
+                    "status": "failed",
+                    "error": str(e)
+                })
+                failed_count += 1
+                print(f"❌ Failed to send email to {candidate['name']}: {e}")
+        
+        return {
+            "success": True,
+            "message": f"Sent {success_count} emails, {failed_count} failed",
+            "results": results,
+            "stats": {
+                "total": len(candidates),
+                "sent": success_count,
+                "failed": failed_count
+            }
+        }
+        
+    except Exception as e:
+        print(f"[BULK EMAIL ERROR]  {e}")
+        return {"success": False, "error": str(e)}
+@app.post("/send-assessment-link")
+async def send_assessment_link_single(request: Request):
+    """Send assessment link to a single candidate"""
+    try:
+        data = await request.json()
+        
+        email = data.get('email')
+        assessment_link = data.get('assessmentLink')
+        assessment_title = data.get('assessmentTitle')
+        job_role = data.get('jobRole')
+        candidate_name = data.get('candidateName', 'Candidate')
+        experience = data.get('experience', 0)
+        duration = data.get('duration', 60)
+        total_questions = data.get('totalQuestions', 10)
+        
+        if not email or not assessment_link:
+            return {"success": False, "error": "Email and assessment link are required"}
+        
+        print(f"[ASSESSMENT EMAIL] 📧 Sending assessment link to {email}")
+        print(f"[ASSESSMENT EMAIL] 🔗 Link: {assessment_link}")
+        print(f"[ASSESSMENT EMAIL] 📝 Assessment: {assessment_title}")
+        
+        # Create email message
+        msg = EmailMessage()
+        msg['Subject'] = f"Assessment Invitation - {assessment_title}"
+        msg['From'] = "ranjan.shitole3129@gmail.com"
+        msg['To'] = email
+        
+        # Create HTML content
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                <h2 style="color: #1976d2;">Assessment Invitation - Onelab Ventures</h2>
+                <p>Hello {candidate_name},</p>
+                <p>You have been invited to take the <strong>{assessment_title}</strong> assessment for the <strong>{job_role}</strong> position.</p>
+                
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <h3 style="color: #333; margin-top: 0;">Assessment Details:</h3>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li><strong>Role:</strong> {job_role}</li>
+                        <li><strong>Experience Required:</strong> {experience} years</li>
+                        <li><strong>Duration:</strong> {duration} minutes</li>
+                        <li><strong>Total Questions:</strong> {total_questions}</li>
+                    </ul>
+                </div>
+                
+                <div style="text-align: center; margin: 25px 0;">
+                    <a href="{assessment_link}" style="background-color: #1976d2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                        Start Assessment
+                    </a>
+                </div>
+                
+                <p>Alternatively, you can copy and paste this link into your browser:</p>
+                <p style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all; font-family: monospace;">
+                    {assessment_link}
+                </p>
+                
+                <p>Important instructions:</p>
+                <ul>
+                    <li>Ensure stable internet connection</li>
+                    <li>Use a quiet environment</li>
+                    <li>Have your resume ready for reference</li>
+                    <li>Complete the assessment in one sitting</li>
+                </ul>
+                
+                <p>Best of luck with your assessment!</p>
+                <p>Regards,<br>Onelab Ventures Team</p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Plain text version
+        plain_text = f"""Hello {candidate_name},
+
+You have been invited to take the {assessment_title} assessment for the {job_role} position.
+
+Assessment Details:
+- Role: {job_role}
+- Experience Required: {experience} years
+- Duration: {duration} minutes
+- Total Questions: {total_questions}
+
+Please use this link to start your assessment: {assessment_link}
+
+Best of luck with your assessment!
+
+Regards,
+Onelab Ventures Team
+"""
+        
+        msg.set_content(plain_text)
+        msg.add_alternative(html_content, subtype='html')
+        
+        # Send the email
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login("ranjan.shitole3129@gmail.com", "mikcnsvzyyjshozh")
+            smtp.send_message(msg)
+        
+        print(f"[ASSESSMENT EMAIL] ✅ Successfully sent to {email}")
+        
+        return {
+            "success": True,
+            "message": f"Assessment link sent to {email} successfully"
+        }
+        
+    except Exception as e:
+        print(f"[ASSESSMENT EMAIL ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to send assessment link"
+        }
+if __name__ == "__main__":
+    import uvicorn
+    print("🚀 Starting AI Interview Bot Server...")
+    print("📝 Loading saved interview questions...")
+    load_questions_from_file()
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
