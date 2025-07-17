@@ -2141,6 +2141,120 @@ Onelab Ventures Team"""
     except Exception as e:
         print(f"[BULK EMAIL ERROR]  {e}")
         return {"success": False, "error": str(e)}
+@app.post("/send-assessment-link")
+async def send_assessment_link_single(request: Request):
+    """Send assessment link to a single candidate"""
+    try:
+        data = await request.json()
+        
+        email = data.get('email')
+        assessment_link = data.get('assessmentLink')
+        assessment_title = data.get('assessmentTitle')
+        job_role = data.get('jobRole')
+        candidate_name = data.get('candidateName', 'Candidate')
+        experience = data.get('experience', 0)
+        duration = data.get('duration', 60)
+        total_questions = data.get('totalQuestions', 10)
+        
+        if not email or not assessment_link:
+            return {"success": False, "error": "Email and assessment link are required"}
+        
+        print(f"[ASSESSMENT EMAIL] 📧 Sending assessment link to {email}")
+        print(f"[ASSESSMENT EMAIL] 🔗 Link: {assessment_link}")
+        print(f"[ASSESSMENT EMAIL] 📝 Assessment: {assessment_title}")
+        
+        # Create email message
+        msg = EmailMessage()
+        msg['Subject'] = f"Assessment Invitation - {assessment_title}"
+        msg['From'] = "ranjan.shitole3129@gmail.com"
+        msg['To'] = email
+        
+        # Create HTML content
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+                <h2 style="color: #1976d2;">Assessment Invitation - Onelab Ventures</h2>
+                <p>Hello {candidate_name},</p>
+                <p>You have been invited to take the <strong>{assessment_title}</strong> assessment for the <strong>{job_role}</strong> position.</p>
+                
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <h3 style="color: #333; margin-top: 0;">Assessment Details:</h3>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li><strong>Role:</strong> {job_role}</li>
+                        <li><strong>Experience Required:</strong> {experience} years</li>
+                        <li><strong>Duration:</strong> {duration} minutes</li>
+                        <li><strong>Total Questions:</strong> {total_questions}</li>
+                    </ul>
+                </div>
+                
+                <div style="text-align: center; margin: 25px 0;">
+                    <a href="{assessment_link}" style="background-color: #1976d2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                        Start Assessment
+                    </a>
+                </div>
+                
+                <p>Alternatively, you can copy and paste this link into your browser:</p>
+                <p style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all; font-family: monospace;">
+                    {assessment_link}
+                </p>
+                
+                <p>Important instructions:</p>
+                <ul>
+                    <li>Ensure stable internet connection</li>
+                    <li>Use a quiet environment</li>
+                    <li>Have your resume ready for reference</li>
+                    <li>Complete the assessment in one sitting</li>
+                </ul>
+                
+                <p>Best of luck with your assessment!</p>
+                <p>Regards,<br>Onelab Ventures Team</p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Plain text version
+        plain_text = f"""Hello {candidate_name},
+
+You have been invited to take the {assessment_title} assessment for the {job_role} position.
+
+Assessment Details:
+- Role: {job_role}
+- Experience Required: {experience} years
+- Duration: {duration} minutes
+- Total Questions: {total_questions}
+
+Please use this link to start your assessment: {assessment_link}
+
+Best of luck with your assessment!
+
+Regards,
+Onelab Ventures Team
+"""
+        
+        msg.set_content(plain_text)
+        msg.add_alternative(html_content, subtype='html')
+        
+        # Send the email
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login("ranjan.shitole3129@gmail.com", "mikcnsvzyyjshozh")
+            smtp.send_message(msg)
+        
+        print(f"[ASSESSMENT EMAIL] ✅ Successfully sent to {email}")
+        
+        return {
+            "success": True,
+            "message": f"Assessment link sent to {email} successfully"
+        }
+        
+    except Exception as e:
+        print(f"[ASSESSMENT EMAIL ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Failed to send assessment link"
+        }
 if __name__ == "__main__":
     import uvicorn
     print("🚀 Starting AI Interview Bot Server...")

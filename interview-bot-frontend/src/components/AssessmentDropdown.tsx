@@ -208,7 +208,11 @@ const AssessmentDropdown: React.FC = () => {
     try {
       const link = assessmentLink || await generateAssessmentLink(assessment.id);
       
-      // Try to send via the fallback API first
+      console.log(`🔗 Sending assessment link: ${link}`);
+      console.log(`📧 To email: ${candidateEmail}`);
+      console.log(`📝 Assessment: ${assessment.testName}`);
+      
+      // Use the correct API endpoint
       const response = await fetch(`${FALLBACK_API_URL}/send-assessment-link`, {
         method: 'POST',
         headers: {
@@ -220,22 +224,27 @@ const AssessmentDropdown: React.FC = () => {
           assessmentTitle: assessment.testName,
           jobRole: assessment.jobRole,
           candidateName: candidateEmail.split('@')[0],
-          experience: assessment.experience,
+          experience: assessment.experience || 0,
           duration: assessment.duration ? Math.floor(assessment.duration / 60) : 60,
           totalQuestions: assessment.totalTopics || 10
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const result = await response.json();
       
-      if (response.ok && result.success) {
+      if (result.success) {
         toast.success(`Assessment link sent to ${candidateEmail}!`);
+        console.log(`✅ Email sent successfully to ${candidateEmail}`);
       } else {
-        toast.error(result.message || 'Failed to send assessment link');
+        throw new Error(result.error || result.message || 'Failed to send email');
       }
     } catch (error) {
       console.error('Error sending assessment link:', error);
-      toast.error('Failed to send assessment link');
+      toast.error(`Failed to send assessment link: ${error.message}`);
     } finally {
       setSendingEmails(prev => ({ ...prev, [assessment.id]: false }));
     }
@@ -284,10 +293,36 @@ const AssessmentDropdown: React.FC = () => {
   const handleCopyAssessmentLink = async (assessment: AssessmentData) => {
     try {
       const link = await generateAssessmentLink(assessment.id);
-      await navigator.clipboard.writeText(link);
-      toast.success(`Assessment link copied for ${assessment.testName}!`);
+      
+      // Try modern clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(link);
+        toast.success(`Assessment link copied for ${assessment.testName}!`);
+      } else {
+        // Fallback method for older browsers or insecure contexts
+        const textArea = document.createElement('textarea');
+        textArea.value = link;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+          toast.success(`Assessment link copied for ${assessment.testName}!`);
+        } catch (err) {
+          console.error('Fallback copy failed:', err);
+          // Show the link in a modal or alert as last resort
+          window.prompt('Copy this link:', link);
+        } finally {
+          document.body.removeChild(textArea);
+        }
+      }
     } catch (error) {
-      toast.error('Failed to copy link');
+      console.error('Copy failed:', error);
+      toast.error('Failed to copy link. Please try again.');
     }
   };
 
@@ -522,10 +557,18 @@ const AssessmentDropdown: React.FC = () => {
           <Button
             onClick={handleSendEmailSubmit}
             variant="contained"
-            disabled={!candidateEmailInput.trim() || !/\S+@\S+\.\S+/.test(candidateEmailInput)}
-            startIcon={<EmailIcon />}
+            disabled={
+              !candidateEmailInput.trim() || 
+              !/\S+@\S+\.\S+/.test(candidateEmailInput) ||
+              sendingEmails[selectedAssessmentForEmail?.id || '']
+            }
+            startIcon={
+              sendingEmails[selectedAssessmentForEmail?.id || ''] ? 
+              <CircularProgress size={20} /> : 
+              <EmailIcon />
+            }
           >
-            Send Assessment Link
+            {sendingEmails[selectedAssessmentForEmail?.id || ''] ? 'Sending...' : 'Send Assessment Link'}
           </Button>
         </DialogActions>
       </Dialog>
