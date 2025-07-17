@@ -100,39 +100,32 @@ def check_skills_match(transcript_text):
     text_lower = transcript_text.lower()
     jd_skills = load_jd_skills()
     comprehensive_ai_ml_skills = [
-        # Text based - NLP/LLM/RAG, agents, chatbots, hugging face
         "nlp", "natural language processing", "llm", "large language model", 
         "rag", "retrieval augmented generation", "agents", "chatbot", "chatbots",
         "hugging face", "transformers", "bert", "gpt", "openai", "text processing", 
         "language models", "text based", "huggingface",
         
-        # Deep Learning/CNN - YOLO, stable diffusion etc image based models
         "deep learning", "neural network", "cnn", "convolutional neural network",
         "yolo", "stable diffusion", "computer vision", "image processing", 
         "object detection", "image based models", "convolutional", "pytorch", 
         "tensorflow", "keras", "generative ai", "diffusion models", "image models",
         
-        # ML - regression, clustering algorithms, unsupervised/supervised algorithms
         "machine learning", "ml", "regression", "clustering", "clustering algorithms",
         "supervised", "unsupervised", "supervised algorithms", "unsupervised algorithms",
         "classification", "random forest", "svm", "decision tree", "xgboost",
         "k-means", "linear regression", "logistic regression", "naive bayes",
         
-        # Knowledge of fine-tuning/training of any model (ML,DL,NLP/LLM)
         "fine-tuning", "fine tuning", "model training", "training", "transfer learning",
         "hyperparameter tuning", "optimization", "model fine-tuning", "training models",
         "fine tuned", "model optimization", "training algorithms",
         
-        # Cloud knowledge and experience - AWS (ec2,s3,sagemaker,ecr), Azure, GCP
         "aws", "amazon web services", "ec2", "s3", "sagemaker", "ecr", 
         "azure", "microsoft azure", "gcp", "google cloud", "google cloud platform",
         "cloud computing", "cloud", "cloud knowledge", "cloud experience",
         
-        # Deployment knowledge - docker, kubernetes etc
         "docker", "kubernetes", "deployment", "containerization", "k8s",
         "container", "orchestration", "ci/cd", "devops", "deployment knowledge",
         
-        # API knowledge and experience - FastAPI, REST API, Flask API or AI/ML APIs
         "api", "fastapi", "rest api", "restapi", "flask", "flask api", 
         "api development", "endpoints", "json", "http", "web services",
         "api knowledge", "api experience", "ai api", "ml api", "model api",
@@ -155,9 +148,7 @@ def check_skills_match(transcript_text):
         len(all_found_skills) >= 1 or
         any(word in text_lower for word in ["programming", "development", "coding", "software", "technical", "engineering"])
     )
-    
     overall_percentage = max(jd_match_percentage, ai_match_percentage)
-    
     return has_good_match, all_found_skills, overall_percentage
 def check_relocation_willingness(transcript_text):
     text_lower = transcript_text.lower()
