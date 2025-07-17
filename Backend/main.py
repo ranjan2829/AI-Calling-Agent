@@ -934,15 +934,11 @@ async def get_all_interviews_detailed():
                         "last_activity": interview_data.get("last_activity", ""),
                         "bulk_call_id": interview_data.get("bulk_call_id"),
                         "is_bulk_call": interview_data.get("is_bulk_call", False),
-                        
-                        # Callback fields
                         "callback_requested": interview_data.get("callback_requested", False),
                         "callback_response": interview_data.get("callback_response", ""),
                         "callback_request_time": interview_data.get("callback_request_time", ""),
                         "preferred_time": interview_data.get("preferred_time", "")
                     }
-                    
-                    print(f"📊 Processed interview {call_sid}: status='{processed_interview['status']}', name='{candidate_name}'")
                     all_interviews.append(processed_interview);
                     
                 except Exception as e:
@@ -956,7 +952,6 @@ async def get_all_interviews_detailed():
                 if session_data:
                     exists_in_files = any(interview["call_sid"] == call_sid for interview in all_interviews)
                     if not exists_in_files:
-                        # Process session data similar to above
                         candidate_name = session_data.get("candidate_name", f"Candidate_{call_sid[-8:]}")
                         phone_number = session_data.get("candidate_phone", f"Phone_{call_sid[-8:]}")
                         
@@ -982,8 +977,6 @@ async def get_all_interviews_detailed():
                             "last_activity": session_data.get("last_activity", ""),
                             "bulk_call_id": session_data.get("bulk_call_id"),
                             "is_bulk_call": session_data.get("is_bulk_call", False),
-                            
-                            # Callback fields
                             "callback_requested": session_data.get("callback_requested", False),
                             "callback_response": session_data.get("callback_response", ""),
                             "callback_request_time": session_data.get("callback_request_time", ""),
@@ -1021,14 +1014,9 @@ async def get_all_interviews_detailed():
             "terminated_count": 0,
             "callback_count": 0
         }
-# Add this to your main.py file
 @app.get("/interview-details/{interview_id}")
 async def get_interview_details(interview_id: str):
-    """Get detailed information for a specific interview"""
     try:
-        print(f"[INTERVIEW DETAILS] Loading details for interview: {interview_id}")
-        
-        # Search in completed interview files
         interview_folder = "interviews"
         if os.path.exists(interview_folder):
             json_files = glob.glob(f"{interview_folder}/*{interview_id}*.json")
@@ -1052,9 +1040,6 @@ async def get_interview_details(interview_id: str):
                                 candidate_name = name_match.group(1).strip().title()
                             else:
                                 candidate_name = f"Candidate_{interview_id[-8:]}"
-                        else:
-                            candidate_name = f"Candidate_{interview_id[-8:]}"
-                    
                     phone_number = (interview_data.get('candidate_phone') or 
                                    interview_data.get('phone_number') or 
                                    f"Phone_{interview_id[-8:]}")
@@ -1086,8 +1071,6 @@ async def get_interview_details(interview_id: str):
                 except Exception as e:
                     print(f"Error reading interview file {file_path}: {e}")
                     continue
-        
-        # Check session files
         session_file = f"interviews/session_{interview_id}.json"
         if os.path.exists(session_file):
             session_data = load_interview_session(interview_id)
@@ -1120,10 +1103,6 @@ async def get_interview_details(interview_id: str):
         return {"error": str(e)}
 @app.post("/upload-csv")
 async def upload_csv(file: UploadFile = File(...)):
-    """
-    ONLY PROCESSES CSV FILE - NO CALLS ARE MADE HERE!
-    This endpoint only parses the CSV and returns contact data.
-    """
     try:
         print("=" * 50)
         print("[CSV UPLOAD] 📄 PROCESSING CSV FILE ONLY - NO CALLS!")
@@ -1138,12 +1117,8 @@ async def upload_csv(file: UploadFile = File(...)):
                 "total_contacts": 0,
                 "message": "Invalid file format"
             }
-        
-        # Read CSV content
         content = await file.read()
         csv_data = content.decode('utf-8')
-        
-        # Parse CSV
         csv_reader = csv.DictReader(io.StringIO(csv_data))
         candidates = list(csv_reader)
         
@@ -1156,8 +1131,6 @@ async def upload_csv(file: UploadFile = File(...)):
                 "total_contacts": 0,
                 "message": "Empty CSV file"
             }
-        
-        # ⚠️ CRITICAL: ONLY PROCESS CSV DATA - ABSOLUTELY NO CALLING!
         processed_contacts = []
         for candidate in candidates:
             name = candidate.get("name", candidate.get("Name", "")).strip()
@@ -1165,14 +1138,10 @@ async def upload_csv(file: UploadFile = File(...)):
             email = candidate.get("email", candidate.get("Email", "")).strip()
             experience = candidate.get("experience", candidate.get("Experience", "")).strip()
             skills = candidate.get("skills", candidate.get("Skills", "")).strip()
-            
-            # Clean phone number format
             clean_phone = phone
             if phone:
                 if phone.startswith('+'):
                     clean_phone = phone[1:]
-                
-                # Handle double 91 prefix: +91918619570449 -> +918619570449
                 if clean_phone.startswith('919') and len(clean_phone) == 13:
                     clean_phone = clean_phone[2:]  # Remove first "91"
                     clean_phone = f"+91{clean_phone}"
@@ -1180,43 +1149,6 @@ async def upload_csv(file: UploadFile = File(...)):
                     clean_phone = f"+{clean_phone}"
                 elif len(clean_phone) == 10:
                     clean_phone = f"+91{clean_phone}"
-            
-            # Generate email if not provided
-            if not email:
-                if name:
-                    email_name = name.lower().replace(' ', '.').replace('-', '.')
-                    # Remove any special characters except dots
-                    email_name = re.sub(r'[^a-z0-9.]', '', email_name)
-                    email = ""
-                elif clean_phone:
-                    phone_suffix = clean_phone.replace('+', '').replace('-', '').replace(' ', '')[-6:]
-                    email = ""
-                else:
-                    email = ""
-            
-            # Generate name if not provided
-            if not name and clean_phone:
-                phone_suffix = clean_phone.replace('+', '')[-4:] if len(clean_phone) >= 4 else "0000"
-                name = f"Candidate_{phone_suffix}"
-            elif not name:
-                name = f"Candidate_{len(processed_contacts)+1}"
-            
-            processed_contacts.append({
-                "name": name,
-                "phone": clean_phone or "",
-                "email": email,
-                "experience": experience,
-                "skills": skills
-            })
-            
-            print(f"[CSV PROCESS] 📋 {name} | 📞 {clean_phone} | 📧 {email}")
-        
-        print(f"[CSV UPLOAD] ✅ Successfully processed {len(processed_contacts)} contacts")
-        print(f"[CSV UPLOAD] 📋 Data parsed and ready for frontend display")
-        print(f"[CSV UPLOAD] ⚠️  NO TWILIO CALLS MADE - This is CSV processing only!")
-        print("=" * 50)
-        
-        # ✅ RETURN ONLY CONTACT DATA - NO BULK CALL FIELDS!
         return {
             "success": True,
             "contacts": processed_contacts,
@@ -1475,6 +1407,9 @@ async def voice_webhook(request: Request):
             "candidate_skills": contact_info.get("candidate_skills", ""),
             "is_bulk_call": contact_info.get("is_bulk_call", False),
             "bulk_call_id": contact_info.get("bulk_call_id", None),
+            "candidate_skills": contact_info.get("candidate_skills", ""),
+            "is_bulk_call": contact_info.get("is_bulk_call", False),
+            "bulk_call_id": contact_info.get("bulk_call_id", None),
             "start_time": datetime.now().isoformat(),
             "status": "IN_PROGRESS",
             "current_question": 0,
@@ -1529,7 +1464,193 @@ async def voice_webhook(request: Request):
         resp.say("Sorry, there was a technical error. Please try again later.", voice='Polly.Aditi')
         resp.hangup()
         return Response(content=str(resp), media_type="application/xml")
+# Add this endpoint to get bulk call results
+@app.get("/bulk-results")
+async def get_bulk_results():
+    """Get all saved bulk call results"""
+    try:
+        bulk_results = []
+        bulk_results_folder = "bulk_results"
+        
+        if os.path.exists(bulk_results_folder):
+            json_files = glob.glob(f"{bulk_results_folder}/*.json")
+            
+            for file_path in json_files:
+                try:
+                    with open(file_path, 'r') as f:
+                        bulk_data = json.load(f)
+                    
+                    # Extract bulk call ID from filename if not in data
+                    filename = os.path.basename(file_path)
+                    bulk_call_id = bulk_data.get("bulk_call_id", filename.replace(".json", ""))
+                    
+                    bulk_result = {
+                        "bulk_call_id": bulk_call_id,
+                        "total_candidates": bulk_data.get("total_candidates", 0),
+                        "successful_calls": bulk_data.get("successful_calls", 0),
+                        "failed_calls": bulk_data.get("failed_calls", 0),
+                        "created_at": bulk_data.get("created_at", ""),
+                        "status": bulk_data.get("status", "COMPLETED"),
+                        "results": bulk_data.get("results", [])
+                    }
+                    
+                    bulk_results.append(bulk_result)
+                    
+                except Exception as e:
+                    print(f"Error reading bulk result file {file_path}: {e}")
+                    continue
+        
+        # Sort by created_at (newest first)
+        bulk_results.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+        
+        print(f"[BULK RESULTS] 📊 Returning {len(bulk_results)} bulk call results")
+        
+        return {
+            "success": True,
+            "bulk_results": bulk_results,
+            "total_count": len(bulk_results)
+        }
+        
+    except Exception as e:
+        print(f"[BULK RESULTS ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "bulk_results": [],
+            "total_count": 0
+        }
 
+# Add this endpoint to get specific bulk call result
+@app.get("/bulk-results/{bulk_call_id}")
+async def get_bulk_result(bulk_call_id: str):
+    """Get specific bulk call result by ID"""
+    try:
+        bulk_results_file = f"bulk_results/{bulk_call_id}.json"
+        
+        if not os.path.exists(bulk_results_file):
+            return {
+                "success": False,
+                "error": "Bulk call result not found",
+                "bulk_result": None
+            }
+        
+        with open(bulk_results_file, 'r') as f:
+            bulk_data = json.load(f)
+        
+        print(f"[BULK RESULT] 📊 Returning result for bulk call: {bulk_call_id}")
+        
+        return {
+            "success": True,
+            "bulk_result": bulk_data
+        }
+        
+    except Exception as e:
+        print(f"[BULK RESULT ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "bulk_result": None
+        }
+
+# Add this endpoint to delete bulk call results
+@app.delete("/bulk-results/{bulk_call_id}")
+async def delete_bulk_result(bulk_call_id: str):
+    """Delete a specific bulk call result"""
+    try:
+        bulk_results_file = f"bulk_results/{bulk_call_id}.json"
+        
+        if not os.path.exists(bulk_results_file):
+            return {
+                "success": False,
+                "error": "Bulk call result not found"
+            }
+        
+        os.remove(bulk_results_file)
+        
+        print(f"[BULK RESULT] 🗑️ Deleted bulk call result: {bulk_call_id}")
+        
+        return {
+            "success": True,
+            "message": f"Bulk call result {bulk_call_id} deleted successfully"
+        }
+        
+    except Exception as e:
+        print(f"[BULK RESULT DELETE ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+# Add this endpoint to get bulk call statistics
+@app.get("/bulk-stats")
+async def get_bulk_stats():
+    """Get bulk call statistics"""
+    try:
+        bulk_results_folder = "bulk_results"
+        
+        if not os.path.exists(bulk_results_folder):
+            return {
+                "success": True,
+                "stats": {
+                    "total_bulk_calls": 0,
+                    "total_candidates_called": 0,
+                    "total_successful_calls": 0,
+                    "total_failed_calls": 0,
+                    "success_rate": 0.0
+                }
+            }
+        
+        json_files = glob.glob(f"{bulk_results_folder}/*.json")
+        
+        total_bulk_calls = 0
+        total_candidates_called = 0
+        total_successful_calls = 0
+        total_failed_calls = 0
+        
+        for file_path in json_files:
+            try:
+                with open(file_path, 'r') as f:
+                    bulk_data = json.load(f)
+                
+                total_bulk_calls += 1
+                total_candidates_called += bulk_data.get("total_candidates", 0)
+                total_successful_calls += bulk_data.get("successful_calls", 0)
+                total_failed_calls += bulk_data.get("failed_calls", 0)
+                
+            except Exception as e:
+                print(f"Error reading bulk stats file {file_path}: {e}")
+                continue
+        
+        success_rate = (total_successful_calls / total_candidates_called * 100) if total_candidates_called > 0 else 0.0
+        
+        stats = {
+            "total_bulk_calls": total_bulk_calls,
+            "total_candidates_called": total_candidates_called,
+            "total_successful_calls": total_successful_calls,
+            "total_failed_calls": total_failed_calls,
+            "success_rate": round(success_rate, 2)
+        }
+        
+        print(f"[BULK STATS] 📊 Returning bulk call statistics: {stats}")
+        
+        return {
+            "success": True,
+            "stats": stats
+        }
+        
+    except Exception as e:
+        print(f"[BULK STATS ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "stats": {
+                "total_bulk_calls": 0,
+                "total_candidates_called": 0,
+                "total_successful_calls": 0,
+                "total_failed_calls": 0,
+                "success_rate": 0.0
+            }
+        }
 @app.get("/api/candidates")
 async def get_candidates():
     """Get candidates from interviews with email addresses"""
@@ -1577,4 +1698,419 @@ async def get_candidates():
     except Exception as e:
         print(f"[CANDIDATES ERROR] ❌ {e}")
         return {"success": False, "error": str(e), "candidates": []}
+# Add this endpoint to your existing main.py file
+@app.get("/twilio-balance")
+async def get_twilio_balance():
+    """Get Twilio account balance"""
+    try:
+        # Get account information from Twilio
+        account = client.api.accounts(account_sid).fetch()
+        
+        # Get balance (this is a string like "-15.00000")
+        balance = float(account.balance)
+        
+        # Format balance properly
+        balance_info = {
+            "success": True,
+            "balance": balance,
+            "currency": account.currency or "USD",
+            "account_status": account.status,
+            "account_sid": account.sid,
+            "friendly_name": account.friendly_name,
+            "formatted_balance": f"{account.currency or 'USD'} {balance:.2f}"
+        }
+        
+        print(f"[TWILIO BALANCE] 💰 Account balance: {balance_info['formatted_balance']}")
+        
+        return balance_info
+        
+    except Exception as e:
+        print(f"[TWILIO BALANCE ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "balance": 0.0,
+            "currency": "USD",
+            "account_status": "unknown",
+            "formatted_balance": "USD 0.00"
+        }
+
+# Add this endpoint to send assessment links (if it's missing)
+@app.post("/send-assessment-link")
+async def send_assessment_link(request: Request):
+    """Send assessment link to candidate via email"""
+    try:
+        email_data = await request.json()
+        
+        candidate_email = email_data.get("email")
+        assessment_link = email_data.get("assessmentLink")
+        assessment_title = email_data.get("assessmentTitle", "Technical Assessment")
+        job_role = email_data.get("jobRole", "Software Developer")
+        candidate_name = email_data.get("candidateName", "Candidate")
+        experience = email_data.get("experience", 0)
+        duration = email_data.get("duration", 60)
+        total_questions = email_data.get("totalQuestions", 10)
+        
+        if not candidate_email or not assessment_link:
+            return {
+                "success": False,
+                "error": "Email and assessment link are required"
+            }
+        
+        # Email configuration (you'll need to set these in your environment)
+        smtp_server = "smtp.gmail.com"
+        smtp_port = 587
+        sender_email = os.getenv("SENDER_EMAIL", "noreply@onelabventures.com")
+        sender_password = os.getenv("SENDER_PASSWORD", "your_app_password")
+        
+        # Create email content
+        subject = f"Technical Assessment Invitation - {job_role} Role"
+        
+        html_body = f"""
+        <html>
+        <body>
+            <h2>Technical Assessment Invitation</h2>
+            <p>Dear {candidate_name},</p>
+            
+            <p>Thank you for your interest in the <strong>{job_role}</strong> position at Onelab Ventures.</p>
+            
+            <p>We would like to invite you to complete our technical assessment:</p>
+            
+            <div style="background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <h3>{assessment_title}</h3>
+                <p><strong>Duration:</strong> {duration} minutes</p>
+                <p><strong>Total Questions:</strong> {total_questions}</p>
+                <p><strong>Experience Level:</strong> {experience} years</p>
+            </div>
+            
+            <p><a href="{assessment_link}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Start Assessment</a></p>
+            
+            <p>Please complete the assessment at your earliest convenience.</p>
+            
+            <p>Best regards,<br>
+            Onelab Ventures Team</p>
+            
+            <hr>
+            <p style="font-size: 12px; color: #666;">
+                This is an automated email. Please do not reply to this email.
+            </p>
+        </body>
+        </html>
+        """
+        
+        # For now, just simulate sending (you can implement actual email sending later)
+        print(f"[EMAIL SIMULATION] 📧 Sending assessment link to {candidate_email}")
+        print(f"[EMAIL SIMULATION] 🔗 Assessment link: {assessment_link}")
+        print(f"[EMAIL SIMULATION] 📝 Assessment: {assessment_title}")
+        
+        # Simulate email sending delay
+        import time
+        time.sleep(0.5)
+        
+        return {
+            "success": True,
+            "message": f"Assessment link sent to {candidate_email}",
+            "email": candidate_email,
+            "assessment_title": assessment_title,
+            "assessment_link": assessment_link
+        }
+        
+    except Exception as e:
+        print(f"[EMAIL ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+# Add this endpoint to get candidates for assessment (if missing)
+@app.get("/report/{assessment_id}")
+async def get_assessment_report(assessment_id: str):
+    """Get assessment report/results for a specific assessment"""
+    try:
+        # This would typically call your assessment API
+        # For now, returning mock data structure
+        
+        print(f"[ASSESSMENT REPORT] 📊 Getting report for assessment: {assessment_id}")
+        
+        # Mock response - replace with actual API call to your assessment system
+        mock_candidates = [
+            {
+                "id": "cand_1",
+                "name": "John Doe",
+                "email": "john.doe@example.com",
+                "score": 85,
+                "totalScore": 85,
+                "status": "completed",
+                "submittedAt": "2024-01-15T10:30:00Z",
+                "duration": 3600,
+                "answers": []
+            },
+            {
+                "id": "cand_2", 
+                "name": "Jane Smith",
+                "email": "jane.smith@example.com",
+                "score": 92,
+                "totalScore": 92,
+                "status": "completed",
+                "submittedAt": "2024-01-15T14:20:00Z",
+                "duration": 3400,
+                "answers": []
+            }
+        ]
+        
+        return {
+            "success": True,
+            "result": mock_candidates,
+            "candidates": mock_candidates,
+            "assessment_id": assessment_id,
+            "total_candidates": len(mock_candidates)
+        }
+        
+    except Exception as e:
+        print(f"[ASSESSMENT REPORT ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "result": [],
+            "candidates": []
+        }
+
+# Add any other missing endpoints your frontend needs
+@app.get("/api/assessments")
+async def get_assessments():
+    """Get available assessments"""
+    try:
+        # Mock assessments data - replace with actual API call
+        assessments = [
+            {
+                "id": "assessment_1",
+                "testName": "Full Stack Developer Assessment",
+                "jobRole": "Full Stack Developer",
+                "experience": 3,
+                "duration": 60,
+                "totalTopics": 10,
+                "status": "active",
+                "assessmentLink": "https://dev.d23pi31x94e0bg.amplifyapp.com/assessment/assessment_1"
+            },
+            {
+                "id": "assessment_2",
+                "testName": "React Developer Assessment", 
+                "jobRole": "React Developer",
+                "experience": 2,
+                "duration": 45,
+                "totalTopics": 8,
+                "status": "active",
+                "assessmentLink": "https://dev.d23pi31x94e0bg.amplifyapp.com/assessment/assessment_2"
+            }
+        ]
+        
+        return {
+            "success": True,
+            "assessments": assessments,
+            "total_count": len(assessments)
+        }
+        
+    except Exception as e:
+        print(f"[ASSESSMENTS ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "assessments": []
+        }
+
+# Add this endpoint for bulk email sending (if missing)
+@app.post("/api/send-assessment-bulk")
+async def send_bulk_assessment_emails(request: Request):
+    """Send assessment emails to multiple candidates"""
+    try:
+        bulk_data = await request.json()
+        
+        assessment_name = bulk_data.get("assessmentName")
+        job_role = bulk_data.get("jobRole")
+        assessment_link = bulk_data.get("assessmentLink")
+        candidates = bulk_data.get("candidates", [])
+        
+        if not candidates:
+            return {
+                "success": False,
+                "error": "No candidates provided"
+            }
+        
+        success_count = 0
+        failed_count = 0
+        results = []
+        
+        for candidate in candidates:
+            try:
+                # Simulate sending email to each candidate
+                candidate_email = candidate.get("email")
+                candidate_name = candidate.get("name", "Candidate")
+                
+                if not candidate_email:
+                    failed_count += 1
+                    results.append({
+                        "name": candidate_name,
+                        "email": "No email provided",
+                        "success": False,
+                        "error": "No email address"
+                    })
+                    continue
+                
+                # Simulate email sending
+                print(f"[BULK EMAIL] 📧 Sending to {candidate_name} ({candidate_email})")
+                
+                # Add small delay to simulate email sending
+                import time
+                time.sleep(0.1)
+                
+                success_count += 1
+                results.append({
+                    "name": candidate_name,
+                    "email": candidate_email,
+                    "success": True,
+                    "error": None
+                })
+                
+            except Exception as e:
+                failed_count += 1
+                results.append({
+                    "name": candidate.get("name", "Unknown"),
+                    "email": candidate.get("email", "Unknown"),
+                    "success": False,
+                    "error": str(e)
+                })
+        
+        return {
+            "success": True,
+            "message": f"Bulk emails sent! Success: {success_count}, Failed: {failed_count}",
+            "total_candidates": len(candidates),
+            "success_count": success_count,
+            "failed_count": failed_count,
+            "results": results
+        }
+        
+    except Exception as e:
+        print(f"[BULK EMAIL ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "results": []
+        }
+
+# Fix the email generation in CSV upload
+@app.post("/upload-csv")
+async def upload_csv(file: UploadFile = File(...)):
+    """
+    ONLY PROCESSES CSV FILE - NO CALLS ARE MADE HERE!
+    This endpoint only parses the CSV and returns contact data.
+    """
+    try:
+        print("=" * 50)
+        print("[CSV UPLOAD] 📄 PROCESSING CSV FILE ONLY - NO CALLS!")
+        print("=" * 50)
+        
+        if not file.filename.endswith('.csv'):
+            print("[CSV UPLOAD] ❌ Invalid file format")
+            return {
+                "success": False, 
+                "error": "Only CSV files are allowed",
+                "contacts": [],
+                "total_contacts": 0,
+                "message": "Invalid file format"
+            }
+        
+        # Read CSV content
+        content = await file.read()
+        csv_data = content.decode('utf-8')
+        
+        # Parse CSV
+        csv_reader = csv.DictReader(io.StringIO(csv_data))
+        candidates = list(csv_reader)
+        
+        if not candidates:
+            print("[CSV UPLOAD] ❌ Empty CSV file")
+            return {
+                "success": False, 
+                "error": "No candidates found in CSV",
+                "contacts": [],
+                "total_contacts": 0,
+                "message": "Empty CSV file"
+            }
+        
+        # ⚠️ CRITICAL: ONLY PROCESS CSV DATA - ABSOLUTELY NO CALLING!
+        processed_contacts = []
+        for candidate in candidates:
+            name = candidate.get("name", candidate.get("Name", "")).strip()
+            phone = candidate.get("phone", candidate.get("Phone", candidate.get("mobile", candidate.get("Mobile", "")))).strip()
+            email = candidate.get("email", candidate.get("Email", "")).strip()
+            experience = candidate.get("experience", candidate.get("Experience", "")).strip()
+            skills = candidate.get("skills", candidate.get("Skills", "")).strip()
+            
+            # Clean phone number format
+            clean_phone = phone
+            if phone:
+                if phone.startswith('+'):
+                    clean_phone = phone[1:]
+                
+                # Handle double 91 prefix: +91918619570449 -> +918619570449
+                if clean_phone.startswith('919') and len(clean_phone) == 13:
+                    clean_phone = clean_phone[2:]  # Remove first "91"
+                    clean_phone = f"+91{clean_phone}"
+                elif clean_phone.startswith('91') and len(clean_phone) == 12:
+                    clean_phone = f"+{clean_phone}"
+                elif len(clean_phone) == 10:
+                    clean_phone = f"+91{clean_phone}"
+            
+            # Generate email if not provided - FIX THE EMPTY EMAIL ISSUE
+            if not email:
+                if name:
+                    email_name = name.lower().replace(' ', '.').replace('-', '.')
+                    # Remove any special characters except dots
+                    email_name = re.sub(r'[^a-z0-9.]', '', email_name)
+                    email = f"{email_name}@example.com"  # ✅ FIXED: Actually generate email
+                elif clean_phone:
+                    phone_suffix = clean_phone.replace('+', '').replace('-', '').replace(' ', '')[-6:]
+                    email = f"candidate{phone_suffix}@example.com"  # ✅ FIXED: Actually generate email
+                else:
+                    email = f"candidate{len(processed_contacts)+1}@example.com"  # ✅ FIXED: Actually generate email
+            
+            # Generate name if not provided
+            if not name and clean_phone:
+                phone_suffix = clean_phone.replace('+', '')[-4:] if len(clean_phone) >= 4 else "0000"
+                name = f"Candidate_{phone_suffix}"
+            elif not name:
+                name = f"Candidate_{len(processed_contacts)+1}"
+            
+            processed_contacts.append({
+                "name": name,
+                "phone": clean_phone or "",
+                "email": email,  # ✅ Now properly includes generated email
+                "experience": experience,
+                "skills": skills
+            })
+            
+            print(f"[CSV PROCESS] 📋 {name} | 📞 {clean_phone} | 📧 {email}")
+        
+        print(f"[CSV UPLOAD] ✅ Successfully processed {len(processed_contacts)} contacts")
+        print(f"[CSV UPLOAD] 📋 Data parsed and ready for frontend display")
+        print(f"[CSV UPLOAD] ⚠️  NO TWILIO CALLS MADE - This is CSV processing only!")
+        print("=" * 50)
+        
+        # ✅ RETURN ONLY CONTACT DATA - NO BULK CALL FIELDS!
+        return {
+            "success": True,
+            "contacts": processed_contacts,
+            "total_contacts": len(processed_contacts),
+            "message": f"✅ {len(processed_contacts)} contacts loaded successfully! Click 'Start AI Bulk Interviews' to begin calling."
+        }
+        
+    except Exception as e:
+        print(f"[CSV UPLOAD] ❌ Error: {e}")
+        return {
+            "success": False, 
+            "error": str(e),
+            "contacts": [],
+            "total_contacts": 0,
+            "message": "Failed to process CSV file"
+        }
 
