@@ -1011,58 +1011,6 @@ const Dashboard: React.FC = () => {
         </Typography>
       </Box>
 
-      {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ p: 2, textAlign: 'center' }}>
-            <CardContent>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-                {stats.totalInterviews}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Total Interviews
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ p: 2, textAlign: 'center' }}>
-            <CardContent>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#4caf50' }}>
-                {stats.completedInterviews}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Completed
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ p: 2, textAlign: 'center' }}>
-            <CardContent>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#ff9800' }}>
-                {stats.inProgressInterviews}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                In Progress
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ p: 2, textAlign: 'center' }}>
-            <CardContent>
-              <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#f44336' }}>
-                {stats.terminatedInterviews}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Terminated
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
       {/* Search and Actions */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
         <TextField
@@ -1105,9 +1053,7 @@ const Dashboard: React.FC = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell>Candidate</TableCell>
-                    <TableCell>Interview ID</TableCell>
                     <TableCell>Status</TableCell>
-                    <TableCell>Progress</TableCell>
                     <TableCell>AI Interview</TableCell>
                     <TableCell>Score</TableCell>
                     <TableCell>Actions</TableCell>
@@ -1132,26 +1078,11 @@ const Dashboard: React.FC = () => {
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                          {interview.interview_id}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
                         <Chip
                           label={interview.status}
                           color={getStatusColor(interview.status)}
                           size="small"
                         />
-                      </TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="body2">
-                            {interview.questions_answered}/{interview.total_questions}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            ({interview.completion_rate})
-                          </Typography>
-                        </Box>
                       </TableCell>
                       <TableCell>
                         {renderCurrentInterviewStatus(interview)}
@@ -1168,14 +1099,6 @@ const Dashboard: React.FC = () => {
                             startIcon={<PlayArrow />}
                           >
                             Start AI Interview
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={() => copyInterviewLinkDirect(interview.interview_id)}
-                            startIcon={<ContentCopy />}
-                          >
-                            Copy Link
                           </Button>
                         </Box>
                       </TableCell>
@@ -1530,14 +1453,11 @@ const Dashboard: React.FC = () => {
               </Typography>
             </Box>
           )}
-
-          {/* Error message */}
           {codingAssessmentErrors.submit && (
             <Alert severity="error" sx={{ mt: 2 }}>
               {codingAssessmentErrors.submit}
             </Alert>
           )}
-          
           {selectedAssessmentForEmail && (
             <Box sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa', borderRadius: 1 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
