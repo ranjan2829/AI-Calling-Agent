@@ -3150,7 +3150,6 @@ async def update_interview_questions(request: Request):
             "success": False,
             "error": str(e)
         }
-
 @app.get("/local-tags-summary")
 async def get_local_tags_summary():
     """Get summary of local tags from the pdf-data directory"""
@@ -3158,6 +3157,7 @@ async def get_local_tags_summary():
         pdf_data_dir = "pdf-data"
         
         if not os.path.exists(pdf_data_dir):
+            print(f"[LOCAL TAGS] 📁 pdf-data directory not found")
             return {
                 "success": True,
                 "tags": [],
@@ -3165,34 +3165,49 @@ async def get_local_tags_summary():
             }
         
         tags_summary = []
+        print(f"[LOCAL TAGS] 🔍 Scanning pdf-data directory...")
         
-        for tag_folder in os.listdir(pdf_data_dir):
-            tag_path = os.path.join(pdf_data_dir, tag_folder)
-            if os.path.isdir(tag_path):
-                tag_index_file = os.path.join(tag_path, "tag_index.json")
+        # ✅ FIX: Scan all subdirectories for tag patterns
+        for item in os.listdir(pdf_data_dir):
+            item_path = os.path.join(pdf_data_dir, item)
+            if os.path.isdir(item_path):
+                print(f"[LOCAL TAGS] 📁 Found directory: {item}")
                 
-                if os.path.exists(tag_index_file):
+                # ✅ Check if this is a tag folder (contains candidates.json)
+                candidates_file = os.path.join(item_path, "candidates.json")
+                if os.path.exists(candidates_file):
                     try:
-                        with open(tag_index_file, 'r') as f:
-                            tag_index = json.load(f)
+                        with open(candidates_file, 'r') as f:
+                            data = json.load(f)
+                        
+                        # ✅ Extract tag information from the JSON metadata
+                        metadata = data.get("metadata", {})
+                        tag_name = metadata.get("tag_name") or data.get("tag", "Unknown Tag")
+                        tag_id = metadata.get("tag_id") or item
+                        total_candidates = metadata.get("total_candidates") or len(data.get("candidates", []))
                         
                         tags_summary.append({
-                            "tag_id": tag_folder,
-                            "tag_name": tag_index.get("tag_name", tag_folder.replace('_', ' ').title()),
-                            "total_candidates": tag_index.get("total_candidates", 0),
-                            "total_batches": tag_index.get("total_batches", 0),
-                            "created_at": tag_index.get("created_at"),
-                            "last_updated": tag_index.get("last_updated"),
-                            "folder_path": f"pdf-data/{tag_folder}"
+                            "tag_id": tag_id,
+                            "tag_name": tag_name,
+                            "total_candidates": total_candidates,
+                            "total_batches": 1,
+                            "created_at": metadata.get("created_at") or data.get("processedAt"),
+                            "last_updated": metadata.get("last_updated") or data.get("processedAt"),
+                            "folder_path": f"pdf-data/{item}"
                         })
                         
+                        print(f"[LOCAL TAGS] ✅ Found tag: {tag_name} with {total_candidates} candidates in {item}")
+                        
                     except Exception as e:
-                        print(f"Error reading tag index for {tag_folder}: {e}")
+                        print(f"[LOCAL TAGS] ❌ Error reading {candidates_file}: {e}")
                         continue
+                else:
+                    print(f"[LOCAL TAGS] ⚠️  No candidates.json found in {item}")
         
+        # Sort by total_candidates descending
         tags_summary.sort(key=lambda x: x["total_candidates"], reverse=True)
         
-        print(f"[LOCAL TAGS] 📊 Found {len(tags_summary)} local tags")
+        print(f"[LOCAL TAGS] 📊 Found {len(tags_summary)} local tags total")
         
         return {
             "success": True,
@@ -3213,44 +3228,67 @@ async def get_local_tags_summary():
 async def get_local_candidates_by_tag(tag_id: str):
     """Get candidates from local storage for a specific tag"""
     try:
-        tag_folder = f"pdf-data/{tag_id}"
-        tag_index_file = f"{tag_folder}/tag_index.json"
+        print(f"[LOCAL CANDIDATES] 🔍 Looking for tag: {tag_id}")
+        pdf_data_dir = "pdf-data"
         
-        if not os.path.exists(tag_index_file):
+        # ✅ FIX: Search for folders that match the tag pattern
+        matching_folders = []
+        if os.path.exists(pdf_data_dir):
+            for item in os.listdir(pdf_data_dir):
+                item_path = os.path.join(pdf_data_dir, item)
+                if os.path.isdir(item_path):
+                    candidates_file = os.path.join(item_path, "candidates.json")
+                    if os.path.exists(candidates_file):
+                        try:
+                            with open(candidates_file, 'r') as f:
+                                data = json.load(f)
+                            
+                            # Check if this folder matches the requested tag
+                            metadata = data.get("metadata", {})
+                            folder_tag_id = metadata.get("tag_id") or item.split('_')[0]
+                            
+                            if folder_tag_id == tag_id or item.startswith(tag_id):
+                                matching_folders.append((item_path, data))
+                                print(f"[LOCAL CANDIDATES] ✅ Found matching folder: {item}")
+                                
+                        except Exception as e:
+                            print(f"[LOCAL CANDIDATES] ❌ Error reading {candidates_file}: {e}")
+                            continue
+        
+        if not matching_folders:
+            print(f"[LOCAL CANDIDATES] ❌ No folders found for tag: {tag_id}")
             return {
                 "success": False,
-                "error": f"Tag '{tag_id}' not found in local storage",
+                "error": f"No data found for tag '{tag_id}'",
                 "candidates": []
             }
         
-        with open(tag_index_file, 'r') as f:
-            tag_index = json.load(f)
-        
+        # ✅ Combine all candidates from matching folders
         all_candidates = []
+        tag_name = tag_id
         
-        for batch_name, batch_info in tag_index.get("batches", {}).items():
-            batch_file = batch_info.get("file_path")
-            if batch_file and os.path.exists(batch_file):
-                try:
-                    with open(batch_file, 'r') as f:
-                        batch_data = json.load(f)
-                    
-                    candidates = batch_data.get("candidates", [])
-                    for candidate in candidates:
-                        candidate["batch_name"] = batch_name
-                        candidate["tag"] = tag_index.get("tag_name", tag_id)
-                        all_candidates.append(candidate)
-                        
-                except Exception as e:
-                    print(f"Error reading batch file {batch_file}: {e}")
-                    continue
+        for folder_path, data in matching_folders:
+            candidates = data.get("candidates", [])
+            folder_name = os.path.basename(folder_path)
+            
+            # Get tag name from metadata
+            metadata = data.get("metadata", {})
+            if metadata.get("tag_name"):
+                tag_name = metadata["tag_name"]
+            elif data.get("tag"):
+                tag_name = data["tag"]
+            
+            for candidate in candidates:
+                candidate["batch_name"] = folder_name
+                candidate["tag"] = tag_name
+                all_candidates.append(candidate)
         
         print(f"[LOCAL CANDIDATES] 📊 Found {len(all_candidates)} candidates for tag {tag_id}")
         
         return {
             "success": True,
             "candidates": all_candidates,
-            "tag_name": tag_index.get("tag_name", tag_id),
+            "tag_name": tag_name,
             "tag_id": tag_id,
             "total_candidates": len(all_candidates)
         }

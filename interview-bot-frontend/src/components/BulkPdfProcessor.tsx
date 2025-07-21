@@ -231,20 +231,21 @@ const BulkPdfProcessor: React.FC = () => {
 
   const uploadToLocal = async (candidatesData: CandidateData[]): Promise<string> => {
     try {
-      // ✅ Generate folder name based on tag and timestamp
+      // ✅ Generate folder name based on tag and timestamp  
       const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const timeMs = Date.now().toString().slice(-6);
       const tagSlug = selectedTag.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      const autoFolderName = `${tagSlug}_${timestamp}_${Date.now().toString().slice(-6)}`;
+      const autoFolderName = `${tagSlug}_${timestamp}_${timeMs}`;
       
-      // ✅ Include tag in the JSON data structure
+      // ✅ Include comprehensive metadata for CallDashboard
       const jsonData = {
-        candidates: candidatesData, // Each candidate already has tag field
+        candidates: candidatesData,
         processedAt: new Date().toISOString(),
         totalCount: candidatesData.length,
-        folderName: autoFolderName, // ✅ Auto-generated folder name
+        folderName: autoFolderName,
         tag: selectedTag,
         tagDetails: getTagByName(selectedTag),
-        // ✅ Add metadata for CallDashboard compatibility
+        // ✅ Enhanced metadata for better tag discovery
         metadata: {
           tag_id: tagSlug,
           tag_name: selectedTag,
@@ -252,7 +253,10 @@ const BulkPdfProcessor: React.FC = () => {
           total_batches: 1,
           created_at: new Date().toISOString(),
           last_updated: new Date().toISOString(),
-          folder_path: `pdf-data/${autoFolderName}/candidates.json`
+          folder_path: `pdf-data/${autoFolderName}/candidates.json`,
+          // ✅ Add search keywords for better matching
+          search_keywords: [tagSlug, selectedTag.toLowerCase(), selectedTag],
+          processor_version: "1.0.0"
         }
       };
       
@@ -263,7 +267,7 @@ const BulkPdfProcessor: React.FC = () => {
         },
         body: JSON.stringify({
           data: jsonData,
-          folderName: autoFolderName, // ✅ Use auto-generated folder name
+          folderName: autoFolderName,
           tag: selectedTag
         }),
       });
@@ -279,7 +283,7 @@ const BulkPdfProcessor: React.FC = () => {
       }
       
       console.log('✅ Local Storage Success:', result);
-      console.log('✅ Metadata for CallDashboard:', jsonData.metadata);
+      console.log('✅ Enhanced Metadata for CallDashboard:', jsonData.metadata);
       
       return result.localPath || `pdf-data/${autoFolderName}/candidates.json`;
     } catch (error) {

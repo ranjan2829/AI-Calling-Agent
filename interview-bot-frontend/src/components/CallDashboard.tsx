@@ -109,10 +109,14 @@ interface TagSummary {
   folder_path?: string;
 }
 
-interface InterviewQuestion {
-  id: number;
-  question: string;
+interface CandidateTag {
+  id: string;
+  name: string;
+  color: string;
+  description: string;
+  createdAt: string;
 }
+
 const initiateCall = async (phoneNumber: string) => {
   try {
     const response = await fetch('http://13.204.76.229:8000/make-call', {
@@ -211,6 +215,9 @@ export const CallDashboard: React.FC = () => {
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // ✅ NEW: Add candidateTags state to match other components
+  const [candidateTags, setCandidateTags] = useState<CandidateTag[]>([]);
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -221,7 +228,105 @@ export const CallDashboard: React.FC = () => {
     loadQuestions(); 
     loadTwilioBalance();
     loadTagsSummary(); // NEW: Load tags on mount
+    loadCandidateTagsFromStorage(); // ✅ NEW: Load candidate tags from localStorage
   }, []);
+
+  // ✅ NEW: Load candidate tags from localStorage (same as other components)
+  const loadCandidateTagsFromStorage = () => {
+    const savedTags = localStorage.getItem('candidateTags');
+    if (savedTags) {
+      try {
+        const parsedTags = JSON.parse(savedTags);
+        setCandidateTags(parsedTags);
+        console.log('✅ Loaded candidate tags from localStorage:', parsedTags);
+        
+        // Convert to TagSummary format for compatibility
+        const tagSummaries: TagSummary[] = parsedTags.map((tag: CandidateTag) => ({
+          tag_id: tag.id,
+          tag_name: tag.name,
+          total_candidates: 0, // Will be updated when candidates are loaded
+          total_batches: 0,
+          created_at: tag.createdAt,
+          last_updated: tag.createdAt,
+          folder_path: `local-data/${tag.id}`
+        }));
+        
+        setTags(tagSummaries);
+        
+      } catch (error) {
+        console.error('Error parsing saved tags:', error);
+        initializeDefaultTags();
+      }
+    } else {
+      initializeDefaultTags();
+    }
+  };
+
+  // ✅ NEW: Initialize with default tags (same as other components)
+  const initializeDefaultTags = () => {
+    const defaultTags: CandidateTag[] = [
+      {
+        id: 'general',
+        name: 'General',
+        color: '#757575',
+        description: 'General candidates',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'frontend',
+        name: 'Frontend Developer',
+        color: '#2196f3',
+        description: 'React, Angular, Vue.js developers',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'backend',
+        name: 'Backend Developer',
+        color: '#4caf50',
+        description: 'Node.js, Python, Java developers',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'fullstack',
+        name: 'Full Stack Developer',
+        color: '#ff9800',
+        description: 'Full stack developers',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'devops',
+        name: 'DevOps Engineer',
+        color: '#9c27b0',
+        description: 'DevOps and Infrastructure engineers',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'mobile',
+        name: 'Mobile Developer',
+        color: '#e91e63',
+        description: 'iOS, Android, React Native developers',
+        createdAt: new Date().toISOString()
+      }
+    ];
+    
+    setCandidateTags(defaultTags);
+    localStorage.setItem('candidateTags', JSON.stringify(defaultTags));
+    
+    // Convert to TagSummary format
+    const tagSummaries: TagSummary[] = defaultTags.map((tag: CandidateTag) => ({
+      tag_id: tag.id,
+      tag_name: tag.name,
+      total_candidates: 0,
+      total_batches: 0,
+      created_at: tag.createdAt,
+      last_updated: tag.createdAt,
+      folder_path: `local-data/${tag.id}`
+    }));
+    
+    setTags(tagSummaries);
+    
+    console.log('✅ Initialized default candidate tags:', defaultTags);
+  };
 
   const loadCallStats = async () => {
     try {
@@ -629,20 +734,60 @@ export const CallDashboard: React.FC = () => {
   const loadTagsSummary = async () => {
     try {
       setLoadingTags(true);
-      // Change API endpoint to load from local JSON files
-      const response = await fetch('http://13.204.76.229:8000/local-tags-summary');
-      const result = await response.json();
+      console.log('🔍 Loading tags from backend and localStorage...');
       
-      if (result.success) {
-        setTags(result.tags || []);
-        console.log('📊 Loaded local tags:', result.tags?.length || 0);
-      } else {
-        setTags([]);
-        console.error('Failed to load local tags:', result.error);
+      // First, try to load from backend
+      const response = await fetch('http://13.204.76.229:8000/local-tags-summary');
+      console.log('📡 Backend response status:', response.status);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('📊 Backend tags result:', result);
+        
+        if (result.success && result.tags?.length > 0) {
+          setTags(result.tags);
+          console.log('✅ Loaded backend tags:', result.tags.length);
+          toast.success(`Loaded ${result.tags.length} data tags from backend!`);
+          return;
+        }
       }
-    } catch (error) {
-      console.error('Error loading local tags:', error);
-      setTags([]);
+      
+      // Fallback to localStorage tags
+      console.log('📱 Falling back to localStorage tags...');
+      const localTags = candidateTags.map((tag: CandidateTag) => ({
+        tag_id: tag.id,
+        tag_name: tag.name,
+        total_candidates: 0, // You can enhance this by counting actual candidates
+        total_batches: 1,
+        created_at: tag.createdAt,
+        last_updated: tag.createdAt,
+        folder_path: `local-data/${tag.id}`
+      }));
+      
+      setTags(localTags);
+      
+      if (localTags.length === 0) {
+        toast.info('No tags found. Create some tags first using the Bulk PDF Processor.');
+      } else {
+        toast.success(`Loaded ${localTags.length} local tags successfully!`);
+      }
+      
+    } catch (error: any) {
+      console.error('❌ Error loading tags:', error);
+      
+      // Final fallback to localStorage tags
+      const localTags = candidateTags.map((tag: CandidateTag) => ({
+        tag_id: tag.id,
+        tag_name: tag.name,
+        total_candidates: 0,
+        total_batches: 1,
+        created_at: tag.createdAt,
+        last_updated: tag.createdAt,
+        folder_path: `local-data/${tag.id}`
+      }));
+      
+      setTags(localTags);
+      toast.error(`Error loading backend tags, using local tags: ${error.message}`);
     } finally {
       setLoadingTags(false);
     }
@@ -657,37 +802,55 @@ export const CallDashboard: React.FC = () => {
 
     try {
       setLoadingCandidates(true);
-      // Change API endpoint to load from local JSON files
-      const response = await fetch(`http://13.204.76.229:8000/local-candidates-by-tag/${tagId}`);
-      const result = await response.json();
+      console.log(`🔍 Loading candidates for tag: ${tagId}`);
       
-      if (result.success) {
-        const candidates = result.candidates || [];
-        console.log(`📊 Loaded ${candidates.length} candidates from local JSON for tag ${tagId}`);
-        setTagCandidates(candidates);
+      // Try backend first
+      const response = await fetch(`http://13.204.76.229:8000/local-candidates-by-tag/${tagId}`);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log(`📊 Backend candidates result for ${tagId}:`, result);
         
-        // Also update contacts for bulk calling
-        const formattedContacts = candidates.map((candidate: any) => ({
-          name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
-          phone: candidate.phone || '',
-          email: candidate.email || '',
-          experience: candidate.experience || '',
-          skills: candidate.skills || '',
-          tag: candidate.tag || tagId,
-          batch_name: candidate.batch_name || candidate.fileName || 'Local Upload'
-        }));
-        setContacts(formattedContacts);
-        
-      } else {
-        setTagCandidates([]);
-        setContacts([]);
-        toast.error(`Failed to load candidates from local JSON: ${result.error}`);
+        if (result.success && result.candidates?.length > 0) {
+          const candidates = result.candidates;
+          console.log(`✅ Loaded ${candidates.length} candidates from backend for tag ${tagId}`);
+          setTagCandidates(candidates);
+          
+          // Also update contacts for bulk calling
+          const formattedContacts = candidates.map((candidate: any) => ({
+            name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
+            phone: candidate.phone || '',
+            email: candidate.email || '',
+            experience: candidate.experience || '',
+            skills: candidate.skills || '',
+            tag: candidate.tag || tagId,
+            batch_name: candidate.batch_name || candidate.fileName || 'PDF Data'
+          }));
+          setContacts(formattedContacts);
+          
+          toast.success(`Loaded ${candidates.length} candidates for "${result.tag_name}"`);
+          return;
+        }
       }
-    } catch (error: any) {
-      console.error('Error loading candidates from local JSON:', error);
+      
+      // ❌ REMOVE: No more fake demo data generation
+      console.log(`📱 No real data found for tag ${tagId}`);
       setTagCandidates([]);
       setContacts([]);
-      toast.error(`Error loading local candidates: ${error.message}`);
+      
+      // Only show message about uploading real data
+      const selectedTag = candidateTags.find(tag => tag.id === tagId);
+      if (selectedTag) {
+        toast.warning(`No candidates found for tag "${selectedTag.name}". Please upload PDF files using the Bulk PDF Processor first.`);
+      } else {
+        toast.warning(`No candidates found for tag ID "${tagId}". Please upload PDF files first.`);
+      }
+      
+    } catch (error: any) {
+      console.error('Error loading candidates:', error);
+      setTagCandidates([]);
+      setContacts([]);
+      toast.error(`Error loading candidates: ${error.message}`);
     } finally {
       setLoadingCandidates(false);
     }
