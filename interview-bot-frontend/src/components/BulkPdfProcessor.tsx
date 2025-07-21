@@ -243,7 +243,17 @@ const BulkPdfProcessor: React.FC = () => {
         totalCount: candidatesData.length,
         folderName: autoFolderName, // ✅ Auto-generated folder name
         tag: selectedTag,
-        tagDetails: getTagByName(selectedTag)
+        tagDetails: getTagByName(selectedTag),
+        // ✅ Add metadata for CallDashboard compatibility
+        metadata: {
+          tag_id: tagSlug,
+          tag_name: selectedTag,
+          total_candidates: candidatesData.length,
+          total_batches: 1,
+          created_at: new Date().toISOString(),
+          last_updated: new Date().toISOString(),
+          folder_path: `pdf-data/${autoFolderName}/candidates.json`
+        }
       };
       
       const response = await fetch(`${API_BASE_URL}/upload-candidates-to-s3`, {
@@ -269,6 +279,7 @@ const BulkPdfProcessor: React.FC = () => {
       }
       
       console.log('✅ Local Storage Success:', result);
+      console.log('✅ Metadata for CallDashboard:', jsonData.metadata);
       
       return result.localPath || `pdf-data/${autoFolderName}/candidates.json`;
     } catch (error) {

@@ -625,114 +625,30 @@ export const CallDashboard: React.FC = () => {
     ));
   };
 
-  // NEW: Load tags summary
+  // NEW: Load tags summary from local JSON files
   const loadTagsSummary = async () => {
     try {
       setLoadingTags(true);
+      // Change API endpoint to load from local JSON files
+      const response = await fetch('http://13.204.76.229:8000/local-tags-summary');
+      const result = await response.json();
       
-      // ✅ Load tags from localStorage (consistent with other components)
-      const savedTags = localStorage.getItem('candidateTags');
-      if (savedTags) {
-        const candidateTags = JSON.parse(savedTags);
-        
-        // ✅ Transform candidateTags to TagSummary format
-        const transformedTags: TagSummary[] = candidateTags.map((tag: any) => ({
-          tag_id: tag.id,
-          tag_name: tag.name,
-          total_candidates: 0, // Will be calculated below
-          total_batches: 1,
-          created_at: tag.createdAt,
-          last_updated: tag.createdAt,
-          folder_path: `pdf-data/${tag.name.toLowerCase().replace(/\s+/g, '-')}`
-        }));
-        
-        // ✅ Try to get candidate counts from API if available
-        try {
-          const response = await fetch('http://13.204.76.229:8000/tags-summary');
-          const result = await response.json();
-          
-          if (result.success && result.tags) {
-            // Merge API data with localStorage tags
-            const apiTags = result.tags;
-            const mergedTags = transformedTags.map(localTag => {
-              const apiTag = apiTags.find((t: any) => t.tag_name === localTag.tag_name);
-              if (apiTag) {
-                return {
-                  ...localTag,
-                  total_candidates: apiTag.total_candidates || 0,
-                  total_batches: apiTag.total_batches || 1
-                };
-              }
-              return localTag;
-            });
-            setTags(mergedTags);
-          } else {
-            setTags(transformedTags);
-          }
-        } catch (apiError) {
-          console.log('📊 API tags not available, using localStorage tags only');
-          setTags(transformedTags);
-        }
-        
-        console.log('📊 Loaded tags from localStorage:', transformedTags.length);
+      if (result.success) {
+        setTags(result.tags || []);
+        console.log('📊 Loaded local tags:', result.tags?.length || 0);
       } else {
-        // ✅ Initialize with default tags if none exist
-        const defaultTags = [
-          {
-            id: 'general',
-            name: 'General',
-            color: '#757575',
-            description: 'General candidates',
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'frontend',
-            name: 'Frontend Developer',
-            color: '#2196f3',
-            description: 'React, Angular, Vue.js developers',
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'backend',
-            name: 'Backend Developer',
-            color: '#4caf50',
-            description: 'Node.js, Python, Java developers',
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'fullstack',
-            name: 'Full Stack Developer',
-            color: '#ff9800',
-            description: 'Full stack developers',
-            createdAt: new Date().toISOString()
-          }
-        ];
-        
-        localStorage.setItem('candidateTags', JSON.stringify(defaultTags));
-        
-        const transformedTags: TagSummary[] = defaultTags.map(tag => ({
-          tag_id: tag.id,
-          tag_name: tag.name,
-          total_candidates: 0,
-          total_batches: 1,
-          created_at: tag.createdAt,
-          last_updated: tag.createdAt,
-          folder_path: `pdf-data/${tag.name.toLowerCase().replace(/\s+/g, '-')}`
-        }));
-        
-        setTags(transformedTags);
-        console.log('📊 Initialized default tags:', transformedTags.length);
+        setTags([]);
+        console.error('Failed to load local tags:', result.error);
       }
-      
     } catch (error) {
-      console.error('Error loading tags:', error);
+      console.error('Error loading local tags:', error);
       setTags([]);
     } finally {
       setLoadingTags(false);
     }
   };
 
-  // NEW: Load candidates for selected tag
+  // NEW: Load candidates from local JSON file for selected tag
   const loadCandidatesForTag = async (tagId: string) => {
     if (!tagId) {
       setTagCandidates([]);
@@ -741,12 +657,13 @@ export const CallDashboard: React.FC = () => {
 
     try {
       setLoadingCandidates(true);
-      const response = await fetch(`http://13.204.76.229:8000/candidates-by-tag/${tagId}`);
+      // Change API endpoint to load from local JSON files
+      const response = await fetch(`http://13.204.76.229:8000/local-candidates-by-tag/${tagId}`);
       const result = await response.json();
       
       if (result.success) {
         const candidates = result.candidates || [];
-        console.log(`📊 Loaded ${candidates.length} candidates for tag ${tagId}`);
+        console.log(`📊 Loaded ${candidates.length} candidates from local JSON for tag ${tagId}`);
         setTagCandidates(candidates);
         
         // Also update contacts for bulk calling
@@ -756,21 +673,21 @@ export const CallDashboard: React.FC = () => {
           email: candidate.email || '',
           experience: candidate.experience || '',
           skills: candidate.skills || '',
-          tag: tagId,
-          batch_name: candidate.batch_name || ''
+          tag: candidate.tag || tagId,
+          batch_name: candidate.batch_name || candidate.fileName || 'Local Upload'
         }));
         setContacts(formattedContacts);
         
       } else {
         setTagCandidates([]);
         setContacts([]);
-        toast.error(`Failed to load candidates: ${result.error}`);
+        toast.error(`Failed to load candidates from local JSON: ${result.error}`);
       }
     } catch (error: any) {
-      console.error('Error loading candidates for tag:', error);
+      console.error('Error loading candidates from local JSON:', error);
       setTagCandidates([]);
       setContacts([]);
-      toast.error(`Error loading candidates: ${error.message}`);
+      toast.error(`Error loading local candidates: ${error.message}`);
     } finally {
       setLoadingCandidates(false);
     }

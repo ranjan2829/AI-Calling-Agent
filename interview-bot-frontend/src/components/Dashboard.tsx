@@ -1005,7 +1005,10 @@ const Dashboard: React.FC = () => {
           candidateName: interview.candidate_name,
           experience: selectedAssessment.experience,
           duration: selectedAssessment.duration ? Math.floor(selectedAssessment.duration / 60) : 60,
-          totalQuestions: selectedAssessment.totalTopics || 10
+          totalQuestions: selectedAssessment.totalTopics || 10,
+          // ✅ Include tag information in email payload
+          candidateTag: interview.tag,
+          tagDetails: getTagByName(interview.tag || '')
         }),
       });
 
@@ -1153,404 +1156,60 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleCloseCodingAssessmentDialog = () => {
-    setShowCodingAssessmentForm(null);
-    setCreatedAssessmentLink(null);
-    setCodingAssessmentFormData({
-      title: '',
-      designation: '',
-      jobDescription: '',
-      experience: 1,
-      totalQuestions: 10,
-      skills: [],
-      questionTypes: []
-    });
-    setCodingAssessmentErrors({});
-  };
-
-  const copyAssessmentLink = async () => {
-    if (createdAssessmentLink) {
-      try {
-        await navigator.clipboard.writeText(createdAssessmentLink);
-        toast.success('Assessment link copied to clipboard!');
-      } catch (err) {
-        toast.error('Failed to copy link. Please copy manually.');
-      }
-    }
-  };
-
-  const sendAssessmentLinkViaEmail = async () => {
-    if (!createdAssessmentLink) {
-      toast.error('No assessment link available');
-      return;
-    }
-    
+  const handleAssignTagToInterview = async (interviewId: string, tagId: string) => {
     try {
-      toast.info('Sending assessment link via email...');
-      toast.success('Assessment link sent via email!');
-    } catch (err) {
-      toast.error('Failed to send email');
-    }
-  };
+      // Update local state
+      setInterviews(prev => prev.map(interview => 
+        interview.interview_id === interviewId 
+          ? { ...interview, tag: tagId }
+          : interview
+      ));
 
-  const refreshInterviewResults = async (interviewId: string) => {
-    await fetchInterviewResults(interviewId);
-  };
-
-  const fetchAssessments = async (page = 1, limit = 10, searchTerm = '') => {
-    try {
-      setLoadingAssessments(true);
-      const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : '';
-      
-      const response = await fetch(`${ASSESSMENT_API_URL}/assessment/?page=${page}&limit=${limit}&sortOrder=DESC&sortBy=createdAt&searchBy=${searchParam}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          console.log('Assessment API endpoint not found, using fallback');
-          setAssessments([]);
-          return {
-            assessments: [],
-            totalCount: 0,
-            currentPage: page,
-            totalPages: 1
-          };
-        }
-        
-        if (response.status === 401) {
-          console.log('Session expired for assessments');
-          setAssessments([]);
-          return {
-            assessments: [],
-            totalCount: 0,
-            currentPage: page,
-            totalPages: 1
-          };
-        }
-        
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('✅ API Response:', data);
-      
-      const assessments = data.result?.assessments || [];
-      
-      const mappedAssessments: AssessmentData[] = assessments.map((assessment: any) => ({
-        id: assessment.id,
-        testName: assessment.title,
-        jobRole: assessment.designation,
-        candidateCount: assessment.candidateCount,
-        createdAt: assessment.createdAt,
-        status: assessment.isActive ? 'active' : 'inactive',
-        description: assessment.description,
-        experience: assessment.experience,
-        duration: assessment.duration,
-        totalTopics: assessment.totalTopics,
-        allowVideoRecording: assessment.allowVideoRecording,
-        createdBy: assessment.createdBy
-      }));
-
-      setAssessments(mappedAssessments);
-      console.log('✅ Mapped assessments:', mappedAssessments);
-      
-      return {
-        assessments: mappedAssessments,
-        totalCount: data.result?.totalItems || 0,
-        currentPage: data.result?.currentPage || 1,
-        totalPages: data.result?.totalPages || 1
-      };
-    } catch (error) {
-      console.error('Error fetching assessments:', error);
-      setAssessments([]);
-      
-      return {
-        assessments: [],
-        totalCount: 0,
-        currentPage: page,
-        totalPages: 1
-      };
-    } finally {
-      setLoadingAssessments(false);
-    }
-  };
-
-  const getAssessmentDetails = async (assessmentId: string) => {
-    try {
-      const response = await fetch(`${ASSESSMENT_API_URL}/assessment/details/${assessmentId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching assessment details:', error);
-      return null;
-    }
-  };
-
-  const getCandidatesForAssessment = async (assessmentId: string) => {
-    try {
-      const response = await fetch(`${ASSESSMENT_API_URL}/report/${assessmentId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching candidates for assessment:', error);
-      return null;
-    }
-  };
-
-  const getVideoPermission = async (assessmentId: string) => {
-    try {
-      const response = await fetch(`${ASSESSMENT_API_URL}/assessment/getVideoPermission/${assessmentId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching video permission:', error);
-      return null;
-    }
-  };
-
-  const generateAssessmentLink = async (assessmentId: string): Promise<string> => {
-    try {
-      const assessmentLink = `https://dev.d23pi31x94e0bg.amplifyapp.com/assessment/${assessmentId}`;
-      
-      const response = await fetch(`${ASSESSMENT_API_URL}/assessment/details/${assessmentId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      });
-      
-      if (response.ok) {
-        console.log(`✅ Assessment ${assessmentId} exists, generating link: ${assessmentLink}`);
-        return assessmentLink;
-      } else {
-        console.log(`⚠️ Assessment ${assessmentId} not found, but returning link anyway`);
-        return assessmentLink;
-      }
-    } catch (error) {
-      console.error('Error generating assessment link:', error);
-      return `https://dev.d23pi31x94e0bg.amplifyapp.com/assessment/${assessmentId}`;
-    }
-  };
-
-  const handleAssessmentSelect = async (assessment: AssessmentData | null) => {
-    setSelectedAssessment(assessment);
-    setShowAssessmentDropdown(false);
-    
-    if (assessment) {
-      const details = await getAssessmentDetails(assessment.id);
-      const videoPermission = await getVideoPermission(assessment.id);
-      
-      if (details) {
-        console.log('Assessment details:', details);
-      }
-      
-      if (videoPermission) {
-        console.log('Video permission settings:', videoPermission);
-      }
-      
-      toast.success(`Selected assessment: ${assessment.testName}`);
-    }
-  };
-
-  const handleSendEmailSubmit = async () => {
-    if (!selectedAssessmentForEmail || !candidateEmailInput) {
-      toast.error('Missing assessment or candidate email');
-      return;
-    }
-
-    try {
-      const assessmentLink = await generateAssessmentLink(selectedAssessmentForEmail.id);
-      const response = await fetch(`${API_BASE_URL}/send-assessment-link`, {
+      // Optionally persist to backend
+      const response = await fetch(`${API_BASE_URL}/update-interview-tag`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: candidateEmailInput,
-          assessmentLink: assessmentLink,
-          assessmentTitle: selectedAssessmentForEmail.testName,
-          jobRole: selectedAssessmentForEmail.jobRole,
-          candidateName: candidateEmailInput.split('@')[0],
-          experience: selectedAssessmentForEmail.experience,
-          duration: selectedAssessmentForEmail.duration ? Math.floor(selectedAssessmentForEmail.duration / 60) : 60,
-          totalQuestions: selectedAssessmentForEmail.totalTopics || 10
+          interviewId: interviewId,
+          tag: tagId
         }),
       });
 
-      const result = await response.json();
-      
-      if (response.ok && result.success) {
-        toast.success('Assessment link sent successfully!');
+      if (response.ok) {
+        const tagName = candidateTags.find(tag => tag.id === tagId)?.name || tagId;
+        toast.success(`Tag "${tagName}" assigned successfully`);
       } else {
-        toast.error(result.message || 'Failed to send assessment link');
+        toast.warning('Tag assigned locally but failed to sync with server');
       }
-      
-      setEmailDialogOpen(false);
-      setCandidateEmailInput('');
-      setSelectedAssessmentForEmail(null);
     } catch (error) {
-      console.error('Error sending assessment link:', error);
-      toast.error('Failed to send assessment link');
+      console.error('Error assigning tag:', error);
+      toast.error('Failed to assign tag');
     }
   };
 
-  // Load tags from localStorage on component mount
-  useEffect(() => {
-    const savedTags = localStorage.getItem('candidateTags');
-    if (savedTags) {
-      setCandidateTags(JSON.parse(savedTags));
-    } else {
-      // Default tags
-      const defaultTags: CandidateTag[] = [
-        {
-          id: 'frontend',
-          name: 'Frontend Developer',
-          color: '#2196f3',
-          description: 'React, Angular, Vue.js developers',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'backend',
-          name: 'Backend Developer',
-          color: '#4caf50',
-          description: 'Node.js, Python, Java developers',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'fullstack',
-          name: 'Full Stack Developer',
-          color: '#ff9800',
-          description: 'Full stack developers',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'devops',
-          name: 'DevOps Engineer',
-          color: '#9c27b0',
-          description: 'DevOps and Infrastructure engineers',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'mobile',
-          name: 'Mobile Developer',
-          color: '#e91e63',
-          description: 'iOS, Android, React Native developers',
-          createdAt: new Date().toISOString()
-        }
-      ];
-      setCandidateTags(defaultTags);
-      localStorage.setItem('candidateTags', JSON.stringify(defaultTags));
-    }
-  }, []);
-
-  const handleCreateTag = () => {
-    if (!newTag.name.trim()) {
-      toast.error('Tag name is required');
-      return;
-    }
-
-    const tag: CandidateTag = {
-      id: newTag.name.toLowerCase().replace(/\s+/g, '-'),
-      name: newTag.name.trim(),
-      color: newTag.color,
-      description: newTag.description.trim(),
-      createdAt: new Date().toISOString()
-    };
-
-    const updatedTags = [...candidateTags, tag];
-    setCandidateTags(updatedTags);
-    localStorage.setItem('candidateTags', JSON.stringify(updatedTags));
-    
-    setNewTag({ name: '', color: '#1976d2', description: '' });
-    setShowTagDialog(false);
-    toast.success(`Tag "${tag.name}" created successfully!`);
-  };
-
-  const handleDeleteTag = (tagId: string) => {
-    const updatedTags = candidateTags.filter(tag => tag.id !== tagId);
-    setCandidateTags(updatedTags);
-    localStorage.setItem('candidateTags', JSON.stringify(updatedTags));
-    toast.success('Tag deleted successfully!');
-  };
-
-  const getTagByName = (tagName: string) => {
-    return candidateTags.find(tag => tag.name === tagName || tag.id === tagName);
-  };
-
-  const renderCandidateTag = (interview: InterviewDetails) => {
-    if (!interview.tag) return null;
-    
-    const tag = getTagByName(interview.tag);
-    if (!tag) {
-      return (
-        <Chip
-          label={interview.tag}
-          size="small"
-          sx={{ 
-            fontSize: '0.7rem',
-            backgroundColor: '#e0e0e0',
-            color: '#666'
-          }}
-        />
-      );
-    }
-
-    return (
-      <Chip
-        label={tag.name}
-        size="small"
-        sx={{ 
-          fontSize: '0.7rem',
-          backgroundColor: tag.color,
-          color: 'white',
-          '& .MuiChip-label': {
-            fontWeight: 500
-          }
-        }}
-      />
+  const handleInterviewTagChange = (interviewId: string, tagId: string) => {
+    setInterviews(prev => 
+      prev.map(interview => 
+        interview.interview_id === interviewId 
+          ? { ...interview, tag: tagId }
+          : interview
+      )
     );
   };
 
-  // Filter interviews by tag
-  
+  const filteredInterviewsByTagAndSearch = filteredInterviews.filter(interview => {
+    const matchesSearch = interview.candidate_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         interview.interview_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         interview.candidate_phone?.includes(searchTerm);
+    const hasValidStartTime = interview.start_time && interview.start_time !== 'N/A';
+    const hasProgress = interview.questions_answered > 0;
+    const matchesTag = tagFilter === 'all' || interview.tag === tagFilter;
+    return matchesSearch && interview.status === 'COMPLETED' && hasValidStartTime && hasProgress && matchesTag;
+  });
+
+ 
   return (
     <Box sx={{ 
       minHeight: '100vh', 
