@@ -2743,34 +2743,22 @@ async def upload_candidates_to_local(request: Request):
         folder_name = data.get('folderName')  # This will be auto-generated now
         candidates_data = data['data']
         tag = data.get('tag', 'General')
-        
-        # ✅ Generate folder name based on tag if not provided
         if not folder_name:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             tag_slug = tag.lower().replace(' ', '-').replace('_', '-')
             tag_slug = re.sub(r'[^a-z0-9-]', '', tag_slug)  # Remove special chars
             folder_name = f"{tag_slug}_{timestamp}"
-        
-        # ✅ Add tag to each candidate
         if 'candidates' in candidates_data:
             for candidate in candidates_data['candidates']:
                 candidate['tag'] = tag
                 candidate['tag_id'] = tag.lower().replace(' ', '_').replace('-', '_')
                 candidate['processed_date'] = datetime.now().isoformat()
-        
-        # ✅ Create local directory structure based on tag hierarchy
         tag_folder = tag.lower().replace(' ', '_').replace('-', '_')
         local_folder = f"pdf-data/{tag_folder}/{folder_name}"
         os.makedirs(local_folder, exist_ok=True)
-        
-        # ✅ Also create a tag-specific index
         tag_index_folder = f"pdf-data/{tag_folder}"
         os.makedirs(tag_index_folder, exist_ok=True)
-        
-        # Local file path
         local_file_path = f"{local_folder}/candidates.json"
-        
-        # ✅ Save JSON data locally with comprehensive tag information
         enhanced_data = {
             **candidates_data,
             'tag': tag,
@@ -2785,15 +2773,11 @@ async def upload_candidates_to_local(request: Request):
         }
         
         json_content = json.dumps(enhanced_data, indent=2)
-        
-        # ✅ Save the main candidates file
         try:
             with open(local_file_path, 'w') as f:
                 f.write(json_content)
             
             print(f"[LOCAL SAVE] ✅ Saved to: {local_file_path} with tag: {tag}")
-            
-            # ✅ Update tag index file
             await update_tag_index(tag_folder, folder_name, enhanced_data)
             
             return {
@@ -2818,8 +2802,6 @@ async def update_tag_index(tag_folder: str, batch_folder: str, batch_data: dict)
     """Update the tag index file with new batch information"""
     try:
         tag_index_file = f"pdf-data/{tag_folder}/tag_index.json"
-        
-        # Load existing tag index
         if os.path.exists(tag_index_file):
             with open(tag_index_file, 'r') as f:
                 tag_index = json.load(f)
@@ -2832,23 +2814,17 @@ async def update_tag_index(tag_folder: str, batch_folder: str, batch_data: dict)
                 "total_candidates": 0,
                 "batches": {}
             }
-        
-        # Add/update batch information
         tag_index["batches"][batch_folder] = {
             "batch_name": batch_folder,
             "candidate_count": len(batch_data.get("candidates", [])),
             "processed_at": batch_data.get("processed_at"),
             "file_path": f"pdf-data/{tag_folder}/{batch_folder}/candidates.json"
         }
-        
-        # Update totals
         tag_index["total_batches"] = len(tag_index["batches"])
         tag_index["total_candidates"] = sum(
             batch["candidate_count"] for batch in tag_index["batches"].values()
         )
         tag_index["last_updated"] = datetime.now().isoformat()
-        
-        # Save updated index
         with open(tag_index_file, 'w') as f:
             json.dump(tag_index, f, indent=2)
         
@@ -2856,8 +2832,6 @@ async def update_tag_index(tag_folder: str, batch_folder: str, batch_data: dict)
         
     except Exception as e:
         print(f"[TAG INDEX ERROR] ❌ {e}")
-
-# ✅ New endpoint to get candidates by tag
 @app.get("/candidates-by-tag/{tag_id}")
 async def get_candidates_by_tag(tag_id: str):
     """Get all candidates for a specific tag"""
@@ -2872,14 +2846,10 @@ async def get_candidates_by_tag(tag_id: str):
                 "candidates": [],
                 "total_count": 0
             }
-        
-        # Load tag index
         with open(tag_index_file, 'r') as f:
             tag_index = json.load(f)
         
         all_candidates = []
-        
-        # Load candidates from all batches for this tag
         for batch_name, batch_info in tag_index["batches"].items():
             batch_file = batch_info["file_path"]
             if os.path.exists(batch_file):
@@ -2916,8 +2886,6 @@ async def get_candidates_by_tag(tag_id: str):
             "candidates": [],
             "total_count": 0
         }
-
-# ✅ New endpoint to get all tags with statistics
 @app.get("/tags-summary")
 async def get_tags_summary():
     """Get summary of all tags with candidate counts"""
@@ -2934,8 +2902,6 @@ async def get_tags_summary():
         
         tags_summary = []
         total_candidates_across_tags = 0
-        
-        # Scan tag directories
         for tag_folder in os.listdir(pdf_data_dir):
             tag_path = os.path.join(pdf_data_dir, tag_folder)
             if os.path.isdir(tag_path):
@@ -2962,8 +2928,6 @@ async def get_tags_summary():
                     except Exception as e:
                         print(f"[TAG SUMMARY ERROR] ❌ Error reading tag {tag_folder}: {e}")
                         continue
-        
-        # Sort by candidate count (highest first)
         tags_summary.sort(key=lambda x: x["total_candidates"], reverse=True)
         
         return {
@@ -2982,8 +2946,6 @@ async def get_tags_summary():
             "total_tags": 0,
             "total_candidates": 0
         }
-
-# ✅ Update the list folders endpoint to show tag-based organization
 @app.get("/list-candidate-folders")
 async def list_candidate_folders():
     """List all candidate folders organized by tags"""
@@ -3003,15 +2965,11 @@ async def list_candidate_folders():
         folders = []
         folders_by_tag = {}
         tags_summary = []
-        
-        # Scan tag directories
         for tag_folder in os.listdir(pdf_data_dir):
             tag_path = os.path.join(pdf_data_dir, tag_folder)
             if os.path.isdir(tag_path):
                 tag_folders = []
                 tag_index_file = os.path.join(tag_path, "tag_index.json")
-                
-                # Load tag information
                 tag_info = {
                     "tag_id": tag_folder,
                     "tag_name": tag_folder.replace('_', ' ').title(),
@@ -3031,8 +2989,6 @@ async def list_candidate_folders():
                         })
                     except Exception as e:
                         print(f"[TAG INDEX READ ERROR] ❌ {e}")
-                
-                # Scan batch folders within tag directory
                 for batch_folder in os.listdir(tag_path):
                     batch_path = os.path.join(tag_path, batch_folder)
                     if os.path.isdir(batch_path):
@@ -3070,8 +3026,6 @@ async def list_candidate_folders():
             "by_tag": {},
             "tags_summary": []
         }
-
-# ✅ New endpoint to search candidates across all tags
 @app.get("/search-candidates")
 async def search_candidates(query: str = "", tag_id: str = ""):
     """Search candidates across all tags or within a specific tag"""
@@ -3088,18 +3042,12 @@ async def search_candidates(query: str = "", tag_id: str = ""):
             }
         
         all_candidates = []
-        
-        # Determine which tags to search
         if tag_id:
             tag_folders = [tag_id] if os.path.exists(f"{pdf_data_dir}/{tag_id}") else []
         else:
             tag_folders = [f for f in os.listdir(pdf_data_dir) if os.path.isdir(f"{pdf_data_dir}/{f}")]
-        
-        # Search through specified tags
         for tag_folder in tag_folders:
             tag_path = f"{pdf_data_dir}/{tag_folder}"
-            
-            # Scan all batch folders in this tag
             for batch_folder in os.listdir(tag_path):
                 if batch_folder == "tag_index.json":
                     continue

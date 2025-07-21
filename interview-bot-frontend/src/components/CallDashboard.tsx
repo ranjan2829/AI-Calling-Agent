@@ -26,7 +26,14 @@ import {
   Divider,
   Tab,
   Tabs,
-  InputAdornment
+  InputAdornment,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  List,
+  ListItem,
+  ListItemText
 } from '@mui/material';
 import {
   Phone,
@@ -34,15 +41,17 @@ import {
   Work,
   Save,
   CheckCircle,
-  Upload,
   People,
   PlayArrow,
   Stop,
   Error,
   CloudUpload,
   PhoneInTalk,
-  QuestionAnswer,  // Add this
-  Edit           // Add this
+  QuestionAnswer,
+  Edit,
+  Tag,
+  Refresh,
+  Search
 } from '@mui/icons-material';
 import { getCallStats, getJobDescription, getAllInterviews, callsApi } from '../api/services';
 import { toast } from 'react-toastify';
@@ -67,7 +76,11 @@ interface JobDescription {
 interface Contact {
   name: string;
   phone: string;
-  data?: string;
+  email?: string;
+  experience?: string;
+  skills?: string;
+  tag?: string;
+  batch_name?: string;
 }
 interface CallResult {
   contact: Contact;
@@ -84,6 +97,21 @@ interface BulkCallSession {
   completed_calls: number;
   results: CallResult[];
   start_time: string;
+}
+
+interface TagSummary {
+  tag_id: string;
+  tag_name: string;
+  total_candidates: number;
+  total_batches: number;
+  created_at?: string;
+  last_updated?: string;
+  folder_path?: string;
+}
+
+interface InterviewQuestion {
+  id: number;
+  question: string;
 }
 const initiateCall = async (phoneNumber: string) => {
   try {
@@ -175,6 +203,14 @@ export const CallDashboard: React.FC = () => {
     loading: false
   });
 
+  // NEW: Tag-based states
+  const [tags, setTags] = useState<TagSummary[]>([]);
+  const [selectedTagId, setSelectedTagId] = useState<string>('');
+  const [tagCandidates, setTagCandidates] = useState<Contact[]>([]);
+  const [loadingTags, setLoadingTags] = useState(false);
+  const [loadingCandidates, setLoadingCandidates] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -183,7 +219,8 @@ export const CallDashboard: React.FC = () => {
     loadJobDescription();
     loadInterviews();
     loadQuestions(); 
-    loadTwilioBalance(); // Add this
+    loadTwilioBalance();
+    loadTagsSummary(); // NEW: Load tags on mount
   }, []);
 
   const loadCallStats = async () => {
@@ -588,6 +625,147 @@ export const CallDashboard: React.FC = () => {
     ));
   };
 
+  // NEW: Load tags summary
+  const loadTagsSummary = async () => {
+    try {
+      setLoadingTags(true);
+      const response = await fetch('http://13.204.76.229:8000/tags-summary');
+      const result = await response.json();
+      
+      if (result.success) {
+        setTags(result.tags || []);
+        console.log('📊 Loaded tags:', result.tags?.length || 0);
+      } else {
+        setTags([]);
+        console.error('Failed to load tags:', result.error);
+      }
+    } catch (error) {
+      console.error('Error loading tags:', error);
+      setTags([]);
+    } finally {
+      setLoadingTags(false);
+    }
+  };
+
+  // NEW: Load candidates for selected tag
+  const loadCandidatesForTag = async (tagId: string) => {
+    if (!tagId) {
+      setTagCandidates([]);
+      return;
+    }
+
+    try {
+      setLoadingCandidates(true);
+      const response = await fetch(`http://13.204.76.229:8000/candidates-by-tag/${tagId}`);
+      const result = await response.json();
+      
+      if (result.success) {
+        const candidates = result.candidates || [];
+        console.log(`📊 Loaded ${candidates.length} candidates for tag ${tagId}`);
+        setTagCandidates(candidates);
+        
+        // Also update contacts for bulk calling
+        const formattedContacts = candidates.map((candidate: any) => ({
+          name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
+          phone: candidate.phone || '',
+          email: candidate.email || '',
+          experience: candidate.experience || '',
+          skills: candidate.skills || '',
+          tag: tagId,
+          batch_name: candidate.batch_name || ''
+        }));
+        setContacts(formattedContacts);
+        
+      } else {
+        setTagCandidates([]);
+        setContacts([]);
+        toast.error(`Failed to load candidates: ${result.error}`);
+      }
+    } catch (error: any) {
+      console.error('Error loading candidates for tag:', error);
+      setTagCandidates([]);
+      setContacts([]);
+      toast.error(`Error loading candidates: ${error.message}`);
+    } finally {
+      setLoadingCandidates(false);
+    }
+  };
+
+  // Handle tag selection
+  const handleTagSelection = (tagId: string) => {
+    setSelectedTagId(tagId);
+    loadCandidatesForTag(tagId);
+  };
+
+  // NEW: Start bulk calling from tag candidates
+  const startBulkCallingFromTag = async () => {
+    if (tagCandidates.length === 0) {
+      toast.error('No candidates available for calling');
+      return;
+    }
+    
+    setIsBulkCalling(true);
+    
+    try {
+      // Format candidates for bulk calling API
+      const formattedContacts = tagCandidates
+        .filter(candidate => candidate.phone) // Only candidates with phone numbers
+        .map(candidate => ({
+          name: candidate.name,
+          phone: candidate.phone,
+          email: candidate.email,
+          experience: candidate.experience || '',
+          skills: candidate.skills || ''
+        }));
+
+      console.log(`🚀 Starting bulk calling for ${formattedContacts.length} candidates from tag ${selectedTagId}`);
+      
+      const response = await fetch('http://13.204.76.229:8000/bulk-call', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formattedContacts),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setBulkCallSession({
+          bulk_call_id: result.bulk_call_id,
+          status: 'STARTING',
+          current_index: 0,
+          total_contacts: result.total_contacts,
+          completed_calls: 0,
+          results: [],
+          start_time: new Date().toISOString()
+        });
+        
+        const selectedTag = tags.find(t => t.tag_id === selectedTagId);
+        toast.success(`Bulk calling started for ${formattedContacts.length} candidates from tag "${selectedTag?.tag_name}"`);
+        pollBulkCallStatus(result.bulk_call_id);
+      } else {
+        toast.error(result.error);
+        setIsBulkCalling(false);
+      }
+    } catch (error: any) {
+      toast.error('Failed to start bulk calling: ' + error.message);
+      setIsBulkCalling(false);
+    }
+  };
+
+  // Filter candidates based on search
+  const filteredCandidates = tagCandidates.filter(candidate => {
+    if (!searchQuery) return true;
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      candidate.name?.toLowerCase().includes(searchLower) ||
+      candidate.phone?.toLowerCase().includes(searchLower) ||
+      candidate.email?.toLowerCase().includes(searchLower) ||
+      candidate.skills?.toLowerCase().includes(searchLower)
+    );
+  });
+
   return (
     <Box sx={{ p: 3 }}>
       {/* Header with Logo - FIX: Correct logo path */}
@@ -614,8 +792,6 @@ export const CallDashboard: React.FC = () => {
           </Typography>
         </Box>
       </Box>
-
-      {/* Stats Cards - MUCH SMALLER */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={6} sm={4} md={2}>
           <Card sx={{ height: '100px' }}>
@@ -731,13 +907,45 @@ export const CallDashboard: React.FC = () => {
           <Card sx={{ height: '100px' }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <People sx={{ color: 'info.main', fontSize: 24, mr: 1 }} />
+                <Tag sx={{ color: 'info.main', fontSize: 24, mr: 1 }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'info.main', fontSize: '1.25rem' }}>
-                    {contacts.length}
+                    {tags.length}
                   </Typography>
                   <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
-                    Contacts
+                    Data Tags
+                  </Typography>
+                </Box>
+              </Box>
+              <Button 
+                size="small" 
+                variant="text"
+                onClick={loadTagsSummary}
+                disabled={loadingTags}
+                sx={{ 
+                  fontSize: '0.6rem', 
+                  minWidth: 'auto', 
+                  p: 0.5,
+                  mt: 0.5
+                }}
+              >
+                Refresh
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={6} sm={4} md={2}>
+          <Card sx={{ height: '100px' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <People sx={{ color: 'primary.main', fontSize: 24, mr: 1 }} />
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main', fontSize: '1.25rem' }}>
+                    {selectedTagId ? tagCandidates.length : contacts.length}
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
+                    Ready to Call
                   </Typography>
                 </Box>
               </Box>
@@ -747,9 +955,10 @@ export const CallDashboard: React.FC = () => {
       </Grid>
       <Card sx={{ mb: 4 }}>
         <CardContent>
-          <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
+          <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
             <Tab label="Single Call" />
-            <Tab label="Bulk Calling" />
+            <Tab label="Tag-Based Bulk Calling" />
+            <Tab label="CSV Upload" />
             <Tab label="Job Description" />
           </Tabs>
           {tabValue === 0 && (
@@ -916,151 +1125,156 @@ export const CallDashboard: React.FC = () => {
             </Box>
           )}
 
-          {/* Bulk Calling Tab - Made Much Larger */}
+          {/* NEW: Tag-Based Bulk Calling Tab */}
           {tabValue === 1 && (
             <Box sx={{ minHeight: '70vh' }}>
-              {/* CSV Upload Section */}
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3 }}>
-                  Sequential Bulk Calling Dashboard
-                </Typography>
-                
-                <Card sx={{ mb: 4 }}>
-                  <CardContent>
-                    <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3 }}>
-                      Upload Contact List
+              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3 }}>
+                Tag-Based Bulk Calling Dashboard
+              </Typography>
+              
+              {/* Tag Selection Section */}
+              <Card sx={{ mb: 4 }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                      Select Data Tag for Bulk Calling
                     </Typography>
-                    
-                    <Box
-                      sx={{
-                        border: '2px dashed #ccc',
-                        borderRadius: 2,
-                        p: 6,
-                        textAlign: 'center',
-                        cursor: 'pointer',
-                        '&:hover': { bgcolor: 'grey.50' },
-                        minHeight: 200
-                      }}
+                    <Button
+                      startIcon={loadingTags ? <CircularProgress size={20} /> : <Refresh />}
+                      onClick={loadTagsSummary}
+                      disabled={loadingTags}
                     >
-                      <input
-                        type="file"
-                        accept=".csv"
-                        onChange={handleFileUpload}
-                        style={{ display: 'none' }}
-                        id="csv-upload"
-                        disabled={isUploading || isBulkCalling}
-                      />
-                      <label htmlFor="csv-upload" style={{ cursor: 'pointer', width: '100%', display: 'block' }}>
-                        <CloudUpload sx={{ fontSize: 72, color: 'text.secondary', mb: 3 }} />
-                        <Typography variant="h5" sx={{ mb: 2 }}>
-                          {isUploading ? 'Processing CSV...' : 'Drop CSV File Here or Click to Upload'}
-                        </Typography>
-                        <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
-                          CSV should contain: name, phone, data (optional)
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          Calls will be made sequentially with proper spacing
-                        </Typography>
-                      </label>
-                    </Box>
-                    
-                    {contacts.length > 0 && (
-                      <Alert severity="success" sx={{ mt: 3 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <People sx={{ mr: 1 }} />
-                          <Typography variant="h6">
-                            {contacts.length} contacts loaded successfully - Ready for sequential calling!
-                          </Typography>
-                        </Box>
-                      </Alert>
-                    )}
-                  </CardContent>
-                </Card>
-              </Box>
+                      Refresh Tags
+                    </Button>
+                  </Box>
 
-              {/* Bulk Calling Controls */}
-              {contacts.length > 0 && (
-                <Grid container spacing={4} sx={{ minHeight: '60vh' }}>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Select Tag</InputLabel>
+                        <Select
+                          value={selectedTagId}
+                          label="Select Tag"
+                          onChange={(e) => handleTagSelection(e.target.value)}
+                          disabled={loadingTags || isBulkCalling}
+                        >
+                          <MenuItem value="">
+                            <em>Choose a tag...</em>
+                          </MenuItem>
+                          {tags.map((tag) => (
+                            <MenuItem key={tag.tag_id} value={tag.tag_id}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                <Tag sx={{ mr: 1, color: 'primary.main' }} />
+                                <Box sx={{ flexGrow: 1 }}>
+                                  <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                                    {tag.tag_name}
+                                  </Typography>
+                                  <Typography variant="body2" color="textSecondary">
+                                    {tag.total_candidates} candidates • {tag.total_batches} batches
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      {selectedTagId && (
+                        <Box sx={{ p: 2, bgcolor: 'info.50', borderRadius: 1 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
+                            Selected Tag: {tags.find(t => t.tag_id === selectedTagId)?.tag_name}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {tagCandidates.length} candidates ready for calling
+                          </Typography>
+                          {tagCandidates.length > 0 && (
+                            <Button
+                              variant="contained"
+                              size="large"
+                              startIcon={isBulkCalling ? <CircularProgress size={20} /> : <PlayArrow />}
+                              onClick={startBulkCallingFromTag}
+                              disabled={isBulkCalling || tagCandidates.length === 0}
+                              sx={{ mt: 2 }}
+                            >
+                              {isBulkCalling ? 'Calling in Progress...' : `Start Calling ${tagCandidates.length} Candidates`}
+                            </Button>
+                          )}
+                        </Box>
+                      )}
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+
+              {/* Candidates List Section */}
+              {selectedTagId && (
+                <Grid container spacing={4}>
                   <Grid item xs={12} md={8}>
                     <Card sx={{ height: '100%' }}>
                       <CardContent>
-                        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3 }}>
-                          Contact List ({contacts.length} contacts)
-                        </Typography>
-                        
-                        {/* Current Call Status */}
-                        {isBulkCalling && bulkCallSession && (
-                          <Card sx={{ mb: 3, borderLeft: 4, borderColor: 'primary.main', bgcolor: 'primary.50' }}>
-                            <CardContent>
-                              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                <Phone sx={{ color: 'primary.main', mr: 1, animation: 'pulse 2s infinite' }} />
-                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                                  Currently Calling: {contacts[bulkCallSession.current_index]?.name}
-                                </Typography>
-                              </Box>
-                              <Typography variant="body1" color="textSecondary">
-                                {contacts[bulkCallSession.current_index]?.phone}
-                              </Typography>
-                              <LinearProgress sx={{ mt: 2 }} />
-                            </CardContent>
-                          </Card>
-                        )}
-                        
-                        <Box sx={{ maxHeight: 500, overflow: 'auto' }}>
-                          {contacts.map((contact, index) => (
-                            <Card
-                              key={index}
-                              sx={{
-                                mb: 2,
-                                bgcolor: bulkCallSession?.current_index === index && isBulkCalling ? 'primary.50' : 
-                                        bulkCallSession?.results?.find(r => r.contact.phone === contact.phone) ? 'grey.50' : 'white',
-                                border: bulkCallSession?.current_index === index && isBulkCalling ? '2px solid' : '1px solid',
-                                borderColor: bulkCallSession?.current_index === index && isBulkCalling ? 'primary.main' : 'grey.300'
-                              }}
-                            >
-                              <CardContent>
-                                <Grid container alignItems="center">
-                                  <Grid item xs={12} sm={4}>
-                                    <Typography variant="h6" sx={{ fontWeight: 'medium' }}>
-                                      {contact.name}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid item xs={12} sm={4}>
-                                    <Typography variant="body1" color="textSecondary">
-                                      {contact.phone}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid item xs={12} sm={4}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                      {bulkCallSession?.results?.find(r => r.contact.phone === contact.phone) && (
-                                        <Chip
-                                          icon={getStatusIcon(bulkCallSession.results.find(r => r.contact.phone === contact.phone)!.status)}
-                                          label={bulkCallSession.results.find(r => r.contact.phone === contact.phone)!.status}
-                                          color={getStatusColor(bulkCallSession.results.find(r => r.contact.phone === contact.phone)!.status) as any}
-                                          size="medium"
-                                        />
-                                      )}
-                                      {bulkCallSession?.current_index === index && isBulkCalling && (
-                                        <Chip
-                                          icon={<CircularProgress size={16} />}
-                                          label="Calling Now..."
-                                          color="primary"
-                                          size="medium"
-                                          sx={{ animation: 'pulse 2s infinite' }}
-                                        />
-                                      )}
-                                    </Box>
-                                  </Grid>
-                                </Grid>
-                                {contact.data && (
-                                  <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                                    <strong>Info:</strong> {contact.data}
-                                  </Typography>
-                                )}
-                              </CardContent>
-                            </Card>
-                          ))}
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                            Candidates from "{tags.find(t => t.tag_id === selectedTagId)?.tag_name}" ({filteredCandidates.length})
+                          </Typography>
+                          
+                          <TextField
+                            size="small"
+                            placeholder="Search candidates..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <Search />
+                                </InputAdornment>
+                              ),
+                            }}
+                            sx={{ width: 250 }}
+                          />
                         </Box>
+
+                        {loadingCandidates ? (
+                          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                            <CircularProgress />
+                          </Box>
+                        ) : filteredCandidates.length === 0 ? (
+                          <Alert severity="info">
+                            <Typography variant="body1">
+                              No candidates found for this tag.
+                            </Typography>
+                          </Alert>
+                        ) : (
+                          <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
+                            <Table stickyHeader>
+                              <TableHead>
+                                <TableRow>
+                                  <TableCell>Name</TableCell>
+                                  <TableCell>Phone</TableCell>
+                                  <TableCell>Email</TableCell>
+                                  <TableCell>Skills</TableCell>
+                                  <TableCell>Batch</TableCell>
+                                </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                {filteredCandidates.map((candidate, index) => (
+                                  <TableRow key={index}>
+                                    <TableCell>{candidate.name}</TableCell>
+                                    <TableCell>{candidate.phone}</TableCell>
+                                    <TableCell>{candidate.email || 'N/A'}</TableCell>
+                                    <TableCell>
+                                      <Typography variant="body2" sx={{ maxWidth: 200 }} noWrap>
+                                        {candidate.skills || 'N/A'}
+                                      </Typography>
+                                    </TableCell>
+                                    <TableCell>{candidate.batch_name || 'N/A'}</TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </TableContainer>
+                        )}
                       </CardContent>
                     </Card>
                   </Grid>
@@ -1069,105 +1283,227 @@ export const CallDashboard: React.FC = () => {
                     <Card sx={{ height: '100%' }}>
                       <CardContent>
                         <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3 }}>
-                          Sequential Call Control
+                          Bulk Calling Status
                         </Typography>
-                        
-                        <Box sx={{ mb: 4 }}>
-                          {!isBulkCalling ? (
-                            <Button
-                              variant="contained"
-                              fullWidth
-                              size="large"
-                              startIcon={<PlayArrow />}
-                              onClick={startBulkCalling}
-                              disabled={contacts.length === 0}
-                              sx={{ mb: 2, py: 2 }}
-                            >
-                              Start Sequential Calling
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="contained"
-                              color="error"
-                              fullWidth
-                              size="large"
-                              startIcon={<Stop />}
-                              onClick={stopBulkCalling}
-                              sx={{ mb: 2, py: 2 }}
-                            >
-                              Stop After Current Call
-                            </Button>
-                          )}
-                          
-                          {bulkCallSession && bulkCallSession.results.length > 0 && (
+
+                        {isBulkCalling && bulkCallSession ? (
+                          <Box>
+                            <Alert severity="info" sx={{ mb: 3 }}>
+                              <Typography variant="body2">
+                                📞 Bulk calling in progress...
+                              </Typography>
+                            </Alert>
+                            
+                            <Box sx={{ mb: 3 }}>
+                              <Typography variant="body2" color="textSecondary">
+                                Progress: {bulkCallSession.completed_calls} / {bulkCallSession.total_contacts}
+                              </Typography>
+                              <LinearProgress 
+                                variant="determinate" 
+                                value={(bulkCallSession.completed_calls / bulkCallSession.total_contacts) * 100}
+                                sx={{ mt: 1 }}
+                              />
+                            </Box>
+
                             <Button
                               variant="outlined"
+                              color="warning"
+                              startIcon={<Stop />}
+                              onClick={stopBulkCalling}
                               fullWidth
-                              size="large"
-                              onClick={() => setShowResults(true)}
-                              sx={{ py: 2 }}
                             >
-                              View Results ({bulkCallSession.results.length})
+                              Stop Calling
                             </Button>
-                          )}
-                        </Box>
-
-                        {/* Progress */}
-                        {isBulkCalling && bulkCallSession && (
-                          <Box sx={{ mb: 4 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                              <Typography variant="h6">Progress</Typography>
-                              <Typography variant="h6">
-                                {bulkCallSession.current_index + 1} of {bulkCallSession.total_contacts}
+                          </Box>
+                        ) : (
+                          <Box>
+                            <Alert severity="success" sx={{ mb: 3 }}>
+                              <Typography variant="body2">
+                                🎯 Select a tag to view candidates and start bulk calling
                               </Typography>
-                            </Box>
-                            <LinearProgress
-                              variant="determinate"
-                              value={((bulkCallSession.current_index + 1) / bulkCallSession.total_contacts) * 100}
-                              sx={{ height: 12, borderRadius: 6, mb: 2 }}
-                            />
-                            <Typography variant="body2" color="textSecondary" sx={{ textAlign: 'center' }}>
-                              Estimated time remaining: {Math.max(0, (bulkCallSession.total_contacts - bulkCallSession.current_index - 1) * 6)} minutes
+                            </Alert>
+                            
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                              Available Tags: {tags.length}
                             </Typography>
+                            
+                            <List dense>
+                              {tags.slice(0, 5).map((tag) => (
+                                <ListItem key={tag.tag_id}>
+                                  <ListItemText
+                                    primary={tag.tag_name}
+                                    secondary={`${tag.total_candidates} candidates`}
+                                  />
+                                </ListItem>
+                              ))}
+                              {tags.length > 5 && (
+                                <ListItem>
+                                  <ListItemText
+                                    secondary={`... and ${tags.length - 5} more tags`}
+                                  />
+                                </ListItem>
+                              )}
+                            </List>
                           </Box>
                         )}
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
+              )}
+            </Box>
+          )}
 
-                        {/* Statistics */}
-                        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                          Statistics
+          {/* CSV Upload Tab */}
+          {tabValue === 2 && (
+            <Box sx={{ minHeight: '70vh' }}>
+              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3 }}>
+                CSV Upload Bulk Calling
+              </Typography>
+              
+              <Card sx={{ mb: 4 }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3 }}>
+                    Upload Contact List
+                  </Typography>
+                  
+                  <Box
+                    sx={{
+                      border: '2px dashed #ccc',
+                      borderRadius: 2,
+                      p: 6,
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'grey.50' },
+                      minHeight: 200
+                    }}
+                  >
+                    <input
+                      type="file"
+                      accept=".csv"
+                      onChange={handleFileUpload}
+                      style={{ display: 'none' }}
+                      id="csv-upload"
+                      disabled={isUploading || isBulkCalling}
+                    />
+                    <label htmlFor="csv-upload" style={{ cursor: 'pointer', width: '100%', display: 'block' }}>
+                      <CloudUpload sx={{ fontSize: 72, color: 'text.secondary', mb: 3 }} />
+                      <Typography variant="h5" sx={{ mb: 2 }}>
+                        {isUploading ? 'Processing CSV...' : 'Drop CSV File Here or Click to Upload'}
+                      </Typography>
+                      <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
+                        CSV should contain: name, phone, email, experience, skills
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        Calls will be made sequentially with proper spacing
+                      </Typography>
+                    </label>
+                  </Box>
+                  
+                  {contacts.length > 0 && (
+                    <Alert severity="success" sx={{ mt: 3 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <People sx={{ mr: 1 }} />
+                        <Typography variant="h6">
+                          {contacts.length} contacts loaded successfully - Ready for sequential calling!
                         </Typography>
-                        <Grid container spacing={2}>
-                          <Grid item xs={4}>
-                            <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-                              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                                {contacts.length}
+                      </Box>
+                    </Alert>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Bulk Calling Controls */}
+              {contacts.length > 0 && (
+                <Grid container spacing={4}>
+                  <Grid item xs={12} md={8}>
+                    <Card>
+                      <CardContent>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3 }}>
+                          Contact List ({contacts.length} contacts)
+                        </Typography>
+                        
+                        <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
+                          <Table stickyHeader>
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>Name</TableCell>
+                                <TableCell>Phone</TableCell>
+                                <TableCell>Email</TableCell>
+                                <TableCell>Skills</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {contacts.map((contact, index) => (
+                                <TableRow key={index}>
+                                  <TableCell>{contact.name}</TableCell>
+                                  <TableCell>{contact.phone}</TableCell>
+                                  <TableCell>{contact.email || 'N/A'}</TableCell>
+                                  <TableCell>
+                                    <Typography variant="body2" sx={{ maxWidth: 200 }} noWrap>
+                                      {contact.skills || 'N/A'}
+                                    </Typography>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  <Grid item xs={12} md={4}>
+                    <Card>
+                      <CardContent>
+                        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3 }}>
+                          Bulk Calling Controls
+                        </Typography>
+
+                        {!isBulkCalling ? (
+                          <Button
+                            variant="contained"
+                            size="large"
+                            fullWidth
+                            startIcon={<PlayArrow />}
+                            onClick={startBulkCalling}
+                            disabled={contacts.length === 0}
+                            sx={{ mb: 2 }}
+                          >
+                            Start Sequential Calling ({contacts.length} contacts)
+                          </Button>
+                        ) : (
+                          <Box>
+                            <Alert severity="info" sx={{ mb: 3 }}>
+                              <Typography variant="body2">
+                                📞 Bulk calling in progress...
                               </Typography>
-                              <Typography variant="body2" color="textSecondary">
-                                Total
-                              </Typography>
-                            </Box>
-                          </Grid>
-                          <Grid item xs={4}>
-                            <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'success.50', borderRadius: 1 }}>
-                              <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'success.main' }}>
-                                {bulkCallSession?.results?.filter(r => r.status === 'SUCCESS').length || 0}
-                              </Typography>
-                              <Typography variant="body2" color="textSecondary">
-                                Success
-                              </Typography>
-                            </Box>
-                          </Grid>
-                          <Grid item xs={4}>
-                            <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'error.50', borderRadius: 1 }}>
-                              <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'error.main' }}>
-                                {bulkCallSession?.results?.filter(r => r.status === 'FAILED').length || 0}
-                              </Typography>
-                              <Typography variant="body2" color="textSecondary">
-                                Failed
-                              </Typography>
-                            </Box>
-                          </Grid>
-                        </Grid>
+                            </Alert>
+                            
+                            {bulkCallSession && (
+                              <Box sx={{ mb: 3 }}>
+                                <Typography variant="body2" color="textSecondary">
+                                  Progress: {bulkCallSession.completed_calls} / {bulkCallSession.total_contacts}
+                                </Typography>
+                                <LinearProgress 
+                                  variant="determinate" 
+                                  value={(bulkCallSession.completed_calls / bulkCallSession.total_contacts) * 100}
+                                  sx={{ mt: 1 }}
+                                />
+                              </Box>
+                            )}
+
+                            <Button
+                              variant="outlined"
+                              color="warning"
+                              startIcon={<Stop />}
+                              onClick={stopBulkCalling}
+                              fullWidth
+                            >
+                              Stop Calling
+                            </Button>
+                          </Box>
+                        )}
                       </CardContent>
                     </Card>
                   </Grid>
@@ -1177,7 +1513,7 @@ export const CallDashboard: React.FC = () => {
           )}
 
           {/* Job Description Tab */}
-          {tabValue === 2 && (
+          {tabValue === 3 && (
             <Box>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
