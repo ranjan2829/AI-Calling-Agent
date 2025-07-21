@@ -2302,45 +2302,103 @@ async def extract_candidate_info(file: UploadFile = File(...)):
         return {"success": False, "error": str(e)}
 
 @app.post("/upload-candidates-to-s3")
-async def upload_candidates_to_s3(request: Request):
+async def upload_candidates_to_local(request: Request):
     try:
         data = await request.json()
         folder_name = data['folderName']
         candidates_data = data['data']
         
-        # S3 key directly in function
-        s3_key = f"pdf-data/{folder_name}/candidates.json"
+        # Create local directory structure
+        local_folder = f"pdf-data/{folder_name}"
+        os.makedirs(local_folder, exist_ok=True)
         
-        # Upload JSON data to S3
+        # Local file path
+        local_file_path = f"{local_folder}/candidates.json"
+        
+        # Save JSON data locally
         json_content = json.dumps(candidates_data, indent=2)
         
         try:
-            s3_client.put_object(
-                Bucket="calling-agent-ai",
-                Key=s3_key,
-                Body=json_content,
-                ContentType='application/json'
-            )
+            with open(local_file_path, 'w') as f:
+                f.write(json_content)
             
-            s3_url = f"s3://calling-agent-ai/{s3_key}"
-            
-            print(f"[S3 UPLOAD] ✅ Uploaded to: {s3_url}")
+            print(f"[LOCAL SAVE] ✅ Saved to: {local_file_path}")
             
             return {
                 "success": True, 
-                "s3Url": s3_url,
-                "s3Key": s3_key,
+                "localPath": local_file_path,
                 "folder": folder_name,
                 "candidateCount": len(candidates_data.get("candidates", []))
             }
             
-        except Exception as s3_error:
-            print(f"[S3 ERROR] ❌ Failed to upload to S3: {s3_error}")
-            return {"success": False, "error": f"S3 upload failed: {str(s3_error)}"}
+        except Exception as save_error:
+            print(f"[LOCAL SAVE ERROR] ❌ Failed to save locally: {save_error}")
+            return {"success": False, "error": f"Local save failed: {str(save_error)}"}
             
     except Exception as e:
         print(f"[UPLOAD ERROR] ❌ {e}")
         return {"success": False, "error": str(e)}
+
+# Update the download endpoint to read from local storage
+@app.get("/download-candidates/{folder_name}")
+async def download_candidates_from_local(folder_name: str):
+    """Download processed candidates from local storage"""
+    try:
+        local_file_path = f"pdf-data/{folder_name}/candidates.json"
+        
+        if not os.path.exists(local_file_path):
+            return {"success": False, "error": "Candidates file not found"}
+        
+        with open(local_file_path, 'r') as f:
+            candidates_data = json.load(f)
+        
+        return {
+            "success": True,
+            "data": candidates_data,
+            "localPath": local_file_path,
+            "folder": folder_name
+        }
+        
+    except Exception as e:
+        print(f"[LOCAL DOWNLOAD ERROR] ❌ {e}")
+        return {"success": False, "error": str(e)}
+
+# Update the list folders endpoint to read from local storage
+@app.get("/list-candidate-folders")
+async def list_candidate_folders():
+    """List all candidate folders in local storage"""
+    try:
+        pdf_data_dir = "pdf-data"
+        
+        if not os.path.exists(pdf_data_dir):
+            os.makedirs(pdf_data_dir, exist_ok=True)
+            return {
+                "success": True,
+                "folders": [],
+                "total_count": 0
+            }
+        
+        folders = []
+        for item in os.listdir(pdf_data_dir):
+            item_path = os.path.join(pdf_data_dir, item)
+            if os.path.isdir(item_path):
+                candidates_file = os.path.join(item_path, "candidates.json")
+                if os.path.exists(candidates_file):
+                    folders.append({
+                        "folder_name": item,
+                        "local_path": item_path,
+                        "candidates_file": candidates_file
+                    })
+        
+        return {
+            "success": True,
+            "folders": folders,
+            "total_count": len(folders)
+        }
+        
+    except Exception as e:
+        print(f"[LOCAL LIST ERROR] ❌ {e}")
+        return {"success": False, "error": str(e), "folders": []}
 
 # Helper functions for PDF text extraction
 def extract_text_from_pdf(pdf_content):
@@ -2598,3 +2656,4 @@ async def recording_status_callback(request: Request):
     except Exception as e:
         print(f"[RECORDING ERROR] ❌ {e}")
         return {"error": str(e)}
+
