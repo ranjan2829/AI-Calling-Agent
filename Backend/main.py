@@ -3093,3 +3093,172 @@ async def search_candidates(query: str = "", tag_id: str = ""):
             "candidates": [],
             "total_count": 0
         }
+# Add these endpoints to your main.py file
+
+@app.get("/interview-questions")
+async def get_interview_questions():
+    """Get current interview questions"""
+    try:
+        return {
+            "success": True,
+            "questions": [
+                {"id": key, "question": value} 
+                for key, value in INTERVIEW_QUESTIONS.items()
+            ]
+        }
+    except Exception as e:
+        print(f"[INTERVIEW QUESTIONS ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "questions": []
+        }
+
+@app.post("/update-interview-questions")
+async def update_interview_questions(request: Request):
+    """Update interview questions"""
+    try:
+        questions_data = await request.json()
+        
+        # Update the global INTERVIEW_QUESTIONS dictionary
+        global INTERVIEW_QUESTIONS
+        for question in questions_data:
+            question_id = question.get("id")
+            question_text = question.get("question")
+            if question_id is not None and question_text:
+                INTERVIEW_QUESTIONS[question_id] = question_text
+        
+        # Save to file for persistence
+        questions_file = "interview_questions.json"
+        with open(questions_file, 'w') as f:
+            json.dump(INTERVIEW_QUESTIONS, f, indent=2)
+        
+        print(f"[INTERVIEW QUESTIONS] ✅ Updated {len(questions_data)} questions")
+        
+        return {
+            "success": True,
+            "message": "Interview questions updated successfully",
+            "questions": [
+                {"id": key, "question": value} 
+                for key, value in INTERVIEW_QUESTIONS.items()
+            ]
+        }
+        
+    except Exception as e:
+        print(f"[UPDATE INTERVIEW QUESTIONS ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+@app.get("/local-tags-summary")
+async def get_local_tags_summary():
+    """Get summary of local tags from the pdf-data directory"""
+    try:
+        pdf_data_dir = "pdf-data"
+        
+        if not os.path.exists(pdf_data_dir):
+            return {
+                "success": True,
+                "tags": [],
+                "total_tags": 0
+            }
+        
+        tags_summary = []
+        
+        for tag_folder in os.listdir(pdf_data_dir):
+            tag_path = os.path.join(pdf_data_dir, tag_folder)
+            if os.path.isdir(tag_path):
+                tag_index_file = os.path.join(tag_path, "tag_index.json")
+                
+                if os.path.exists(tag_index_file):
+                    try:
+                        with open(tag_index_file, 'r') as f:
+                            tag_index = json.load(f)
+                        
+                        tags_summary.append({
+                            "tag_id": tag_folder,
+                            "tag_name": tag_index.get("tag_name", tag_folder.replace('_', ' ').title()),
+                            "total_candidates": tag_index.get("total_candidates", 0),
+                            "total_batches": tag_index.get("total_batches", 0),
+                            "created_at": tag_index.get("created_at"),
+                            "last_updated": tag_index.get("last_updated"),
+                            "folder_path": f"pdf-data/{tag_folder}"
+                        })
+                        
+                    except Exception as e:
+                        print(f"Error reading tag index for {tag_folder}: {e}")
+                        continue
+        
+        tags_summary.sort(key=lambda x: x["total_candidates"], reverse=True)
+        
+        print(f"[LOCAL TAGS] 📊 Found {len(tags_summary)} local tags")
+        
+        return {
+            "success": True,
+            "tags": tags_summary,
+            "total_tags": len(tags_summary)
+        }
+        
+    except Exception as e:
+        print(f"[LOCAL TAGS SUMMARY ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "tags": [],
+            "total_tags": 0
+        }
+
+@app.get("/local-candidates-by-tag/{tag_id}")
+async def get_local_candidates_by_tag(tag_id: str):
+    """Get candidates from local storage for a specific tag"""
+    try:
+        tag_folder = f"pdf-data/{tag_id}"
+        tag_index_file = f"{tag_folder}/tag_index.json"
+        
+        if not os.path.exists(tag_index_file):
+            return {
+                "success": False,
+                "error": f"Tag '{tag_id}' not found in local storage",
+                "candidates": []
+            }
+        
+        with open(tag_index_file, 'r') as f:
+            tag_index = json.load(f)
+        
+        all_candidates = []
+        
+        for batch_name, batch_info in tag_index.get("batches", {}).items():
+            batch_file = batch_info.get("file_path")
+            if batch_file and os.path.exists(batch_file):
+                try:
+                    with open(batch_file, 'r') as f:
+                        batch_data = json.load(f)
+                    
+                    candidates = batch_data.get("candidates", [])
+                    for candidate in candidates:
+                        candidate["batch_name"] = batch_name
+                        candidate["tag"] = tag_index.get("tag_name", tag_id)
+                        all_candidates.append(candidate)
+                        
+                except Exception as e:
+                    print(f"Error reading batch file {batch_file}: {e}")
+                    continue
+        
+        print(f"[LOCAL CANDIDATES] 📊 Found {len(all_candidates)} candidates for tag {tag_id}")
+        
+        return {
+            "success": True,
+            "candidates": all_candidates,
+            "tag_name": tag_index.get("tag_name", tag_id),
+            "tag_id": tag_id,
+            "total_candidates": len(all_candidates)
+        }
+        
+    except Exception as e:
+        print(f"[LOCAL CANDIDATES BY TAG ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "candidates": []
+        }

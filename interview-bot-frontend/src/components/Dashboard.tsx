@@ -27,7 +27,10 @@ import {
   Tooltip,
   useTheme,
   useMediaQuery,
-  Divider
+  Divider,
+  FormControl,
+  Select,
+  MenuItem
 } from '@mui/material';
 import {
   Search,
@@ -235,14 +238,16 @@ const Dashboard: React.FC = () => {
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [candidateEmailInput, setCandidateEmailInput] = useState('');
   const [selectedAssessmentForEmail, setSelectedAssessmentForEmail] = useState<AssessmentData | null>(null);
-  const [assessmentStatuses, setAssessmentStatuses] = useState<{[key: string]: {
-    testTaken: 'taken' | 'not_given' | 'pending';
-    score?: number;
-    emailSent: boolean;
-    emailSentAt?: string;
-    candidateEmail?: string;
-    completed?: boolean;
-  }}>({});
+  const [assessmentStatuses, setAssessmentStatuses] = useState<{
+    [key: string]: {
+      testTaken: 'taken' | 'not_given' | 'pending';
+      score?: number;
+      emailSent: boolean;
+      emailSentAt?: string;
+      candidateEmail?: string;
+      completed?: boolean;
+    };
+  }>({});
   const [sendingEmails, setSendingEmails] = useState<{[key: string]: boolean}>({});
   const [sendingBulkEmails, setSendingBulkEmails] = useState(false);
   const [candidateTags, setCandidateTags] = useState<CandidateTag[]>([]);
@@ -1209,7 +1214,229 @@ const Dashboard: React.FC = () => {
     return matchesSearch && interview.status === 'COMPLETED' && hasValidStartTime && hasProgress && matchesTag;
   });
 
- 
+  // ✅ Add missing functions
+  const refreshInterviewResults = async (interviewId: string) => {
+    try {
+      await fetchInterviewResults(interviewId);
+      toast.success('Results refreshed successfully');
+    } catch (error) {
+      console.error('Error refreshing results:', error);
+      toast.error('Failed to refresh results');
+    }
+  };
+
+  // ✅ Add the missing handleCreateTag function
+  const handleCreateTag = () => {
+    if (!newTag.name.trim()) {
+      toast.error('Tag name is required');
+      return;
+    }
+
+    const tag: CandidateTag = {
+      id: newTag.name.toLowerCase().replace(/\s+/g, '-'),
+      name: newTag.name.trim(),
+      color: newTag.color,
+      description: newTag.description.trim(),
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedTags = [...candidateTags, tag];
+    setCandidateTags(updatedTags);
+    localStorage.setItem('candidateTags', JSON.stringify(updatedTags));
+    
+    setNewTag({ name: '', color: '#1976d2', description: '' });
+    setShowTagDialog(false);
+    toast.success(`Tag "${tag.name}" created successfully!`);
+  };
+
+  // ✅ Add the missing getTagByName function
+  const getTagByName = (tagName: string) => {
+    return candidateTags.find(tag => tag.name === tagName || tag.id === tagName);
+  };
+
+  // ✅ Load tags from localStorage on component mount
+  useEffect(() => {
+    const savedTags = localStorage.getItem('candidateTags');
+    if (savedTags) {
+      try {
+        const parsedTags = JSON.parse(savedTags);
+        setCandidateTags(parsedTags);
+      } catch (error) {
+        console.error('Error parsing saved tags:', error);
+        // Initialize with default tags if parsing fails
+        const defaultTags: CandidateTag[] = [
+          {
+            id: 'general',
+            name: 'General',
+            color: '#1976d2',
+            description: 'General candidates',
+            createdAt: new Date().toISOString()
+          }
+        ];
+        setCandidateTags(defaultTags);
+        localStorage.setItem('candidateTags', JSON.stringify(defaultTags));
+      }
+    } else {
+      // Initialize with default tags
+      const defaultTags: CandidateTag[] = [
+        {
+          id: 'general',
+          name: 'General',
+          color: '#1976d2',
+          description: 'General candidates',
+          createdAt: new Date().toISOString()
+        }
+      ];
+      setCandidateTags(defaultTags);
+      localStorage.setItem('candidateTags', JSON.stringify(defaultTags));
+    }
+  }, []);
+
+  const fetchAssessments = async () => {
+    try {
+      setLoadingAssessments(true);
+      const response = await fetch(`${ASSESSMENT_API_URL}/api/assessments`);
+      if (response.ok) {
+        const data = await response.json();
+        setAssessments(data.assessments || []);
+      }
+    } catch (error) {
+      console.error('Error fetching assessments:', error);
+      setAssessments([]);
+    } finally {
+      setLoadingAssessments(false);
+    }
+  };
+
+  const generateAssessmentLink = async (assessmentId: string): Promise<string> => {
+    try {
+      // Generate assessment link - you might need to adjust this based on your assessment system
+      return `https://dev.d23pi31x94e0bg.amplifyapp.com/assessment/${assessmentId}`;
+    } catch (error) {
+      throw new Error('Failed to generate assessment link');
+    }
+  };
+
+  const getCandidatesForAssessment = async (assessmentId: string) => {
+    try {
+      const response = await fetch(`${ASSESSMENT_API_URL}/report/${assessmentId}`);
+      if (response.ok) {
+        return await response.json();
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting candidates for assessment:', error);
+      return null;
+    }
+  };
+
+  const handleSendEmailSubmit = async () => {
+    if (!selectedAssessmentForEmail || !candidateEmailInput.trim()) {
+      toast.error('Please select an assessment and enter an email');
+      return;
+    }
+
+    try {
+      const assessmentLink = await generateAssessmentLink(selectedAssessmentForEmail.id);
+      
+      const response = await fetch(`${API_BASE_URL}/send-assessment-link`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: candidateEmailInput,
+          assessmentLink: assessmentLink,
+          assessmentTitle: selectedAssessmentForEmail.testName,
+          jobRole: selectedAssessmentForEmail.jobRole,
+          candidateName: 'Candidate',
+          experience: selectedAssessmentForEmail.experience,
+          duration: selectedAssessmentForEmail.duration,
+          totalQuestions: selectedAssessmentForEmail.totalTopics
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        toast.success('Assessment link sent successfully!');
+        setEmailDialogOpen(false);
+        setCandidateEmailInput('');
+      } else {
+        toast.error(result.message || 'Failed to send assessment link');
+      }
+    } catch (error) {
+      console.error('Error sending assessment link:', error);
+      toast.error('Failed to send assessment link');
+    }
+  };
+
+  const handleDeleteTag = async (tagId: string) => {
+    try {
+      const updatedTags = candidateTags.filter(tag => tag.id !== tagId);
+      setCandidateTags(updatedTags);
+      localStorage.setItem('candidateTags', JSON.stringify(updatedTags));
+      
+      // Reset filter if deleted tag was selected
+      if (tagFilter === tagId) {
+        setTagFilter('all');
+      }
+      
+      toast.success('Tag deleted successfully');
+    } catch (error) {
+      console.error('Error deleting tag:', error);
+      toast.error('Failed to delete tag');
+    }
+  };
+
+  const renderCandidateTag = (interview: InterviewDetails) => {
+    const currentTag = interview.tag;
+    
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <FormControl size="small" sx={{ minWidth: 120 }}>
+          <Select
+            value={currentTag || ''}
+            onChange={(e) => handleInterviewTagChange(interview.interview_id, e.target.value)}
+            displayEmpty
+            size="small"
+          >
+            <MenuItem value="">
+              <em>No tag</em>
+            </MenuItem>
+            {candidateTags.map((tag) => (
+              <MenuItem key={tag.id} value={tag.name}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: '50%',
+                      backgroundColor: tag.color
+                    }}
+                  />
+                  {tag.name}
+                </Box>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        
+        {currentTag && (
+          <Chip
+            label={currentTag}
+            size="small"
+            sx={{
+              backgroundColor: candidateTags.find(t => t.name === currentTag)?.color || '#1976d2',
+              color: 'white',
+              fontWeight: 500
+            }}
+          />
+        )}
+      </Box>
+    );
+  };
+
   return (
     <Box sx={{ 
       minHeight: '100vh', 
@@ -1711,39 +1938,41 @@ const Dashboard: React.FC = () => {
                 label="Tag Name"
                 value={newTag.name}
                 onChange={(e) => setNewTag(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="e.g., Frontend Developer"
-                required
+                placeholder="Enter tag name"
+                variant="outlined"
+                size="small"
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 fullWidth
                 label="Description"
-                multiline
-                rows={2}
                 value={newTag.description}
                 onChange={(e) => setNewTag(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Brief description of this tag"
+                placeholder="Enter tag description"
+                variant="outlined"
+                size="small"
               />
             </Grid>
             <Grid item xs={12}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography variant="body2">Color:</Typography>
-                <input
-                  type="color"
-                  value={newTag.color}
-                  onChange={(e) => setNewTag(prev => ({ ...prev, color: e.target.value }))}
-                  style={{ width: 50, height: 30, border: 'none', borderRadius: 4 }}
-                />
-                <Chip
-                  label={newTag.name || 'Preview'}
-                  size="small"
-                  sx={{
-                    backgroundColor: newTag.color,
-                    color: 'white',
-                    fontWeight: 500
-                  }}
-                />
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Select a color for the tag:
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                {['#1976d2', '#e91e63', '#4caf50', '#ff9800', '#9c27b0', '#2196f3'].map(color => (
+                  <Box
+                    key={color}
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 1,
+                      backgroundColor: color,
+                      cursor: 'pointer',
+                      border: newTag.color === color ? '2px solid #000' : '2px solid transparent'
+                    }}
+                    onClick={() => setNewTag(prev => ({ ...prev, color }))}
+                  />
+                ))}
               </Box>
             </Grid>
           </Grid>
@@ -1756,14 +1985,12 @@ const Dashboard: React.FC = () => {
           <Button
             onClick={handleCreateTag}
             variant="contained"
-            disabled={!newTag.name.trim()}
+            size="small"
           >
             Create Tag
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* ...rest of existing dialogs... */}
     </Box>
   );
 };
