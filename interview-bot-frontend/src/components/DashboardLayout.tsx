@@ -1,26 +1,27 @@
-import * as React from 'react';
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
 import {
   Box,
+  Typography,
+  IconButton,
+  Avatar,
+  Divider,
   Drawer,
   AppBar,
   Toolbar,
   List,
-  Typography,
   ListItem,
   ListItemButton,
   ListItemIcon,
-  ListItemText,
-  IconButton,
-  Avatar
+  ListItemText
 } from '@mui/material';
 import {
-  Dashboard,
+  Dashboard as DashboardIcon,
   History,
   ExitToApp,
-  Menu
+  Menu,
+  PictureAsPdf
 } from '@mui/icons-material';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const drawerWidth = 260;
 
@@ -28,7 +29,12 @@ const navigationItems = [
   {
     title: 'Dashboard',
     path: '/dashboard',
-    icon: <Dashboard />
+    icon: <DashboardIcon />
+  },
+  {
+    title: 'Bulk PDF Processor', 
+    path: '/bulk-pdf-processor',
+    icon: <PictureAsPdf />
   },
   {
     title: 'Interview History',
@@ -41,7 +47,7 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -54,6 +60,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/login');
+  };
+
+  const handleNavigation = (item: typeof navigationItems[0]) => {
+    navigate(item.path);
   };
 
   const drawer = (
@@ -69,7 +79,22 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           <ListItem key={item.title} disablePadding>
             <ListItemButton
               selected={location.pathname === item.path}
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNavigation(item)}
+              sx={{
+                '&.Mui-selected': {
+                  backgroundColor: '#e3f2fd',
+                  '& .MuiListItemIcon-root': {
+                    color: '#1976d2',
+                  },
+                  '& .MuiListItemText-primary': {
+                    color: '#1976d2',
+                    fontWeight: 'bold',
+                  },
+                },
+                '&:hover': {
+                  backgroundColor: '#f5f5f5',
+                },
+              }}
             >
               <ListItemIcon>
                 {item.icon}
@@ -78,6 +103,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
             </ListItemButton>
           </ListItem>
         ))}
+        
+        <Divider sx={{ my: 1 }} />
         
         <ListItem disablePadding>
           <ListItemButton onClick={handleLogout}>
@@ -161,3 +188,5 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     </Box>
   );
 };
+
+export default DashboardLayout;

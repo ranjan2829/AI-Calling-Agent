@@ -28,7 +28,8 @@ import {
   Assessment,
   Monitor,
   Logout,
-  AccountCircle
+  AccountCircle,
+  PictureAsPdf
 } from '@mui/icons-material';
 
 interface DashboardLayoutProps {
@@ -50,7 +51,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
     { icon: <Phone />, text: 'Make Call', path: '/calls' },
     { icon: <Monitor />, text: 'Monitor', path: '/monitor' },
     { icon: <History />, text: 'Call History', path: '/history' },
-    { icon: <Assessment />, text: 'Results', path: '/results' }
+    { icon: <Assessment />, text: 'Results', path: '/results' },
+    { icon: <PictureAsPdf />, text: 'Bulk PDF Processor', path: '/bulk-pdf-processor' }
   ];
 
   const handleDrawerToggle = () => {

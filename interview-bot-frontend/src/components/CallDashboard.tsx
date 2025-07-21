@@ -46,6 +46,9 @@ import {
 } from '@mui/icons-material';
 import { getCallStats, getJobDescription, getAllInterviews, callsApi } from '../api/services';
 import { toast } from 'react-toastify';
+import { useLocation, useNavigate } from 'react-router-dom';
+import BulkPdfProcessor from './BulkPdfProcessor';
+
 interface CallStats {
   totalCalls: number;
   completedCalls: number;
@@ -171,6 +174,9 @@ export const CallDashboard: React.FC = () => {
     currency: 'USD',
     loading: false
   });
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadCallStats();

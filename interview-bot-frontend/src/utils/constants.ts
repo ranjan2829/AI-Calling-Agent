@@ -4,6 +4,7 @@ import {
   Monitor,
   History,
   Analytics,
+  PictureAsPdf,
 } from '@mui/icons-material';
 import { SvgIconComponent } from '@mui/icons-material';
 
@@ -33,5 +34,10 @@ export const sideBarLinks: SideBarLink[] = [
     name: "Call History",
     link: "/dashboard/history",
     icon: History,
+  },
+  {
+    name: "Bulk PDF Processor",
+    link: "/bulk-pdf-processor",
+    icon: PictureAsPdf,
   }
 ];

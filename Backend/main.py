@@ -2040,6 +2040,7 @@ async def upload_csv(file: UploadFile = File(...)):
             
             # Clean phone number format
             clean_phone = phone
+            clean_phone = phone[1:]
             if phone:
                 if phone.startswith('+'):
                     clean_phone = phone[1:]
@@ -2501,3 +2502,99 @@ async def list_candidate_folders():
     except Exception as e:
         print(f"[S3 LIST ERROR] ❌ {e}")
         return {"success": False, "error": str(e), "folders": []}
+@app.post("/voice/speech/{call_sid}")
+async def handle_speech_response(call_sid: str, request: Request):
+    """Handle speech responses from Twilio"""
+    try:
+        form_data = await request.form()
+        speech_result = form_data.get('SpeechResult', '')
+        confidence = form_data.get('Confidence', '0.0')
+        
+        print(f"[SPEECH] 🎤 Call {call_sid}: '{speech_result}' (confidence: {confidence})")
+        
+        # Load interview session
+        interview_data = load_interview_session(call_sid)
+        if not interview_data:
+            return Response(content=handle_error("Interview session not found"), media_type="application/xml")
+        
+        current_question = interview_data.get('current_question', 0)
+        
+        # Store the response
+        response_data = {
+            "question_index": current_question,
+            "question": INTERVIEW_QUESTIONS.get(current_question, ""),
+            "answer": speech_result,
+            "confidence": float(confidence),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        if "responses" not in interview_data:
+            interview_data["responses"] = []
+        interview_data["responses"].append(response_data)
+        
+        # Reset silence prompts
+        interview_data['silence_prompts'] = 0
+        interview_data['last_activity'] = datetime.now().isoformat()
+        
+        # Validate the response
+        is_valid, validation_action, validation_reason = validate_response_selected_questions(
+            call_sid, current_question, speech_result
+        )
+        
+        if not is_valid:
+            if validation_action == "call_later":
+                save_incomplete_interview(call_sid, interview_data, "call_later")
+                resp = VoiceResponse()
+                resp.say("Thank you! We'll call you back at a better time. Have a great day!", voice='Polly.Aditi')
+                resp.hangup()
+                return Response(content=str(resp), media_type="application/xml")
+            
+            elif validation_action == "not_available":
+                save_incomplete_interview(call_sid, interview_data, "not_available")
+                resp = VoiceResponse()
+                resp.say("Thank you for your time. We'll be in touch soon. Have a great day!", voice='Polly.Aditi')
+                resp.hangup()
+                return Response(content=str(resp), media_type="application/xml")
+        
+        # Move to next question
+        next_question_index = current_question + 1
+        interview_data['current_question'] = next_question_index
+        save_interview_session(call_sid, interview_data)
+        
+        # Check if interview is complete
+        if next_question_index >= len(INTERVIEW_QUESTIONS):
+            return Response(content=complete_interview(call_sid), media_type="application/xml")
+        
+        # Ask next question
+        return Response(content=ask_next_question_immediately(call_sid, next_question_index), media_type="application/xml")
+        
+    except Exception as e:
+        print(f"[SPEECH ERROR] ❌ {e}")
+        return Response(content=handle_error("Sorry, there was an error processing your response."), media_type="application/xml")
+
+@app.post("/voice/no-response/{call_sid}")
+async def handle_no_response_endpoint(call_sid: str):
+    """Handle no response from candidate"""
+    try:
+        return Response(content=handle_no_response(call_sid), media_type="application/xml")
+    except Exception as e:
+        print(f"[NO RESPONSE ERROR] ❌ {e}")
+        return Response(content=handle_error("Technical difficulty occurred."), media_type="application/xml")
+
+@app.post("/recording-status")
+async def recording_status_callback(request: Request):
+    """Handle Twilio recording status callbacks"""
+    try:
+        form_data = await request.form()
+        call_sid = form_data.get('CallSid')
+        recording_url = form_data.get('RecordingUrl')
+        recording_status = form_data.get('RecordingStatus')
+        recording_duration = form_data.get('RecordingDuration', '0')
+        
+        print(f"[RECORDING] 📹 Call {call_sid}: {recording_status} ({recording_duration}s)")
+        
+        return {"status": "received"}
+        
+    except Exception as e:
+        print(f"[RECORDING ERROR] ❌ {e}")
+        return {"error": str(e)}

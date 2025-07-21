@@ -25,7 +25,8 @@ import {
   GroupAdd,
   Menu,
   ExitToApp,
-  Phone
+  Phone,
+  PictureAsPdf
 } from '@mui/icons-material';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -38,6 +39,7 @@ import { CallHistory } from './components/CallHistory';
 import { InterviewDetails } from './components/InterviewDetails';
 import { InterviewResults } from './components/InterviewResults';
 import { BulkCallDashboard } from './components/BulkCallDashboard';
+import BulkPdfProcessor from './components/BulkPdfProcessor';
 
 const drawerWidth = 280;
 
@@ -164,6 +166,7 @@ const Sidebar: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClo
     { text: 'Call History', icon: <History />, path: '/history' },
     { text: 'Interview Results', icon: <Assessment />, path: '/results' },
     { text: 'Bulk Calling', icon: <GroupAdd />, path: '/bulk-call', showBadge: isCalling },
+    { text: 'Bulk PDF Processor', icon: <PictureAsPdf />, path: '/bulk-pdf-processor' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -661,6 +664,39 @@ function App() {
                       <TopBar onMenuClick={handleDrawerToggle} />
                       <Box sx={{ p: { xs: 2, md: 4 } }}>
                         <BulkCallDashboard />
+                      </Box>
+                    </Box>
+                  </Box>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/bulk-pdf-processor"
+              element={
+                <ProtectedRoute>
+                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                    <TopProgressBar />
+                    <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        ml: { md: `${drawerWidth}px` },
+                        backgroundColor: 'background.default',
+                        minHeight: '100vh',
+                        pt: isCalling ? '60px' : 0,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          height: '4px',
+                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
+                          width: '100%'
+                        }}
+                      />
+                      <TopBar onMenuClick={handleDrawerToggle} />
+                      <Box sx={{ p: { xs: 2, md: 4 } }}>
+                        <BulkPdfProcessor />
                       </Box>
                     </Box>
                   </Box>
