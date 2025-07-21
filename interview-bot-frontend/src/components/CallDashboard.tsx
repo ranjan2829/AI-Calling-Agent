@@ -653,6 +653,13 @@ export const CallDashboard: React.FC = () => {
     const pollInterval = setInterval(async () => {
       try {
         const response = await fetch(`http://13.204.76.229:8000/bulk-call-status/${bulkCallId}`);
+        
+        if (!response.ok) {
+          console.warn(`Bulk call status endpoint returned ${response.status} for ${bulkCallId}`);
+          // Don't throw error, just log and continue
+          return;
+        }
+        
         const status = await response.json();
         
         if (!status.error) {
@@ -670,8 +677,15 @@ export const CallDashboard: React.FC = () => {
         }
       } catch (error) {
         console.error('Error polling status:', error);
+        // Don't clear interval on network errors, keep trying
       }
     }, 2000);
+    
+    // Auto-clear interval after 10 minutes to prevent infinite polling
+    setTimeout(() => {
+      clearInterval(pollInterval);
+      setIsBulkCalling(false);
+    }, 600000);
   };
   const stopBulkCalling = async () => {
     if (!bulkCallSession) return;
@@ -737,57 +751,71 @@ export const CallDashboard: React.FC = () => {
       console.log('🔍 Loading tags from backend and localStorage...');
       
       // First, try to load from backend
-      const response = await fetch('http://13.204.76.229:8000/local-tags-summary');
-      console.log('📡 Backend response status:', response.status);
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('📊 Backend tags result:', result);
+      try {
+        const response = await fetch('http://13.204.76.229:8000/local-tags-summary');
+        console.log('📡 Backend response status:', response.status);
         
-        if (result.success && result.tags?.length > 0) {
-          setTags(result.tags);
-          console.log('✅ Loaded backend tags:', result.tags.length);
-          toast.success(`Loaded ${result.tags.length} data tags from backend!`);
-          return;
+        if (response.ok) {
+          const result = await response.json();
+          console.log('📊 Backend tags result:', result);
+          
+          if (result.success && result.tags?.length > 0) {
+            setTags(result.tags);
+            console.log('✅ Loaded backend tags:', result.tags.length);
+            toast.success(`Loaded ${result.tags.length} data tags from backend!`);
+            return;
+          }
         }
+      } catch (backendError) {
+        console.log('⚠️ Backend not available, using localStorage tags');
       }
       
       // Fallback to localStorage tags
-      console.log('📱 Falling back to localStorage tags...');
-      const localTags = candidateTags.map((tag: CandidateTag) => ({
-        tag_id: tag.id,
-        tag_name: tag.name,
-        total_candidates: 0, // You can enhance this by counting actual candidates
-        total_batches: 1,
-        created_at: tag.createdAt,
-        last_updated: tag.createdAt,
-        folder_path: `local-data/${tag.id}`
-      }));
-      
-      setTags(localTags);
-      
-      if (localTags.length === 0) {
-        toast.info('No tags found. Create some tags first using the Bulk PDF Processor.');
+      console.log('📱 Using localStorage tags...');
+      if (candidateTags && candidateTags.length > 0) {
+        const localTags = candidateTags.map((tag: CandidateTag) => ({
+          tag_id: tag.id,
+          tag_name: tag.name,
+          total_candidates: 0, // You can enhance this by counting actual candidates
+          total_batches: 1,
+          created_at: tag.createdAt,
+          last_updated: tag.createdAt,
+          folder_path: `local-data/${tag.id}`
+        }));
+        
+        setTags(localTags);
+        
+        if (localTags.length === 0) {
+          toast.info('No tags found. Create some tags first using the Bulk PDF Processor.');
+        } else {
+          toast.success(`Loaded ${localTags.length} local tags successfully!`);
+        }
       } else {
-        toast.success(`Loaded ${localTags.length} local tags successfully!`);
+        // Final fallback: load from localStorage again
+        loadCandidateTagsFromStorage();
       }
       
     } catch (error: any) {
       console.error('❌ Error loading tags:', error);
       
       // Final fallback to localStorage tags
-      const localTags = candidateTags.map((tag: CandidateTag) => ({
-        tag_id: tag.id,
-        tag_name: tag.name,
-        total_candidates: 0,
-        total_batches: 1,
-        created_at: tag.createdAt,
-        last_updated: tag.createdAt,
-        folder_path: `local-data/${tag.id}`
-      }));
-      
-      setTags(localTags);
-      toast.error(`Error loading backend tags, using local tags: ${error.message}`);
+      if (candidateTags && candidateTags.length > 0) {
+        const localTags = candidateTags.map((tag: CandidateTag) => ({
+          tag_id: tag.id,
+          tag_name: tag.name,
+          total_candidates: 0,
+          total_batches: 1,
+          created_at: tag.createdAt,
+          last_updated: tag.createdAt,
+          folder_path: `local-data/${tag.id}`
+        }));
+        
+        setTags(localTags || []);
+        toast.error(`Error loading backend tags, using local tags: ${error.message}`);
+      } else {
+        setTags([]);
+        toast.error(`Error loading tags: ${error.message}`);
+      }
     } finally {
       setLoadingTags(false);
     }
@@ -804,47 +832,44 @@ export const CallDashboard: React.FC = () => {
       setLoadingCandidates(true);
       console.log(`🔍 Loading candidates for tag: ${tagId}`);
       
-      // Try backend first
-      const response = await fetch(`http://13.204.76.229:8000/local-candidates-by-tag/${tagId}`);
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log(`📊 Backend candidates result for ${tagId}:`, result);
+      // First try backend
+      try {
+        const response = await fetch(`http://13.204.76.229:8000/local-candidates-by-tag/${tagId}`);
         
-        if (result.success && result.candidates?.length > 0) {
-          const candidates = result.candidates;
-          console.log(`✅ Loaded ${candidates.length} candidates from backend for tag ${tagId}`);
-          setTagCandidates(candidates);
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`📊 Backend candidates result for ${tagId}:`, result);
           
-          // Also update contacts for bulk calling
-          const formattedContacts = candidates.map((candidate: any) => ({
-            name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
-            phone: candidate.phone || '',
-            email: candidate.email || '',
-            experience: candidate.experience || '',
-            skills: candidate.skills || '',
-            tag: candidate.tag || tagId,
-            batch_name: candidate.batch_name || candidate.fileName || 'PDF Data'
-          }));
-          setContacts(formattedContacts);
-          
-          toast.success(`Loaded ${candidates.length} candidates for "${result.tag_name}"`);
-          return;
+          if (result.success && result.candidates?.length > 0) {
+            const candidates = result.candidates;
+            console.log(`✅ Loaded ${candidates.length} candidates from backend for tag ${tagId}`);
+            setTagCandidates(candidates);
+            
+            // Also update contacts for bulk calling
+            const formattedContacts = candidates.map((candidate: any) => ({
+              name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
+              phone: candidate.phone || '',
+              email: candidate.email || '',
+              experience: candidate.experience || '',
+              skills: candidate.skills || '',
+              tag: candidate.tag || tagId,
+              batch_name: candidate.batch_name || candidate.fileName || 'Backend Data'
+            }));
+            setContacts(formattedContacts);
+            
+            toast.success(`Loaded ${candidates.length} candidates for "${result.tag_name}"`);
+            return;
+          }
         }
+      } catch (backendError) {
+        console.log(`⚠️ Backend not available for tag ${tagId}`);
       }
       
-      // ❌ REMOVE: No more fake demo data generation
-      console.log(`📱 No real data found for tag ${tagId}`);
+      // ❌ REMOVED: No more fake demo data generation
+      console.log(`❌ No candidates found for tag ${tagId}`);
       setTagCandidates([]);
       setContacts([]);
-      
-      // Only show message about uploading real data
-      const selectedTag = candidateTags.find(tag => tag.id === tagId);
-      if (selectedTag) {
-        toast.warning(`No candidates found for tag "${selectedTag.name}". Please upload PDF files using the Bulk PDF Processor first.`);
-      } else {
-        toast.warning(`No candidates found for tag ID "${tagId}". Please upload PDF files first.`);
-      }
+      toast.warning(`No candidates found for the selected tag. Please upload PDF data using the Bulk PDF Processor.`);
       
     } catch (error: any) {
       console.error('Error loading candidates:', error);
@@ -1326,7 +1351,8 @@ export const CallDashboard: React.FC = () => {
                           <MenuItem value="">
                             <em>Choose a tag...</em>
                           </MenuItem>
-                          {tags.map((tag) => (
+                          {/* ✅ FIX: Add null check for tags array */}
+                          {(tags || []).map((tag) => (
                             <MenuItem key={tag.tag_id} value={tag.tag_id}>
                               <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                 <Tag sx={{ mr: 1, color: 'primary.main' }} />
@@ -1349,7 +1375,7 @@ export const CallDashboard: React.FC = () => {
                       {selectedTagId && (
                         <Box sx={{ p: 2, bgcolor: 'info.50', borderRadius: 1 }}>
                           <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-                            Selected Tag: {tags.find(t => t.tag_id === selectedTagId)?.tag_name}
+                            Selected Tag: {(tags || []).find(t => t.tag_id === selectedTagId)?.tag_name}
                           </Typography>
                           <Typography variant="body2" color="textSecondary">
                             {tagCandidates.length} candidates ready for calling
@@ -1381,7 +1407,7 @@ export const CallDashboard: React.FC = () => {
                       <CardContent>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
                           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                            Candidates from "{tags.find(t => t.tag_id === selectedTagId)?.tag_name}" ({filteredCandidates.length})
+                            Candidates from "{(tags || []).find(t => t.tag_id === selectedTagId)?.tag_name}" ({filteredCandidates.length})
                           </Typography>
                           
                           <TextField
@@ -1407,7 +1433,7 @@ export const CallDashboard: React.FC = () => {
                         ) : filteredCandidates.length === 0 ? (
                           <Alert severity="info">
                             <Typography variant="body1">
-                              No candidates found for this tag.
+                              No candidates found for this tag. Please upload PDF data using the Bulk PDF Processor.
                             </Typography>
                           </Alert>
                         ) : (
@@ -1489,11 +1515,11 @@ export const CallDashboard: React.FC = () => {
                             </Alert>
                             
                             <Typography variant="h6" sx={{ mb: 2 }}>
-                              Available Tags: {tags.length}
+                              Available Tags: {(tags || []).length}
                             </Typography>
                             
                             <List dense>
-                              {tags.slice(0, 5).map((tag) => (
+                              {(tags || []).slice(0, 5).map((tag) => (
                                 <ListItem key={tag.tag_id}>
                                   <ListItemText
                                     primary={tag.tag_name}
@@ -1501,10 +1527,10 @@ export const CallDashboard: React.FC = () => {
                                   />
                                 </ListItem>
                               ))}
-                              {tags.length > 5 && (
+                              {(tags || []).length > 5 && (
                                 <ListItem>
                                   <ListItemText
-                                    secondary={`... and ${tags.length - 5} more tags`}
+                                    secondary={`... and ${(tags || []).length - 5} more tags`}
                                   />
                                 </ListItem>
                               )}
