@@ -46,10 +46,19 @@ import {
   ContentCopy,
   Timeline,
   Email as EmailIcon,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Add
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import AssessmentDropdown from './AssessmentDropdown';
+
+interface CandidateTag {
+  id: string;
+  name: string;
+  color: string;
+  description: string;
+  createdAt: string;
+}
 
 interface InterviewDetails {
   interview_id: string;
@@ -72,6 +81,7 @@ interface InterviewDetails {
   assessment_test_taken?: 'taken' | 'not_given' | 'pending';
   email_sent?: boolean;
   email_sent_at?: string;
+  tag?: string; // ✅ Add tag field
 }
 
 interface InterviewResult {
@@ -235,8 +245,11 @@ const Dashboard: React.FC = () => {
   }}>({});
   const [sendingEmails, setSendingEmails] = useState<{[key: string]: boolean}>({});
   const [sendingBulkEmails, setSendingBulkEmails] = useState(false);
-
-
+  const [candidateTags, setCandidateTags] = useState<CandidateTag[]>([]);
+  const [showTagDialog, setShowTagDialog] = useState(false);
+  const [newTag, setNewTag] = useState({ name: '', color: '#1976d2', description: '' });
+  const [selectedTag, setSelectedTag] = useState<CandidateTag | null>(null);
+  const [tagFilter, setTagFilter] = useState<string>('all');
   useEffect(() => {
     loadInterviews();
     loadJobDescription();
@@ -297,6 +310,7 @@ const Dashboard: React.FC = () => {
     });
   };
 
+  
   const filteredInterviews = interviews.filter(interview => {
     const matchesSearch = interview.candidate_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          interview.interview_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -305,7 +319,12 @@ const Dashboard: React.FC = () => {
     const hasProgress = interview.questions_answered > 0;
     return matchesSearch && interview.status === 'COMPLETED' && hasValidStartTime && hasProgress;
   });
-
+  // Filter interviews by tag
+    const filteredInterviewsByTag = filteredInterviews.filter(interview => {
+    if (tagFilter === 'all') return true;
+    if (tagFilter === 'untagged') return !interview.tag;
+    return interview.tag === tagFilter;
+  });
   const getStatusColor = (status: string): "success" | "warning" | "error" | "info" | "default" => {
     switch (status) {
       case 'COMPLETED': return 'success';
@@ -1413,31 +1432,199 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Load tags from localStorage on component mount
+  useEffect(() => {
+    const savedTags = localStorage.getItem('candidateTags');
+    if (savedTags) {
+      setCandidateTags(JSON.parse(savedTags));
+    } else {
+      // Default tags
+      const defaultTags: CandidateTag[] = [
+        {
+          id: 'frontend',
+          name: 'Frontend Developer',
+          color: '#2196f3',
+          description: 'React, Angular, Vue.js developers',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'backend',
+          name: 'Backend Developer',
+          color: '#4caf50',
+          description: 'Node.js, Python, Java developers',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'fullstack',
+          name: 'Full Stack Developer',
+          color: '#ff9800',
+          description: 'Full stack developers',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'devops',
+          name: 'DevOps Engineer',
+          color: '#9c27b0',
+          description: 'DevOps and Infrastructure engineers',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'mobile',
+          name: 'Mobile Developer',
+          color: '#e91e63',
+          description: 'iOS, Android, React Native developers',
+          createdAt: new Date().toISOString()
+        }
+      ];
+      setCandidateTags(defaultTags);
+      localStorage.setItem('candidateTags', JSON.stringify(defaultTags));
+    }
+  }, []);
+
+  const handleCreateTag = () => {
+    if (!newTag.name.trim()) {
+      toast.error('Tag name is required');
+      return;
+    }
+
+    const tag: CandidateTag = {
+      id: newTag.name.toLowerCase().replace(/\s+/g, '-'),
+      name: newTag.name.trim(),
+      color: newTag.color,
+      description: newTag.description.trim(),
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedTags = [...candidateTags, tag];
+    setCandidateTags(updatedTags);
+    localStorage.setItem('candidateTags', JSON.stringify(updatedTags));
+    
+    setNewTag({ name: '', color: '#1976d2', description: '' });
+    setShowTagDialog(false);
+    toast.success(`Tag "${tag.name}" created successfully!`);
+  };
+
+  const handleDeleteTag = (tagId: string) => {
+    const updatedTags = candidateTags.filter(tag => tag.id !== tagId);
+    setCandidateTags(updatedTags);
+    localStorage.setItem('candidateTags', JSON.stringify(updatedTags));
+    toast.success('Tag deleted successfully!');
+  };
+
+  const getTagByName = (tagName: string) => {
+    return candidateTags.find(tag => tag.name === tagName || tag.id === tagName);
+  };
+
+  const renderCandidateTag = (interview: InterviewDetails) => {
+    if (!interview.tag) return null;
+    
+    const tag = getTagByName(interview.tag);
+    if (!tag) {
+      return (
+        <Chip
+          label={interview.tag}
+          size="small"
+          sx={{ 
+            fontSize: '0.7rem',
+            backgroundColor: '#e0e0e0',
+            color: '#666'
+          }}
+        />
+      );
+    }
+
+    return (
+      <Chip
+        label={tag.name}
+        size="small"
+        sx={{ 
+          fontSize: '0.7rem',
+          backgroundColor: tag.color,
+          color: 'white',
+          '& .MuiChip-label': {
+            fontWeight: 500
+          }
+        }}
+      />
+    );
+  };
+
+  // Filter interviews by tag
+  
   return (
     <Box sx={{ 
       minHeight: '100vh', 
       backgroundColor: '#f5f5f5',
       p: isMobile ? 1 : 3
     }}>
-      <AssessmentDropdown 
-        onAssessmentSelect={handleAssessmentSelect}
-        selectedAssessment={selectedAssessment}
-      />
-
-      {/* Header */}
+      {/* Header with Tag Management */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
-          Interview Dashboard
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Manage AI interviews and coding assessments
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box>
+            <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
+              Interview Dashboard
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Manage AI interviews and coding assessments
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => setShowTagDialog(true)}
+            sx={{ 
+              backgroundColor: '#1976d2',
+              '&:hover': { backgroundColor: '#1565c0' }
+            }}
+          >
+            Create Tag
+          </Button>
+        </Box>
+
+        {/* Tag Filter */}
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Typography variant="body2" sx={{ fontWeight: 'medium', mr: 1 }}>
+            Filter by tag:
+          </Typography>
+          <Chip
+            label="All"
+            onClick={() => setTagFilter('all')}
+            color={tagFilter === 'all' ? 'primary' : 'default'}
+            size="small"
+            clickable
+          />
+          <Chip
+            label="Untagged"
+            onClick={() => setTagFilter('untagged')}
+            color={tagFilter === 'untagged' ? 'primary' : 'default'}
+            size="small"
+            clickable
+          />
+          {candidateTags.map((tag) => (
+            <Chip
+              key={tag.id}
+              label={`${tag.name} (${interviews.filter(i => i.tag === tag.name).length})`}
+              onClick={() => setTagFilter(tag.name)}
+              onDelete={() => handleDeleteTag(tag.id)}
+              color={tagFilter === tag.name ? 'primary' : 'default'}
+              size="small"
+              clickable
+              sx={{
+                backgroundColor: tagFilter === tag.name ? tag.color : undefined,
+                color: tagFilter === tag.name ? 'white' : undefined,
+                '& .MuiChip-deleteIcon': {
+                  color: tagFilter === tag.name ? 'white' : undefined
+                }
+              }}
+            />
+          ))}
+        </Box>
       </Box>
 
       {/* Search and Actions */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
         <TextField
-          placeholder="Search by name, ID, or phone..."
+          placeholder="Search by name, ID, phone, or email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           InputProps={{
@@ -1469,13 +1656,13 @@ const Dashboard: React.FC = () => {
           variant="contained"
           onClick={sendBulkAssessmentEmails}
           startIcon={<EmailIcon />}
-          disabled={!selectedAssessment || filteredInterviews.length === 0 || sendingBulkEmails}
+          disabled={!selectedAssessment || filteredInterviewsByTag.length === 0 || sendingBulkEmails}
           sx={{ 
             backgroundColor: '#4caf50',
             '&:hover': { backgroundColor: '#45a049' }
           }}
         >
-          {sendingBulkEmails ? 'Sending...' : `Send Bulk Emails (${filteredInterviews.length})`}
+          {sendingBulkEmails ? 'Sending...' : `Send Bulk Emails (${filteredInterviewsByTag.length})`}
         </Button>
       </Box>
 
@@ -1496,6 +1683,7 @@ const Dashboard: React.FC = () => {
                 <TableHead>
                   <TableRow>
                     <TableCell>Candidate</TableCell>
+                    <TableCell>Tag</TableCell>
                     <TableCell>Assessment Score</TableCell>
                     <TableCell>Email Sent</TableCell>
                     <TableCell>AI Interview</TableCell>
@@ -1504,7 +1692,7 @@ const Dashboard: React.FC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredInterviews.map((interview) => (
+                  {filteredInterviewsByTag.map((interview) => (
                     <TableRow key={interview.interview_id}>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -1523,6 +1711,9 @@ const Dashboard: React.FC = () => {
                             </Typography>
                           </Box>
                         </Box>
+                      </TableCell>
+                      <TableCell>
+                        {renderCandidateTag(interview)}
                       </TableCell>
                       <TableCell>
                         {renderAssessmentScore(interview)}
@@ -1675,22 +1866,31 @@ const Dashboard: React.FC = () => {
                   <Button
                     component="span"
                     variant="contained"
-                    startIcon={uploading ? <CircularProgress size={20} /> : <Upload />}
+                    size="small"
                     disabled={uploading}
+                    sx={{ 
+                      backgroundColor: '#1976d2',
+                      '&:hover': { backgroundColor: '#1565c0' },
+                      mr: 1
+                    }}
                   >
-                    {uploading ? 'Uploading...' : 
-                     interviewFormData.resume ? 'Resume Uploaded' : 
-                     'Upload Resume'}
+                    {uploading ? <CircularProgress size={16} /> : 'Upload Resume'}
                   </Button>
                 </label>
-                {formErrors.resume && (
-                  <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                    {formErrors.resume}
-                  </Typography>
+                {interviewFormData.resume && (
+                  <Chip
+                    label="Resume uploaded"
+                    size="small"
+                    color="success"
+                    sx={{ fontSize: '0.7rem' }}
+                  />
                 )}
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                  Upload candidate's resume (PDF, DOC, DOCX)
+                </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label="Years of Experience"
@@ -1700,23 +1900,12 @@ const Dashboard: React.FC = () => {
                 onChange={handleInterviewFormChange}
                 error={!!formErrors.yearsOfExperience}
                 helperText={formErrors.yearsOfExperience}
-                inputProps={{ min: 0 }}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">👤</InputAdornment>,
+                }}
               />
             </Grid>
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Duration (minutes)"
-                name="duration"
-                type="number"
-                value={interviewFormData.duration}
-                onChange={handleInterviewFormChange}
-                error={!!formErrors.duration}
-                helperText={formErrors.duration}
-                inputProps={{ min: 1 }}
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
                 label="Total Questions"
@@ -1726,7 +1915,9 @@ const Dashboard: React.FC = () => {
                 onChange={handleInterviewFormChange}
                 error={!!formErrors.totalQuestion}
                 helperText={formErrors.totalQuestion}
-                inputProps={{ min: 1 }}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">❓</InputAdornment>,
+                }}
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -1735,14 +1926,13 @@ const Dashboard: React.FC = () => {
                 label="Start Time"
                 name="startTime"
                 type="datetime-local"
-                value={interviewFormData.startTime ? interviewFormData.startTime.toISOString().slice(0, 16) : ''}
-                onChange={(e) => setInterviewFormData(prev => ({ 
-                  ...prev, 
-                  startTime: e.target.value ? new Date(e.target.value) : null 
-                }))}
+                value={interviewFormData.startTime?.toISOString().slice(0, 16) || ''}
+                onChange={handleInterviewFormChange}
                 error={!!formErrors.startTime}
                 helperText={formErrors.startTime}
-                InputLabelProps={{ shrink: true }}
+                InputLabelProps={{
+                  shrink: true,
+                }}
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -1751,124 +1941,61 @@ const Dashboard: React.FC = () => {
                 label="Expiry Time"
                 name="expiryTime"
                 type="datetime-local"
-                value={interviewFormData.expiryTime ? interviewFormData.expiryTime.toISOString().slice(0, 16) : ''}
-                onChange={(e) => setInterviewFormData(prev => ({ 
-                  ...prev, 
-                  expiryTime: e.target.value ? new Date(e.target.value) : null 
-                }))}
+                value={interviewFormData.expiryTime?.toISOString().slice(0, 16) || ''}
+                onChange={handleInterviewFormChange}
                 error={!!formErrors.expiryTime}
                 helperText={formErrors.expiryTime}
-                InputLabelProps={{ shrink: true }}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Duration (minutes)"
+                name="duration"
+                type="number"
+                value={interviewFormData.duration}
+                onChange={handleInterviewFormChange}
+                error={!!formErrors.duration}
+                helperText={formErrors.duration}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">⏱️</InputAdornment>,
+                }}
               />
             </Grid>
           </Grid>
-          
-          {createdInterviewLink && (
-            <Box sx={{ mt: 3, p: 2, backgroundColor: '#e8f5e8', borderRadius: 1 }}>
-              <Typography variant="h6" sx={{ color: '#2e7d32', mb: 2 }}>
-                <CheckCircle sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Interview Created Successfully!
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                Share this link with the candidate to start their interview:
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <TextField
-                  fullWidth
-                  value={createdInterviewLink}
-                  inputRef={linkInputRef}
-                  variant="outlined"
-                  size="small"
-                  InputProps={{ readOnly: true }}
-                />
-                <Button
-                  onClick={copyInterviewLink}
-                  variant="contained"
-                  startIcon={<ContentCopy />}
-                  sx={{ minWidth: 120 }}
-                >
-                  Copy Link
-                </Button>
-                <Button
-                  onClick={sendInterviewLinkViaEmail}
-                  variant="contained"
-                  color="primary"
-                  startIcon={<EmailIcon />}
-                  sx={{ minWidth: 160 }}
-                >
-                  Send Email
-                </Button>
-              </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                The candidate will also receive this link via email.
-              </Typography>
-            </Box>
-          )}
-          
-          {formErrors.submit && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {formErrors.submit}
-            </Alert>
-          )}
         </DialogContent>
 
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={handleCloseDialog}>
-            {createdInterviewLink ? 'Close' : 'Cancel'}
+        <DialogActions>
+          <Button onClick={() => setShowInterviewForm(null)}>
+            Cancel
           </Button>
-          {!createdInterviewLink && (
-            <Button
-              onClick={() => handleStartInterview(filteredInterviews.find(i => i.interview_id === showInterviewForm)!)}
-              disabled={isSubmittingInterview || uploading}
-              variant="contained"
-              startIcon={isSubmittingInterview ? <CircularProgress size={20} /> : <PlayArrow />}
-            >
-              {isSubmittingInterview ? 'Starting...' : 'Start Interview'}
-            </Button>
-          )}
+          <Button
+            onClick={handleStartInterview}
+            variant="contained"
+            disabled={isSubmittingInterview}
+          >
+            {isSubmittingInterview ? <CircularProgress size={16} /> : 'Start Interview'}
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Email Dialog */}
-      <Dialog 
-        open={emailDialogOpen} 
+      <Dialog
+        open={emailDialogOpen}
         onClose={() => setEmailDialogOpen(false)}
         maxWidth="sm"
         fullWidth
       >
         <DialogTitle>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6">
-              Send Assessment Link
-            </Typography>
-            <IconButton onClick={() => setEmailDialogOpen(false)}>
-              <Close />
-            </IconButton>
-          </Box>
+          <Typography variant="h6">
+            Send Assessment Link via Email
+          </Typography>
         </DialogTitle>
 
         <DialogContent>
-          {selectedAssessmentForEmail && (
-            <Box sx={{ mb: 3, p: 2, backgroundColor: '#f8f9fa', borderRadius: 1 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                {selectedAssessmentForEmail.testName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Job Role: {selectedAssessmentForEmail.jobRole}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Experience: {selectedAssessmentForEmail.experience} years
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Duration: {selectedAssessmentForEmail.duration ? Math.floor(selectedAssessmentForEmail.duration / 60) : 60} minutes
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Topics: {selectedAssessmentForEmail.totalTopics || 0} topics
-              </Typography>
-              <Divider sx={{ my: 2 }} />
-            </Box>
-          )}
-
           <TextField
             fullWidth
             label="Candidate Email"
@@ -1898,6 +2025,86 @@ const Dashboard: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Create Tag Dialog */}
+      <Dialog 
+        open={showTagDialog} 
+        onClose={() => setShowTagDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">
+              Create New Tag
+            </Typography>
+            <IconButton onClick={() => setShowTagDialog(false)}>
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Tag Name"
+                value={newTag.name}
+                onChange={(e) => setNewTag(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g., Frontend Developer"
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Description"
+                multiline
+                rows={2}
+                value={newTag.description}
+                onChange={(e) => setNewTag(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Brief description of this tag"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Typography variant="body2">Color:</Typography>
+                <input
+                  type="color"
+                  value={newTag.color}
+                  onChange={(e) => setNewTag(prev => ({ ...prev, color: e.target.value }))}
+                  style={{ width: 50, height: 30, border: 'none', borderRadius: 4 }}
+                />
+                <Chip
+                  label={newTag.name || 'Preview'}
+                  size="small"
+                  sx={{
+                    backgroundColor: newTag.color,
+                    color: 'white',
+                    fontWeight: 500
+                  }}
+                />
+              </Box>
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setShowTagDialog(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCreateTag}
+            variant="contained"
+            disabled={!newTag.name.trim()}
+          >
+            Create Tag
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ...rest of existing dialogs... */}
     </Box>
   );
 };

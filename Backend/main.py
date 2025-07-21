@@ -2494,23 +2494,99 @@ def extract_phone(text):
         return ""
 
 def extract_email(text):
-    """Extract email address from resume text"""
+    """Extract email address from resume text with enhanced parsing"""
     try:
-        # Email patterns
-        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        # Multiple email patterns with priority
+        email_patterns = [
+            # Standard email pattern (highest priority)
+            r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
+            
+            # Email with spaces around @ (common OCR error)
+            r'\b[A-Za-z0-9._%+-]+\s*@\s*[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
+            
+            # Email with "at" instead of @
+            r'\b[A-Za-z0-9._%+-]+\s*(?:at|AT)\s*[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
+            
+            # Email with dots replaced by spaces (OCR error)
+            r'\b[A-Za-z0-9_%+-]+\s*@\s*[A-Za-z0-9\s-]+\s+(?:com|org|net|edu|gov|in|co|io|me|us|uk)\b',
+            
+            # Email patterns in different formats
+            r'(?:email|e-mail|mail)[\s:]+([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,})',
+            r'(?:contact|reach)[\s:]+([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,})',
+        ]
         
-        emails = re.findall(email_pattern, text)
-        for email in emails:
-            # Filter out common non-personal emails
-            if not any(domain in email.lower() for domain in ['example.com', 'test.com', 'placeholder']):
-                return email.lower()
+        # Additional context-based patterns
+        context_patterns = [
+            r'(?i)(?:email|e-mail|mail|contact|reach(?:\s+me)?(?:\s+at)?)[:\s]*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})',
+            r'(?i)(?:you can reach me|contact me|email me)[:\s]*(?:at\s+)?([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})',
+            r'(?i)(?:my email is|email address)[:\s]*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})',
+        ]
         
+        all_emails = []
+        
+        # Extract emails using all patterns
+        for pattern in email_patterns + context_patterns:
+            matches = re.findall(pattern, text, re.IGNORECASE)
+            for match in matches:
+                # Handle tuple returns from context patterns
+                email = match[0] if isinstance(match, tuple) else match
+                # Clean the email
+                email = re.sub(r'\s+', '', email)  # Remove spaces
+                email = email.replace(' at ', '@').replace(' AT ', '@')  # Replace "at" with @
+                all_emails.append(email.lower())
+        
+        # Remove duplicates while preserving order
+        unique_emails = list(dict.fromkeys(all_emails))
+        
+        # Filter and prioritize emails
+        valid_emails = []
+        for email in unique_emails:
+            # Basic validation
+            if (len(email) > 5 and 
+                '@' in email and 
+                '.' in email.split('@')[-1] and
+                not any(invalid in email.lower() for invalid in [
+                    'example.com', 'test.com', 'placeholder', 'sample', 
+                    'dummy', 'fake', 'noreply', 'donotreply'
+                ])):
+                
+                # Additional validation
+                parts = email.split('@')
+                if len(parts) == 2:
+                    username, domain = parts
+                    if (len(username) >= 2 and 
+                        len(domain) >= 4 and 
+                        '.' in domain and
+                        not domain.startswith('.') and
+                        not domain.endswith('.')):
+                        valid_emails.append(email)
+        
+        # Return the first valid email (prioritized by pattern order)
+        if valid_emails:
+            print(f"[EMAIL EXTRACT] ✅ Found valid email: {valid_emails[0]}")
+            return valid_emails[0]
+        
+        # Fallback: try to extract from social media or portfolio URLs
+        url_patterns = [
+            r'(?:linkedin\.com/in/|github\.com/)([a-zA-Z0-9._-]+)',
+            r'(?:portfolio|website)[\s:]*(?:https?://)?([a-zA-Z0-9._-]+)',
+        ]
+        
+        for pattern in url_patterns:
+            matches = re.findall(pattern, text, re.IGNORECASE)
+            for match in matches:
+                # Generate email from username
+                username = match.lower().replace('-', '.').replace('_', '.')
+                generated_email = f"{username}@gmail.com"
+                print(f"[EMAIL EXTRACT] 📧 Generated email from profile: {generated_email}")
+                return generated_email
+        
+        print("[EMAIL EXTRACT] ❌ No valid email found")
         return ""
+        
     except Exception as e:
         print(f"[EMAIL EXTRACT ERROR] ❌ {e}")
         return ""
-
-# Add S3 download endpoint for processed candidates
 @app.get("/download-candidates/{folder_name}")
 async def download_candidates_from_s3(folder_name: str):
     """Download processed candidates from S3"""
@@ -2657,3 +2733,415 @@ async def recording_status_callback(request: Request):
         print(f"[RECORDING ERROR] ❌ {e}")
         return {"error": str(e)}
 
+import re
+from datetime import datetime
+
+@app.post("/upload-candidates-to-s3")
+async def upload_candidates_to_local(request: Request):
+    try:
+        data = await request.json()
+        folder_name = data.get('folderName')  # This will be auto-generated now
+        candidates_data = data['data']
+        tag = data.get('tag', 'General')
+        
+        # ✅ Generate folder name based on tag if not provided
+        if not folder_name:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            tag_slug = tag.lower().replace(' ', '-').replace('_', '-')
+            tag_slug = re.sub(r'[^a-z0-9-]', '', tag_slug)  # Remove special chars
+            folder_name = f"{tag_slug}_{timestamp}"
+        
+        # ✅ Add tag to each candidate
+        if 'candidates' in candidates_data:
+            for candidate in candidates_data['candidates']:
+                candidate['tag'] = tag
+                candidate['tag_id'] = tag.lower().replace(' ', '_').replace('-', '_')
+                candidate['processed_date'] = datetime.now().isoformat()
+        
+        # ✅ Create local directory structure based on tag hierarchy
+        tag_folder = tag.lower().replace(' ', '_').replace('-', '_')
+        local_folder = f"pdf-data/{tag_folder}/{folder_name}"
+        os.makedirs(local_folder, exist_ok=True)
+        
+        # ✅ Also create a tag-specific index
+        tag_index_folder = f"pdf-data/{tag_folder}"
+        os.makedirs(tag_index_folder, exist_ok=True)
+        
+        # Local file path
+        local_file_path = f"{local_folder}/candidates.json"
+        
+        # ✅ Save JSON data locally with comprehensive tag information
+        enhanced_data = {
+            **candidates_data,
+            'tag': tag,
+            'tag_id': tag_folder,
+            'tag_slug': tag_slug,
+            'processed_at': datetime.now().isoformat(),
+            'total_candidates': len(candidates_data.get("candidates", [])),
+            'folder_name': folder_name,
+            'tag_folder': tag_folder,
+            'storage_path': local_folder,
+            'file_path': local_file_path
+        }
+        
+        json_content = json.dumps(enhanced_data, indent=2)
+        
+        # ✅ Save the main candidates file
+        try:
+            with open(local_file_path, 'w') as f:
+                f.write(json_content)
+            
+            print(f"[LOCAL SAVE] ✅ Saved to: {local_file_path} with tag: {tag}")
+            
+            # ✅ Update tag index file
+            await update_tag_index(tag_folder, folder_name, enhanced_data)
+            
+            return {
+                "success": True, 
+                "localPath": local_file_path,
+                "folder": folder_name,
+                "tag": tag,
+                "tag_id": tag_folder,
+                "tag_folder": tag_folder,
+                "candidateCount": len(candidates_data.get("candidates", []))
+            }
+            
+        except Exception as save_error:
+            print(f"[LOCAL SAVE ERROR] ❌ Failed to save locally: {save_error}")
+            return {"success": False, "error": f"Local save failed: {str(save_error)}"}
+            
+    except Exception as e:
+        print(f"[UPLOAD ERROR] ❌ {e}")
+        return {"success": False, "error": str(e)}
+
+async def update_tag_index(tag_folder: str, batch_folder: str, batch_data: dict):
+    """Update the tag index file with new batch information"""
+    try:
+        tag_index_file = f"pdf-data/{tag_folder}/tag_index.json"
+        
+        # Load existing tag index
+        if os.path.exists(tag_index_file):
+            with open(tag_index_file, 'r') as f:
+                tag_index = json.load(f)
+        else:
+            tag_index = {
+                "tag_name": batch_data.get('tag', 'Unknown'),
+                "tag_id": tag_folder,
+                "created_at": datetime.now().isoformat(),
+                "total_batches": 0,
+                "total_candidates": 0,
+                "batches": {}
+            }
+        
+        # Add/update batch information
+        tag_index["batches"][batch_folder] = {
+            "batch_name": batch_folder,
+            "candidate_count": len(batch_data.get("candidates", [])),
+            "processed_at": batch_data.get("processed_at"),
+            "file_path": f"pdf-data/{tag_folder}/{batch_folder}/candidates.json"
+        }
+        
+        # Update totals
+        tag_index["total_batches"] = len(tag_index["batches"])
+        tag_index["total_candidates"] = sum(
+            batch["candidate_count"] for batch in tag_index["batches"].values()
+        )
+        tag_index["last_updated"] = datetime.now().isoformat()
+        
+        # Save updated index
+        with open(tag_index_file, 'w') as f:
+            json.dump(tag_index, f, indent=2)
+        
+        print(f"[TAG INDEX] ✅ Updated tag index for {tag_folder}: {tag_index['total_candidates']} total candidates")
+        
+    except Exception as e:
+        print(f"[TAG INDEX ERROR] ❌ {e}")
+
+# ✅ New endpoint to get candidates by tag
+@app.get("/candidates-by-tag/{tag_id}")
+async def get_candidates_by_tag(tag_id: str):
+    """Get all candidates for a specific tag"""
+    try:
+        tag_folder = f"pdf-data/{tag_id}"
+        tag_index_file = f"{tag_folder}/tag_index.json"
+        
+        if not os.path.exists(tag_index_file):
+            return {
+                "success": False,
+                "error": f"Tag '{tag_id}' not found",
+                "candidates": [],
+                "total_count": 0
+            }
+        
+        # Load tag index
+        with open(tag_index_file, 'r') as f:
+            tag_index = json.load(f)
+        
+        all_candidates = []
+        
+        # Load candidates from all batches for this tag
+        for batch_name, batch_info in tag_index["batches"].items():
+            batch_file = batch_info["file_path"]
+            if os.path.exists(batch_file):
+                try:
+                    with open(batch_file, 'r') as f:
+                        batch_data = json.load(f)
+                    
+                    candidates = batch_data.get("candidates", [])
+                    for candidate in candidates:
+                        candidate["batch_name"] = batch_name
+                        candidate["batch_processed_at"] = batch_info["processed_at"]
+                    
+                    all_candidates.extend(candidates)
+                    
+                except Exception as e:
+                    print(f"[BATCH LOAD ERROR] ❌ Error loading batch {batch_name}: {e}")
+                    continue
+        
+        return {
+            "success": True,
+            "tag_name": tag_index["tag_name"],
+            "tag_id": tag_id,
+            "candidates": all_candidates,
+            "total_count": len(all_candidates),
+            "total_batches": tag_index["total_batches"],
+            "last_updated": tag_index.get("last_updated")
+        }
+        
+    except Exception as e:
+        print(f"[CANDIDATES BY TAG ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "candidates": [],
+            "total_count": 0
+        }
+
+# ✅ New endpoint to get all tags with statistics
+@app.get("/tags-summary")
+async def get_tags_summary():
+    """Get summary of all tags with candidate counts"""
+    try:
+        pdf_data_dir = "pdf-data"
+        
+        if not os.path.exists(pdf_data_dir):
+            return {
+                "success": True,
+                "tags": [],
+                "total_tags": 0,
+                "total_candidates": 0
+            }
+        
+        tags_summary = []
+        total_candidates_across_tags = 0
+        
+        # Scan tag directories
+        for tag_folder in os.listdir(pdf_data_dir):
+            tag_path = os.path.join(pdf_data_dir, tag_folder)
+            if os.path.isdir(tag_path):
+                tag_index_file = os.path.join(tag_path, "tag_index.json")
+                
+                if os.path.exists(tag_index_file):
+                    try:
+                        with open(tag_index_file, 'r') as f:
+                            tag_index = json.load(f)
+                        
+                        tag_summary = {
+                            "tag_id": tag_folder,
+                            "tag_name": tag_index.get("tag_name", tag_folder.replace('_', ' ').title()),
+                            "total_candidates": tag_index.get("total_candidates", 0),
+                            "total_batches": tag_index.get("total_batches", 0),
+                            "created_at": tag_index.get("created_at"),
+                            "last_updated": tag_index.get("last_updated"),
+                            "folder_path": tag_path
+                        }
+                        
+                        tags_summary.append(tag_summary)
+                        total_candidates_across_tags += tag_summary["total_candidates"]
+                        
+                    except Exception as e:
+                        print(f"[TAG SUMMARY ERROR] ❌ Error reading tag {tag_folder}: {e}")
+                        continue
+        
+        # Sort by candidate count (highest first)
+        tags_summary.sort(key=lambda x: x["total_candidates"], reverse=True)
+        
+        return {
+            "success": True,
+            "tags": tags_summary,
+            "total_tags": len(tags_summary),
+            "total_candidates": total_candidates_across_tags
+        }
+        
+    except Exception as e:
+        print(f"[TAGS SUMMARY ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "tags": [],
+            "total_tags": 0,
+            "total_candidates": 0
+        }
+
+# ✅ Update the list folders endpoint to show tag-based organization
+@app.get("/list-candidate-folders")
+async def list_candidate_folders():
+    """List all candidate folders organized by tags"""
+    try:
+        pdf_data_dir = "pdf-data"
+        
+        if not os.path.exists(pdf_data_dir):
+            os.makedirs(pdf_data_dir, exist_ok=True)
+            return {
+                "success": True,
+                "folders": [],
+                "total_count": 0,
+                "by_tag": {},
+                "tags_summary": []
+            }
+        
+        folders = []
+        folders_by_tag = {}
+        tags_summary = []
+        
+        # Scan tag directories
+        for tag_folder in os.listdir(pdf_data_dir):
+            tag_path = os.path.join(pdf_data_dir, tag_folder)
+            if os.path.isdir(tag_path):
+                tag_folders = []
+                tag_index_file = os.path.join(tag_path, "tag_index.json")
+                
+                # Load tag information
+                tag_info = {
+                    "tag_id": tag_folder,
+                    "tag_name": tag_folder.replace('_', ' ').title(),
+                    "total_candidates": 0,
+                    "total_batches": 0
+                }
+                
+                if os.path.exists(tag_index_file):
+                    try:
+                        with open(tag_index_file, 'r') as f:
+                            tag_index = json.load(f)
+                        tag_info.update({
+                            "tag_name": tag_index.get("tag_name", tag_info["tag_name"]),
+                            "total_candidates": tag_index.get("total_candidates", 0),
+                            "total_batches": tag_index.get("total_batches", 0),
+                            "last_updated": tag_index.get("last_updated")
+                        })
+                    except Exception as e:
+                        print(f"[TAG INDEX READ ERROR] ❌ {e}")
+                
+                # Scan batch folders within tag directory
+                for batch_folder in os.listdir(tag_path):
+                    batch_path = os.path.join(tag_path, batch_folder)
+                    if os.path.isdir(batch_path):
+                        candidates_file = os.path.join(batch_path, "candidates.json")
+                        if os.path.exists(candidates_file):
+                            folder_info = {
+                                "folder_name": batch_folder,
+                                "tag_folder": tag_folder,
+                                "tag_name": tag_info["tag_name"],
+                                "local_path": batch_path,
+                                "candidates_file": candidates_file,
+                                "full_path": f"{tag_folder}/{batch_folder}"
+                            }
+                            folders.append(folder_info)
+                            tag_folders.append(folder_info)
+                
+                if tag_folders:
+                    folders_by_tag[tag_folder] = tag_folders
+                    tags_summary.append(tag_info)
+        
+        return {
+            "success": True,
+            "folders": folders,
+            "total_count": len(folders),
+            "by_tag": folders_by_tag,
+            "tags_summary": tags_summary
+        }
+        
+    except Exception as e:
+        print(f"[LOCAL LIST ERROR] ❌ {e}")
+        return {
+            "success": False, 
+            "error": str(e), 
+            "folders": [],
+            "by_tag": {},
+            "tags_summary": []
+        }
+
+# ✅ New endpoint to search candidates across all tags
+@app.get("/search-candidates")
+async def search_candidates(query: str = "", tag_id: str = ""):
+    """Search candidates across all tags or within a specific tag"""
+    try:
+        pdf_data_dir = "pdf-data"
+        
+        if not os.path.exists(pdf_data_dir):
+            return {
+                "success": True,
+                "candidates": [],
+                "total_count": 0,
+                "search_query": query,
+                "tag_filter": tag_id
+            }
+        
+        all_candidates = []
+        
+        # Determine which tags to search
+        if tag_id:
+            tag_folders = [tag_id] if os.path.exists(f"{pdf_data_dir}/{tag_id}") else []
+        else:
+            tag_folders = [f for f in os.listdir(pdf_data_dir) if os.path.isdir(f"{pdf_data_dir}/{f}")]
+        
+        # Search through specified tags
+        for tag_folder in tag_folders:
+            tag_path = f"{pdf_data_dir}/{tag_folder}"
+            
+            # Scan all batch folders in this tag
+            for batch_folder in os.listdir(tag_path):
+                if batch_folder == "tag_index.json":
+                    continue
+                    
+                batch_path = os.path.join(tag_path, batch_folder)
+                candidates_file = os.path.join(batch_path, "candidates.json")
+                
+                if os.path.exists(candidates_file):
+                    try:
+                        with open(candidates_file, 'r') as f:
+                            batch_data = json.load(f)
+                        
+                        candidates = batch_data.get("candidates", [])
+                        for candidate in candidates:
+                            candidate["tag_folder"] = tag_folder
+                            candidate["batch_folder"] = batch_folder
+                            
+                            # Apply search filter if query provided
+                            if query:
+                                searchable_text = f"{candidate.get('name', '')} {candidate.get('email', '')} {candidate.get('fileName', '')}".lower()
+                                if query.lower() in searchable_text:
+                                    all_candidates.append(candidate)
+                            else:
+                                all_candidates.append(candidate)
+                        
+                    except Exception as e:
+                        print(f"[SEARCH ERROR] ❌ Error searching in {candidates_file}: {e}")
+                        continue
+        
+        return {
+            "success": True,
+            "candidates": all_candidates,
+            "total_count": len(all_candidates),
+            "search_query": query,
+            "tag_filter": tag_id
+        }
+        
+    except Exception as e:
+        print(f"[SEARCH CANDIDATES ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "candidates": [],
+            "total_count": 0
+        }
