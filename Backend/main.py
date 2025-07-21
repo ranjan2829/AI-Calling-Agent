@@ -20,6 +20,7 @@ from typing import Optional
 from typing import List
 import csv
 import io
+import PyPDF2
 from dotenv import load_dotenv
 load_dotenv()
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
@@ -2278,3 +2279,225 @@ async def clear_all_contact_mappings():
             "success": False,
             "error": str(e)
         }
+@app.post("/extract-candidate-info")
+async def extract_candidate_info(file: UploadFile = File(...)):
+    try:
+        # Read PDF file
+        pdf_content = await file.read()
+        
+        # Extract text from PDF using PyPDF2 or similar
+        text = extract_text_from_pdf(pdf_content)
+        
+        # Use regex to extract name, phone, and email
+        candidate_info = {
+            'name': extract_name(text),
+            'phone': extract_phone(text),
+            'email': extract_email(text)
+        }
+        
+        return {"success": True, **candidate_info}
+    except Exception as e:
+        print(f"[PDF EXTRACT ERROR] ❌ {e}")
+        return {"success": False, "error": str(e)}
+
+@app.post("/upload-candidates-to-s3")
+async def upload_candidates_to_s3(request: Request):
+    try:
+        data = await request.json()
+        folder_name = data['folderName']
+        candidates_data = data['data']
+        
+        # S3 key directly in function
+        s3_key = f"pdf-data/{folder_name}/candidates.json"
+        
+        # Upload JSON data to S3
+        json_content = json.dumps(candidates_data, indent=2)
+        
+        try:
+            s3_client.put_object(
+                Bucket="calling-agent-ai",
+                Key=s3_key,
+                Body=json_content,
+                ContentType='application/json'
+            )
+            
+            s3_url = f"s3://calling-agent-ai/{s3_key}"
+            
+            print(f"[S3 UPLOAD] ✅ Uploaded to: {s3_url}")
+            
+            return {
+                "success": True, 
+                "s3Url": s3_url,
+                "s3Key": s3_key,
+                "folder": folder_name,
+                "candidateCount": len(candidates_data.get("candidates", []))
+            }
+            
+        except Exception as s3_error:
+            print(f"[S3 ERROR] ❌ Failed to upload to S3: {s3_error}")
+            return {"success": False, "error": f"S3 upload failed: {str(s3_error)}"}
+            
+    except Exception as e:
+        print(f"[UPLOAD ERROR] ❌ {e}")
+        return {"success": False, "error": str(e)}
+
+# Helper functions for PDF text extraction
+def extract_text_from_pdf(pdf_content):
+    """Extract text from PDF content"""
+    try:
+        try:
+            import PyPDF2
+            import io
+            
+            pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_content))
+            text = ""
+            
+            for page in pdf_reader.pages:
+                text += page.extract_text() + "\n"
+            
+            return text.strip()
+        except ImportError:
+            # Fallback: Try using pdfplumber if available
+            try:
+                import pdfplumber
+                import io
+                
+                with pdfplumber.open(io.BytesIO(pdf_content)) as pdf:
+                    text = ""
+                    for page in pdf.pages:
+                        page_text = page.extract_text()
+                        if page_text:
+                            text += page_text + "\n"
+                
+                return text.strip()
+            except ImportError:
+                # Fallback: Return empty string and log error
+                print("[PDF ERROR] No PDF processing library available (PyPDF2 or pdfplumber)")
+                return ""
+                
+    except Exception as e:
+        print(f"[PDF TEXT EXTRACT ERROR] ❌ {e}")
+        return ""
+
+def extract_name(text):
+    """Extract candidate name from resume text"""
+    try:
+        # Common patterns for names in resumes
+        name_patterns = [
+            r'^([A-Z][a-zA-Z\s]{2,40})(?:\n|\s{2,})',  # Name at start of document
+            r'Name[\s:]+([A-Z][a-zA-Z\s]{2,40})',       # "Name: John Doe"
+            r'([A-Z][a-zA-Z]+\s+[A-Z][a-zA-Z]+)',       # "First Last" pattern
+            r'I am ([A-Z][a-zA-Z\s]{2,40})',            # "I am John Doe"
+        ]
+        
+        for pattern in name_patterns:
+            match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+            if match:
+                name = match.group(1).strip()
+                # Validate name (not too long, no numbers)
+                if 2 < len(name) < 50 and not re.search(r'\d', name):
+                    return name.title()
+        
+        return "Unknown"
+    except Exception as e:
+        print(f"[NAME EXTRACT ERROR] ❌ {e}")
+        return "Unknown"
+
+def extract_phone(text):
+    """Extract phone number from resume text"""
+    try:
+        # Phone number patterns
+        phone_patterns = [
+            r'\+?91[-\s]?[6-9]\d{9}',           # Indian mobile numbers
+            r'\+?[1-9]\d{1,3}[-\s]?\d{3,4}[-\s]?\d{6,7}',  # International format
+            r'[6-9]\d{9}',                      # 10-digit Indian mobile
+            r'\(\d{3}\)\s?\d{3}-?\d{4}',        # (123) 456-7890
+            r'\d{3}[-.\s]?\d{3}[-.\s]?\d{4}',   # 123-456-7890
+        ]
+        
+        for pattern in phone_patterns:
+            matches = re.findall(pattern, text)
+            for match in matches:
+                # Clean and validate phone number
+                clean_phone = re.sub(r'[-\s()]', '', match)
+                if 10 <= len(clean_phone) <= 15:
+                    # Format Indian numbers
+                    if len(clean_phone) == 10 and clean_phone[0] in '6789':
+                        return f"+91{clean_phone}"
+                    elif len(clean_phone) == 12 and clean_phone.startswith('91'):
+                        return f"+{clean_phone}"
+                    else:
+                        return f"+{clean_phone}" if not clean_phone.startswith('+') else clean_phone
+        
+        return ""
+    except Exception as e:
+        print(f"[PHONE EXTRACT ERROR] ❌ {e}")
+        return ""
+
+def extract_email(text):
+    """Extract email address from resume text"""
+    try:
+        # Email patterns
+        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        
+        emails = re.findall(email_pattern, text)
+        for email in emails:
+            # Filter out common non-personal emails
+            if not any(domain in email.lower() for domain in ['example.com', 'test.com', 'placeholder']):
+                return email.lower()
+        
+        return ""
+    except Exception as e:
+        print(f"[EMAIL EXTRACT ERROR] ❌ {e}")
+        return ""
+
+# Add S3 download endpoint for processed candidates
+@app.get("/download-candidates/{folder_name}")
+async def download_candidates_from_s3(folder_name: str):
+    """Download processed candidates from S3"""
+    try:
+        s3_key = f"pdf-data/{folder_name}/candidates.json"
+        
+        response = s3_client.get_object(Bucket="calling-agent-ai", Key=s3_key)
+        candidates_data = json.loads(response['Body'].read())
+        
+        return {
+            "success": True,
+            "data": candidates_data,
+            "s3Key": s3_key,
+            "folder": folder_name
+        }
+        
+    except Exception as e:
+        print(f"[S3 DOWNLOAD ERROR] ❌ {e}")
+        return {"success": False, "error": str(e)}
+
+# Add endpoint to list all S3 folders
+@app.get("/list-candidate-folders")
+async def list_candidate_folders():
+    """List all candidate folders in S3"""
+    try:
+        response = s3_client.list_objects_v2(
+            Bucket="calling-agent-ai",
+            Prefix="pdf-data/",
+            Delimiter="/"
+        )
+        
+        folders = []
+        for prefix in response.get('CommonPrefixes', []):
+            folder_name = prefix['Prefix'].replace('pdf-data/', '').rstrip('/')
+            if folder_name:
+                folders.append({
+                    "folder_name": folder_name,
+                    "s3_path": f"s3://calling-agent-ai/pdf-data/{folder_name}/"
+                })
+        
+        return {
+            "success": True,
+            "folders": folders,
+            "total_count": len(folders)
+        }
+        
+    except Exception as e:
+        print(f"[S3 LIST ERROR] ❌ {e}")
+        return {"success": False, "error": str(e), "folders": []}
