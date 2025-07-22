@@ -1461,8 +1461,6 @@ const Dashboard: React.FC = () => {
       toast.error('Tag not found');
       return;
     }
-
-    // Show confirmation dialog
     const confirmDelete = window.confirm(
       `Are you sure you want to delete the tag "${tagToDelete.name}"?\n\n` +
       `This will:\n` +

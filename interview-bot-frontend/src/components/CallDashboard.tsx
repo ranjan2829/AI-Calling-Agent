@@ -256,221 +256,14 @@ export const CallDashboard: React.FC = () => {
         
       } catch (error) {
         console.error('Error parsing saved tags:', error);
-        initializeDefaultTags();
+        // Don't initialize default tags - just set empty arrays
+        setCandidateTags([]);
+        setTags([]);
       }
     } else {
-      initializeDefaultTags();
-    }
-  };
-
-  // ✅ NEW: Initialize with default tags (same as other components) - FIXED to prevent duplicates
-  const initializeDefaultTags = () => {
-    // ✅ Check if tags already exist to prevent duplicates
-    const existingTags = localStorage.getItem('candidateTags');
-    if (existingTags) {
-      try {
-        const parsedTags = JSON.parse(existingTags);
-        if (parsedTags && parsedTags.length > 0) {
-          setCandidateTags(parsedTags);
-          // Convert existing tags to TagSummary format
-          const tagSummaries: TagSummary[] = parsedTags.map((tag: CandidateTag) => ({
-            tag_id: tag.id,
-            tag_name: tag.name,
-            total_candidates: 0,
-            total_batches: 0,
-            created_at: tag.createdAt,
-            last_updated: tag.createdAt,
-            folder_path: `local-data/${tag.id}`
-          }));
-          setTags(tagSummaries);
-          return; // Exit early if tags already exist
-        }
-      } catch (error) {
-        console.error('Error parsing existing tags:', error);
-      }
-    }
-
-    // Only create default tags if none exist
-    const defaultTags: CandidateTag[] = [
-      {
-        id: 'general',
-        name: 'General',
-        color: '#757575',
-        description: 'General candidates',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'frontend',
-        name: 'Frontend Developer',
-        color: '#2196f3',
-        description: 'React, Angular, Vue.js developers',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'backend',
-        name: 'Backend Developer',
-        color: '#4caf50',
-        description: 'Node.js, Python, Java developers',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'fullstack',
-        name: 'Full Stack Developer',
-        color: '#ff9800',
-        description: 'Full stack developers',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'devops',
-        name: 'DevOps Engineer',
-        color: '#9c27b0',
-        description: 'DevOps and Infrastructure engineers',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'mobile',
-        name: 'Mobile Developer',
-        color: '#e91e63',
-        description: 'iOS, Android, React Native developers',
-        createdAt: new Date().toISOString()
-      }
-    ];
-    
-    setCandidateTags(defaultTags);
-    localStorage.setItem('candidateTags', JSON.stringify(defaultTags));
-    
-    // Convert to TagSummary format
-    const tagSummaries: TagSummary[] = defaultTags.map((tag: CandidateTag) => ({
-      tag_id: tag.id,
-      tag_name: tag.name,
-      total_candidates: 0,
-      total_batches: 0,
-      created_at: tag.createdAt,
-      last_updated: tag.createdAt,
-      folder_path: `local-data/${tag.id}`
-    }));
-    
-    setTags(tagSummaries);
-    
-    console.log('✅ Initialized default candidate tags:', defaultTags);
-  };
-
-  const loadCallStats = async () => {
-    try {
-      // 🔥 FIX: Use getAllInterviewsDetailed instead of getCallStats
-      const response = await callsApi.getAllInterviewsDetailed();
-      const allInterviews = response.data.interviews || [];
-      
-      console.log('📊 CallDashboard - Raw interviews loaded:', allInterviews.length);
-      
-      // 🔥 Include ALL interviews (same logic as CallHistory)
-      const validInterviews = allInterviews.filter(interview => {
-        const hasBasicData = interview.interview_id || interview.call_sid;
-        
-        // Don't exclude INCOMPLETE_SILENCE - keep them!
-        if (!hasBasicData) {
-          return false;
-        }
-        
-        // Keep INCOMPLETE_SILENCE interviews
-        if (interview.status === 'INCOMPLETE_SILENCE') {
-          return true;
-        }
-        
-        // Check for invalid time fields
-        const completionTime = interview.completion_time;
-        const endTime = interview.end_time;
-        const startTime = interview.start_time;
-        
-        if (completionTime === "N/A" || endTime === "N/A" || startTime === "N/A") {
-          return false;
-        }
-        
-        if ((!completionTime || !endTime || !startTime) && 
-            (!interview.responses || interview.responses.length === 0)) {
-          return false;
-        }
-        
-        return true;
-      });
-      
-      console.log('📊 CallDashboard - Valid interviews after filtering:', validInterviews.length);
-      
-      // 🔥 Calculate comprehensive stats
-      const totalCalls = validInterviews.length;
-      const completedCalls = validInterviews.filter(i => i.status === 'COMPLETED').length;
-      const incompleteSilence = validInterviews.filter(i => i.status === 'INCOMPLETE_SILENCE').length;
-      const terminated = validInterviews.filter(i => i.status === 'TERMINATED').length;
-      const inProgress = validInterviews.filter(i => i.status === 'IN_PROGRESS').length;
-      const callbackRequested = validInterviews.filter(i => i.status === 'CALLBACK_REQUESTED').length;
-      
-      console.log('📊 CallDashboard - Stats breakdown:', {
-        totalCalls,
-        completedCalls,
-        incompleteSilence,
-        terminated,
-        inProgress,
-        callbackRequested
-      });
-      
-      setCallStats({ 
-        totalCalls, 
-        completedCalls,
-        incompleteSilence,
-        terminated,
-        inProgress,
-        callbackRequested
-      });
-      
-      // Also set the interviews for display
-      setInterviews(validInterviews);
-      
-    } catch (error) {
-      console.error('Error loading call stats:', error);
-      setCallStats({ 
-        totalCalls: 0, 
-        completedCalls: 0,
-        incompleteSilence: 0,
-        terminated: 0,
-        inProgress: 0,
-        callbackRequested: 0
-      });
-      setInterviews([]);
-    }
-  };
-
-  const loadJobDescription = async () => {
-    try {
-      const jd = await getJobDescription();
-      setJobDescription(jd || {
-        title: '',
-        company: '',
-        description: '',
-        required_skills: '',
-        experience_required: ''
-      });
-    } catch (error) {
-      console.error('Error loading job description:', error);
-      // FIX: Set default values on error
-      setJobDescription({
-        title: '',
-        company: '',
-        description: '',
-        required_skills: '',
-        experience_required: ''
-      });
-    }
-  };
-
-  const loadInterviews = async () => {
-    try {
-      const data = await getAllInterviews();
-      // FIX: Always ensure interviews is an array
-      setInterviews(data?.interviews || []);
-    } catch (error) {
-      console.error('Error loading interviews:', error);
-      // FIX: Set empty array on error
-      setInterviews([]);
+      // No saved tags - just set empty arrays
+      setCandidateTags([]);
+      setTags([]);
     }
   };
 
@@ -817,14 +610,15 @@ export const CallDashboard: React.FC = () => {
           toast.success(`Loaded ${localTags.length} local tags successfully!`);
         }
       } else {
-        // Final fallback: load from localStorage again
+        // No fallback to default tags - just reload from localStorage
         loadCandidateTagsFromStorage();
+        toast.info('No tags found. Create some tags first using the Bulk PDF Processor.');
       }
       
     } catch (error: any) {
       console.error('❌ Error loading tags:', error);
       
-      // Final fallback to localStorage tags
+      // Final fallback to localStorage tags only if they exist
       if (candidateTags && candidateTags.length > 0) {
         const localTags = candidateTags.map((tag: CandidateTag) => ({
           tag_id: tag.id,
@@ -1080,6 +874,7 @@ export const CallDashboard: React.FC = () => {
           </Typography>
         </Box>
       </Box>
+
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={6} sm={4} md={2}>
           <Card sx={{ height: '100px' }}>
@@ -1121,44 +916,6 @@ export const CallDashboard: React.FC = () => {
           <Card sx={{ height: '100px' }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Phone sx={{ color: 'secondary.main', fontSize: 24, mr: 1 }} />
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'secondary.main', fontSize: '1.25rem' }}>
-                    {twilioBalance.loading ? (
-                      <CircularProgress size={16} />
-                    ) : twilioBalance.balance === 'Error' ? (
-                      'Error'
-                    ) : (
-                      `$${parseFloat(twilioBalance.balance).toFixed(2)}`
-                    )}
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
-                    Balance
-                  </Typography>
-                </Box>
-              </Box>
-              <Button 
-                size="small" 
-                variant="text"
-                onClick={loadTwilioBalance}
-                disabled={twilioBalance.loading}
-                sx={{ 
-                  fontSize: '0.6rem', 
-                  minWidth: 'auto', 
-                  p: 0.5,
-                  mt: 0.5
-                }}
-              >
-                Refresh
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={6} sm={4} md={2}>
-          <Card sx={{ height: '100px' }}>
-            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Phone sx={{ color: 'warning.main', fontSize: 24, mr: 1 }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'warning.main', fontSize: '1.25rem' }}>
@@ -1184,7 +941,7 @@ export const CallDashboard: React.FC = () => {
                   </Typography>
                   <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
                     Terminated
-                  </Typography>
+</Typography>
                 </Box>
               </Box>
             </CardContent>
@@ -1241,6 +998,7 @@ export const CallDashboard: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
+
       <Card sx={{ mb: 4 }}>
         <CardContent>
           <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
@@ -1902,7 +1660,6 @@ export const CallDashboard: React.FC = () => {
 
       {/* Results Dialog */}
       <Dialog open={showResults} onClose={() => setShowResults(false)} maxWidth="lg" fullWidth>
-        <DialogTitle>Sequential Call Results</DialogTitle>
         <DialogContent>
           {bulkCallSession && (
             <TableContainer component={Paper}>

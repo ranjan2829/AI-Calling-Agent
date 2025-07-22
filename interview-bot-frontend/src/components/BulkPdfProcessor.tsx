@@ -98,13 +98,6 @@ const BulkPdfProcessor: React.FC = () => {
     console.log('🔧 BulkPdfProcessor - No existing tags found, creating defaults...');
     const defaultTags: CandidateTag[] = [
       {
-        id: 'general',
-        name: 'General',
-        color: '#757575',
-        description: 'General candidates',
-        createdAt: new Date().toISOString()
-      },
-      {
         id: 'frontend',
         name: 'Frontend Developer',
         color: '#2196f3',
@@ -118,27 +111,8 @@ const BulkPdfProcessor: React.FC = () => {
         description: 'Node.js, Python, Java developers',
         createdAt: new Date().toISOString()
       },
-      {
-        id: 'fullstack',
-        name: 'Full Stack Developer',
-        color: '#ff9800',
-        description: 'Full stack developers',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'devops',
-        name: 'DevOps Engineer',
-        color: '#9c27b0',
-        description: 'DevOps and Infrastructure engineers',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'mobile',
-        name: 'Mobile Developer',
-        color: '#e91e63',
-        description: 'iOS, Android, React Native developers',
-        createdAt: new Date().toISOString()
-      }
+      
+   
     ];
     setCandidateTags(defaultTags);
     localStorage.setItem('candidateTags', JSON.stringify(defaultTags));
