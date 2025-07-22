@@ -51,7 +51,8 @@ import {
   Edit,
   Tag,
   Refresh,
-  Search
+  Search,
+  Delete
 } from '@mui/icons-material';
 import { getCallStats, getJobDescription, getAllInterviews, callsApi } from '../api/services';
 import { toast } from 'react-toastify';
@@ -981,6 +982,78 @@ export const CallDashboard: React.FC = () => {
     );
   });
 
+  // ✅ Add tag deletion function
+  const handleDeleteTag = async (tagId: string) => {
+    const tagToDelete = candidateTags.find(tag => tag.id === tagId);
+    if (!tagToDelete) {
+      toast.error('Tag not found');
+      return;
+    }
+
+    // Show confirmation dialog
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the tag "${tagToDelete.name}"?\n\n` +
+      `This will:\n` +
+      `• Remove the tag from all candidates\n` +
+      `• Delete associated candidate data files\n` +
+      `• Clear this tag from call dashboard\n` +
+      `• This action cannot be undone.`
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      // 1. Delete from backend
+      try {
+        const deleteResponse = await fetch(`http://13.204.76.229:8000/delete-tag/${tagId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tagName: tagToDelete.name,
+            deleteAssociatedData: true
+          }),
+        });
+
+        if (deleteResponse.ok) {
+          const result = await deleteResponse.json();
+          console.log('✅ Tag deleted from backend:', result);
+          toast.success('Tag and associated data deleted from server');
+        } else {
+          console.warn('⚠️ Backend deletion failed');
+          toast.warning('Server deletion failed, deleting locally');
+        }
+      } catch (backendError) {
+        console.warn('⚠️ Backend not available:', backendError);
+        toast.warning('Server not available, deleting locally only');
+      }
+
+      // 2. Remove from localStorage
+      const updatedTags = candidateTags.filter(tag => tag.id !== tagId);
+      setCandidateTags(updatedTags);
+      localStorage.setItem('candidateTags', JSON.stringify(updatedTags));
+
+      // 3. Update tags state
+      setTags(prev => prev.filter(tag => tag.tag_id !== tagId));
+
+      // 4. Reset selected tag if it was the deleted one
+      if (selectedTagId === tagId) {
+        setSelectedTagId('');
+        setTagCandidates([]);
+        setContacts([]);
+      }
+
+      toast.success(`Tag "${tagToDelete.name}" deleted successfully`);
+      
+    } catch (error) {
+      console.error('Error deleting tag:', error);
+      toast.error('Failed to delete tag');
+    }
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       {/* Header with Logo - FIX: Correct logo path */}
@@ -1543,6 +1616,7 @@ export const CallDashboard: React.FC = () => {
                               Available Tags: {(tags || []).length}
                             </Typography>
                             
+                            {/* ✅ Available tags with delete option */}
                             <List dense>
                               {(tags || []).slice(0, 5).map((tag) => (
                                 <ListItem key={tag.tag_id}>
@@ -1550,6 +1624,14 @@ export const CallDashboard: React.FC = () => {
                                     primary={tag.tag_name}
                                     secondary={`${tag.total_candidates} candidates`}
                                   />
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleDeleteTag(tag.tag_id)}
+                                    color="error"
+                                    title={`Delete ${tag.tag_name} tag`}
+                                  >
+                                    <Delete sx={{ fontSize: 16 }} />
+                                  </IconButton>
                                 </ListItem>
                               ))}
                               {(tags || []).length > 5 && (

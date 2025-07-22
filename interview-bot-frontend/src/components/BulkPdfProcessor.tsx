@@ -79,8 +79,6 @@ const BulkPdfProcessor: React.FC = () => {
   const [selectedTag, setSelectedTag] = useState<string>('General');
   const [showTagDialog, setShowTagDialog] = useState(false);
   const [newTag, setNewTag] = useState({ name: '', color: '#1976d2', description: '' });
-
-  // ✅ Load tags from localStorage on component mount - FIXED to prevent duplicates
   useEffect(() => {
     const savedTags = localStorage.getItem('candidateTags');
     if (savedTags) {
@@ -89,7 +87,7 @@ const BulkPdfProcessor: React.FC = () => {
         if (parsedTags && parsedTags.length > 0) {
           setCandidateTags(parsedTags);
           console.log('✅ BulkPdfProcessor - Loaded existing tags from localStorage:', parsedTags.length);
-          return; // Exit early if tags already exist
+          return;
         }
       } catch (error) {
         console.error('Error parsing saved tags:', error);
@@ -458,6 +456,82 @@ const BulkPdfProcessor: React.FC = () => {
   const processingProgress = selectedFiles.length > 0 ? 
     ((completedCount + errorCount) / selectedFiles.length) * 100 : 0;
 
+  // ✅ Handle tag deletion with backend cleanup
+  const handleDeleteTag = async (tagId: string) => {
+    const tagToDelete = candidateTags.find(tag => tag.id === tagId);
+    if (!tagToDelete) {
+      toast.error('Tag not found');
+      return;
+    }
+
+    // Show confirmation dialog
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the tag "${tagToDelete.name}"?\n\n` +
+      `This will:\n` +
+      `• Remove the tag from the system\n` +
+      `• Delete all associated candidate data files\n` +
+      `• This action cannot be undone.`
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      // 1. Delete from backend/server with associated data
+      try {
+        const deleteResponse = await fetch(`${API_BASE_URL}/delete-tag/${tagId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tagName: tagToDelete.name,
+            deleteAssociatedData: true // Flag to delete JSON files too
+          }),
+        });
+
+        if (deleteResponse.ok) {
+          const result = await deleteResponse.json();
+          if (result.success) {
+            console.log('✅ Tag and data deleted from backend:', result);
+            toast.success(`Tag "${tagToDelete.name}" and ${result.deletedFiles || 0} data files deleted`);
+          } else {
+            console.warn('⚠️ Backend deletion issues:', result.message);
+            toast.warning('Tag deleted but some data files may remain on server');
+          }
+        } else {
+          console.warn('⚠️ Backend deletion failed');
+          toast.warning('Server deletion failed, deleting locally only');
+        }
+      } catch (backendError) {
+        console.warn('⚠️ Backend not available for deletion:', backendError);
+        toast.warning('Server not available, deleting locally only');
+      }
+
+      // 2. Remove from localStorage
+      const updatedTags = candidateTags.filter(tag => tag.id !== tagId);
+      setCandidateTags(updatedTags);
+      localStorage.setItem('candidateTags', JSON.stringify(updatedTags));
+
+      // 3. Reset selected tag if it was the deleted one
+      if (selectedTag === tagToDelete.name) {
+        setSelectedTag(updatedTags.length > 0 ? updatedTags[0].name : '');
+      }
+
+      // 4. Clear extracted candidates if they belong to deleted tag
+      setExtractedCandidates(prev => 
+        prev.filter(candidate => candidate.tag !== tagToDelete.name)
+      );
+
+      toast.success(`Tag "${tagToDelete.name}" deleted successfully`);
+      
+    } catch (error) {
+      console.error('Error deleting tag:', error);
+      toast.error('Failed to delete tag completely');
+    }
+  };
+
   return (
     <Box sx={{ width: '100%', height: '100%', p: 2 }}>
       {/* Header */}
@@ -498,7 +572,7 @@ const BulkPdfProcessor: React.FC = () => {
                 >
                   {candidateTags.map((tag) => (
                     <MenuItem key={tag.id} value={tag.name}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                         <Box
                           sx={{
                             width: 12,
@@ -507,12 +581,26 @@ const BulkPdfProcessor: React.FC = () => {
                             backgroundColor: tag.color
                           }}
                         />
-                        {tag.name}
-                        {tag.description && (
-                          <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                            ({tag.description})
-                          </Typography>
-                        )}
+                        <Box sx={{ flexGrow: 1 }}>
+                          {tag.name}
+                          {tag.description && (
+                            <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                              ({tag.description})
+                            </Typography>
+                          )}
+                        </Box>
+                        {/* ✅ Add delete button for each tag */}
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteTag(tag.id);
+                          }}
+                          sx={{ ml: 1 }}
+                          color="error"
+                        >
+                          <Delete sx={{ fontSize: 16 }} />
+                        </IconButton>
                       </Box>
                     </MenuItem>
                   ))}
@@ -526,10 +614,17 @@ const BulkPdfProcessor: React.FC = () => {
                   <Chip
                     label={selectedTag}
                     size="small"
+                    onDelete={() => {
+                      const tag = getTagByName(selectedTag);
+                      if (tag) handleDeleteTag(tag.id);
+                    }}
                     sx={{
                       backgroundColor: getTagByName(selectedTag)?.color || '#1976d2',
                       color: 'white',
-                      fontWeight: 500
+                      fontWeight: 500,
+                      '& .MuiChip-deleteIcon': {
+                        color: 'white'
+                      }
                     }}
                   />
                 </Box>

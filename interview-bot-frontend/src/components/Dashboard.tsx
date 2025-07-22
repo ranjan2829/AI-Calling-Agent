@@ -1456,20 +1456,92 @@ const Dashboard: React.FC = () => {
   };
 
   const handleDeleteTag = async (tagId: string) => {
+    const tagToDelete = candidateTags.find(tag => tag.id === tagId);
+    if (!tagToDelete) {
+      toast.error('Tag not found');
+      return;
+    }
+
+    // Show confirmation dialog
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the tag "${tagToDelete.name}"?\n\n` +
+      `This will:\n` +
+      `• Remove the tag from all candidates\n` +
+      `• Delete associated backend data files\n` +
+      `• This action cannot be undone.`
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
     try {
+      // 1. Delete from backend/server
+      try {
+        const deleteResponse = await fetch(`http://13.204.76.229:8000/delete-tag/${tagId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (deleteResponse.ok) {
+          const result = await deleteResponse.json();
+          if (result.success) {
+            console.log('✅ Tag deleted from backend:', result.message);
+            toast.success('Tag and associated data deleted from server');
+          } else {
+            console.warn('⚠️ Backend deletion partial:', result.message);
+            toast.warning('Tag deleted locally, but server cleanup may be incomplete');
+          }
+        } else {
+          console.warn('⚠️ Backend deletion failed, continuing with local deletion');
+          toast.warning('Server deletion failed, but continuing with local cleanup');
+        }
+      } catch (backendError) {
+        console.warn('⚠️ Backend not available for tag deletion:', backendError);
+        toast.warning('Server not available, deleting locally only');
+      }
+
+      // 2. Remove from localStorage
       const updatedTags = candidateTags.filter(tag => tag.id !== tagId);
       setCandidateTags(updatedTags);
       localStorage.setItem('candidateTags', JSON.stringify(updatedTags));
-      
-      // Reset filter if deleted tag was selected
-      if (tagFilter === tagId) {
+
+      // 3. Reset filter if deleted tag was selected
+      if (tagFilter === tagId || tagFilter === tagToDelete.name) {
         setTagFilter('all');
       }
+
+      // 4. Remove tag from all interviews in local state
+      setInterviews(prevInterviews => 
+        prevInterviews.map(interview => ({
+          ...interview,
+          tag: interview.tag === tagToDelete.name ? undefined : interview.tag
+        }))
+      );
+
+      // 5. Update backend to remove tag from interviews
+      try {
+        await fetch(`http://13.204.76.229:8000/remove-tag-from-interviews`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tagName: tagToDelete.name,
+            tagId: tagId
+          }),
+        });
+      } catch (error) {
+        console.warn('Failed to update interviews on backend:', error);
+      }
+
+      toast.success(`Tag "${tagToDelete.name}" deleted successfully`);
       
-      toast.success('Tag deleted successfully');
     } catch (error) {
       console.error('Error deleting tag:', error);
-      toast.error('Failed to delete tag');
+      toast.error('Failed to delete tag completely');
     }
   };
 
