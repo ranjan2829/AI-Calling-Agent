@@ -22,6 +22,7 @@ import csv
 import io
 import PyPDF2
 from dotenv import load_dotenv
+import shutil
 load_dotenv()
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
@@ -3300,3 +3301,19 @@ async def get_local_candidates_by_tag(tag_id: str):
             "error": str(e),
             "candidates": []
         }
+
+@app.delete("/delete-tag/{tag_id}")
+async def delete_tag(tag_id: str):
+    """
+    Delete a tag and all associated candidate data (batches) from pdf-data.
+    """
+    try:
+        tag_folder = f"pdf-data/{tag_id}"
+        if not os.path.exists(tag_folder):
+            return {"success": False, "error": f"Tag '{tag_id}' not found"}
+        shutil.rmtree(tag_folder)
+        print(f"[TAG DELETE] 🗑️ Deleted tag folder: {tag_folder}")
+        return {"success": True, "message": f"Tag '{tag_id}' and all data deleted"}
+    except Exception as e:
+        print(f"[TAG DELETE ERROR] ❌ {e}")
+        return {"success": False, "error": str(e)}

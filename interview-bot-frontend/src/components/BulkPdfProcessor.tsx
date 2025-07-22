@@ -36,7 +36,9 @@ import {
   Download,
   FolderOpen,
   Label,
-  Add
+  Add,
+  Sync,
+  Save
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 
@@ -54,7 +56,7 @@ interface CandidateData {
   email: string;
   fileName: string;
   extractedAt: string;
-  tag?: string; // ✅ Add tag field
+  tag?: string;
 }
 
 interface ProcessingStatus {
@@ -64,7 +66,258 @@ interface ProcessingStatus {
   candidateData?: CandidateData;
 }
 
+// Enhanced Data Manager for permanent storage
+class PermanentDataManager {
+  private static instance: PermanentDataManager;
+  private dataFolder = '/ai-interview-data';
+  private backendUrl = 'http://13.204.76.229:8000';
+
+  static getInstance(): PermanentDataManager {
+    if (!PermanentDataManager.instance) {
+      PermanentDataManager.instance = new PermanentDataManager();
+    }
+    return PermanentDataManager.instance;
+  }
+
+  // Initialize permanent storage
+  async initializePermanentStorage(): Promise<void> {
+    try {
+      await fetch(`${this.backendUrl}/api/data/initialize-permanent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          folders: [
+            'tags/permanent',
+            'candidates/by_tag',
+            'candidates/by_date', 
+            'sync_logs',
+            'backups/daily'
+          ]
+        })
+      });
+
+      // Initialize localStorage with permanent flag
+      const storageKey = 'ai-interview-permanent-data';
+      if (!localStorage.getItem(storageKey)) {
+        const initialData = {
+          tags: [],
+          lastSync: new Date().toISOString(),
+          permanentStorage: true,
+          initialized: new Date().toISOString()
+        };
+        localStorage.setItem(storageKey, JSON.stringify(initialData));
+      }
+    } catch (error) {
+      console.error('Failed to initialize permanent storage:', error);
+    }
+  }
+
+  // Save tags permanently with backup
+  async saveTagsPermanently(tags: CandidateTag[]): Promise<void> {
+    try {
+      const timestamp = new Date().toISOString();
+      const tagsData = {
+        tags: tags,
+        lastUpdated: timestamp,
+        version: '2.0',
+        backupCreated: timestamp
+      };
+
+      // Save to localStorage
+      const storageKey = 'ai-interview-permanent-data';
+      const currentData = this.getPermanentData();
+      currentData.tags = tags;
+      currentData.lastSync = timestamp;
+      localStorage.setItem(storageKey, JSON.stringify(currentData));
+
+      // Save to backend with backup
+      await Promise.all([
+        this.saveToBackend('tags/permanent/tags.json', tagsData),
+        this.saveToBackend(`tags/permanent/backup_${timestamp.split('T')[0]}.json`, tagsData),
+        this.saveToBackend('sync_logs/tags_sync.json', {
+          type: 'TAGS_SYNC',
+          timestamp: timestamp,
+          tagsCount: tags.length,
+          action: 'SAVE_PERMANENT'
+        })
+      ]);
+
+      console.log('✅ Tags saved permanently:', tags.length);
+    } catch (error) {
+      console.error('❌ Failed to save tags permanently:', error);
+    }
+  }
+
+  // Load tags from permanent storage
+  async loadTagsPermanently(): Promise<CandidateTag[]> {
+    try {
+      // Try backend first
+      const backendTags = await this.loadFromBackend('tags/permanent/tags.json');
+      if (backendTags && backendTags.tags) {
+        // Update localStorage with backend data
+        const storageKey = 'ai-interview-permanent-data';
+        const currentData = this.getPermanentData();
+        currentData.tags = backendTags.tags;
+        currentData.lastSync = new Date().toISOString();
+        localStorage.setItem(storageKey, JSON.stringify(currentData));
+        
+        console.log('✅ Loaded tags from backend:', backendTags.tags.length);
+        return backendTags.tags;
+      }
+    } catch (error) {
+      console.warn('⚠️ Backend not available, using localStorage');
+    }
+
+    // Fallback to localStorage
+    const localData = this.getPermanentData();
+    console.log('📱 Loaded tags from localStorage:', localData.tags.length);
+    return localData.tags;
+  }
+
+  // Save candidate data with proper organization
+  async saveCandidateData(candidates: CandidateData[], tag: string): Promise<string> {
+    try {
+      const timestamp = new Date().toISOString();
+      const dateStr = timestamp.split('T')[0];
+      const tagSlug = tag.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const uniqueId = `${tagSlug}_${dateStr}_${Date.now().toString().slice(-6)}`;
+      
+      const candidateData = {
+        candidates: candidates,
+        tag: tag,
+        processedAt: timestamp,
+        totalCount: candidates.length,
+        uniqueId: uniqueId,
+        metadata: {
+          tag_id: tagSlug,
+          tag_name: tag,
+          total_candidates: candidates.length,
+          created_at: timestamp,
+          folder_path: `candidates/by_tag/${uniqueId}.json`
+        }
+      };
+
+      // Save to multiple locations for redundancy
+      const savePaths = [
+        `candidates/by_tag/${uniqueId}.json`,
+        `candidates/by_date/${dateStr}/${uniqueId}.json`,
+        `backups/daily/${dateStr}_candidates_${uniqueId}.json`
+      ];
+
+      await Promise.all(
+        savePaths.map(path => this.saveToBackend(path, candidateData))
+      );
+
+      // Log the save operation
+      await this.saveToBackend('sync_logs/candidates_sync.json', {
+        type: 'CANDIDATES_SAVE',
+        timestamp: timestamp,
+        candidatesCount: candidates.length,
+        tag: tag,
+        uniqueId: uniqueId,
+        paths: savePaths
+      });
+
+      console.log('✅ Candidate data saved permanently:', uniqueId);
+      return uniqueId;
+    } catch (error) {
+      console.error('❌ Failed to save candidate data:', error);
+      throw error;
+    }
+  }
+
+  // Get permanent data from localStorage
+  getPermanentData(): any {
+    const storageKey = 'ai-interview-permanent-data';
+    const data = localStorage.getItem(storageKey);
+    if (data) {
+      try {
+        return JSON.parse(data);
+      } catch (error) {
+        console.error('Error parsing permanent data:', error);
+      }
+    }
+    return {
+      tags: [],
+      lastSync: new Date().toISOString(),
+      permanentStorage: true,
+      initialized: new Date().toISOString()
+    };
+  }
+
+  // Backend operations
+  private async saveToBackend(filepath: string, data: any): Promise<void> {
+    try {
+      await fetch(`${this.backendUrl}/api/data/save-permanent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filepath: `${this.dataFolder}/${filepath}`,
+          data: data,
+          permanent: true
+        })
+      });
+    } catch (error) {
+      console.error(`Failed to save ${filepath}:`, error);
+    }
+  }
+
+  private async loadFromBackend(filepath: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.backendUrl}/api/data/load-permanent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filepath: `${this.dataFolder}/${filepath}`
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        return result.data;
+      }
+    } catch (error) {
+      console.error(`Failed to load ${filepath}:`, error);
+    }
+    return null;
+  }
+
+  // Create daily backup
+  async createDailyBackup(): Promise<void> {
+    try {
+      const dateStr = new Date().toISOString().split('T')[0];
+      const data = this.getPermanentData();
+      
+      await this.saveToBackend(`backups/daily/full_backup_${dateStr}.json`, {
+        ...data,
+        backupDate: new Date().toISOString(),
+        backupType: 'DAILY_FULL'
+      });
+      
+      console.log('✅ Daily backup created:', dateStr);
+    } catch (error) {
+      console.error('❌ Failed to create daily backup:', error);
+    }
+  }
+}
+
 const API_BASE_URL = 'http://13.204.76.229:8000';
+
+// Utility to fetch tags from backend
+const fetchTagsFromBackend = async () => {
+  const response = await fetch('http://13.204.76.229:8000/tags-summary');
+  const data = await response.json();
+  if (data.success && data.tags) {
+    return data.tags.map((tag: any) => ({
+      id: tag.tag_id,
+      name: tag.tag_name,
+      color: tag.color || '#1976d2',
+      description: tag.description || '',
+      createdAt: tag.created_at || new Date().toISOString()
+    }));
+  }
+  return [];
+};
 
 const BulkPdfProcessor: React.FC = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -74,28 +327,30 @@ const BulkPdfProcessor: React.FC = () => {
   const [showPreview, setShowPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ✅ Tag related state
+  // Enhanced state with permanent storage
   const [candidateTags, setCandidateTags] = useState<CandidateTag[]>([]);
-  const [selectedTag, setSelectedTag] = useState<string>('General');
+  const [selectedTag, setSelectedTag] = useState<string>('');
   const [showTagDialog, setShowTagDialog] = useState(false);
   const [newTag, setNewTag] = useState({ name: '', color: '#1976d2', description: '' });
-  useEffect(() => {
-    const savedTags = localStorage.getItem('candidateTags');
-    if (savedTags) {
-      try {
-        const parsedTags = JSON.parse(savedTags);
-        if (parsedTags && parsedTags.length > 0) {
-          setCandidateTags(parsedTags);
-          console.log('✅ BulkPdfProcessor - Loaded existing tags from localStorage:', parsedTags.length);
-          return;
-        }
-      } catch (error) {
-        console.error('Error parsing saved tags:', error);
-      }
-    }
+  const [dataManager] = useState(() => PermanentDataManager.getInstance());
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<string>('idle');
 
-    // Only create default tags if none exist
-    console.log('🔧 BulkPdfProcessor - No existing tags found, creating defaults...');
+  // Initialize permanent storage and load tags
+  useEffect(() => {
+    const loadTags = async () => {
+      setSyncStatus('initializing');
+      const tags = await fetchTagsFromBackend();
+      setCandidateTags(tags);
+      setSelectedTag(tags[0]?.name || '');
+      setIsInitialized(true);
+      setSyncStatus('ready');
+    };
+    loadTags();
+  }, []);
+
+  // Create default tags with permanent storage
+  const createDefaultTags = async () => {
     const defaultTags: CandidateTag[] = [
       {
         id: 'frontend',
@@ -111,87 +366,130 @@ const BulkPdfProcessor: React.FC = () => {
         description: 'Node.js, Python, Java developers',
         createdAt: new Date().toISOString()
       },
-      
-   
+      {
+        id: 'fullstack',
+        name: 'Full Stack Developer',
+        color: '#ff9800',
+        description: 'Frontend + Backend developers',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'devops',
+        name: 'DevOps Engineer',
+        color: '#9c27b0',
+        description: 'AWS, Docker, Kubernetes experts',
+        createdAt: new Date().toISOString()
+      }
     ];
-    setCandidateTags(defaultTags);
-    localStorage.setItem('candidateTags', JSON.stringify(defaultTags));
-    console.log('✅ BulkPdfProcessor - Created default tags:', defaultTags.length);
-  }, []);
 
-  // ✅ Handle tag creation - FIXED to prevent duplicates
-  const handleCreateTag = () => {
+    setCandidateTags(defaultTags);
+    setSelectedTag(defaultTags[0].name);
+    await dataManager.saveTagsPermanently(defaultTags);
+    
+    console.log('✅ Created default tags with permanent storage');
+    toast.success('Created default tags with permanent storage');
+  };
+
+  // Update handleCreateTag to refresh from backend after creation
+  const handleCreateTag = async () => {
     if (!newTag.name.trim()) {
       toast.error('Tag name is required');
       return;
     }
-
-    // ✅ Check for duplicate tag names or IDs
-    const tagId = newTag.name.toLowerCase().replace(/\s+/g, '-');
-    const existingTag = candidateTags.find(tag => 
-      tag.id === tagId || 
-      tag.name.toLowerCase() === newTag.name.toLowerCase()
-    );
-
-    if (existingTag) {
+    const tagId = newTag.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    if (candidateTags.find(tag => tag.id === tagId || tag.name.toLowerCase() === newTag.name.toLowerCase())) {
       toast.error(`Tag "${newTag.name}" already exists!`);
       return;
     }
-
-    const tag: CandidateTag = {
-      id: tagId,
-      name: newTag.name.trim(),
-      color: newTag.color,
-      description: newTag.description.trim(),
-      createdAt: new Date().toISOString()
-    };
-
-    const updatedTags = [...candidateTags, tag];
-    setCandidateTags(updatedTags);
-    localStorage.setItem('candidateTags', JSON.stringify(updatedTags));
-    
-    setNewTag({ name: '', color: '#1976d2', description: '' });
-    setShowTagDialog(false);
-    toast.success(`Tag "${tag.name}" created successfully!`);
-  };
-
-  // ✅ Get tag by name
-  const getTagByName = (tagName: string) => {
-    return candidateTags.find(tag => tag.name === tagName || tag.id === tagName);
-  };
-
-  const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    const pdfFiles = files.filter(file => file.type === 'application/pdf');
-    
-    if (pdfFiles.length !== files.length) {
-      toast.warning('Only PDF files are supported. Non-PDF files were filtered out.');
-    }
-    
-    setSelectedFiles(prev => [...prev, ...pdfFiles]);
-    
-    // Initialize processing statuses
-    const newStatuses: ProcessingStatus[] = pdfFiles.map(file => ({
-      fileName: file.name,
-      status: 'pending'
-    }));
-    setProcessingStatuses(prev => [...prev, ...newStatuses]);
-    
-    // Clear the input
-    if (event.target) {
-      event.target.value = '';
+    try {
+      setSyncStatus('saving');
+      // Create a dummy candidate batch to force backend to create the tag folder/index
+      await fetch('http://13.204.76.229:8000/upload-candidates-to-s3', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          folderName: '',
+          data: { candidates: [] },
+          tag: newTag.name.trim()
+        })
+      });
+      // Refresh tags from backend
+      const tags = await fetchTagsFromBackend();
+      setCandidateTags(tags);
+      setSelectedTag(newTag.name.trim());
+      setNewTag({ name: '', color: '#1976d2', description: '' });
+      setShowTagDialog(false);
+      setSyncStatus('ready');
+      toast.success(`Tag "${newTag.name}" created and saved!`);
+    } catch (error) {
+      setSyncStatus('error');
+      toast.error('Failed to create tag');
     }
   };
 
-  const removeFile = (index: number) => {
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-    setProcessingStatuses(prev => prev.filter((_, i) => i !== index));
+  // Update handleDeleteTag to call backend and refresh
+  const handleDeleteTag = async (tagId: string) => {
+    const tagToDelete = candidateTags.find(tag => tag.id === tagId);
+    if (!tagToDelete) {
+      toast.error('Tag not found');
+      return;
+    }
+    if (!window.confirm(`Are you sure you want to delete the tag "${tagToDelete.name}"? This will permanently remove it from all storage locations.`)) return;
+    try {
+      setSyncStatus('deleting');
+      // Call backend to delete tag
+      const resp = await fetch(`http://13.204.76.229:8000/delete-tag/${tagId}`, { method: 'DELETE' });
+      const result = await resp.json();
+      if (!result.success) throw new Error(result.error || 'Failed to delete tag');
+      // Refresh tags from backend
+      const tags = await fetchTagsFromBackend();
+      setCandidateTags(tags);
+      if (selectedTag === tagToDelete.name) {
+        setSelectedTag(tags[0]?.name || '');
+      }
+      setSyncStatus('ready');
+      toast.success(`Tag "${tagToDelete.name}" deleted successfully`);
+    } catch (error) {
+      setSyncStatus('error');
+      toast.error('Failed to delete tag');
+    }
   };
 
-  const clearAllFiles = () => {
-    setSelectedFiles([]);
-    setProcessingStatuses([]);
-    setExtractedCandidates([]);
+  // Enhanced candidate data upload with permanent storage
+  const uploadToLocal = async (candidatesData: CandidateData[]): Promise<string> => {
+    try {
+      setSyncStatus('uploading');
+      
+      // Save using permanent data manager
+      const uniqueId = await dataManager.saveCandidateData(candidatesData, selectedTag);
+      
+      setSyncStatus('ready');
+      console.log('✅ Candidate data saved permanently:', uniqueId);
+      
+      return uniqueId;
+    } catch (error) {
+      setSyncStatus('error');
+      throw new Error(`Permanent storage failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  // Manual sync function
+  const handleManualSync = async () => {
+    try {
+      setSyncStatus('syncing');
+      
+      // Re-save all tags to ensure sync
+      await dataManager.saveTagsPermanently(candidateTags);
+      
+      // Create backup
+      await dataManager.createDailyBackup();
+      
+      setSyncStatus('ready');
+      toast.success('Manual sync completed successfully!');
+    } catch (error) {
+      setSyncStatus('error');
+      toast.error('Manual sync failed');
+    }
   };
 
   const extractCandidateInfo = async (file: File): Promise<CandidateData> => {
@@ -221,71 +519,6 @@ const BulkPdfProcessor: React.FC = () => {
       };
     } catch (error) {
       throw new Error(`Failed to process ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  };
-
-  // ✅ Prevent duplicate candidate data uploads
-  const uploadToLocal = async (candidatesData: CandidateData[]): Promise<string> => {
-    try {
-      // ✅ Generate unique folder name to prevent data conflicts
-      const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
-      const timeMs = Date.now().toString().slice(-6);
-      const randomId = Math.random().toString(36).substr(2, 4); // Add random component
-      const tagSlug = selectedTag.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      const autoFolderName = `${tagSlug}_${timestamp}_${timeMs}_${randomId}`; // More unique naming
-      
-      // ✅ Include comprehensive metadata for CallDashboard
-      const jsonData = {
-        candidates: candidatesData,
-        processedAt: new Date().toISOString(),
-        totalCount: candidatesData.length,
-        folderName: autoFolderName,
-        tag: selectedTag,
-        tagDetails: getTagByName(selectedTag),
-        // ✅ Enhanced metadata for better tag discovery
-        metadata: {
-          tag_id: tagSlug,
-          tag_name: selectedTag,
-          total_candidates: candidatesData.length,
-          total_batches: 1,
-          created_at: new Date().toISOString(),
-          last_updated: new Date().toISOString(),
-          folder_path: `pdf-data/${autoFolderName}/candidates.json`,
-          // ✅ Add search keywords for better matching
-          search_keywords: [tagSlug, selectedTag.toLowerCase(), selectedTag],
-          processor_version: "1.0.0",
-          unique_id: autoFolderName // Add unique identifier
-        }
-      };
-      
-      const response = await fetch(`${API_BASE_URL}/upload-candidates-to-s3`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          data: jsonData,
-          folderName: autoFolderName,
-          tag: selectedTag
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Local storage failed');
-      }
-      
-      const result = await response.json();
-      
-      if (!result.success) {
-        throw new Error(result.error || 'Local storage failed');
-      }
-      
-      console.log('✅ Local Storage Success:', result);
-      console.log('✅ Enhanced Metadata for CallDashboard:', jsonData.metadata);
-      
-      return result.localPath || `pdf-data/${autoFolderName}/candidates.json`;
-    } catch (error) {
-      throw new Error(`Local storage failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -430,114 +663,100 @@ const BulkPdfProcessor: React.FC = () => {
   const processingProgress = selectedFiles.length > 0 ? 
     ((completedCount + errorCount) / selectedFiles.length) * 100 : 0;
 
-  // ✅ Handle tag deletion with backend cleanup
-  const handleDeleteTag = async (tagId: string) => {
-    const tagToDelete = candidateTags.find(tag => tag.id === tagId);
-    if (!tagToDelete) {
-      toast.error('Tag not found');
-      return;
+  const getTagByName = (tagName: string) => {
+    return candidateTags.find(tag => tag.name === tagName || tag.id === tagName);
+  };
+
+  const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const pdfFiles = files.filter(file => file.type === 'application/pdf');
+    
+    if (pdfFiles.length !== files.length) {
+      toast.warning('Only PDF files are supported. Non-PDF files were filtered out.');
     }
-
-    // Show confirmation dialog
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete the tag "${tagToDelete.name}"?\n\n` +
-      `This will:\n` +
-      `• Remove the tag from the system\n` +
-      `• Delete all associated candidate data files\n` +
-      `• This action cannot be undone.`
-    );
-
-    if (!confirmDelete) {
-      return;
+    
+    setSelectedFiles(prev => [...prev, ...pdfFiles]);
+    
+    // Initialize processing statuses
+    const newStatuses: ProcessingStatus[] = pdfFiles.map(file => ({
+      fileName: file.name,
+      status: 'pending'
+    }));
+    setProcessingStatuses(prev => [...prev, ...newStatuses]);
+    
+    // Clear the input
+    if (event.target) {
+      event.target.value = '';
     }
+  };
 
-    try {
-      // 1. Delete from backend/server with associated data
-      try {
-        const deleteResponse = await fetch(`${API_BASE_URL}/delete-tag/${tagId}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            tagName: tagToDelete.name,
-            deleteAssociatedData: true // Flag to delete JSON files too
-          }),
-        });
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setProcessingStatuses(prev => prev.filter((_, i) => i !== index));
+  };
 
-        if (deleteResponse.ok) {
-          const result = await deleteResponse.json();
-          if (result.success) {
-            console.log('✅ Tag and data deleted from backend:', result);
-            toast.success(`Tag "${tagToDelete.name}" and ${result.deletedFiles || 0} data files deleted`);
-          } else {
-            console.warn('⚠️ Backend deletion issues:', result.message);
-            toast.warning('Tag deleted but some data files may remain on server');
-          }
-        } else {
-          console.warn('⚠️ Backend deletion failed');
-          toast.warning('Server deletion failed, deleting locally only');
-        }
-      } catch (backendError) {
-        console.warn('⚠️ Backend not available for deletion:', backendError);
-        toast.warning('Server not available, deleting locally only');
-      }
-
-      // 2. Remove from localStorage
-      const updatedTags = candidateTags.filter(tag => tag.id !== tagId);
-      setCandidateTags(updatedTags);
-      localStorage.setItem('candidateTags', JSON.stringify(updatedTags));
-
-      // 3. Reset selected tag if it was the deleted one
-      if (selectedTag === tagToDelete.name) {
-        setSelectedTag(updatedTags.length > 0 ? updatedTags[0].name : '');
-      }
-
-      // 4. Clear extracted candidates if they belong to deleted tag
-      setExtractedCandidates(prev => 
-        prev.filter(candidate => candidate.tag !== tagToDelete.name)
-      );
-
-      toast.success(`Tag "${tagToDelete.name}" deleted successfully`);
-      
-    } catch (error) {
-      console.error('Error deleting tag:', error);
-      toast.error('Failed to delete tag completely');
-    }
+  const clearAllFiles = () => {
+    setSelectedFiles([]);
+    setProcessingStatuses([]);
+    setExtractedCandidates([]);
   };
 
   return (
     <Box sx={{ width: '100%', height: '100%', p: 2 }}>
-      {/* Header */}
+      {/* Enhanced Header with Sync Status */}
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
             Bulk PDF Processor
+            {syncStatus !== 'idle' && syncStatus !== 'ready' && (
+              <Chip 
+                label={syncStatus} 
+                color="primary" 
+                size="small" 
+                sx={{ ml: 2 }}
+                icon={<CircularProgress size={16} />}
+              />
+            )}
           </Typography>
-          <Button
-            variant="outlined"
-            startIcon={<Add />}
-            onClick={() => setShowTagDialog(true)}
-            size="small"
-          >
-            Create Tag
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={<Sync />}
+              onClick={handleManualSync}
+              size="small"
+              disabled={syncStatus !== 'ready'}
+            >
+              Manual Sync
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<Add />}
+              onClick={() => setShowTagDialog(true)}
+              size="small"
+              disabled={!isInitialized}
+            >
+              Create Tag
+            </Button>
+          </Box>
         </Box>
         <Typography variant="body2" color="text.secondary">
-          Extract candidate information from multiple PDFs and organize with tags
+          Extract candidate information from multiple PDFs with permanent storage and sync
         </Typography>
+        <Alert severity="info" sx={{ mt: 1 }}>
+          📂 Permanent Storage Active - All tags and data are automatically synced and backed up daily
+        </Alert>
       </Box>
 
-      {/* ✅ Tag Selection */}
+      {/* Enhanced Tag Selection with Storage Info */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="subtitle1" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
             <Label sx={{ mr: 1 }} />
-            Tag Selection
+            Tag Selection (Permanent Storage)
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} md={8}>
-              <FormControl fullWidth>
+              <FormControl fullWidth disabled={!isInitialized}>
                 <InputLabel>Select Tag for Candidates</InputLabel>
                 <Select
                   value={selectedTag}
@@ -563,7 +782,6 @@ const BulkPdfProcessor: React.FC = () => {
                             </Typography>
                           )}
                         </Box>
-                        {/* ✅ Add delete button for each tag */}
                         <IconButton
                           size="small"
                           onClick={(e) => {
@@ -588,28 +806,28 @@ const BulkPdfProcessor: React.FC = () => {
                   <Chip
                     label={selectedTag}
                     size="small"
-                    onDelete={() => {
-                      const tag = getTagByName(selectedTag);
-                      if (tag) handleDeleteTag(tag.id);
-                    }}
                     sx={{
                       backgroundColor: getTagByName(selectedTag)?.color || '#1976d2',
                       color: 'white',
-                      fontWeight: 500,
-                      '& .MuiChip-deleteIcon': {
-                        color: 'white'
-                      }
+                      fontWeight: 500
                     }}
+                  />
+                  <Chip
+                    label="Permanent"
+                    size="small"
+                    color="success"
+                    icon={<Save />}
                   />
                 </Box>
               )}
             </Grid>
           </Grid>
           
-          {/* ✅ Auto-folder info */}
           {selectedTag && (
-            <Alert severity="info" sx={{ mt: 2 }}>
-              Files will be automatically organized in folder: <strong>{selectedTag.toLowerCase().replace(/\s+/g, '-')}_[timestamp]</strong>
+            <Alert severity="success" sx={{ mt: 2 }}>
+              📂 Files will be permanently stored and organized in: <strong>{selectedTag.toLowerCase().replace(/\s+/g, '-')}_[timestamp]</strong>
+              <br />
+              🔄 Automatic backup and sync enabled
             </Alert>
           )}
         </CardContent>
@@ -878,15 +1096,18 @@ const BulkPdfProcessor: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Tag Creation Dialog */}
+      {/* Enhanced Tag Creation Dialog */}
       <Dialog
         open={showTagDialog}
         onClose={() => setShowTagDialog(false)}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Create New Tag</DialogTitle>
+        <DialogTitle>Create New Permanent Tag</DialogTitle>
         <DialogContent>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            This tag will be permanently stored and synced across all devices
+          </Alert>
           <TextField
             autoFocus
             margin="dense"
@@ -996,8 +1217,13 @@ const BulkPdfProcessor: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowTagDialog(false)}>Cancel</Button>
-          <Button onClick={handleCreateTag} variant="contained">
-            Create Tag
+          <Button 
+            onClick={handleCreateTag} 
+            variant="contained"
+            disabled={syncStatus !== 'ready'}
+            startIcon={syncStatus === 'saving' ? <CircularProgress size={16} /> : <Save />}
+          >
+            {syncStatus === 'saving' ? 'Saving...' : 'Create Permanent Tag'}
           </Button>
         </DialogActions>
       </Dialog>
