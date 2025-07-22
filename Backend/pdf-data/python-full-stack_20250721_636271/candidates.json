@@ -1,0 +1,48 @@
+{
+  "candidates": [
+    {
+      "name": "Ranjan\nShit Ole",
+      "phone": "+917387792437",
+      "email": "ranjan.shitole3129@gmail.com",
+      "fileName": "Ranjan-ShitoleQuant.pdf",
+      "extractedAt": "2025-07-21T09:20:35.922Z",
+      "tag": "Python Full Stack"
+    },
+    {
+      "name": "Shubham Kumbhar",
+      "phone": "+918668284482",
+      "email": "peshubhamkumbhar7854@gmail.com",
+      "fileName": "Resume Shubham Kumbhar (1).pdf",
+      "extractedAt": "2025-07-21T09:20:36.062Z",
+      "tag": "Python Full Stack"
+    },
+    {
+      "name": "Ranjan\n \nShitole",
+      "phone": "+917387792437",
+      "email": "ranjan.shitole3129@gmail.com",
+      "fileName": "Resume.pdf",
+      "extractedAt": "2025-07-21T09:20:36.271Z",
+      "tag": "Python Full Stack"
+    }
+  ],
+  "processedAt": "2025-07-21T09:20:36.271Z",
+  "totalCount": 3,
+  "folderName": "python-full-stack_20250721_636271",
+  "tag": "Python Full Stack",
+  "tagDetails": {
+    "id": "python-full-stack-",
+    "name": "Python Full Stack",
+    "color": "#1976d2",
+    "description": "",
+    "createdAt": "2025-07-21T08:18:23.862Z"
+  },
+  "metadata": {
+    "tag_id": "python-full-stack",
+    "tag_name": "Python Full Stack",
+    "total_candidates": 3,
+    "total_batches": 1,
+    "created_at": "2025-07-21T09:20:36.271Z",
+    "last_updated": "2025-07-21T09:20:36.271Z",
+    "folder_path": "pdf-data/python-full-stack_20250721_636271/candidates.json"
+  }
+}

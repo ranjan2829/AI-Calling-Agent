@@ -1,0 +1,39 @@
+{
+  "candidates": [
+    {
+      "name": "Ranjan\nShit Ole",
+      "phone": "+917387792437",
+      "email": "ranjan.shitole3129@gmail.com",
+      "fileName": "Ranjan-ShitoleQuant.pdf",
+      "extractedAt": "2025-07-21T09:00:59.580Z",
+      "tag": "AI"
+    },
+    {
+      "name": "Shubham Kumbhar",
+      "phone": "+918668284482",
+      "email": "peshubhamkumbhar7854@gmail.com",
+      "fileName": "Resume Shubham Kumbhar (1).pdf",
+      "extractedAt": "2025-07-21T09:00:59.680Z",
+      "tag": "AI"
+    },
+    {
+      "name": "Ranjan\n \nShitole",
+      "phone": "+917387792437",
+      "email": "ranjan.shitole3129@gmail.com",
+      "fileName": "Resume.pdf",
+      "extractedAt": "2025-07-21T09:00:59.945Z",
+      "tag": "AI"
+    }
+  ],
+  "processedAt": "2025-07-21T09:00:59.945Z",
+  "totalCount": 3,
+  "folderName": "ai_20250721_459945",
+  "tag": "AI",
+  "tagDetails": {
+    "id": "ai",
+    "name": "AI",
+    "color": "#1976d2",
+    "description": "",
+    "createdAt": "2025-07-21T09:00:11.939Z"
+  }
+}

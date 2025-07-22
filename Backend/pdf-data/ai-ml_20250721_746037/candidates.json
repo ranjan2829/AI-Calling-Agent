@@ -1,0 +1,54 @@
+{
+  "candidates": [
+    {
+      "name": "Ranjan\n \nShitole",
+      "phone": "+917387792437",
+      "email": "ranjan.shitole3129@gmail.com",
+      "fileName": "Resume.pdf",
+      "extractedAt": "2025-07-21T10:12:25.782Z",
+      "tag": "AI ML"
+    },
+    {
+      "name": "Ranjan\nShit Ole",
+      "phone": "+917387792437",
+      "email": "ranjan.shitole3129@gmail.com",
+      "fileName": "Ranjan-ShitoleQuant.pdf",
+      "extractedAt": "2025-07-21T10:12:25.939Z",
+      "tag": "AI ML"
+    },
+    {
+      "name": "Shubham Kumbhar",
+      "phone": "+918668284482",
+      "email": "peshubhamkumbhar7854@gmail.com",
+      "fileName": "Resume Shubham Kumbhar (1).pdf",
+      "extractedAt": "2025-07-21T10:12:26.037Z",
+      "tag": "AI ML"
+    }
+  ],
+  "processedAt": "2025-07-21T10:12:26.037Z",
+  "totalCount": 3,
+  "folderName": "ai-ml_20250721_746037",
+  "tag": "AI ML",
+  "tagDetails": {
+    "id": "ai-ml",
+    "name": "AI ML",
+    "color": "#1976d2",
+    "description": "",
+    "createdAt": "2025-07-21T07:29:47.173Z"
+  },
+  "metadata": {
+    "tag_id": "ai-ml",
+    "tag_name": "AI ML",
+    "total_candidates": 3,
+    "total_batches": 1,
+    "created_at": "2025-07-21T10:12:26.037Z",
+    "last_updated": "2025-07-21T10:12:26.037Z",
+    "folder_path": "pdf-data/ai-ml_20250721_746037/candidates.json",
+    "search_keywords": [
+      "ai-ml",
+      "ai ml",
+      "AI ML"
+    ],
+    "processor_version": "1.0.0"
+  }
+}

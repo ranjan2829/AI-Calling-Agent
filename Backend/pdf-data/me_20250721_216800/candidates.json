@@ -1,0 +1,38 @@
+{
+  "candidates": [
+    {
+      "name": "Ranjan\n \nShitole",
+      "phone": "+917387792437",
+      "email": "ranjan.shitole3129@gmail.com",
+      "fileName": "Resume.pdf",
+      "extractedAt": "2025-07-21T10:03:36.800Z",
+      "tag": "me"
+    }
+  ],
+  "processedAt": "2025-07-21T10:03:36.800Z",
+  "totalCount": 1,
+  "folderName": "me_20250721_216800",
+  "tag": "me",
+  "tagDetails": {
+    "id": "me",
+    "name": "me",
+    "color": "#1976d2",
+    "description": "",
+    "createdAt": "2025-07-21T10:03:28.690Z"
+  },
+  "metadata": {
+    "tag_id": "me",
+    "tag_name": "me",
+    "total_candidates": 1,
+    "total_batches": 1,
+    "created_at": "2025-07-21T10:03:36.800Z",
+    "last_updated": "2025-07-21T10:03:36.800Z",
+    "folder_path": "pdf-data/me_20250721_216800/candidates.json",
+    "search_keywords": [
+      "me",
+      "me",
+      "me"
+    ],
+    "processor_version": "1.0.0"
+  }
+}
