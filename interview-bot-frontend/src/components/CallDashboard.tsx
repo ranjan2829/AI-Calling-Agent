@@ -262,8 +262,34 @@ export const CallDashboard: React.FC = () => {
     }
   };
 
-  // ✅ NEW: Initialize with default tags (same as other components)
+  // ✅ NEW: Initialize with default tags (same as other components) - FIXED to prevent duplicates
   const initializeDefaultTags = () => {
+    // ✅ Check if tags already exist to prevent duplicates
+    const existingTags = localStorage.getItem('candidateTags');
+    if (existingTags) {
+      try {
+        const parsedTags = JSON.parse(existingTags);
+        if (parsedTags && parsedTags.length > 0) {
+          setCandidateTags(parsedTags);
+          // Convert existing tags to TagSummary format
+          const tagSummaries: TagSummary[] = parsedTags.map((tag: CandidateTag) => ({
+            tag_id: tag.id,
+            tag_name: tag.name,
+            total_candidates: 0,
+            total_batches: 0,
+            created_at: tag.createdAt,
+            last_updated: tag.createdAt,
+            folder_path: `local-data/${tag.id}`
+          }));
+          setTags(tagSummaries);
+          return; // Exit early if tags already exist
+        }
+      } catch (error) {
+        console.error('Error parsing existing tags:', error);
+      }
+    }
+
+    // Only create default tags if none exist
     const defaultTags: CandidateTag[] = [
       {
         id: 'general',
@@ -656,7 +682,6 @@ export const CallDashboard: React.FC = () => {
         
         if (!response.ok) {
           console.warn(`Bulk call status endpoint returned ${response.status} for ${bulkCallId}`);
-          // Don't throw error, just log and continue
           return;
         }
         

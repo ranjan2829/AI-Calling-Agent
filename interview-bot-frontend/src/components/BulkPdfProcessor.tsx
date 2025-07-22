@@ -80,71 +80,94 @@ const BulkPdfProcessor: React.FC = () => {
   const [showTagDialog, setShowTagDialog] = useState(false);
   const [newTag, setNewTag] = useState({ name: '', color: '#1976d2', description: '' });
 
-  // ✅ Load tags from localStorage on component mount
+  // ✅ Load tags from localStorage on component mount - FIXED to prevent duplicates
   useEffect(() => {
     const savedTags = localStorage.getItem('candidateTags');
     if (savedTags) {
-      setCandidateTags(JSON.parse(savedTags));
-    } else {
-      // Default tags
-      const defaultTags: CandidateTag[] = [
-        {
-          id: 'general',
-          name: 'General',
-          color: '#757575',
-          description: 'General candidates',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'frontend',
-          name: 'Frontend Developer',
-          color: '#2196f3',
-          description: 'React, Angular, Vue.js developers',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'backend',
-          name: 'Backend Developer',
-          color: '#4caf50',
-          description: 'Node.js, Python, Java developers',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'fullstack',
-          name: 'Full Stack Developer',
-          color: '#ff9800',
-          description: 'Full stack developers',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'devops',
-          name: 'DevOps Engineer',
-          color: '#9c27b0',
-          description: 'DevOps and Infrastructure engineers',
-          createdAt: new Date().toISOString()
-        },
-        {
-          id: 'mobile',
-          name: 'Mobile Developer',
-          color: '#e91e63',
-          description: 'iOS, Android, React Native developers',
-          createdAt: new Date().toISOString()
+      try {
+        const parsedTags = JSON.parse(savedTags);
+        if (parsedTags && parsedTags.length > 0) {
+          setCandidateTags(parsedTags);
+          console.log('✅ BulkPdfProcessor - Loaded existing tags from localStorage:', parsedTags.length);
+          return; // Exit early if tags already exist
         }
-      ];
-      setCandidateTags(defaultTags);
-      localStorage.setItem('candidateTags', JSON.stringify(defaultTags));
+      } catch (error) {
+        console.error('Error parsing saved tags:', error);
+      }
     }
+
+    // Only create default tags if none exist
+    console.log('🔧 BulkPdfProcessor - No existing tags found, creating defaults...');
+    const defaultTags: CandidateTag[] = [
+      {
+        id: 'general',
+        name: 'General',
+        color: '#757575',
+        description: 'General candidates',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'frontend',
+        name: 'Frontend Developer',
+        color: '#2196f3',
+        description: 'React, Angular, Vue.js developers',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'backend',
+        name: 'Backend Developer',
+        color: '#4caf50',
+        description: 'Node.js, Python, Java developers',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'fullstack',
+        name: 'Full Stack Developer',
+        color: '#ff9800',
+        description: 'Full stack developers',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'devops',
+        name: 'DevOps Engineer',
+        color: '#9c27b0',
+        description: 'DevOps and Infrastructure engineers',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'mobile',
+        name: 'Mobile Developer',
+        color: '#e91e63',
+        description: 'iOS, Android, React Native developers',
+        createdAt: new Date().toISOString()
+      }
+    ];
+    setCandidateTags(defaultTags);
+    localStorage.setItem('candidateTags', JSON.stringify(defaultTags));
+    console.log('✅ BulkPdfProcessor - Created default tags:', defaultTags.length);
   }, []);
 
-  // ✅ Handle tag creation
+  // ✅ Handle tag creation - FIXED to prevent duplicates
   const handleCreateTag = () => {
     if (!newTag.name.trim()) {
       toast.error('Tag name is required');
       return;
     }
 
+    // ✅ Check for duplicate tag names or IDs
+    const tagId = newTag.name.toLowerCase().replace(/\s+/g, '-');
+    const existingTag = candidateTags.find(tag => 
+      tag.id === tagId || 
+      tag.name.toLowerCase() === newTag.name.toLowerCase()
+    );
+
+    if (existingTag) {
+      toast.error(`Tag "${newTag.name}" already exists!`);
+      return;
+    }
+
     const tag: CandidateTag = {
-      id: newTag.name.toLowerCase().replace(/\s+/g, '-'),
+      id: tagId,
       name: newTag.name.trim(),
       color: newTag.color,
       description: newTag.description.trim(),
@@ -229,13 +252,15 @@ const BulkPdfProcessor: React.FC = () => {
     }
   };
 
+  // ✅ Prevent duplicate candidate data uploads
   const uploadToLocal = async (candidatesData: CandidateData[]): Promise<string> => {
     try {
-      // ✅ Generate folder name based on tag and timestamp  
+      // ✅ Generate unique folder name to prevent data conflicts
       const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
       const timeMs = Date.now().toString().slice(-6);
+      const randomId = Math.random().toString(36).substr(2, 4); // Add random component
       const tagSlug = selectedTag.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      const autoFolderName = `${tagSlug}_${timestamp}_${timeMs}`;
+      const autoFolderName = `${tagSlug}_${timestamp}_${timeMs}_${randomId}`; // More unique naming
       
       // ✅ Include comprehensive metadata for CallDashboard
       const jsonData = {
@@ -256,7 +281,8 @@ const BulkPdfProcessor: React.FC = () => {
           folder_path: `pdf-data/${autoFolderName}/candidates.json`,
           // ✅ Add search keywords for better matching
           search_keywords: [tagSlug, selectedTag.toLowerCase(), selectedTag],
-          processor_version: "1.0.0"
+          processor_version: "1.0.0",
+          unique_id: autoFolderName // Add unique identifier
         }
       };
       

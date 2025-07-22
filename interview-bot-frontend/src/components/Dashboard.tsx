@@ -1225,15 +1225,95 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // ✅ Add the missing handleCreateTag function
+  // ✅ Load tags from localStorage on component mount - FIXED to prevent duplicates
+  useEffect(() => {
+    const savedTags = localStorage.getItem('candidateTags');
+    if (savedTags) {
+      try {
+        const parsedTags = JSON.parse(savedTags);
+        if (parsedTags && parsedTags.length > 0) {
+          setCandidateTags(parsedTags);
+          console.log('✅ Dashboard - Loaded existing tags from localStorage:', parsedTags.length);
+          return; // Exit early if tags already exist
+        }
+      } catch (error) {
+        console.error('Error parsing saved tags:', error);
+      }
+    }
+
+    // Only initialize default tags if none exist
+    console.log('🔧 Dashboard - No existing tags found, creating defaults...');
+    const defaultTags: CandidateTag[] = [
+      {
+        id: 'general',
+        name: 'General',
+        color: '#1976d2',
+        description: 'General candidates',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'frontend',
+        name: 'Frontend Developer',
+        color: '#2196f3',
+        description: 'React, Angular, Vue.js developers',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'backend',
+        name: 'Backend Developer',
+        color: '#4caf50',
+        description: 'Node.js, Python, Java developers',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'fullstack',
+        name: 'Full Stack Developer',
+        color: '#ff9800',
+        description: 'Full stack developers',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'devops',
+        name: 'DevOps Engineer',
+        color: '#9c27b0',
+        description: 'DevOps and Infrastructure engineers',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'mobile',
+        name: 'Mobile Developer',
+        color: '#e91e63',
+        description: 'iOS, Android, React Native developers',
+        createdAt: new Date().toISOString()
+      }
+    ];
+    
+    setCandidateTags(defaultTags);
+    localStorage.setItem('candidateTags', JSON.stringify(defaultTags));
+    console.log('✅ Dashboard - Created default tags:', defaultTags.length);
+  }, []);
+
+  // ✅ Add the missing handleCreateTag function - FIXED to prevent duplicates
   const handleCreateTag = () => {
     if (!newTag.name.trim()) {
       toast.error('Tag name is required');
       return;
     }
 
+    // ✅ Check for duplicate tag names or IDs
+    const tagId = newTag.name.toLowerCase().replace(/\s+/g, '-');
+    const existingTag = candidateTags.find(tag => 
+      tag.id === tagId || 
+      tag.name.toLowerCase() === newTag.name.toLowerCase()
+    );
+
+    if (existingTag) {
+      toast.error(`Tag "${newTag.name}" already exists!`);
+      return;
+    }
+
     const tag: CandidateTag = {
-      id: newTag.name.toLowerCase().replace(/\s+/g, '-'),
+      id: tagId,
       name: newTag.name.trim(),
       color: newTag.color,
       description: newTag.description.trim(),
@@ -1260,7 +1340,11 @@ const Dashboard: React.FC = () => {
     if (savedTags) {
       try {
         const parsedTags = JSON.parse(savedTags);
-        setCandidateTags(parsedTags);
+        if (parsedTags && parsedTags.length > 0) {
+          setCandidateTags(parsedTags);
+          console.log('✅ Dashboard - Loaded existing tags from localStorage:', parsedTags.length);
+          return; // Exit early if tags already exist
+        }
       } catch (error) {
         console.error('Error parsing saved tags:', error);
         // Initialize with default tags if parsing fails
