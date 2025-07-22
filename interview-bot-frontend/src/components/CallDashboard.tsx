@@ -690,7 +690,7 @@ export const CallDashboard: React.FC = () => {
       setLoadingTags(true);
       console.log('🔍 Loading tags from localStorage and backend...');
       
-      // 🔥 FIX: Load from localStorage FIRST (most reliable source)
+      // Load from localStorage first
       const savedTags = localStorage.getItem('candidateTags');
       let localTags: TagSummary[] = [];
       
@@ -701,13 +701,13 @@ export const CallDashboard: React.FC = () => {
             localTags = parsedTags.map((tag: CandidateTag) => ({
               tag_id: tag.id,
               tag_name: tag.name,
-              total_candidates: 0, // Will be updated if backend data is available
+              total_candidates: 0, // Will be updated from backend
               total_batches: 1,
               created_at: tag.createdAt,
               last_updated: tag.createdAt,
               folder_path: `local-data/${tag.id}`,
-              color: tag.color, // Add color for UI
-              description: tag.description // Add description
+              color: tag.color,
+              description: tag.description
             }));
             
             console.log('✅ Loaded tags from localStorage:', localTags.length);
@@ -717,7 +717,7 @@ export const CallDashboard: React.FC = () => {
         }
       }
       
-      // 🔥 Then try to enhance with backend data (candidate counts, etc.)
+      // 🔥 FIX: Use the correct backend endpoint to get ACTUAL candidate counts
       try {
         const response = await fetch('http://13.204.76.229:8000/local-tags-summary');
         
@@ -726,13 +726,15 @@ export const CallDashboard: React.FC = () => {
           console.log('📊 Backend tags result:', result);
           
           if (result.success && result.tags?.length > 0) {
-            // Merge backend data with localStorage tags
             const backendTags = result.tags;
             
-            // Update local tags with backend candidate counts
+            // Update local tags with actual candidate counts from backend
             localTags = localTags.map(localTag => {
               const backendTag = backendTags.find((bt: any) => 
-                bt.tag_id === localTag.tag_id || bt.tag_name === localTag.tag_name
+                bt.tag_id === localTag.tag_id || 
+                bt.tag_name === localTag.tag_name ||
+                bt.tag_id.includes(localTag.tag_id) ||
+                localTag.tag_id.includes(bt.tag_id)
               );
               
               if (backendTag) {
@@ -746,12 +748,25 @@ export const CallDashboard: React.FC = () => {
               return localTag;
             });
             
-            // Add any backend-only tags that aren't in localStorage
+            // Add any backend-only tags
             const backendOnlyTags = backendTags.filter((bt: any) => 
-              !localTags.some(lt => lt.tag_id === bt.tag_id || lt.tag_name === bt.tag_name)
+              !localTags.some(lt => 
+                lt.tag_id === bt.tag_id || 
+                lt.tag_name === bt.tag_name ||
+                bt.tag_id.includes(lt.tag_id) ||
+                lt.tag_id.includes(bt.tag_id)
+              )
             );
             
-            localTags = [...localTags, ...backendOnlyTags];
+            localTags = [...localTags, ...backendOnlyTags.map((bt: any) => ({
+              tag_id: bt.tag_id,
+              tag_name: bt.tag_name,
+              total_candidates: bt.total_candidates || 0,
+              total_batches: bt.total_batches || 1,
+              created_at: bt.created_at,
+              last_updated: bt.last_updated,
+              folder_path: bt.folder_path
+            }))];
             
             console.log('✅ Enhanced with backend data. Total tags:', localTags.length);
           }
@@ -781,36 +796,7 @@ export const CallDashboard: React.FC = () => {
       
     } catch (error: any) {
       console.error('❌ Error loading tags:', error);
-      
-      // Final fallback - just use localStorage
-      const savedTags = localStorage.getItem('candidateTags');
-      if (savedTags) {
-        try {
-          const parsedTags = JSON.parse(savedTags);
-          const fallbackTags = parsedTags.map((tag: CandidateTag) => ({
-            tag_id: tag.id,
-            tag_name: tag.name,
-            total_candidates: 0,
-            total_batches: 1,
-            created_at: tag.createdAt,
-            last_updated: tag.createdAt,
-            folder_path: `local-data/${tag.id}`
-          }));
-          
-          setTags(fallbackTags);
-          setCandidateTags(parsedTags);
-          toast.warning(`Loaded ${fallbackTags.length} tags from localStorage only`);
-        } catch (parseError) {
-          console.error('Error parsing fallback tags:', parseError);
-          setTags([]);
-          setCandidateTags([]);
-          toast.error('Failed to load tags');
-        }
-      } else {
-        setTags([]);
-        setCandidateTags([]);
-        toast.error('No tags found');
-      }
+      toast.error('Failed to load tags');
     } finally {
       setLoadingTags(false);
     }
@@ -827,9 +813,45 @@ export const CallDashboard: React.FC = () => {
       setLoadingCandidates(true);
       console.log(`🔍 Loading candidates for tag: ${tagId}`);
       
-      // First try backend
+      // 🔥 FIX: Try the correct endpoint that actually returns data
       try {
         const response = await fetch(`http://13.204.76.229:8000/local-candidates-by-tag/${tagId}`);
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`📊 Local candidates result for ${tagId}:`, result);
+          
+          if (result.success && result.candidates?.length > 0) {
+            const candidates = result.candidates;
+            console.log(`✅ Loaded ${candidates.length} candidates from local storage for tag ${tagId}`);
+            
+            // 🔥 FIX: Properly format the candidates data
+            const formattedCandidates = candidates.map((candidate: any) => ({
+              name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
+              phone: candidate.phone || '',
+              email: candidate.email || '',
+              experience: candidate.experience || candidate.skills || '', // Use skills as fallback
+              skills: candidate.skills || candidate.experience || '', // Cross-reference
+              tag: candidate.tag || result.tag_name || tagId,
+              batch_name: candidate.batch_name || candidate.fileName || 'Local Data'
+            }));
+            
+            setTagCandidates(formattedCandidates);
+            
+            // Also update contacts for bulk calling
+            setContacts(formattedCandidates);
+            
+            toast.success(`✅ Loaded ${candidates.length} candidates for "${result.tag_name}"`);
+            return;
+          }
+        }
+      } catch (backendError) {
+        console.log(`⚠️ Local endpoint failed for tag ${tagId}:`, backendError);
+      }
+      
+      // 🔥 Second attempt: Try the original candidates-by-tag endpoint
+      try {
+        const response = await fetch(`http://13.204.76.229:8000/candidates-by-tag/${tagId}`);
         
         if (response.ok) {
           const result = await response.json();
@@ -838,33 +860,66 @@ export const CallDashboard: React.FC = () => {
           if (result.success && result.candidates?.length > 0) {
             const candidates = result.candidates;
             console.log(`✅ Loaded ${candidates.length} candidates from backend for tag ${tagId}`);
-            setTagCandidates(candidates);
             
-            // Also update contacts for bulk calling
-            const formattedContacts = candidates.map((candidate: any) => ({
+            const formattedCandidates = candidates.map((candidate: any) => ({
+              name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
+              phone: candidate.phone || '',
+              email: candidate.email || '',
+              experience: candidate.experience || '',
+              skills: candidate.skills || '',
+              tag: candidate.tag || result.tag_name || tagId,
+              batch_name: candidate.batch_name || candidate.fileName || 'Backend Data'
+            }));
+            
+            setTagCandidates(formattedCandidates);
+            setContacts(formattedCandidates);
+            
+            toast.success(`✅ Loaded ${candidates.length} candidates for "${result.tag_name}"`);
+            return;
+          }
+        }
+      } catch (backendError) {
+        console.log(`⚠️ Backend endpoint failed for tag ${tagId}:`, backendError);
+      }
+      
+      // 🔥 Third attempt: Check if there are any folders that start with the tag ID
+      try {
+        const response = await fetch(`http://13.204.76.229:8000/search-candidates?tag_id=${tagId}`);
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`📊 Search candidates result for ${tagId}:`, result);
+          
+          if (result.success && result.candidates?.length > 0) {
+            const candidates = result.candidates;
+            console.log(`✅ Found ${candidates.length} candidates via search for tag ${tagId}`);
+            
+            const formattedCandidates = candidates.map((candidate: any) => ({
               name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
               phone: candidate.phone || '',
               email: candidate.email || '',
               experience: candidate.experience || '',
               skills: candidate.skills || '',
               tag: candidate.tag || tagId,
-              batch_name: candidate.batch_name || candidate.fileName || 'Backend Data'
+              batch_name: candidate.batch_name || candidate.fileName || 'Search Data'
             }));
-            setContacts(formattedContacts);
             
-            toast.success(`Loaded ${candidates.length} candidates for "${result.tag_name}"`);
+            setTagCandidates(formattedCandidates);
+            setContacts(formattedCandidates);
+            
+            toast.success(`✅ Found ${candidates.length} candidates via search`);
             return;
           }
         }
-      } catch (backendError) {
-        console.log(`⚠️ Backend not available for tag ${tagId}`);
+      } catch (searchError) {
+        console.log(`⚠️ Search endpoint failed for tag ${tagId}:`, searchError);
       }
       
-      // ❌ REMOVED: No more fake demo data generation
-      console.log(`❌ No candidates found for tag ${tagId}`);
+      // If all endpoints fail, show appropriate message
+      console.log(`❌ No candidates found for tag ${tagId} in any endpoint`);
       setTagCandidates([]);
       setContacts([]);
-      toast.warning(`No candidates found for the selected tag. Please upload PDF data using the Bulk PDF Processor.`);
+      toast.warning(`No candidates found for the selected tag "${tagId}". Please make sure you have processed PDF data using the Bulk PDF Processor.`);
       
     } catch (error: any) {
       console.error('Error loading candidates:', error);

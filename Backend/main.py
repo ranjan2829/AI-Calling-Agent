@@ -3317,3 +3317,94 @@ async def delete_tag(tag_id: str):
     except Exception as e:
         print(f"[TAG DELETE ERROR] ❌ {e}")
         return {"success": False, "error": str(e)}
+@app.get("/candidates-by-tag/{tag_id}")
+async def get_candidates_by_tag(tag_id: str):
+    """Get all candidates for a specific tag"""
+    try:
+        tag_folder = f"pdf-data/{tag_id}"
+        
+        if not os.path.exists(tag_folder):
+            # Try to find folder that starts with tag_id
+            pdf_data_dir = "pdf-data"
+            if os.path.exists(pdf_data_dir):
+                for item in os.listdir(pdf_data_dir):
+                    if item.startswith(tag_id) and os.path.isdir(os.path.join(pdf_data_dir, item)):
+                        tag_folder = os.path.join(pdf_data_dir, item)
+                        break
+        
+        all_candidates = []
+        tag_name = tag_id
+        
+        if os.path.exists(tag_folder):
+            # Check if it's a direct candidates.json file
+            candidates_file = os.path.join(tag_folder, "candidates.json")
+            if os.path.exists(candidates_file):
+                try:
+                    with open(candidates_file, 'r') as f:
+                        data = json.load(f)
+                    
+                    candidates = data.get("candidates", [])
+                    metadata = data.get("metadata", {})
+                    tag_name = metadata.get("tag_name") or data.get("tag", tag_id)
+                    
+                    for candidate in candidates:
+                        candidate["batch_name"] = "main"
+                        candidate["tag"] = tag_name
+                    
+                    all_candidates.extend(candidates)
+                    
+                except Exception as e:
+                    print(f"Error reading {candidates_file}: {e}")
+            
+            # Also check subdirectories for multiple batches
+            try:
+                for item in os.listdir(tag_folder):
+                    item_path = os.path.join(tag_folder, item)
+                    if os.path.isdir(item_path):
+                        sub_candidates_file = os.path.join(item_path, "candidates.json")
+                        if os.path.exists(sub_candidates_file):
+                            try:
+                                with open(sub_candidates_file, 'r') as f:
+                                    sub_data = json.load(f)
+                                
+                                sub_candidates = sub_data.get("candidates", [])
+                                sub_metadata = sub_data.get("metadata", {})
+                                if sub_metadata.get("tag_name"):
+                                    tag_name = sub_metadata["tag_name"]
+                                
+                                for candidate in sub_candidates:
+                                    candidate["batch_name"] = item
+                                    candidate["tag"] = tag_name
+                                
+                                all_candidates.extend(sub_candidates)
+                                
+                            except Exception as e:
+                                print(f"Error reading {sub_candidates_file}: {e}")
+                                continue
+            except Exception as e:
+                print(f"Error scanning subdirectories in {tag_folder}: {e}")
+        
+        if len(all_candidates) == 0:
+            return {
+                "success": False,
+                "error": f"No candidates found for tag '{tag_id}'",
+                "candidates": [],
+                "total_count": 0
+            }
+        
+        return {
+            "success": True,
+            "tag_name": tag_name,
+            "tag_id": tag_id,
+            "candidates": all_candidates,
+            "total_count": len(all_candidates)
+        }
+        
+    except Exception as e:
+        print(f"[CANDIDATES BY TAG ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "candidates": [],
+            "total_count": 0
+        }
