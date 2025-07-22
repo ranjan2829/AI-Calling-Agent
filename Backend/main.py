@@ -3533,7 +3533,8 @@ async def search_candidates_exact(request: dict):
     except Exception as e:
         print(f"[EXACT SEARCH ERROR] ❌ {e}")
         return {"success": False, "candidates": [], "error": str(e)}
-
+# Fix the get_local_tags_summary_exact function - replace lines around 3564
+import re
 @app.get("/local-tags-summary-exact")
 async def get_local_tags_summary_exact():
     """Get case-sensitive tag summary"""
@@ -3560,8 +3561,8 @@ async def get_local_tags_summary_exact():
                     
                     if tag_name:
                         if tag_name not in tags_summary:
-                            # Create tag_id from exact name for URL safety
-                            tag_id = tag_name.lower().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+                            # 🔥 FIX: Use Python regex syntax instead of JavaScript
+                            tag_id = re.sub(r'[^a-z0-9-]', '', re.sub(r'\s+', '-', tag_name.lower()))
                             tags_summary[tag_name] = {
                                 "tag_id": tag_id,
                                 "tag_name": tag_name,  # Keep EXACT case
