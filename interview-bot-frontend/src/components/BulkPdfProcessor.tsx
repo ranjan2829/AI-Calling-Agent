@@ -94,29 +94,10 @@ const BulkPdfProcessor: React.FC = () => {
       }
     }
 
-    // Only create default tags if none exist
-    console.log('🔧 BulkPdfProcessor - No existing tags found, creating defaults...');
-    const defaultTags: CandidateTag[] = [
-      {
-        id: 'frontend',
-        name: 'Frontend Developer',
-        color: '#2196f3',
-        description: 'React, Angular, Vue.js developers',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'backend',
-        name: 'Backend Developer',
-        color: '#4caf50',
-        description: 'Node.js, Python, Java developers',
-        createdAt: new Date().toISOString()
-      },
-      
-   
-    ];
-    setCandidateTags(defaultTags);
-    localStorage.setItem('candidateTags', JSON.stringify(defaultTags));
-    console.log('✅ BulkPdfProcessor - Created default tags:', defaultTags.length);
+    // ❌ REMOVED: Don't create default tags - just set empty array
+    console.log('🔧 BulkPdfProcessor - No existing tags found, starting with empty array...');
+    setCandidateTags([]);
+    console.log('✅ BulkPdfProcessor - No default tags created');
   }, []);
 
   // ✅ Handle tag creation - FIXED to prevent duplicates
