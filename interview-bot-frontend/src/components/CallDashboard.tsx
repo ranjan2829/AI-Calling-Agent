@@ -688,7 +688,7 @@ export const CallDashboard: React.FC = () => {
   const loadTagsSummary = async () => {
     try {
       setLoadingTags(true);
-      console.log('🔍 Loading tags from localStorage and backend...');
+      console.log('🔍 Loading tags with case-sensitive matching...');
       
       // Load from localStorage first
       const savedTags = localStorage.getItem('candidateTags');
@@ -700,8 +700,8 @@ export const CallDashboard: React.FC = () => {
           if (parsedTags && parsedTags.length > 0) {
             localTags = parsedTags.map((tag: CandidateTag) => ({
               tag_id: tag.id,
-              tag_name: tag.name,
-              total_candidates: 0, // Will be updated from backend
+              tag_name: tag.name, // Keep EXACT case
+              total_candidates: 0,
               total_batches: 1,
               created_at: tag.createdAt,
               last_updated: tag.createdAt,
@@ -710,31 +710,28 @@ export const CallDashboard: React.FC = () => {
               description: tag.description
             }));
             
-            console.log('✅ Loaded tags from localStorage:', localTags.length);
+            console.log('✅ Loaded case-sensitive tags from localStorage:', localTags);
           }
         } catch (error) {
           console.error('Error parsing localStorage tags:', error);
         }
       }
       
-      // 🔥 FIX: Use the correct backend endpoint to get ACTUAL candidate counts
+      // 🔥 Get candidate counts with EXACT case-sensitive matching
       try {
-        const response = await fetch('http://13.204.76.229:8000/local-tags-summary');
+        const response = await fetch('http://13.204.76.229:8000/local-tags-summary-exact');
         
         if (response.ok) {
           const result = await response.json();
-          console.log('📊 Backend tags result:', result);
+          console.log('📊 Case-sensitive backend tags result:', result);
           
           if (result.success && result.tags?.length > 0) {
             const backendTags = result.tags;
             
-            // Update local tags with actual candidate counts from backend
+            // Update local tags with exact name matching
             localTags = localTags.map(localTag => {
               const backendTag = backendTags.find((bt: any) => 
-                bt.tag_id === localTag.tag_id || 
-                bt.tag_name === localTag.tag_name ||
-                bt.tag_id.includes(localTag.tag_id) ||
-                localTag.tag_id.includes(bt.tag_id)
+                bt.tag_name === localTag.tag_name // EXACT case-sensitive match
               );
               
               if (backendTag) {
@@ -748,37 +745,16 @@ export const CallDashboard: React.FC = () => {
               return localTag;
             });
             
-            // Add any backend-only tags
-            const backendOnlyTags = backendTags.filter((bt: any) => 
-              !localTags.some(lt => 
-                lt.tag_id === bt.tag_id || 
-                lt.tag_name === bt.tag_name ||
-                bt.tag_id.includes(lt.tag_id) ||
-                lt.tag_id.includes(bt.tag_id)
-              )
-            );
-            
-            localTags = [...localTags, ...backendOnlyTags.map((bt: any) => ({
-              tag_id: bt.tag_id,
-              tag_name: bt.tag_name,
-              total_candidates: bt.total_candidates || 0,
-              total_batches: bt.total_batches || 1,
-              created_at: bt.created_at,
-              last_updated: bt.last_updated,
-              folder_path: bt.folder_path
-            }))];
-            
-            console.log('✅ Enhanced with backend data. Total tags:', localTags.length);
+            console.log('✅ Enhanced with case-sensitive backend data:', localTags);
           }
         }
       } catch (backendError) {
         console.log('⚠️ Backend not available, using localStorage tags only');
       }
       
-      // Set the final tags
       setTags(localTags);
       
-      // Update candidateTags state for consistency
+      // Update candidateTags state
       if (savedTags) {
         try {
           const parsedTags = JSON.parse(savedTags);
@@ -791,7 +767,7 @@ export const CallDashboard: React.FC = () => {
       if (localTags.length === 0) {
         toast.info('No tags found. Create some tags first using the Bulk PDF Processor.');
       } else {
-        toast.success(`✅ Loaded ${localTags.length} tags successfully!`);
+        toast.success(`✅ Loaded ${localTags.length} case-sensitive tags successfully!`);
       }
       
     } catch (error: any) {
@@ -811,115 +787,125 @@ export const CallDashboard: React.FC = () => {
 
     try {
       setLoadingCandidates(true);
-      console.log(`🔍 Loading candidates for tag: ${tagId}`);
+      console.log(`🔍 Loading candidates for EXACT tag: "${tagId}"`);
       
-      // 🔥 FIX: Try the correct endpoint that actually returns data
+      // 🔥 FIX: Get the EXACT tag name from the tags array
+      const selectedTagData = tags.find(t => t.tag_id === tagId);
+      const exactTagName = selectedTagData?.tag_name || tagId;
+      
+      console.log(`🔥 Using EXACT tag name: "${exactTagName}" for search`);
+      
+      // 🔥 First attempt: Try with EXACT tag name (case sensitive)
       try {
-        const response = await fetch(`http://13.204.76.229:8000/local-candidates-by-tag/${tagId}`);
+        const response = await fetch(`http://13.204.76.229:8000/candidates-by-tag-exact/${encodeURIComponent(exactTagName)}`);
         
         if (response.ok) {
           const result = await response.json();
-          console.log(`📊 Local candidates result for ${tagId}:`, result);
+          console.log(`📊 Exact tag search result for "${exactTagName}":`, result);
           
           if (result.success && result.candidates?.length > 0) {
             const candidates = result.candidates;
-            console.log(`✅ Loaded ${candidates.length} candidates from local storage for tag ${tagId}`);
+            console.log(`✅ Found ${candidates.length} candidates for EXACT tag "${exactTagName}"`);
             
-            // 🔥 FIX: Properly format the candidates data
             const formattedCandidates = candidates.map((candidate: any) => ({
               name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
               phone: candidate.phone || '',
               email: candidate.email || '',
-              experience: candidate.experience || candidate.skills || '', // Use skills as fallback
-              skills: candidate.skills || candidate.experience || '', // Cross-reference
-              tag: candidate.tag || result.tag_name || tagId,
+              experience: candidate.experience || candidate.skills || '',
+              skills: candidate.skills || candidate.experience || '',
+              tag: candidate.tag || exactTagName,
+              batch_name: candidate.batch_name || candidate.fileName || 'Exact Match'
+            }));
+            
+            setTagCandidates(formattedCandidates);
+            setContacts(formattedCandidates);
+            
+            toast.success(`✅ Loaded ${candidates.length} candidates for "${exactTagName}"`);
+            return;
+          }
+        }
+      } catch (exactError) {
+        console.log(`⚠️ Exact tag endpoint failed for "${exactTagName}":`, exactError);
+      }
+      
+      // 🔥 Second attempt: Try with tag ID (folder-safe version)
+      try {
+        const response = await fetch(`http://13.204.76.229:8000/local-candidates-by-tag/${encodeURIComponent(tagId)}`);
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`📊 Local candidates result for tag ID "${tagId}":`, result);
+          
+          if (result.success && result.candidates?.length > 0) {
+            const candidates = result.candidates;
+            console.log(`✅ Found ${candidates.length} candidates via tag ID "${tagId}"`);
+            
+            const formattedCandidates = candidates.map((candidate: any) => ({
+              name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
+              phone: candidate.phone || '',
+              email: candidate.email || '',
+              experience: candidate.experience || candidate.skills || '',
+              skills: candidate.skills || candidate.experience || '',
+              tag: candidate.tag || exactTagName,
               batch_name: candidate.batch_name || candidate.fileName || 'Local Data'
             }));
             
             setTagCandidates(formattedCandidates);
-            
-            // Also update contacts for bulk calling
             setContacts(formattedCandidates);
             
-            toast.success(`✅ Loaded ${candidates.length} candidates for "${result.tag_name}"`);
+            toast.success(`✅ Loaded ${candidates.length} candidates for "${exactTagName}"`);
             return;
           }
         }
-      } catch (backendError) {
-        console.log(`⚠️ Local endpoint failed for tag ${tagId}:`, backendError);
+      } catch (localError) {
+        console.log(`⚠️ Local endpoint failed for tag ID "${tagId}":`, localError);
       }
       
-      // 🔥 Second attempt: Try the original candidates-by-tag endpoint
+      // 🔥 Third attempt: Search in all folders for EXACT tag name match
       try {
-        const response = await fetch(`http://13.204.76.229:8000/candidates-by-tag/${tagId}`);
+        const response = await fetch(`http://13.204.76.229:8000/search-candidates-exact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            tag_name: exactTagName, // EXACT case-sensitive search
+            case_sensitive: true 
+          })
+        });
         
         if (response.ok) {
           const result = await response.json();
-          console.log(`📊 Backend candidates result for ${tagId}:`, result);
+          console.log(`📊 Exact search result for "${exactTagName}":`, result);
           
           if (result.success && result.candidates?.length > 0) {
             const candidates = result.candidates;
-            console.log(`✅ Loaded ${candidates.length} candidates from backend for tag ${tagId}`);
+            console.log(`✅ Found ${candidates.length} candidates via exact search for "${exactTagName}"`);
             
             const formattedCandidates = candidates.map((candidate: any) => ({
               name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
               phone: candidate.phone || '',
               email: candidate.email || '',
-              experience: candidate.experience || '',
-              skills: candidate.skills || '',
-              tag: candidate.tag || result.tag_name || tagId,
-              batch_name: candidate.batch_name || candidate.fileName || 'Backend Data'
-            }));
-            
-            setTagCandidates(formattedCandidates);
-            setContacts(formattedCandidates);
-            
-            toast.success(`✅ Loaded ${candidates.length} candidates for "${result.tag_name}"`);
-            return;
-          }
-        }
-      } catch (backendError) {
-        console.log(`⚠️ Backend endpoint failed for tag ${tagId}:`, backendError);
-      }
-      
-      // 🔥 Third attempt: Check if there are any folders that start with the tag ID
-      try {
-        const response = await fetch(`http://13.204.76.229:8000/search-candidates?tag_id=${tagId}`);
-        
-        if (response.ok) {
-          const result = await response.json();
-          console.log(`📊 Search candidates result for ${tagId}:`, result);
-          
-          if (result.success && result.candidates?.length > 0) {
-            const candidates = result.candidates;
-            console.log(`✅ Found ${candidates.length} candidates via search for tag ${tagId}`);
-            
-            const formattedCandidates = candidates.map((candidate: any) => ({
-              name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
-              phone: candidate.phone || '',
-              email: candidate.email || '',
-              experience: candidate.experience || '',
-              skills: candidate.skills || '',
-              tag: candidate.tag || tagId,
+              experience: candidate.experience || candidate.skills || '',
+              skills: candidate.skills || candidate.experience || '',
+              tag: candidate.tag || exactTagName,
               batch_name: candidate.batch_name || candidate.fileName || 'Search Data'
             }));
             
             setTagCandidates(formattedCandidates);
             setContacts(formattedCandidates);
             
-            toast.success(`✅ Found ${candidates.length} candidates via search`);
+            toast.success(`✅ Found ${candidates.length} candidates via exact search`);
             return;
           }
         }
       } catch (searchError) {
-        console.log(`⚠️ Search endpoint failed for tag ${tagId}:`, searchError);
+        console.log(`⚠️ Exact search failed for "${exactTagName}":`, searchError);
       }
       
-      // If all endpoints fail, show appropriate message
-      console.log(`❌ No candidates found for tag ${tagId} in any endpoint`);
+      // If all attempts fail
+      console.log(`❌ No candidates found for EXACT tag "${exactTagName}"`);
       setTagCandidates([]);
       setContacts([]);
-      toast.warning(`No candidates found for the selected tag "${tagId}". Please make sure you have processed PDF data using the Bulk PDF Processor.`);
+      toast.warning(`No candidates found for tag "${exactTagName}". Make sure you've processed PDFs with this EXACT tag name (case-sensitive).`);
       
     } catch (error: any) {
       console.error('Error loading candidates:', error);

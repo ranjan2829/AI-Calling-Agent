@@ -3408,3 +3408,186 @@ async def get_candidates_by_tag(tag_id: str):
             "candidates": [],
             "total_count": 0
         }
+
+@app.get("/candidates-by-tag-exact/{tag_name}")
+async def get_candidates_by_exact_tag(tag_name: str):
+    """Get candidates for EXACT tag name (case-sensitive)"""
+    try:
+        decoded_tag_name = urllib.parse.unquote(tag_name)
+        print(f"[EXACT TAG SEARCH] Looking for EXACT tag: '{decoded_tag_name}'")
+        
+        all_candidates = []
+        pdf_data_dir = "pdf-data"
+        
+        if not os.path.exists(pdf_data_dir):
+            return {
+                "success": False,
+                "error": f"No data directory found",
+                "candidates": [],
+                "total_count": 0
+            }
+        
+        # Search all folders for EXACT tag name match
+        for folder_name in os.listdir(pdf_data_dir):
+            folder_path = os.path.join(pdf_data_dir, folder_name)
+            if not os.path.isdir(folder_path):
+                continue
+                
+            candidates_file = os.path.join(folder_path, "candidates.json")
+            if os.path.exists(candidates_file):
+                try:
+                    with open(candidates_file, 'r') as f:
+                        data = json.load(f)
+                    
+                    # Check for EXACT tag name match (case-sensitive)
+                    file_tag = data.get("tag") or data.get("metadata", {}).get("tag_name")
+                    
+                    if file_tag == decoded_tag_name:  # EXACT match
+                        candidates = data.get("candidates", [])
+                        print(f"[EXACT MATCH] Found {len(candidates)} candidates in {folder_name} for tag '{file_tag}'")
+                        
+                        for candidate in candidates:
+                            candidate["tag"] = decoded_tag_name
+                            candidate["batch_name"] = folder_name
+                        
+                        all_candidates.extend(candidates)
+                        
+                except Exception as e:
+                    print(f"Error reading {candidates_file}: {e}")
+                    continue
+        
+        print(f"[EXACT TAG SEARCH] Total candidates found for '{decoded_tag_name}': {len(all_candidates)}")
+        
+        if len(all_candidates) == 0:
+            return {
+                "success": False,
+                "error": f"No candidates found for EXACT tag '{decoded_tag_name}'",
+                "candidates": [],
+                "total_count": 0
+            }
+        
+        return {
+            "success": True,
+            "tag_name": decoded_tag_name,
+            "candidates": all_candidates,
+            "total_count": len(all_candidates)
+        }
+        
+    except Exception as e:
+        print(f"[EXACT TAG SEARCH ERROR] ❌ {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "candidates": [],
+            "total_count": 0
+        }
+
+@app.post("/search-candidates-exact")
+async def search_candidates_exact(request: dict):
+    """Search for candidates with EXACT tag name match"""
+    try:
+        tag_name = request.get("tag_name")
+        case_sensitive = request.get("case_sensitive", True)
+        
+        print(f"[EXACT SEARCH] Looking for tag: '{tag_name}' (case_sensitive: {case_sensitive})")
+        
+        all_candidates = []
+        pdf_data_dir = "pdf-data"
+        
+        if not os.path.exists(pdf_data_dir):
+            return {"success": False, "candidates": [], "error": "No data directory"}
+        
+        for folder_name in os.listdir(pdf_data_dir):
+            folder_path = os.path.join(pdf_data_dir, folder_name)
+            if not os.path.isdir(folder_path):
+                continue
+                
+            candidates_file = os.path.join(folder_path, "candidates.json")
+            if os.path.exists(candidates_file):
+                try:
+                    with open(candidates_file, 'r') as f:
+                        data = json.load(f)
+                    
+                    file_tag = data.get("tag") or data.get("metadata", {}).get("tag_name")
+                    
+                    # EXACT case-sensitive match
+                    if case_sensitive and file_tag == tag_name:
+                        candidates = data.get("candidates", [])
+                        for candidate in candidates:
+                            candidate["tag"] = tag_name
+                            candidate["batch_name"] = folder_name
+                        all_candidates.extend(candidates)
+                        print(f"[EXACT MATCH] Found {len(candidates)} candidates in {folder_name}")
+                    
+                except Exception as e:
+                    print(f"Error reading {candidates_file}: {e}")
+                    continue
+        
+        return {
+            "success": True,
+            "candidates": all_candidates,
+            "total_count": len(all_candidates),
+            "search_tag": tag_name
+        }
+        
+    except Exception as e:
+        print(f"[EXACT SEARCH ERROR] ❌ {e}")
+        return {"success": False, "candidates": [], "error": str(e)}
+
+@app.get("/local-tags-summary-exact")
+async def get_local_tags_summary_exact():
+    """Get case-sensitive tag summary"""
+    try:
+        tags_summary = {}
+        pdf_data_dir = "pdf-data"
+        
+        if not os.path.exists(pdf_data_dir):
+            return {"success": True, "tags": []}
+        
+        for folder_name in os.listdir(pdf_data_dir):
+            folder_path = os.path.join(pdf_data_dir, folder_name)
+            if not os.path.isdir(folder_path):
+                continue
+                
+            candidates_file = os.path.join(folder_path, "candidates.json")
+            if os.path.exists(candidates_file):
+                try:
+                    with open(candidates_file, 'r') as f:
+                        data = json.load(f)
+                    
+                    # Get EXACT tag name
+                    tag_name = data.get("tag") or data.get("metadata", {}).get("tag_name")
+                    
+                    if tag_name:
+                        if tag_name not in tags_summary:
+                            # Create tag_id from exact name for URL safety
+                            tag_id = tag_name.lower().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+                            tags_summary[tag_name] = {
+                                "tag_id": tag_id,
+                                "tag_name": tag_name,  # Keep EXACT case
+                                "total_candidates": 0,
+                                "total_batches": 0,
+                                "folders": []
+                            }
+                        
+                        candidates = data.get("candidates", [])
+                        tags_summary[tag_name]["total_candidates"] += len(candidates)
+                        tags_summary[tag_name]["total_batches"] += 1
+                        tags_summary[tag_name]["folders"].append(folder_name)
+                        
+                except Exception as e:
+                    print(f"Error reading {candidates_file}: {e}")
+                    continue
+        
+        tags_list = list(tags_summary.values())
+        print(f"[EXACT TAGS SUMMARY] Found {len(tags_list)} unique case-sensitive tags")
+        
+        return {
+            "success": True,
+            "tags": tags_list,
+            "total_tags": len(tags_list)
+        }
+        
+    except Exception as e:
+        print(f"[EXACT TAGS SUMMARY ERROR] ❌ {e}")
+        return {"success": False, "error": str(e), "tags": []}
