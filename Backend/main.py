@@ -23,6 +23,7 @@ import io
 import PyPDF2
 from dotenv import load_dotenv
 import shutil
+import urllib.parse
 load_dotenv()
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
@@ -2364,104 +2365,26 @@ async def download_candidates_from_local(folder_name: str):
         print(f"[LOCAL DOWNLOAD ERROR] ❌ {e}")
         return {"success": False, "error": str(e)}
 
-# Update the list folders endpoint to read from local storage
-@app.get("/list-candidate-folders")
-async def list_candidate_folders():
-    """List all candidate folders in local storage"""
-    try:
-        pdf_data_dir = "pdf-data"
-        
-        if not os.path.exists(pdf_data_dir):
-            os.makedirs(pdf_data_dir, exist_ok=True)
-            r'(?i)(?:my email is|email address)[:\s]*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})',
-        ]
-        
-        all_emails = []
-        
-        # Extract emails using all patterns
-        for pattern in email_patterns + context_patterns:
-            matches = re.findall(pattern, text, re.IGNORECASE)
-            for match in matches:
-                # Handle tuple returns from context patterns
-                email = match[0] if isinstance(match, tuple) else match
-                # Clean the email
-                email = re.sub(r'\s+', '', email)  # Remove spaces
-                email = email.replace('at', '@').replace('AT', '@')  # Replace "at" with @
-                all_emails.append(email.lower())
-        
-        # Remove duplicates while preserving order
-        unique_emails = list(dict.fromkeys(all_emails))
-        
-        # Filter and prioritize emails
-        valid_emails = []
-        for email in unique_emails:
-            # Basic validation
-            if (len(email) > 5 and 
-                '@' in email and 
-                '.' in email.split('@')[-1] and
-                not any(invalid in email.lower() for invalid in [
-                    'example.com', 'test.com', 'placeholder', 'sample', 
-                    'dummy', 'fake', 'noreply', 'donotreply'
-                ])):
-                
-                # Additional validation
-                parts = email.split('@')
-                if len(parts) == 2:
-                    username, domain = parts
-                    if (len(username) >= 2 and 
-                        len(domain) >= 4 and 
-                        '.' in domain and
-                        not domain.startswith('.') and
-                        not domain.endswith('.')):
-                        valid_emails.append(email)
-        
-        # Return the first valid email (prioritized by pattern order)
-        if valid_emails:
-            print(f"[EMAIL EXTRACT] ✅ Found valid email: {valid_emails[0]}")
-            return valid_emails[0]
-        
-        # Fallback: try to extract from social media or portfolio URLs
-        url_patterns = [
-            r'(?:linkedin\.com/in/|github\.com/)([a-zA-Z0-9._-]+)',
-            r'(?:portfolio|website)[\s:]*(?:https?://)?([a-zA-Z0-9._-]+)',
-        ]
-        
-        for pattern in url_patterns:
-            matches = re.findall(pattern, text, re.IGNORECASE)
-            for match in matches:
-                # Generate email from username
-                username = match.lower().replace('-', '.').replace('_', '.')
-                generated_email = f"{username}@gmail.com"
-                print(f"[EMAIL EXTRACT] 📧 Generated email from profile: {generated_email}")
-                return generated_email
-        
-        print("[EMAIL EXTRACT] ❌ No valid email found")
-        return ""
-        
-    except Exception as e:
-        print(f"[EMAIL EXTRACT ERROR] ❌ {e}")
-        return ""
+
 @app.get("/download-candidates/{folder_name}")
 async def download_candidates_from_s3(folder_name: str):
     """Download processed candidates from S3"""
     try:
         s3_key = f"pdf-data/{folder_name}/candidates.json"
         
-            r'I am ([A-Z][a-zA-Z\s]{2,40})',            # "I am John Doe"
-        ]
+        response = s3_client.get_object(Bucket="calling-agent-ai", Key=s3_key)
+        candidates_data = json.loads(response['Body'].read())
         
-        for pattern in name_patterns:
-            match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
-            if match:
-                name = match.group(1).strip()
-                # Validate name (not too long, no numbers)
-                if 2 < len(name) < 50 and not re.search(r'\d', name):
-                    return name.title()
+        return {
+            "success": True,
+            "data": candidates_data,
+            "s3Key": s3_key,
+            "folder": folder_name
+        }
         
-        return "Unknown"
     except Exception as e:
-        print(f"[NAME EXTRACT ERROR] ❌ {e}")
-        return "Unknown"
+        print(f"[S3 DOWNLOAD ERROR] ❌ {e}")
+        return {"success": False, "error": str(e)}
 
 def extract_phone(text):
     """Extract phone number from resume text"""
@@ -3766,6 +3689,3 @@ def process_bulk_calls(bulk_call_id: str, contacts: List[dict]):
         if bulk_call_id in bulk_call_sessions:
             bulk_call_sessions[bulk_call_id]["status"] = "ERROR"
             bulk_call_sessions[bulk_call_id]["error"] = str(e)
-
-# Add this import at the top if not already present
-import time
