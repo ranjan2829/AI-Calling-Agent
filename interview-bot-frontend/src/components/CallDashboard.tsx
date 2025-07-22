@@ -688,74 +688,128 @@ export const CallDashboard: React.FC = () => {
   const loadTagsSummary = async () => {
     try {
       setLoadingTags(true);
-      console.log('🔍 Loading tags from backend and localStorage...');
+      console.log('🔍 Loading tags from localStorage and backend...');
       
-      // First, try to load from backend
+      // 🔥 FIX: Load from localStorage FIRST (most reliable source)
+      const savedTags = localStorage.getItem('candidateTags');
+      let localTags: TagSummary[] = [];
+      
+      if (savedTags) {
+        try {
+          const parsedTags = JSON.parse(savedTags);
+          if (parsedTags && parsedTags.length > 0) {
+            localTags = parsedTags.map((tag: CandidateTag) => ({
+              tag_id: tag.id,
+              tag_name: tag.name,
+              total_candidates: 0, // Will be updated if backend data is available
+              total_batches: 1,
+              created_at: tag.createdAt,
+              last_updated: tag.createdAt,
+              folder_path: `local-data/${tag.id}`,
+              color: tag.color, // Add color for UI
+              description: tag.description // Add description
+            }));
+            
+            console.log('✅ Loaded tags from localStorage:', localTags.length);
+          }
+        } catch (error) {
+          console.error('Error parsing localStorage tags:', error);
+        }
+      }
+      
+      // 🔥 Then try to enhance with backend data (candidate counts, etc.)
       try {
         const response = await fetch('http://13.204.76.229:8000/local-tags-summary');
-        console.log('📡 Backend response status:', response.status);
         
         if (response.ok) {
           const result = await response.json();
           console.log('📊 Backend tags result:', result);
           
           if (result.success && result.tags?.length > 0) {
-            setTags(result.tags);
-            console.log('✅ Loaded backend tags:', result.tags.length);
-            toast.success(`Loaded ${result.tags.length} data tags from backend!`);
-            return;
+            // Merge backend data with localStorage tags
+            const backendTags = result.tags;
+            
+            // Update local tags with backend candidate counts
+            localTags = localTags.map(localTag => {
+              const backendTag = backendTags.find((bt: any) => 
+                bt.tag_id === localTag.tag_id || bt.tag_name === localTag.tag_name
+              );
+              
+              if (backendTag) {
+                return {
+                  ...localTag,
+                  total_candidates: backendTag.total_candidates || 0,
+                  total_batches: backendTag.total_batches || 1,
+                  last_updated: backendTag.last_updated || localTag.last_updated
+                };
+              }
+              return localTag;
+            });
+            
+            // Add any backend-only tags that aren't in localStorage
+            const backendOnlyTags = backendTags.filter((bt: any) => 
+              !localTags.some(lt => lt.tag_id === bt.tag_id || lt.tag_name === bt.tag_name)
+            );
+            
+            localTags = [...localTags, ...backendOnlyTags];
+            
+            console.log('✅ Enhanced with backend data. Total tags:', localTags.length);
           }
         }
       } catch (backendError) {
-        console.log('⚠️ Backend not available, using localStorage tags');
+        console.log('⚠️ Backend not available, using localStorage tags only');
       }
       
-      // Fallback to localStorage tags
-      console.log('📱 Using localStorage tags...');
-      if (candidateTags && candidateTags.length > 0) {
-        const localTags = candidateTags.map((tag: CandidateTag) => ({
-          tag_id: tag.id,
-          tag_name: tag.name,
-          total_candidates: 0, // You can enhance this by counting actual candidates
-          total_batches: 1,
-          created_at: tag.createdAt,
-          last_updated: tag.createdAt,
-          folder_path: `local-data/${tag.id}`
-        }));
-        
-        setTags(localTags);
-        
-        if (localTags.length === 0) {
-          toast.info('No tags found. Create some tags first using the Bulk PDF Processor.');
-        } else {
-          toast.success(`Loaded ${localTags.length} local tags successfully!`);
+      // Set the final tags
+      setTags(localTags);
+      
+      // Update candidateTags state for consistency
+      if (savedTags) {
+        try {
+          const parsedTags = JSON.parse(savedTags);
+          setCandidateTags(parsedTags);
+        } catch (error) {
+          console.error('Error setting candidate tags:', error);
         }
-      } else {
-        // No fallback to default tags - just reload from localStorage
-        loadCandidateTagsFromStorage();
+      }
+      
+      if (localTags.length === 0) {
         toast.info('No tags found. Create some tags first using the Bulk PDF Processor.');
+      } else {
+        toast.success(`✅ Loaded ${localTags.length} tags successfully!`);
       }
       
     } catch (error: any) {
       console.error('❌ Error loading tags:', error);
       
-      // Final fallback to localStorage tags only if they exist
-      if (candidateTags && candidateTags.length > 0) {
-        const localTags = candidateTags.map((tag: CandidateTag) => ({
-          tag_id: tag.id,
-          tag_name: tag.name,
-          total_candidates: 0,
-          total_batches: 1,
-          created_at: tag.createdAt,
-          last_updated: tag.createdAt,
-          folder_path: `local-data/${tag.id}`
-        }));
-        
-        setTags(localTags || []);
-        toast.error(`Error loading backend tags, using local tags: ${error.message}`);
+      // Final fallback - just use localStorage
+      const savedTags = localStorage.getItem('candidateTags');
+      if (savedTags) {
+        try {
+          const parsedTags = JSON.parse(savedTags);
+          const fallbackTags = parsedTags.map((tag: CandidateTag) => ({
+            tag_id: tag.id,
+            tag_name: tag.name,
+            total_candidates: 0,
+            total_batches: 1,
+            created_at: tag.createdAt,
+            last_updated: tag.createdAt,
+            folder_path: `local-data/${tag.id}`
+          }));
+          
+          setTags(fallbackTags);
+          setCandidateTags(parsedTags);
+          toast.warning(`Loaded ${fallbackTags.length} tags from localStorage only`);
+        } catch (parseError) {
+          console.error('Error parsing fallback tags:', parseError);
+          setTags([]);
+          setCandidateTags([]);
+          toast.error('Failed to load tags');
+        }
       } else {
         setTags([]);
-        toast.error(`Error loading tags: ${error.message}`);
+        setCandidateTags([]);
+        toast.error('No tags found');
       }
     } finally {
       setLoadingTags(false);
@@ -1685,41 +1739,20 @@ export const CallDashboard: React.FC = () => {
           {tabValue === 3 && (
             <Box>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Work sx={{ color: 'primary.main', mr: 1 }} />
-                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    Job Description Configuration
-                  </Typography>
-                  {jdSaved && (
-                    <Chip
-                      icon={<CheckCircle />}
-                      label="Saved"
-                      color="success"
-                      size="small"
-                      sx={{ ml: 2 }}
-                    />
-                  )}
-                </Box>
-                <Box>
-                  <Button
-                    variant="contained"
-                    startIcon={savingJD ? <CircularProgress size={20} /> : <Save />}
-                    onClick={handleSaveJD}
-                    disabled={savingJD}
-                    sx={{ mr: 2 }}
-                  >
-                    {savingJD ? 'Saving...' : 'Save JD'}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={loading ? <CircularProgress size={20} /> : <Assessment />}
-                    onClick={handleRunAnalysis}
-                    disabled={loading}
-                  >
-                    {loading ? 'Running...' : 'Run Analysis'}
-                  </Button>
-                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                  Job Description
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={handleSaveJD}
+                  disabled={savingJD}
+                  startIcon={savingJD ? <CircularProgress size={16} /> : <Save />}
+                >
+                  {savingJD ? 'Saving...' : 'Save Job Description'}
+                </Button>
               </Box>
+
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
                   <TextField
@@ -1728,6 +1761,7 @@ export const CallDashboard: React.FC = () => {
                     value={jobDescription.title}
                     onChange={(e) => setJobDescription({...jobDescription, title: e.target.value})}
                     sx={{ mb: 2 }}
+                    placeholder="e.g., Senior Software Engineer"
                   />
                   <TextField
                     fullWidth
@@ -1735,6 +1769,7 @@ export const CallDashboard: React.FC = () => {
                     value={jobDescription.company}
                     onChange={(e) => setJobDescription({...jobDescription, company: e.target.value})}
                     sx={{ mb: 2 }}
+                    placeholder="e.g., Tech Innovations Inc."
                   />
                   <TextField
                     fullWidth
