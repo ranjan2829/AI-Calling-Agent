@@ -178,6 +178,63 @@ const fetchAllInterviews = async () => {
   return await response.json();
 };
 
+// Add this utility function to fetch all tag candidates and cache them
+const loadAllTagCandidates = async (): Promise<{[tagName: string]: any[]}> => {
+  try {
+    const tagCandidatesMap: {[tagName: string]: any[]} = {};
+    const tagsResponse = await fetch('http://13.204.76.229:8000/local-tags-summary-exact');
+    if (!tagsResponse.ok) return tagCandidatesMap;
+    const tagsResult = await tagsResponse.json();
+    if (!tagsResult.success || !tagsResult.tags) return tagCandidatesMap;
+    for (const tag of tagsResult.tags) {
+      try {
+        const candidatesResponse = await fetch(`http://13.204.76.229:8000/search-candidates-exact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tag_name: tag.tag_name, case_sensitive: true })
+        });
+        if (candidatesResponse.ok) {
+          const candidatesResult = await candidatesResponse.json();
+          if (candidatesResult.success && candidatesResult.candidates) {
+            tagCandidatesMap[tag.tag_name] = candidatesResult.candidates;
+          }
+        }
+      } catch (error) {}
+    }
+    // Cache for later use
+    (window as any).tagCandidatesCache = tagCandidatesMap;
+    return tagCandidatesMap;
+  } catch (error) {
+    return {};
+  }
+};
+
+// Enhance interviews with tag candidate info
+const enhanceInterviewsWithTagData = async (interviews: InterviewDetails[]) => {
+  const tagCandidatesMap = (window as any).tagCandidatesCache || await loadAllTagCandidates();
+  return interviews.map(interview => {
+    let tagCandidate = null;
+    if (interview.tag && tagCandidatesMap[interview.tag]) {
+      tagCandidate = tagCandidatesMap[interview.tag].find((c: any) =>
+        c.phone === interview.candidate_phone ||
+        c.email === interview.candidate_email ||
+        c.name === interview.candidate_name
+      );
+    }
+    if (tagCandidate) {
+      return {
+        ...interview,
+        candidate_name: tagCandidate.name || interview.candidate_name,
+        candidate_phone: tagCandidate.phone || interview.candidate_phone,
+        candidate_email: tagCandidate.email || interview.candidate_email,
+        tag: interview.tag,
+        tagCandidate: tagCandidate // keep full candidate info for rendering
+      };
+    }
+    return interview;
+  });
+};
+
 const Dashboard: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -1737,17 +1794,17 @@ const Dashboard: React.FC = () => {
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Avatar sx={{ width: 32, height: 32 }}>
-                            {interview.candidate_name?.charAt(0) || '?'}
+                            {interview.tagCandidate?.name?.charAt(0) || interview.candidate_name?.charAt(0) || '?'}
                           </Avatar>
                           <Box>
                             <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                              {interview.candidate_name || 'Unknown'}
+                              {interview.tagCandidate?.name || interview.candidate_name || 'Unknown'}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {interview.candidate_phone || 'No phone'}
+                              {interview.tagCandidate?.phone || interview.candidate_phone || 'No phone'}
                             </Typography>
                             <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                              {extractCandidateEmail(interview)}
+                              {interview.tagCandidate?.email || interview.candidate_email || 'No email'}
                             </Typography>
                           </Box>
                         </Box>
