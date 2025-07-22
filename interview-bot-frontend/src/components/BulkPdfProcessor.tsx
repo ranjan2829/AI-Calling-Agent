@@ -488,13 +488,73 @@ const BulkPdfProcessor: React.FC = () => {
   const uploadToLocal = async (candidatesData: CandidateData[]): Promise<string> => {
     try {
       setSyncStatus('uploading');
-      const uniqueId = await dataManager.saveCandidateData(candidatesData, selectedTag);
+      
+      // 🔥 FIX: Use the EXACT same API endpoint that backend expects
+      const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const timeMs = Date.now().toString().slice(-6);
+      const randomId = Math.random().toString(36).substr(2, 4);
+      
+      // 🔥 CRITICAL: Keep tag EXACTLY as entered (case sensitive)
+      const exactTagName = selectedTag; // Don't modify case!
+      const tagSlugForFolder = selectedTag.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const autoFolderName = `${tagSlugForFolder}_${timestamp}_${timeMs}_${randomId}`;
+      
+      console.log(`🔥 Saving with EXACT tag name: "${exactTagName}" and folder: "${autoFolderName}"`);
+      
+      // 🔥 FIX: Use the exact same structure as backend expects
+      const jsonData = {
+        candidates: candidatesData,
+        processedAt: new Date().toISOString(),
+        totalCount: candidatesData.length,
+        folderName: autoFolderName,
+        tag: exactTagName, // EXACT case-sensitive tag name
+        tagDetails: getTagByName(selectedTag),
+        metadata: {
+          tag_id: tagSlugForFolder, // URL-safe version for folder
+          tag_name: exactTagName, // EXACT case-sensitive name
+          total_candidates: candidatesData.length,
+          total_batches: 1,
+          created_at: new Date().toISOString(),
+          last_updated: new Date().toISOString(),
+          folder_path: `pdf-data/${autoFolderName}/candidates.json`,
+          search_keywords: [tagSlugForFolder, exactTagName.toLowerCase(), exactTagName],
+          processor_version: "2.0.0",
+          unique_id: autoFolderName
+        }
+      };
+      
+      // 🔥 FIX: Call the backend upload endpoint with proper data
+      const response = await fetch(`${API_BASE_URL}/upload-candidates-to-s3`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: jsonData,
+          folderName: autoFolderName,
+          tag: exactTagName // Pass exact tag name
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Backend storage failed');
+      }
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Backend storage failed');
+      }
+      
+      console.log('✅ Backend Storage Success with exact tag:', result);
+      console.log('📊 Saved metadata:', jsonData.metadata);
+      
       setSyncStatus('ready');
-      console.log('✅ Candidate data saved permanently:', uniqueId);
-      return uniqueId;
+      return result.localPath || `pdf-data/${autoFolderName}/candidates.json`;
+      
     } catch (error) {
       setSyncStatus('error');
-      throw new Error(`Permanent storage failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Backend storage failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
