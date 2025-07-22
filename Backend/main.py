@@ -3592,3 +3592,180 @@ async def get_local_tags_summary_exact():
     except Exception as e:
         print(f"[EXACT TAGS SUMMARY ERROR] ❌ {e}")
         return {"success": False, "error": str(e), "tags": []}
+# Add these bulk calling endpoints to your main.py file
+
+# Global variable to store bulk call sessions
+bulk_call_sessions = {}
+
+@app.post("/bulk-call")
+async def bulk_call(contacts: List[dict]):
+    """Start bulk calling for a list of contacts"""
+    try:
+        if not contacts:
+            return {"success": False, "error": "No contacts provided"}
+        
+        # Generate unique bulk call ID
+        bulk_call_id = f"bulk_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        
+        # Initialize bulk call session
+        bulk_call_sessions[bulk_call_id] = {
+            "bulk_call_id": bulk_call_id,
+            "status": "STARTING",
+            "current_index": 0,
+            "total_contacts": len(contacts),
+            "completed_calls": 0,
+            "results": [],
+            "start_time": datetime.now().isoformat(),
+            "contacts": contacts
+        }
+        
+        # Start background task for sequential calling
+        executor.submit(process_bulk_calls, bulk_call_id, contacts)
+        
+        print(f"[BULK CALL] Started bulk calling session: {bulk_call_id} with {len(contacts)} contacts")
+        
+        return {
+            "success": True,
+            "bulk_call_id": bulk_call_id,
+            "total_contacts": len(contacts),
+            "message": f"Bulk calling started for {len(contacts)} contacts"
+        }
+        
+    except Exception as e:
+        print(f"[BULK CALL ERROR] ❌ {e}")
+        return {"success": False, "error": str(e)}
+
+@app.get("/bulk-call-status/{bulk_call_id}")
+async def get_bulk_call_status(bulk_call_id: str):
+    """Get the status of a bulk call session"""
+    try:
+        if bulk_call_id not in bulk_call_sessions:
+            return {
+                "error": f"Bulk call session {bulk_call_id} not found",
+                "success": False
+            }
+        
+        session = bulk_call_sessions[bulk_call_id]
+        
+        return {
+            "bulk_call_id": bulk_call_id,
+            "status": session["status"],
+            "current_index": session["current_index"],
+            "total_contacts": session["total_contacts"],
+            "completed_calls": session["completed_calls"],
+            "results": session["results"],
+            "start_time": session["start_time"],
+            "success": True
+        }
+        
+    except Exception as e:
+        print(f"[BULK CALL STATUS ERROR] ❌ {e}")
+        return {"success": False, "error": str(e)}
+
+@app.post("/stop-bulk-call/{bulk_call_id}")
+async def stop_bulk_call(bulk_call_id: str):
+    """Stop a bulk call session"""
+    try:
+        if bulk_call_id not in bulk_call_sessions:
+            return {"success": False, "error": f"Bulk call session {bulk_call_id} not found"}
+        
+        # Update session status to stopped
+        bulk_call_sessions[bulk_call_id]["status"] = "STOPPED"
+        
+        print(f"[BULK CALL] Stopped bulk calling session: {bulk_call_id}")
+        
+        return {
+            "success": True,
+            "message": f"Bulk call session {bulk_call_id} stopped"
+        }
+        
+    except Exception as e:
+        print(f"[STOP BULK CALL ERROR] ❌ {e}")
+        return {"success": False, "error": str(e)}
+
+def process_bulk_calls(bulk_call_id: str, contacts: List[dict]):
+    """Process bulk calls sequentially with proper spacing"""
+    try:
+        session = bulk_call_sessions[bulk_call_id]
+        session["status"] = "IN_PROGRESS"
+        
+        print(f"[BULK CALL] Processing {len(contacts)} contacts for session {bulk_call_id}")
+        
+        for index, contact in enumerate(contacts):
+            # Check if session was stopped
+            if session["status"] == "STOPPED":
+                print(f"[BULK CALL] Session {bulk_call_id} stopped by user")
+                break
+            
+            session["current_index"] = index
+            
+            try:
+                # Extract contact info
+                name = contact.get("name", f"Contact_{index + 1}")
+                phone = contact.get("phone", "")
+                email = contact.get("email", "")
+                
+                if not phone:
+                    result = {
+                        "contact": contact,
+                        "status": "FAILED",
+                        "timestamp": datetime.now().isoformat(),
+                        "message": "No phone number provided"
+                    }
+                    session["results"].append(result)
+                    session["completed_calls"] += 1
+                    continue
+                
+                print(f"[BULK CALL] Calling {name} at {phone} ({index + 1}/{len(contacts)})")
+                
+                # Make the call using existing make_call logic
+                call = client.calls.create(
+                    to=phone,
+                    from_="+12512530853",  # Your Twilio number
+                    url=f"{WEBHOOK_BASE_URL}/voice/interview",
+                    method="POST",
+                    timeout=30,
+                    record=True
+                )
+                
+                result = {
+                    "contact": contact,
+                    "status": "SUCCESS",
+                    "call_sid": call.sid,
+                    "timestamp": datetime.now().isoformat(),
+                    "message": f"Call initiated successfully to {name}"
+                }
+                
+                print(f"[BULK CALL] ✅ Call successful: {call.sid} to {name}")
+                
+            except Exception as call_error:
+                print(f"[BULK CALL] ❌ Call failed to {name}: {call_error}")
+                
+                result = {
+                    "contact": contact,
+                    "status": "FAILED",
+                    "timestamp": datetime.now().isoformat(),
+                    "message": f"Call failed: {str(call_error)}"
+                }
+            
+            session["results"].append(result)
+            session["completed_calls"] += 1
+            
+            # Add delay between calls (5 seconds minimum)
+            if index < len(contacts) - 1 and session["status"] != "STOPPED":
+                time.sleep(5)
+        
+        # Mark as completed
+        if session["status"] != "STOPPED":
+            session["status"] = "COMPLETED"
+        
+        print(f"[BULK CALL] Session {bulk_call_id} finished. Status: {session['status']}")
+        
+    except Exception as e:
+        print(f"[BULK CALL PROCESS ERROR] ❌ {e}")
+        if bulk_call_id in bulk_call_sessions:
+            bulk_call_sessions[bulk_call_id]["status"] = "ERROR"
+            bulk_call_sessions[bulk_call_id]["error"] = str(e)
+
+# Add this import at the top if not already present
+import time
