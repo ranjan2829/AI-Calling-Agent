@@ -789,85 +789,19 @@ export const CallDashboard: React.FC = () => {
       setLoadingCandidates(true);
       console.log(`🔍 Loading candidates for EXACT tag: "${tagId}"`);
       
-      // 🔥 FIX: Get the EXACT tag name from the tags array
+      // 🔥 Get the EXACT tag name from the tags array
       const selectedTagData = tags.find(t => t.tag_id === tagId);
       const exactTagName = selectedTagData?.tag_name || tagId;
       
       console.log(`🔥 Using EXACT tag name: "${exactTagName}" for search`);
       
-      // 🔥 First attempt: Try with EXACT tag name (case sensitive)
-      try {
-        const response = await fetch(`http://13.204.76.229:8000/candidates-by-tag-exact/${encodeURIComponent(exactTagName)}`);
-        
-        if (response.ok) {
-          const result = await response.json();
-          console.log(`📊 Exact tag search result for "${exactTagName}":`, result);
-          
-          if (result.success && result.candidates?.length > 0) {
-            const candidates = result.candidates;
-            console.log(`✅ Found ${candidates.length} candidates for EXACT tag "${exactTagName}"`);
-            
-            const formattedCandidates = candidates.map((candidate: any) => ({
-              name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
-              phone: candidate.phone || '',
-              email: candidate.email || '',
-              experience: candidate.experience || candidate.skills || '',
-              skills: candidate.skills || candidate.experience || '',
-              tag: candidate.tag || exactTagName,
-              batch_name: candidate.batch_name || candidate.fileName || 'Exact Match'
-            }));
-            
-            setTagCandidates(formattedCandidates);
-            setContacts(formattedCandidates);
-            
-            toast.success(`✅ Loaded ${candidates.length} candidates for "${exactTagName}"`);
-            return;
-          }
-        }
-      } catch (exactError) {
-        console.log(`⚠️ Exact tag endpoint failed for "${exactTagName}":`, exactError);
-      }
-      
-      // 🔥 Second attempt: Try with tag ID (folder-safe version)
-      try {
-        const response = await fetch(`http://13.204.76.229:8000/local-candidates-by-tag/${encodeURIComponent(tagId)}`);
-        
-        if (response.ok) {
-          const result = await response.json();
-          console.log(`📊 Local candidates result for tag ID "${tagId}":`, result);
-          
-          if (result.success && result.candidates?.length > 0) {
-            const candidates = result.candidates;
-            console.log(`✅ Found ${candidates.length} candidates via tag ID "${tagId}"`);
-            
-            const formattedCandidates = candidates.map((candidate: any) => ({
-              name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
-              phone: candidate.phone || '',
-              email: candidate.email || '',
-              experience: candidate.experience || candidate.skills || '',
-              skills: candidate.skills || candidate.experience || '',
-              tag: candidate.tag || exactTagName,
-              batch_name: candidate.batch_name || candidate.fileName || 'Local Data'
-            }));
-            
-            setTagCandidates(formattedCandidates);
-            setContacts(formattedCandidates);
-            
-            toast.success(`✅ Loaded ${candidates.length} candidates for "${exactTagName}"`);
-            return;
-          }
-        }
-      } catch (localError) {
-        console.log(`⚠️ Local endpoint failed for tag ID "${tagId}":`, localError);
-      }
-      
-      // 🔥 Third attempt: Search in all folders for EXACT tag name match
+      // 🔥 FIRST: Try the exact search endpoint with POST request
       try {
         const response = await fetch(`http://13.204.76.229:8000/search-candidates-exact`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            tag_name: exactTagName, // EXACT case-sensitive search
+            tag_name: exactTagName, // EXACT case-sensitive name
             case_sensitive: true 
           })
         });
@@ -878,34 +812,82 @@ export const CallDashboard: React.FC = () => {
           
           if (result.success && result.candidates?.length > 0) {
             const candidates = result.candidates;
-            console.log(`✅ Found ${candidates.length} candidates via exact search for "${exactTagName}"`);
+            console.log(`✅ Found ${candidates.length} candidates via EXACT search for "${exactTagName}"`);
             
-            const formattedCandidates = candidates.map((candidate: any) => ({
-              name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
-              phone: candidate.phone || '',
-              email: candidate.email || '',
-              experience: candidate.experience || candidate.skills || '',
-              skills: candidate.skills || candidate.experience || '',
-              tag: candidate.tag || exactTagName,
-              batch_name: candidate.batch_name || candidate.fileName || 'Search Data'
-            }));
+            // 🔥 VALIDATE: Make sure all candidates actually have the exact tag
+            const exactMatchCandidates = candidates.filter(candidate => 
+              candidate.tag === exactTagName
+            );
             
-            setTagCandidates(formattedCandidates);
-            setContacts(formattedCandidates);
-            
-            toast.success(`✅ Found ${candidates.length} candidates via exact search`);
-            return;
+            if (exactMatchCandidates.length > 0) {
+              const formattedCandidates = exactMatchCandidates.map((candidate: any) => ({
+                name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
+                phone: candidate.phone || '',
+                email: candidate.email || '',
+                experience: candidate.experience || candidate.skills || '',
+                skills: candidate.skills || candidate.experience || '',
+                tag: exactTagName, // Force exact tag name
+                batch_name: candidate.batch_name || candidate.fileName || 'Exact Search'
+              }));
+              
+              setTagCandidates(formattedCandidates);
+              setContacts(formattedCandidates);
+              
+              toast.success(`✅ Found ${exactMatchCandidates.length} candidates for EXACT tag "${exactTagName}"`);
+              return;
+            }
           }
         }
-      } catch (searchError) {
-        console.log(`⚠️ Exact search failed for "${exactTagName}":`, searchError);
+      } catch (exactError) {
+        console.log(`⚠️ Exact search failed for "${exactTagName}":`, exactError);
       }
       
-      // If all attempts fail
-      console.log(`❌ No candidates found for EXACT tag "${exactTagName}"`);
+      // 🔥 SECOND: Try the exact tag endpoint with encoded name
+      try {
+        const response = await fetch(`http://13.204.76.229:8000/candidates-by-tag-exact/${encodeURIComponent(exactTagName)}`);
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log(`📊 Exact tag endpoint result for "${exactTagName}":`, result);
+          
+          if (result.success && result.candidates?.length > 0) {
+            const candidates = result.candidates;
+            
+            // 🔥 DOUBLE VALIDATE: Filter to ensure EXACT tag match
+            const exactMatchCandidates = candidates.filter(candidate => 
+              candidate.tag === exactTagName
+            );
+            
+            if (exactMatchCandidates.length > 0) {
+              console.log(`✅ Found ${exactMatchCandidates.length} EXACT matches for "${exactTagName}"`);
+              
+              const formattedCandidates = exactMatchCandidates.map((candidate: any) => ({
+                name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
+                phone: candidate.phone || '',
+                email: candidate.email || '',
+                experience: candidate.experience || candidate.skills || '',
+                skills: candidate.skills || candidate.experience || '',
+                tag: exactTagName, // Force exact tag name
+                batch_name: candidate.batch_name || candidate.fileName || 'Exact Match'
+              }));
+              
+              setTagCandidates(formattedCandidates);
+              setContacts(formattedCandidates);
+              
+              toast.success(`✅ Loaded ${exactMatchCandidates.length} candidates for EXACT tag "${exactTagName}"`);
+              return;
+            }
+          }
+        }
+      } catch (exactTagError) {
+        console.log(`⚠️ Exact tag endpoint failed for "${exactTagName}":`, exactTagError);
+      }
+      
+      // If no exact matches found
+      console.log(`❌ No EXACT matches found for tag "${exactTagName}"`);
       setTagCandidates([]);
       setContacts([]);
-      toast.warning(`No candidates found for tag "${exactTagName}". Make sure you've processed PDFs with this EXACT tag name (case-sensitive).`);
+      toast.warning(`No candidates found for EXACT tag "${exactTagName}". Make sure you've processed PDFs with this exact tag name (case-sensitive).`);
       
     } catch (error: any) {
       console.error('Error loading candidates:', error);
