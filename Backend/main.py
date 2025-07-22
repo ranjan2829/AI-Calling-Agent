@@ -2373,80 +2373,80 @@ async def list_candidate_folders():
         
         if not os.path.exists(pdf_data_dir):
             os.makedirs(pdf_data_dir, exist_ok=True)
-            return {
-                "success": True,
-                "folders": [],
-                "total_count": 0
-            }
+            r'(?i)(?:my email is|email address)[:\s]*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})',
+        ]
         
-        folders = []
-        for item in os.listdir(pdf_data_dir):
-            item_path = os.path.join(pdf_data_dir, item)
-            if os.path.isdir(item_path):
-                candidates_file = os.path.join(item_path, "candidates.json")
-                if os.path.exists(candidates_file):
-                    folders.append({
-                        "folder_name": item,
-                        "local_path": item_path,
-                        "candidates_file": candidates_file
-                    })
+        all_emails = []
         
-        return {
-            "success": True,
-            "folders": folders,
-            "total_count": len(folders)
-        }
+        # Extract emails using all patterns
+        for pattern in email_patterns + context_patterns:
+            matches = re.findall(pattern, text, re.IGNORECASE)
+            for match in matches:
+                # Handle tuple returns from context patterns
+                email = match[0] if isinstance(match, tuple) else match
+                # Clean the email
+                email = re.sub(r'\s+', '', email)  # Remove spaces
+                email = email.replace('at', '@').replace('AT', '@')  # Replace "at" with @
+                all_emails.append(email.lower())
         
-    except Exception as e:
-        print(f"[LOCAL LIST ERROR] ❌ {e}")
-        return {"success": False, "error": str(e), "folders": []}
-
-# Helper functions for PDF text extraction
-def extract_text_from_pdf(pdf_content):
-    """Extract text from PDF content"""
-    try:
-        try:
-            import PyPDF2
-            import io
-            
-            pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_content))
-            text = ""
-            
-            for page in pdf_reader.pages:
-                text += page.extract_text() + "\n"
-            
-            return text.strip()
-        except ImportError:
-            # Fallback: Try using pdfplumber if available
-            try:
-                import pdfplumber
-                import io
+        # Remove duplicates while preserving order
+        unique_emails = list(dict.fromkeys(all_emails))
+        
+        # Filter and prioritize emails
+        valid_emails = []
+        for email in unique_emails:
+            # Basic validation
+            if (len(email) > 5 and 
+                '@' in email and 
+                '.' in email.split('@')[-1] and
+                not any(invalid in email.lower() for invalid in [
+                    'example.com', 'test.com', 'placeholder', 'sample', 
+                    'dummy', 'fake', 'noreply', 'donotreply'
+                ])):
                 
-                with pdfplumber.open(io.BytesIO(pdf_content)) as pdf:
-                    text = ""
-                    for page in pdf.pages:
-                        page_text = page.extract_text()
-                        if page_text:
-                            text += page_text + "\n"
-                
-                return text.strip()
-            except ImportError:
-                # Fallback: Return empty string and log error
-                print("[PDF ERROR] No PDF processing library available (PyPDF2 or pdfplumber)")
-                return ""
-                
-    except Exception as e:
-        print(f"[PDF TEXT EXTRACT ERROR] ❌ {e}")
+                # Additional validation
+                parts = email.split('@')
+                if len(parts) == 2:
+                    username, domain = parts
+                    if (len(username) >= 2 and 
+                        len(domain) >= 4 and 
+                        '.' in domain and
+                        not domain.startswith('.') and
+                        not domain.endswith('.')):
+                        valid_emails.append(email)
+        
+        # Return the first valid email (prioritized by pattern order)
+        if valid_emails:
+            print(f"[EMAIL EXTRACT] ✅ Found valid email: {valid_emails[0]}")
+            return valid_emails[0]
+        
+        # Fallback: try to extract from social media or portfolio URLs
+        url_patterns = [
+            r'(?:linkedin\.com/in/|github\.com/)([a-zA-Z0-9._-]+)',
+            r'(?:portfolio|website)[\s:]*(?:https?://)?([a-zA-Z0-9._-]+)',
+        ]
+        
+        for pattern in url_patterns:
+            matches = re.findall(pattern, text, re.IGNORECASE)
+            for match in matches:
+                # Generate email from username
+                username = match.lower().replace('-', '.').replace('_', '.')
+                generated_email = f"{username}@gmail.com"
+                print(f"[EMAIL EXTRACT] 📧 Generated email from profile: {generated_email}")
+                return generated_email
+        
+        print("[EMAIL EXTRACT] ❌ No valid email found")
         return ""
-
-def extract_name(text):
-    """Extract candidate name from resume text"""
+        
+    except Exception as e:
+        print(f"[EMAIL EXTRACT ERROR] ❌ {e}")
+        return ""
+@app.get("/download-candidates/{folder_name}")
+async def download_candidates_from_s3(folder_name: str):
+    """Download processed candidates from S3"""
     try:
-        # Common patterns for names in resumes
-        name_patterns = [
-            r'^([A-Z][a-zA-Z\s]{2,40})(?:\n|\s{2,})',  # Name at start of document
-            r'Name[\s:]+([A-Z][a-zA-Z\s]{2,40})',       # "Name: John Doe"
-            r'([A-Z][a-zA-Z]+\s+[A-Z][a-zA-Z]+)',       # "First Last" pattern
+        s3_key = f"pdf-data/{folder_name}/candidates.json"
+        
             r'I am ([A-Z][a-zA-Z\s]{2,40})',            # "I am John Doe"
         ]
         

@@ -54,16 +54,19 @@ interface InterviewResponse {
 
 interface Interview {
   interview_id: string;
-  status: 'COMPLETED' | 'TERMINATED' | 'IN_PROGRESS';
+  status: 'COMPLETED' | 'TERMINATED' | 'IN_PROGRESS' | 'INCOMPLETE_SILENCE';
   questions_answered: number;
   total_questions: number;
   completion_time: string;
   all_validations_passed: boolean;
   termination_reason?: string;
   candidate_phone?: string;
+  candidate_email?: string;
+  candidate_name?: string;
   interviewer?: string;
   start_time?: string;
   end_time?: string;
+  call_sid?: string;
   responses: InterviewResponse[];
 }
 
@@ -95,22 +98,42 @@ export const CallHistory: React.FC = () => {
     }
   };
 
-  // 🔥 NEW: Helper function to get candidate info from mapping
+  // 🔥 IMPROVED: Helper function to get candidate info with better fallback handling
   const getCandidateInfo = (interview: Interview) => {
     const callId = interview.interview_id || interview.call_sid;
-    const mapping = contactMappings[callId];
+    const mapping = callId ? contactMappings[callId] : null;
     
-    if (mapping) {
-      return {
-        name: mapping.candidate_name || mapping.name || `ID: ${callId}`,
-        phone: mapping.candidate_phone || mapping.phone || interview.candidate_phone || 'Unknown'
-      };
-    }
+    // Priority: mapping data -> interview data -> fallback values
+    const name = mapping?.candidate_name || 
+                 mapping?.name || 
+                 interview.candidate_name || 
+                 `ID: ${callId || 'Unknown'}`;
     
-    return {
-      name: `ID: ${callId}`,
-      phone: interview.candidate_phone || 'Unknown'
-    };
+    const phone = mapping?.candidate_phone || 
+                  mapping?.phone || 
+                  interview.candidate_phone || 
+                  'No phone';
+    
+    const email = mapping?.candidate_email || 
+                  mapping?.email || 
+                  interview.candidate_email || 
+                  'No email';
+    
+    // Debug logging to track data sources
+    console.log(`📊 Candidate Info for ${callId}:`, {
+      fromMapping: mapping ? true : false,
+      name,
+      phone,
+      email,
+      mapping: mapping,
+      interview: {
+        candidate_name: interview.candidate_name,
+        candidate_phone: interview.candidate_phone,
+        candidate_email: interview.candidate_email
+      }
+    });
+    
+    return { name, phone, email };
   };
 
   const loadInterviews = async () => {
@@ -121,7 +144,7 @@ export const CallHistory: React.FC = () => {
       console.log('Raw interviews from API:', response.data.interviews);
       
       // UPDATED: Include ALL interviews, including INCOMPLETE_SILENCE
-      const filteredInterviews = (response.data.interviews || []).filter(interview => {
+      const filteredInterviews = (response.data.interviews || []).filter((interview: any) => {
         // Keep all interviews that have basic data
         const hasBasicData = interview.interview_id || interview.call_sid;
         
@@ -431,6 +454,59 @@ export const CallHistory: React.FC = () => {
         </Grid>
       </Grid>
 
+      {/* DEBUG: Data Consistency Panel (only in development) */}
+      {process.env.NODE_ENV === 'development' && interviews.length > 0 && (
+        <Card sx={{ mb: 4, border: '2px solid orange' }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: 'warning.main' }}>
+              🔍 DEBUG: Data Consistency Check
+            </Typography>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              This panel helps identify data inconsistencies between contact mappings and interview records.
+            </Alert>
+            
+            {interviews.slice(0, 3).map((interview) => {
+              const candidateInfo = getCandidateInfo(interview);
+              const mapping = contactMappings[interview.interview_id];
+              
+              return (
+                <Box key={interview.interview_id} sx={{ mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    Interview: {interview.interview_id}
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={4}>
+                      <Typography variant="caption" color="textSecondary">From Interview Record:</Typography>
+                      <Typography variant="body2">
+                        Name: {interview.candidate_name || 'N/A'}<br/>
+                        Phone: {interview.candidate_phone || 'N/A'}<br/>
+                        Email: {interview.candidate_email || 'N/A'}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="caption" color="textSecondary">From Contact Mapping:</Typography>
+                      <Typography variant="body2">
+                        Name: {mapping?.candidate_name || 'N/A'}<br/>
+                        Phone: {mapping?.candidate_phone || 'N/A'}<br/>
+                        Email: {mapping?.candidate_email || 'N/A'}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Typography variant="caption" color="textSecondary">Final Display:</Typography>
+                      <Typography variant="body2">
+                        Name: {candidateInfo.name}<br/>
+                        Phone: {candidateInfo.phone}<br/>
+                        Email: {candidateInfo.email}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Interviews Table - UPDATED to show real names */}
       <Card>
         <CardContent>
@@ -477,17 +553,33 @@ export const CallHistory: React.FC = () => {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          {/* 🔥 UPDATED: Show real name and phone */}
+                          {/* 🔥 UPDATED: Show real name, phone, and email */}
                           <Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
                               <Person sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
                               <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                                 {candidateInfo.name}
                               </Typography>
+                              {/* 🔥 NEW: Data source indicator */}
+                              {contactMappings[interview.interview_id] ? (
+                                <Chip size="small" label="Mapped" color="success" sx={{ ml: 1, fontSize: '0.6rem' }} />
+                              ) : (
+                                <Chip size="small" label="Direct" color="warning" sx={{ ml: 1, fontSize: '0.6rem' }} />
+                              )}
                             </Box>
-                            <Typography variant="caption" sx={{ color: 'text.secondary', ml: 3 }}>
+                            <Typography variant="caption" sx={{ color: 'text.secondary', ml: 3, display: 'block' }}>
                               📞 {candidateInfo.phone}
                             </Typography>
+                            {candidateInfo.email !== 'No email' && (
+                              <Typography variant="caption" sx={{ color: 'text.secondary', ml: 3, display: 'block' }}>
+                                ✉️ {candidateInfo.email}
+                              </Typography>
+                            )}
+                            {candidateInfo.email === 'No email' && (
+                              <Typography variant="caption" sx={{ color: 'warning.main', ml: 3, display: 'block' }}>
+                                ⚠️ No email available
+                              </Typography>
+                            )}
                           </Box>
                         </TableCell>
                         <TableCell>
@@ -563,6 +655,33 @@ export const CallHistory: React.FC = () => {
         <DialogContent>
           {selectedInterview && (
             <Box>
+              {/* 🔥 UPDATED: Add candidate information section */}
+              <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                  Candidate Information
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={4}>
+                    <Typography variant="body2" color="textSecondary">Name</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+                      {getCandidateInfo(selectedInterview).name}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Typography variant="body2" color="textSecondary">Phone</Typography>
+                    <Typography variant="body1">
+                      {getCandidateInfo(selectedInterview).phone}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Typography variant="body2" color="textSecondary">Email</Typography>
+                    <Typography variant="body1">
+                      {getCandidateInfo(selectedInterview).email}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Box>
+
               {/* Interview Info */}
               <Grid container spacing={2} sx={{ mb: 3 }}>
                 <Grid item xs={6}>

@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+
+import { callsApi } from '../api/services';
 import {
   Box,
   Typography,
@@ -85,6 +87,13 @@ interface InterviewDetails {
   email_sent?: boolean;
   email_sent_at?: string;
   tag?: string; // ✅ Add tag field
+  tagCandidate?: any; // ✅ Add tagCandidate field for enhanced data
+  contactMapping?: any; // ✅ Add contactMapping field for debugging
+  originalInterviewData?: { // ✅ Track original data before enhancement
+    name?: string;
+    phone?: string;
+    email?: string;
+  };
 }
 
 interface InterviewResult {
@@ -212,27 +221,102 @@ const loadAllTagCandidates = async (): Promise<{[tagName: string]: any[]}> => {
 // Enhance interviews with tag candidate info
 const enhanceInterviewsWithTagData = async (interviews: InterviewDetails[]) => {
   const tagCandidatesMap = (window as any).tagCandidatesCache || await loadAllTagCandidates();
+  
   return interviews.map(interview => {
     let tagCandidate = null;
+    let foundTagName = null;
+    
+    // 🔥 ENHANCED: Search ALL tags to find the original source, not just interview.tag
+    // This helps find where the candidate originally came from for calling/emails
+    
+    // First, if interview already has a tag, try that tag first
     if (interview.tag && tagCandidatesMap[interview.tag]) {
-      tagCandidate = tagCandidatesMap[interview.tag].find((c: any) =>
-        c.phone === interview.candidate_phone ||
-        c.email === interview.candidate_email ||
-        c.name === interview.candidate_name
-      );
+      const candidates = tagCandidatesMap[interview.tag];
+      tagCandidate = findCandidateInTagData(candidates, interview);
+      if (tagCandidate) {
+        foundTagName = interview.tag;
+      }
     }
-    if (tagCandidate) {
+    
+    // If not found and no existing tag, search ALL tags to find the original source
+    if (!tagCandidate) {
+      for (const [tagName, candidates] of Object.entries(tagCandidatesMap)) {
+        tagCandidate = findCandidateInTagData(candidates as any[], interview);
+        if (tagCandidate) {
+          foundTagName = tagName;
+          console.log(`🔍 Found candidate in tag "${tagName}" - this is likely the original source!`);
+          break;
+        }
+      }
+    }
+    
+    if (tagCandidate && foundTagName) {
+      console.log(`✅ Enhanced interview ${interview.interview_id} with tag candidate from "${foundTagName}":`, {
+        originalName: interview.candidate_name,
+        originalPhone: interview.candidate_phone,
+        originalEmail: interview.candidate_email,
+        tagName: tagCandidate.name,
+        tagPhone: tagCandidate.phone,
+        tagEmail: tagCandidate.email,
+        foundInTag: foundTagName,
+        originalTag: interview.tag
+      });
+      
       return {
         ...interview,
+        // 🔥 PRIORITIZE: Use tag candidate data as the source of truth
         candidate_name: tagCandidate.name || interview.candidate_name,
         candidate_phone: tagCandidate.phone || interview.candidate_phone,
         candidate_email: tagCandidate.email || interview.candidate_email,
-        tag: interview.tag,
-        tagCandidate: tagCandidate // keep full candidate info for rendering
+        tag: foundTagName, // 🔥 IMPORTANT: Set the tag to where we found the candidate
+        tagCandidate: tagCandidate, // keep full candidate info for rendering
+        originalInterviewData: {
+          name: interview.candidate_name,
+          phone: interview.candidate_phone,
+          email: interview.candidate_email
+        } // keep original for debugging
       };
     }
+    
     return interview;
   });
+};
+
+// 🔥 NEW: Helper function to find candidate in tag data with multiple matching strategies
+const findCandidateInTagData = (candidates: any[], interview: InterviewDetails) => {
+  if (!candidates || !Array.isArray(candidates)) return null;
+  
+  // Strategy 1: Exact phone match (most reliable for call data)
+  let found = candidates.find((c: any) => {
+    const candidatePhone = c.phone?.replace(/\D/g, ''); // Remove non-digits
+    const interviewPhone = interview.candidate_phone?.replace(/\D/g, '');
+    return candidatePhone && interviewPhone && candidatePhone.includes(interviewPhone.slice(-10));
+  });
+  
+  if (found) return found;
+  
+  // Strategy 2: Email match (exact)
+  if (interview.candidate_email) {
+    found = candidates.find((c: any) => 
+      c.email?.toLowerCase() === interview.candidate_email?.toLowerCase()
+    );
+    if (found) return found;
+  }
+  
+  // Strategy 3: Name match (fuzzy)
+  if (interview.candidate_name) {
+    found = candidates.find((c: any) => {
+      const candidateName = c.name?.toLowerCase().trim();
+      const interviewName = interview.candidate_name?.toLowerCase().trim();
+      return candidateName && interviewName && 
+             (candidateName === interviewName || 
+              candidateName.includes(interviewName) || 
+              interviewName.includes(candidateName));
+    });
+    if (found) return found;
+  }
+  
+  return null;
 };
 
 const Dashboard: React.FC = () => {
@@ -326,10 +410,65 @@ const Dashboard: React.FC = () => {
       setError(null);
       const response = await fetchAllInterviews();
       
-      const interviewData = response.interviews || response.data || response || [];
-      setInterviews(Array.isArray(interviewData) ? interviewData : []);
+      let interviewData = response.interviews || response.data || response || [];
+      interviewData = Array.isArray(interviewData) ? interviewData : [];
       
-      calculateStats(interviewData);
+      // 🔥 ENHANCED: Enrich interviews with contact mapping and tag candidate data
+      console.log('🔄 Enhancing interviews with contact mappings and tag data...');
+      
+      // Load contact mappings
+      const contactMappingsResponse = await callsApi.getContactMappings();
+      const contactMappings = contactMappingsResponse.success ? contactMappingsResponse.mappings || {} : {};
+      
+      // Enhance with contact mappings first
+      const enhancedWithMappings = interviewData.map((interview: any) => {
+        const callId = interview.interview_id || interview.call_sid;
+        const mapping = contactMappings[callId];
+        
+        if (mapping) {
+          return {
+            ...interview,
+            candidate_name: mapping.candidate_name || mapping.name || interview.candidate_name,
+            candidate_phone: mapping.candidate_phone || mapping.phone || interview.candidate_phone,
+            candidate_email: mapping.candidate_email || mapping.email || interview.candidate_email,
+            tag: mapping.tag || interview.tag, // Include tag from mapping
+            contactMapping: mapping // Keep full mapping for debugging
+          };
+        }
+        
+        return interview;
+      });
+      
+      // Then enhance with tag candidate data for more complete information
+      const fullyEnhancedData = await enhanceInterviewsWithTagData(enhancedWithMappings);
+      
+      // 🔥 ENHANCED: Better logging for tag enhancement results
+      console.log('✅ Enhanced interviews:', {
+        original: interviewData.length,
+        withMappings: enhancedWithMappings.length,
+        fullyEnhanced: fullyEnhancedData.length,
+        contactMappings: Object.keys(contactMappings).length,
+        taggedInterviews: fullyEnhancedData.filter(i => i.tag).length,
+        withEmail: fullyEnhancedData.filter(i => i.candidate_email && i.candidate_email !== 'No email').length
+      });
+      
+      // Show detailed enhancement results for debugging
+      fullyEnhancedData.forEach((interview, index) => {
+        if (index < 3) { // Only log first 3 for brevity
+          console.log(`🔍 Interview ${interview.interview_id}:`, {
+            name: interview.candidate_name,
+            phone: interview.candidate_phone,
+            email: interview.candidate_email,
+            tag: interview.tag,
+            hasTagCandidate: !!interview.tagCandidate,
+            hasContactMapping: !!interview.contactMapping,
+            originalData: interview.originalInterviewData
+          });
+        }
+      });
+      
+      setInterviews(fullyEnhancedData);
+      calculateStats(fullyEnhancedData);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch interviews');
       console.error('Error fetching interviews:', err);
@@ -1003,7 +1142,7 @@ const Dashboard: React.FC = () => {
             variant="outlined"
             onClick={() => sendAssessmentEmail(interview.interview_id)}
             startIcon={<EmailIcon />}
-            disabled={!selectedAssessment}
+            disabled={extractCandidateEmail(interview) === 'No email'}
           >
             Send
           </Button>
@@ -1029,15 +1168,16 @@ const Dashboard: React.FC = () => {
   };
 
   const extractCandidateEmail = (interview: InterviewDetails): string => {
+    // 🔥 ENHANCED: Prioritize email from tag candidate data
+    if (interview.tagCandidate?.email) {
+      return interview.tagCandidate.email;
+    }
+    
+    // Fallback to interview data or assessment status
     return interview.candidate_email || assessmentStatuses[interview.interview_id]?.candidateEmail || 'No email';
   };
 
   const sendAssessmentEmail = async (interviewId: string) => {
-    if (!selectedAssessment) {
-      toast.error('Please select an assessment first');
-      return;
-    }
-    
     const interview = interviews.find(i => i.interview_id === interviewId);
     if (!interview) {
       toast.error('Interview not found');
@@ -1049,11 +1189,35 @@ const Dashboard: React.FC = () => {
       toast.error('Candidate email not found');
       return;
     }
+
+    // 🔥 ENHANCED: Use selectedAssessment or create a default assessment
+    let assessmentToSend = selectedAssessment;
+    
+    if (!assessmentToSend) {
+      // Create a default assessment based on candidate's tag/role
+      const candidateRole = interview.tagCandidate?.role || interview.candidate_name || 'Software Developer';
+      assessmentToSend = {
+        id: 'default-assessment',
+        testName: `Technical Assessment for ${candidateRole}`,
+        jobRole: candidateRole,
+        candidateCount: 1,
+        createdAt: new Date().toISOString(),
+        status: 'active',
+        description: `Technical assessment for ${candidateRole} position`,
+        experience: 2,
+        duration: 60 * 60, // 1 hour in seconds
+        totalTopics: 10,
+        allowVideoRecording: false,
+        createdBy: 'System'
+      };
+      
+      toast.info('Using default assessment since none was selected');
+    }
     
     setSendingEmails(prev => ({ ...prev, [interviewId]: true }));
     
     try {
-      const assessmentLink = await generateAssessmentLink(selectedAssessment.id);
+      const assessmentLink = await generateAssessmentLink(assessmentToSend.id);
       const response = await fetch(`${API_BASE_URL}/send-assessment-link`, {
         method: 'POST',
         headers: {
@@ -1062,15 +1226,17 @@ const Dashboard: React.FC = () => {
         body: JSON.stringify({
           email: candidateEmail,
           assessmentLink: assessmentLink,
-          assessmentTitle: selectedAssessment.testName,
-          jobRole: selectedAssessment.jobRole,
+          assessmentTitle: assessmentToSend.testName,
+          jobRole: assessmentToSend.jobRole,
           candidateName: interview.candidate_name,
-          experience: selectedAssessment.experience,
-          duration: selectedAssessment.duration ? Math.floor(selectedAssessment.duration / 60) : 60,
-          totalQuestions: selectedAssessment.totalTopics || 10,
+          experience: assessmentToSend.experience,
+          duration: assessmentToSend.duration ? Math.floor(assessmentToSend.duration / 60) : 60,
+          totalQuestions: assessmentToSend.totalTopics || 10,
           // ✅ Include tag information in email payload
           candidateTag: interview.tag,
-          tagDetails: getTagByName(interview.tag || '')
+          tagDetails: getTagByName(interview.tag || ''),
+          // ✅ Include tag candidate details
+          tagCandidate: interview.tagCandidate
         }),
       });
 
