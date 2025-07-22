@@ -232,6 +232,126 @@ export const CallDashboard: React.FC = () => {
     loadCandidateTagsFromStorage(); // ✅ NEW: Load candidate tags from localStorage
   }, []);
 
+  // ✅ FIXED: Add the missing loadCallStats function
+  const loadCallStats = async () => {
+    try {
+      // 🔥 FIX: Use getAllInterviewsDetailed instead of getCallStats
+      const response = await callsApi.getAllInterviewsDetailed();
+      const allInterviews = response.data.interviews || [];
+      
+      console.log('📊 CallDashboard - Raw interviews loaded:', allInterviews.length);
+      
+      // 🔥 Include ALL interviews (same logic as CallHistory)
+      const validInterviews = allInterviews.filter(interview => {
+        const hasBasicData = interview.interview_id || interview.call_sid;
+        
+        // Don't exclude INCOMPLETE_SILENCE - keep them!
+        if (!hasBasicData) {
+          return false;
+        }
+        
+        // Keep INCOMPLETE_SILENCE interviews
+        if (interview.status === 'INCOMPLETE_SILENCE') {
+          return true;
+        }
+        
+        // Check for invalid time fields
+        const completionTime = interview.completion_time;
+        const endTime = interview.end_time;
+        const startTime = interview.start_time;
+        
+        if (completionTime === "N/A" || endTime === "N/A" || startTime === "N/A") {
+          return false;
+        }
+        
+        if ((!completionTime || !endTime || !startTime) && 
+            (!interview.responses || interview.responses.length === 0)) {
+          return false;
+        }
+        
+        return true;
+      });
+      
+      console.log('📊 CallDashboard - Valid interviews after filtering:', validInterviews.length);
+      
+      // 🔥 Calculate comprehensive stats
+      const totalCalls = validInterviews.length;
+      const completedCalls = validInterviews.filter(i => i.status === 'COMPLETED').length;
+      const incompleteSilence = validInterviews.filter(i => i.status === 'INCOMPLETE_SILENCE').length;
+      const terminated = validInterviews.filter(i => i.status === 'TERMINATED').length;
+      const inProgress = validInterviews.filter(i => i.status === 'IN_PROGRESS').length;
+      const callbackRequested = validInterviews.filter(i => i.status === 'CALLBACK_REQUESTED').length;
+      
+      console.log('📊 CallDashboard - Stats breakdown:', {
+        totalCalls,
+        completedCalls,
+        incompleteSilence,
+        terminated,
+        inProgress,
+        callbackRequested
+      });
+      
+      setCallStats({ 
+        totalCalls, 
+        completedCalls,
+        incompleteSilence,
+        terminated,
+        inProgress,
+        callbackRequested
+      });
+      
+      // Also set the interviews for display
+      setInterviews(validInterviews);
+      
+    } catch (error) {
+      console.error('Error loading call stats:', error);
+      setCallStats({ 
+        totalCalls: 0, 
+        completedCalls: 0,
+        incompleteSilence: 0,
+        terminated: 0,
+        inProgress: 0,
+        callbackRequested: 0
+      });
+      setInterviews([]);
+    }
+  };
+
+  const loadJobDescription = async () => {
+    try {
+      const jd = await getJobDescription();
+      setJobDescription(jd || {
+        title: '',
+        company: '',
+        description: '',
+        required_skills: '',
+        experience_required: ''
+      });
+    } catch (error) {
+      console.error('Error loading job description:', error);
+      // FIX: Set default values on error
+      setJobDescription({
+        title: '',
+        company: '',
+        description: '',
+        required_skills: '',
+        experience_required: ''
+      });
+    }
+  };
+
+  const loadInterviews = async () => {
+    try {
+      const data = await getAllInterviews();
+      // FIX: Always ensure interviews is an array
+      setInterviews(data?.interviews || []);
+    } catch (error) {
+      console.error('Error loading interviews:', error);
+      // FIX: Set empty array on error
+      setInterviews([]);
+    }
+  };
+
   // ✅ NEW: Load candidate tags from localStorage (same as other components)
   const loadCandidateTagsFromStorage = () => {
     const savedTags = localStorage.getItem('candidateTags');
@@ -941,7 +1061,7 @@ export const CallDashboard: React.FC = () => {
                   </Typography>
                   <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
                     Terminated
-</Typography>
+                  </Typography>
                 </Box>
               </Box>
             </CardContent>
@@ -1031,7 +1151,7 @@ export const CallDashboard: React.FC = () => {
                       ),
                     }}
                     helperText="Enter phone number (e.g., +1234567890) or leave empty for default"
-                    error={phoneNumber && !isValidPhoneNumber(phoneNumber)}
+                    error={!!(phoneNumber && !isValidPhoneNumber(phoneNumber))}
                   />
                 </Box>
 
