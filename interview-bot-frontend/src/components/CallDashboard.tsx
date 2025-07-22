@@ -1421,8 +1421,6 @@ export const CallDashboard: React.FC = () => {
                                   <TableCell>Name</TableCell>
                                   <TableCell>Phone</TableCell>
                                   <TableCell>Email</TableCell>
-                                  <TableCell>Skills</TableCell>
-                                  <TableCell>Batch</TableCell>
                                 </TableRow>
                               </TableHead>
                               <TableBody>
@@ -1431,12 +1429,6 @@ export const CallDashboard: React.FC = () => {
                                     <TableCell>{candidate.name}</TableCell>
                                     <TableCell>{candidate.phone}</TableCell>
                                     <TableCell>{candidate.email || 'N/A'}</TableCell>
-                                    <TableCell>
-                                      <Typography variant="body2" sx={{ maxWidth: 200 }} noWrap>
-                                        {candidate.skills || 'N/A'}
-                                      </Typography>
-                                    </TableCell>
-                                    <TableCell>{candidate.batch_name || 'N/A'}</TableCell>
                                   </TableRow>
                                 ))}
                               </TableBody>
