@@ -22,7 +22,6 @@ import {
   LinearProgress
 } from '@mui/material';
 import {
-  TrendingUp,
   Person,
   CheckCircle,
   Schedule,
@@ -90,7 +89,7 @@ const Dashboard = () => {
     fetchDashboardData();
   }, []);
 
-  const StatCard = ({ title, value, icon, color, subtitle }: any) => (
+  const StatCard = ({ title, value, icon, color }: any) => (
     <Card sx={{ 
       height: '100%', 
       border: '1px solid rgba(255, 255, 255, 0.1)', 
@@ -116,16 +115,9 @@ const Dashboard = () => {
             {title}
           </Typography>
         </Box>
-        <Typography variant="h4" sx={{ fontWeight: 700, color: '#f5f5f5', mb: 0.25, fontSize: '1.5rem' }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: '#f5f5f5', fontSize: '1.5rem' }}>
           {value}
         </Typography>
-        {subtitle && (
-          <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', color: '#a3a3a3', fontSize: '0.7rem' }}>
-            <TrendingUp sx={{ fontSize: 12, color: '#10b981', mr: 0.5 }} />
-            <span style={{ color: '#10b981', fontWeight: 600 }}>{subtitle}</span>
-            <span style={{ marginLeft: 4 }}>vs last month</span>
-          </Typography>
-        )}
       </CardContent>
     </Card>
   );
