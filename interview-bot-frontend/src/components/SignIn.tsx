@@ -12,7 +12,8 @@ import {
   Stack,
   IconButton,
   InputAdornment,
-  Fade
+  Fade,
+  useTheme
 } from '@mui/material';
 import {
   Visibility,
@@ -26,6 +27,7 @@ const SignIn = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const theme = useTheme();
 
   // Check if already logged in
   useEffect(() => {
@@ -48,12 +50,8 @@ const SignIn = () => {
     };
 
     try {
-      console.log('Attempting login with:', credentials.email);
-      
       // Demo authentication
-      if (credentials.email === 'admin@onelab.com' && credentials.password === 'admin123') {
-        console.log('Login successful, setting token...');
-        
+      if (credentials.email === 'admin@example.com' && credentials.password === 'admin123') {
         // Set token and user data
         localStorage.setItem('token', 'demo-token-' + Date.now());
         localStorage.setItem('user', JSON.stringify({
@@ -62,11 +60,7 @@ const SignIn = () => {
           role: 'admin'
         }));
         
-        console.log('Token set, navigating to dashboard...');
-        
-        // Navigate to dashboard
         navigate('/dashboard', { replace: true });
-        
       } else {
         throw new Error('Invalid credentials');
       }
@@ -82,101 +76,80 @@ const SignIn = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        backgroundColor: '#f8fafc !important',
-        color: '#1e293b !important',
+        backgroundColor: '#0f172a',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      {/* Top Color Bar */}
-      <Box
-        sx={{
-          height: '4px',
-          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
-          width: '100%'
-        }}
-      />
-
-      {/* Main Content */}
       <Box 
         sx={{ 
-          flex: 1, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
+          width: '100%',
+          maxWidth: '400px',
           px: 2,
-          py: 4 
         }}
       >
         <Fade in={true} timeout={800}>
           <Card 
-            className="login-card"
             elevation={0}
             sx={{ 
-              border: '1px solid #e2e8f0',
-              borderRadius: 3,
-              background: 'white !important',
-              color: '#1e293b !important',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
-              width: '400px !important',
-              maxWidth: '400px !important',
-              minWidth: 'auto !important'
+              border: '1px solid #334155',
+              borderRadius: 2,
+              backgroundColor: '#1e293b',
+              boxShadow: 'none',
             }}
           >
             <CardContent sx={{ p: 4 }}>
-              {/* Logo and Header */}
+              {/* Header */}
               <Box sx={{ textAlign: 'center', mb: 4 }}>
-                {/* Onelab Logo */}
-                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-                  <Box
-                    component="img"
-                    src="/dashboard-logo.svg"
-                    alt="Onelab Ventures Logo"
-                    sx={{
-                      height: '50px',
-                      width: 'auto'
-                    }}
-                  />
-                </Box>
+                <Box
+                  component="img"
+                  src="/dashboard-logo.svg"
+                  alt="Logo"
+                  sx={{
+                    height: '40px',
+                    width: 'auto',
+                    mb: 3,
+                    filter: 'brightness(0) invert(1)'
+                  }}
+                />
                 
                 <Typography 
-                  variant="h4" 
+                  variant="h5" 
                   sx={{ 
-                    fontWeight: 'bold', 
-                    color: '#1e293b !important', 
+                    fontWeight: 600, 
+                    color: '#f8fafc', 
                     mb: 1,
-                    fontSize: '1.5rem'
                   }}
                 >
                   Welcome Back
                 </Typography>
                 <Typography 
-                  variant="body1" 
+                  variant="body2" 
                   sx={{ 
-                    color: '#64748b !important',
-                    fontSize: '0.9rem'
+                    color: '#94a3b8',
                   }}
                 >
-                  Sign in to your account
+                  Sign in to AI Interview Platform
                 </Typography>
               </Box>
 
               {/* Error Alert */}
               {error && (
-                <Fade in={true}>
-                  <Alert 
-                    severity="error" 
-                    sx={{ 
-                      mb: 3, 
-                      borderRadius: 2,
-                      border: '1px solid #fecaca',
-                      backgroundColor: '#fef2f2 !important',
-                      color: '#dc2626 !important'
-                    }}
-                  >
-                    {error}
-                  </Alert>
-                </Fade>
+                <Alert 
+                  severity="error" 
+                  sx={{ 
+                    mb: 3, 
+                    borderRadius: 1,
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    color: '#ef4444',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    '& .MuiAlert-icon': { color: '#ef4444' }
+                  }}
+                >
+                  {error}
+                </Alert>
               )}
 
               {/* Login Form */}
@@ -199,28 +172,13 @@ const SignIn = () => {
                     }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        backgroundColor: 'white !important',
-                        color: '#1e293b !important',
-                        '& fieldset': {
-                          borderColor: '#e2e8f0',
-                        },
-                        '&:hover fieldset': {
-                          borderColor: '#2F8D8C',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#2F8D8C',
-                        }
+                        backgroundColor: '#0f172a',
+                        '& fieldset': { borderColor: '#334155' },
+                        '&:hover fieldset': { borderColor: '#475569' },
+                        '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
                       },
-                      '& .MuiInputLabel-root': {
-                        color: '#64748b !important',
-                        '&.Mui-focused': {
-                          color: '#2F8D8C !important',
-                        }
-                      },
-                      '& .MuiOutlinedInput-input': {
-                        color: '#1e293b !important'
-                      }
+                      '& .MuiInputLabel-root': { color: '#94a3b8' },
+                      '& .MuiOutlinedInput-input': { color: '#f8fafc' }
                     }}
                   />
 
@@ -243,8 +201,7 @@ const SignIn = () => {
                             onClick={() => setShowPassword(!showPassword)}
                             edge="end"
                             size="small"
-                            aria-label="toggle password visibility"
-                            sx={{ color: '#64748b !important' }}
+                            sx={{ color: '#64748b' }}
                           >
                             {showPassword ? <VisibilityOff /> : <Visibility />}
                           </IconButton>
@@ -253,28 +210,13 @@ const SignIn = () => {
                     }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        backgroundColor: 'white !important',
-                        color: '#1e293b !important',
-                        '& fieldset': {
-                          borderColor: '#e2e8f0',
-                        },
-                        '&:hover fieldset': {
-                          borderColor: '#2F8D8C',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#2F8D8C',
-                        }
+                        backgroundColor: '#0f172a',
+                        '& fieldset': { borderColor: '#334155' },
+                        '&:hover fieldset': { borderColor: '#475569' },
+                        '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
                       },
-                      '& .MuiInputLabel-root': {
-                        color: '#64748b !important',
-                        '&.Mui-focused': {
-                          color: '#2F8D8C !important',
-                        }
-                      },
-                      '& .MuiOutlinedInput-input': {
-                        color: '#1e293b !important'
-                      }
+                      '& .MuiInputLabel-root': { color: '#94a3b8' },
+                      '& .MuiOutlinedInput-input': { color: '#f8fafc' }
                     }}
                   />
 
@@ -286,24 +228,12 @@ const SignIn = () => {
                     disabled={loading}
                     sx={{
                       py: 1.5,
-                      borderRadius: 2,
                       fontSize: '1rem',
-                      fontWeight: 600,
+                      fontWeight: 500,
                       textTransform: 'none',
-                      background: 'linear-gradient(135deg, #2F8D8C 0%, #319492 100%) !important',
-                      color: 'white !important',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #256B6A 0%, #2A7D7B 100%) !important',
-                        transform: 'translateY(-1px)',
-                        boxShadow: '0 8px 24px rgba(47, 141, 140, 0.3)'
-                      },
-                      '&:disabled': {
-                        background: '#94a3b8 !important',
-                        color: 'white !important',
-                        transform: 'none',
-                        boxShadow: 'none'
-                      },
-                      transition: 'all 0.2s ease'
+                      backgroundColor: '#3b82f6',
+                      '&:hover': { backgroundColor: '#2563eb' },
+                      '&:disabled': { backgroundColor: '#334155', color: '#94a3b8' }
                     }}
                   >
                     {loading ? (
@@ -317,19 +247,6 @@ const SignIn = () => {
                   </Button>
                 </Stack>
               </form>
-
-              {/* Footer */}
-              <Box sx={{ textAlign: 'center', mt: 4 }}>
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    color: '#94a3b8 !important',
-                    fontSize: '0.75rem'
-                  }}
-                >
-                  Powered by Onelab Ventures
-                </Typography>
-              </Box>
             </CardContent>
           </Card>
         </Fade>

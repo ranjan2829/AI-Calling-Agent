@@ -41,7 +41,7 @@ const getMockData = (endpoint: string) => {
     case '/job-description':
       return {
         title: 'Software Developer',
-        company: 'Onelab Ventures',
+        company: 'AI Interview Platform',
         description: 'Sample job description',
         required_skills: 'Python, JavaScript, React',
         experience_required: '2-5 years'

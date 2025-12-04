@@ -1,14 +1,9 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
+  Typography,
   Card,
   CardContent,
-  Typography,
-  Button,
-  Grid,
-  Chip,
   Table,
   TableBody,
   TableCell,
@@ -16,6 +11,12 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Chip,
+  IconButton,
+  useTheme,
+  Tooltip,
+  CircularProgress,
+  Button,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -23,760 +24,457 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  CircularProgress,
-  Alert,
-  Divider,
-  Stack,
-  IconButton,
-  Tooltip
+  Grid
 } from '@mui/material';
 import {
-  History,
-  Phone,
   Visibility,
-  ExpandMore,
-  CheckCircle,
-  Cancel,
-  PlayArrow,
-  Person,
+  Phone,
+  CalendarToday,
   AccessTime,
+  CheckCircle,
+  Error as ErrorIcon,
+  Refresh,
+  ExpandMore,
+  Person,
+  Email,
   QuestionAnswer
 } from '@mui/icons-material';
-import { callsApi } from '../api/services';
+import { toast } from 'react-toastify';
+
+const API_BASE_URL = 'http://13.204.76.229:8000';
 
 interface InterviewResponse {
   question_number: number;
   question: string;
   answer: string;
-  timestamp: string;
   duration?: string;
 }
 
-interface Interview {
+interface CallHistoryItem {
   interview_id: string;
-  status: 'COMPLETED' | 'TERMINATED' | 'IN_PROGRESS' | 'INCOMPLETE_SILENCE';
-  questions_answered: number;
-  total_questions: number;
-  completion_time: string;
-  all_validations_passed: boolean;
-  termination_reason?: string;
-  candidate_phone?: string;
+  candidate_name: string;
+  candidate_phone: string;
   candidate_email?: string;
-  candidate_name?: string;
-  interviewer?: string;
-  start_time?: string;
-  end_time?: string;
-  call_sid?: string;
+  status: string;
+  start_time: string;
+  duration?: string;
   responses: InterviewResponse[];
+  tag?: string;
+  tagCandidate?: any;
 }
 
-export const CallHistory: React.FC = () => {
-  const [interviews, setInterviews] = useState<Interview[]>([]);
+export const CallHistory = () => {
+  const theme = useTheme();
+  const [interviews, setInterviews] = useState<CallHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
+  const [selectedInterview, setSelectedInterview] = useState<CallHistoryItem | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  // 🔥 NEW: Contact mappings state
-  const [contactMappings, setContactMappings] = useState<{[key: string]: any}>({});
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    loadContactMappings();
-    loadInterviews();
-  }, []);
-
-  // 🔥 NEW: Load contact mappings
-  const loadContactMappings = async () => {
-    try {
-      console.log('🔄 Loading contact mappings...');
-      const response = await callsApi.getContactMappings();
-      if (response.success) {
-        setContactMappings(response.mappings || {});
-        console.log('✅ Contact mappings loaded:', Object.keys(response.mappings || {}).length, 'mappings');
-      }
-    } catch (error) {
-      console.error('❌ Error loading contact mappings:', error);
-    }
-  };
-
-  // 🔥 IMPROVED: Helper function to get candidate info with better fallback handling
-  const getCandidateInfo = (interview: Interview) => {
-    const callId = interview.interview_id || interview.call_sid;
-    const mapping = callId ? contactMappings[callId] : null;
-    
-    // Priority: mapping data -> interview data -> fallback values
-    const name = mapping?.candidate_name || 
-                 mapping?.name || 
-                 interview.candidate_name || 
-                 `ID: ${callId || 'Unknown'}`;
-    
-    const phone = mapping?.candidate_phone || 
-                  mapping?.phone || 
-                  interview.candidate_phone || 
-                  'No phone';
-    
-    const email = mapping?.candidate_email || 
-                  mapping?.email || 
-                  interview.candidate_email || 
-                  'No email';
-    
-    // Debug logging to track data sources
-    console.log(`📊 Candidate Info for ${callId}:`, {
-      fromMapping: mapping ? true : false,
-      name,
-      phone,
-      email,
-      mapping: mapping,
-      interview: {
-        candidate_name: interview.candidate_name,
-        candidate_phone: interview.candidate_phone,
-        candidate_email: interview.candidate_email
-      }
-    });
-    
-    return { name, phone, email };
-  };
-
-  const loadInterviews = async () => {
+  const fetchHistory = async () => {
     try {
       setLoading(true);
-      const response = await callsApi.getAllInterviewsDetailed();
-      
-      console.log('Raw interviews from API:', response.data.interviews);
-      
-      // UPDATED: Include ALL interviews, including INCOMPLETE_SILENCE
-      const filteredInterviews = (response.data.interviews || []).filter((interview: any) => {
-        // Keep all interviews that have basic data
-        const hasBasicData = interview.interview_id || interview.call_sid;
-        
-        // Only exclude if completely invalid
-        if (!hasBasicData) {
-          console.log(`Filtering out - no basic data:`, interview);
-          return false;
-        }
-        
-        // 🔥 KEEP INCOMPLETE_SILENCE INTERVIEWS - Don't filter them out
-        if (interview.status === 'INCOMPLETE_SILENCE') {
-          console.log(`Keeping INCOMPLETE_SILENCE interview:`, interview.interview_id);
-          return true;
-        }
-        
-        // Get ALL possible time fields
-        const completionTime = interview.completion_time;
-        const endTime = interview.end_time;
-        const startTime = interview.start_time;
-        
-        // Check if ANY time field is exactly "N/A"
-        if (completionTime === "N/A" || endTime === "N/A" || startTime === "N/A") {
-          console.log(`Filtering out - has N/A time:`, {
-            id: interview.interview_id,
-            completion_time: completionTime,
-            end_time: endTime,
-            start_time: startTime
-          });
-          return false;
-        }
-        if ((!completionTime || !endTime || !startTime) && 
-            (!interview.responses || interview.responses.length === 0)) {
-          console.log(`Filtering out - no dates and no responses:`, {
-            id: interview.interview_id,
-            responses: interview.responses?.length || 0
-          });
-          return false;
-        }
-        
-        // Keep the record
-        console.log(`Keeping interview:`, {
-          id: interview.interview_id,
-          completion_time: completionTime,
-          responses: interview.responses?.length || 0
-        });
-        return true;
-      });
-      
-      console.log(`Filtered from ${response.data.interviews?.length || 0} to ${filteredInterviews.length} interviews`);
-      setInterviews(filteredInterviews);
-    } catch (error: any) {
-      console.error('Error loading interviews:', error);
-      setInterviews([]);
+      const response = await fetch(`${API_BASE_URL}/interviews-detailed`);
+      const data = await response.json();
+
+      if (data.success) {
+        // Process and enhance data
+        const processedInterviews = await enhanceInterviewsWithTagData(data.interviews || []);
+        setInterviews(processedInterviews);
+      }
+    } catch (error) {
+      console.error('Error fetching history:', error);
+      toast.error('Failed to load call history');
     } finally {
       setLoading(false);
     }
   };
 
-  const getActualStatus = (interview: Interview) => {
-    if (interview.status === 'TERMINATED' || interview.status === 'COMPLETED') {
-      return interview.status;
-    }
-    if (interview.status === 'IN_PROGRESS') {
-      if (interview.end_time) {
-        return 'TERMINATED';
-      }
-      const startTime = interview.start_time || interview.completion_time;
-      if (startTime) {
-        const start = new Date(startTime);
-        const now = new Date();
-        const hoursSinceStart = (now.getTime() - start.getTime()) / (1000 * 60 * 60);
-        if (hoursSinceStart > 2) {
-          return 'HUNG_UP';
+  // Helper to load tag data (reused from Dashboard)
+  const loadAllTagCandidates = async (): Promise<{[tagName: string]: any[]}> => {
+    try {
+      const tagCandidatesMap: {[tagName: string]: any[]} = {};
+      const tagsResponse = await fetch('http://13.204.76.229:8000/local-tags-summary-exact');
+      if (!tagsResponse.ok) return tagCandidatesMap;
+      const tagsResult = await tagsResponse.json();
+      
+      if (tagsResult.success && tagsResult.tags) {
+        for (const tag of tagsResult.tags) {
+          try {
+            const candidatesResponse = await fetch(`http://13.204.76.229:8000/search-candidates-exact`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ tag_name: tag.tag_name, case_sensitive: true })
+            });
+            if (candidatesResponse.ok) {
+              const candidatesResult = await candidatesResponse.json();
+              if (candidatesResult.success && candidatesResult.candidates) {
+                tagCandidatesMap[tag.tag_name] = candidatesResult.candidates;
+              }
+            }
+          } catch (e) {}
         }
       }
-    }
-    
-    return interview.status;
-  };
-
-  const getStatusChip = (interview: Interview) => {
-    const actualStatus = getActualStatus(interview);
-    
-    // FIXED: Replace INCOMPLETE_SILENCE with "No Response"
-    const displayStatus = actualStatus === 'INCOMPLETE_SILENCE' ? 'No Response' : actualStatus;
-    
-    switch (actualStatus) {
-      case 'COMPLETED':
-        return (
-          <Chip
-            icon={<CheckCircle />}
-            label="Completed"
-            color="success"
-            size="small"
-            sx={{ fontWeight: 'bold' }}
-          />
-        );
-      case 'INCOMPLETE_SILENCE':
-        return (
-          <Chip
-            icon={<Phone />}
-            label="No Response"
-            color="warning"
-            size="small"
-            sx={{ fontWeight: 'bold' }}
-          />
-        );
-      case 'TERMINATED':
-        return (
-          <Chip
-            icon={<Cancel />}
-            label="Terminated"
-            color="error"
-            size="small"
-            sx={{ fontWeight: 'bold' }}
-          />
-        );
-      case 'HUNG_UP':
-        return (
-          <Chip
-            icon={<Cancel />}
-            label="Hung Up"
-            color="warning"
-            size="small"
-            sx={{ fontWeight: 'bold' }}
-          />
-        );
-      case 'IN_PROGRESS':
-        return (
-          <Chip
-            icon={<PlayArrow />}
-            label="In Progress"
-            color="info"
-            size="small"
-            sx={{ fontWeight: 'bold' }}
-          />
-        );
-      default:
-        return (
-          <Chip
-            label={displayStatus}
-            color="default"
-            size="small"
-            sx={{ fontWeight: 'bold' }}
-          />
-        );
+      return tagCandidatesMap;
+    } catch (error) {
+      return {};
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      if (!dateString) return 'N/A';
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid Date';
-      return date.toLocaleString();
-    } catch {
-      return 'Invalid Date';
-    }
+  const enhanceInterviewsWithTagData = async (interviews: any[]) => {
+    const tagCandidatesMap = await loadAllTagCandidates();
+    
+    return interviews.map(interview => {
+      // Find candidate in tags
+      let tagCandidate = null;
+      let foundTagName = null;
+      
+      // Try to find matching candidate in all tags
+      for (const [tagName, candidates] of Object.entries(tagCandidatesMap)) {
+        const found = (candidates as any[]).find((c: any) => {
+          // Match by phone (most reliable)
+          if (c.phone && interview.candidate_phone) {
+            const cPhone = c.phone.replace(/\D/g, '');
+            const iPhone = interview.candidate_phone.replace(/\D/g, '');
+            if (cPhone.includes(iPhone.slice(-10)) || iPhone.includes(cPhone.slice(-10))) return true;
+          }
+          // Match by email
+          if (c.email && interview.candidate_email && c.email.toLowerCase() === interview.candidate_email.toLowerCase()) return true;
+          return false;
+        });
+        
+        if (found) {
+          tagCandidate = found;
+          foundTagName = tagName;
+          break;
+        }
+      }
+      
+      if (tagCandidate) {
+        return {
+          ...interview,
+          candidate_name: tagCandidate.name || interview.candidate_name,
+          candidate_phone: tagCandidate.phone || interview.candidate_phone,
+          candidate_email: tagCandidate.email || interview.candidate_email,
+          tag: foundTagName,
+          tagCandidate: tagCandidate
+        };
+      }
+      
+      return interview;
+    });
   };
 
-  const getCompletionRate = (questionsAnswered: number, totalQuestions: number) => {
-    if (totalQuestions === 0) return 0;
-    
-    // Fix for the backend issue: if total_questions is less than questions_answered, 
-    // use questions_answered as the total to prevent >100%
-    const actualTotal = Math.max(totalQuestions, questionsAnswered);
-    
-    const rate = Math.round((questionsAnswered / actualTotal) * 100);
-    return Math.min(rate, 100); // Cap at 100%
-  };
-  const formatCompletionRate = (questionsAnswered: number, totalQuestions: number) => {
-    // Fix the display to show correct total
-    const actualTotal = Math.max(totalQuestions, questionsAnswered, 8); // 9 is the actual total questions (0-8)
-    const rate = getCompletionRate(questionsAnswered, actualTotal);
-    
-    return {
-      displayText: `${questionsAnswered}/${actualTotal}`,
-      percentage: rate
-    };
-  };
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
-  const handleViewDetails = (interview: Interview) => {
+  const handleViewDetails = (interview: CallHistoryItem) => {
     setSelectedInterview(interview);
     setDetailsOpen(true);
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case 'COMPLETED': return 'success';
+      case 'IN_PROGRESS': return 'warning';
+      case 'TERMINATED': return 'error';
+      default: return 'default';
+    }
+  };
+
+  const formatDuration = (seconds?: number) => {
+    if (!seconds) return '-';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}m ${secs}s`;
+  };
+
+  // Helper to get best available name/phone
+  const getCandidateInfo = (interview: CallHistoryItem) => {
+    const name = interview.tagCandidate?.name || interview.candidate_name || 'Unknown Candidate';
+    const phone = interview.tagCandidate?.phone || interview.candidate_phone || 'No Phone';
+    const email = interview.tagCandidate?.email || interview.candidate_email || 'No Email';
+    
+    // Clean up name if it looks like a phone number placeholder
+    const displayName = name.startsWith('Candidate_') || name.startsWith('Phone_') ? 'Unknown Candidate' : name;
+    
+    return { name: displayName, phone, email };
+  };
+
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress size={50} />
-        <Typography variant="h6" sx={{ ml: 2 }}>
-          Loading interview history...
-        </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
+        <CircularProgress size={60} thickness={4} sx={{ color: 'primary.main' }} />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <History sx={{ fontSize: 32, color: 'primary.main', mr: 2 }} />
-          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-            Interview Call History
+    <Box className="animate-fade-in">
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: '#fff', mb: 1 }}>
+            Call History
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            View and analyze past interview calls
           </Typography>
         </Box>
-        <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-          View and analyze all completed AI interview calls
-        </Typography>
+        <Button
+          startIcon={<Refresh />}
+          onClick={fetchHistory}
+          variant="outlined"
+          sx={{
+            borderColor: 'rgba(255, 255, 255, 0.1)',
+            color: 'text.secondary',
+            '&:hover': {
+              borderColor: 'primary.main',
+              color: 'primary.main',
+              backgroundColor: 'rgba(0, 217, 255, 0.05)'
+            }
+          }}
+        >
+          Refresh
+        </Button>
       </Box>
 
-      {/* UPDATED Statistics Cards - Added No Response Card */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={2.4}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Phone sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {interviews.length}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Total Interviews
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={12} md={2.4}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <CheckCircle sx={{ fontSize: 40, color: 'success.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'success.main' }}>
-                    {interviews.filter(i => i.status === 'COMPLETED').length}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Completed
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* 🔥 NEW: No Response Card for INCOMPLETE_SILENCE */}
-        <Grid item xs={12} md={2.4}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Phone sx={{ fontSize: 40, color: 'warning.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'warning.main' }}>
-                    {interviews.filter(i => i.status === 'INCOMPLETE_SILENCE').length}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    🔇 No Response
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={2.4}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Cancel sx={{ fontSize: 40, color: 'error.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'error.main' }}>
-                    {interviews.filter(i => {
-                      const status = getActualStatus(i);
-                      return status === 'TERMINATED' || status === 'HUNG_UP';
-                    }).length}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Terminated/Hung Up
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={2.4}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <PlayArrow sx={{ fontSize: 40, color: 'info.main', mr: 2 }} />
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'info.main' }}>
-                    {interviews.filter(i => getActualStatus(i) === 'IN_PROGRESS').length}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Active Now
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      {/* DEBUG: Data Consistency Panel (only in development) */}
-      {process.env.NODE_ENV === 'development' && interviews.length > 0 && (
-        <Card sx={{ mb: 4, border: '2px solid orange' }}>
-          <CardContent>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: 'warning.main' }}>
-              🔍 DEBUG: Data Consistency Check
-            </Typography>
-            <Alert severity="info" sx={{ mb: 2 }}>
-              This panel helps identify data inconsistencies between contact mappings and interview records.
-            </Alert>
-            
-            {interviews.slice(0, 3).map((interview) => {
-              const candidateInfo = getCandidateInfo(interview);
-              const mapping = contactMappings[interview.interview_id];
-              
+      <TableContainer 
+        component={Paper} 
+        sx={{ 
+          background: 'rgba(30, 41, 59, 0.4)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.05)',
+          borderRadius: 3,
+          overflow: 'hidden'
+        }}
+      >
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+              <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Candidate</TableCell>
+              <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Status</TableCell>
+              <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Date & Time</TableCell>
+              <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>Duration</TableCell>
+              <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }} align="right">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {interviews.map((interview) => {
+              const { name, phone } = getCandidateInfo(interview);
               return (
-                <Box key={interview.interview_id} sx={{ mb: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    Interview: {interview.interview_id}
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={4}>
-                      <Typography variant="caption" color="textSecondary">From Interview Record:</Typography>
+                <TableRow 
+                  key={interview.interview_id}
+                  sx={{ 
+                    '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.02)' },
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+                  }}
+                >
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box 
+                        sx={{ 
+                          width: 40, 
+                          height: 40, 
+                          borderRadius: '50%', 
+                          background: 'linear-gradient(135deg, #00d9ff 0%, #00a8cc 100%)',
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center',
+                          color: '#fff',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        {name.charAt(0)}
+                      </Box>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#fff' }}>
+                          {name}
+                        </Typography>
+                        {/* Hide phone number in main view for cleaner UI */}
+                        {interview.tag && (
+                          <Chip 
+                            label={interview.tag} 
+                            size="small" 
+                            sx={{ 
+                              mt: 0.5, 
+                              height: 20, 
+                              fontSize: '0.65rem',
+                              bgcolor: 'rgba(255, 255, 255, 0.1)',
+                              color: 'text.secondary'
+                            }} 
+                          />
+                        )}
+                      </Box>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={interview.status}
+                      color={getStatusColor(interview.status) as any}
+                      size="small"
+                      sx={{ fontWeight: 500 }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
+                      <CalendarToday sx={{ fontSize: 16 }} />
                       <Typography variant="body2">
-                        Name: {interview.candidate_name || 'N/A'}<br/>
-                        Phone: {interview.candidate_phone || 'N/A'}<br/>
-                        Email: {interview.candidate_email || 'N/A'}
+                        {new Date(interview.start_time).toLocaleDateString()}
                       </Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Typography variant="caption" color="textSecondary">From Contact Mapping:</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.disabled', ml: 1 }}>
+                        {new Date(interview.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
+                      <AccessTime sx={{ fontSize: 16 }} />
                       <Typography variant="body2">
-                        Name: {mapping?.candidate_name || 'N/A'}<br/>
-                        Phone: {mapping?.candidate_phone || 'N/A'}<br/>
-                        Email: {mapping?.candidate_email || 'N/A'}
+                        {interview.responses.length > 0 ? `${interview.responses.length} questions` : '-'}
                       </Typography>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Typography variant="caption" color="textSecondary">Final Display:</Typography>
-                      <Typography variant="body2">
-                        Name: {candidateInfo.name}<br/>
-                        Phone: {candidateInfo.phone}<br/>
-                        Email: {candidateInfo.email}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </Box>
+                    </Box>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Tooltip title="View Details">
+                      <IconButton 
+                        onClick={() => handleViewDetails(interview)}
+                        sx={{ 
+                          color: 'primary.main',
+                          '&:hover': { backgroundColor: 'rgba(0, 217, 255, 0.1)' }
+                        }}
+                      >
+                        <Visibility />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
               );
             })}
-          </CardContent>
-        </Card>
-      )}
+            {interviews.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
+                  <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
+                    <Typography variant="h6" gutterBottom>No calls found</Typography>
+                    <Typography variant="body2">Start a new interview to see history here</Typography>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      {/* Interviews Table - UPDATED to show real names */}
-      <Card>
-        <CardContent>
-          <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold' }}>
-            All Interview Records
-          </Typography>
-          
-          {interviews.length === 0 ? (
-            <Alert severity="info">
-              No interview records found. Start by making your first AI interview call.
-            </Alert>
-          ) : (
-            <TableContainer component={Paper} elevation={0}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: 'grey.50' }}>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Interview ID</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Candidate</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Progress</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Duration</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {interviews.map((interview) => {
-                    // 🔥 UPDATED: Get real candidate info
-                    const candidateInfo = getCandidateInfo(interview);
-                    
-                    return (
-                      <TableRow key={interview.interview_id} hover>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
-                            {interview.interview_id}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          {getStatusChip(interview)}
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {formatDate(interview.completion_time)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          {/* 🔥 UPDATED: Show real name, phone, and email */}
-                          <Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                              <Person sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
-                              <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                                {candidateInfo.name}
-                              </Typography>
-                              {/* 🔥 NEW: Data source indicator */}
-                              {contactMappings[interview.interview_id] ? (
-                                <Chip size="small" label="Mapped" color="success" sx={{ ml: 1, fontSize: '0.6rem' }} />
-                              ) : (
-                                <Chip size="small" label="Direct" color="warning" sx={{ ml: 1, fontSize: '0.6rem' }} />
-                              )}
-                            </Box>
-                            <Typography variant="caption" sx={{ color: 'text.secondary', ml: 3, display: 'block' }}>
-                              📞 {candidateInfo.phone}
-                            </Typography>
-                            {candidateInfo.email !== 'No email' && (
-                              <Typography variant="caption" sx={{ color: 'text.secondary', ml: 3, display: 'block' }}>
-                                ✉️ {candidateInfo.email}
-                              </Typography>
-                            )}
-                            {candidateInfo.email === 'No email' && (
-                              <Typography variant="caption" sx={{ color: 'warning.main', ml: 3, display: 'block' }}>
-                                ⚠️ No email available
-                              </Typography>
-                            )}
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Typography variant="body2" sx={{ mr: 1 }}>
-                              {(() => {
-                                const formatted = formatCompletionRate(interview.questions_answered, interview.total_questions);
-                                return formatted.displayText;
-                              })()}
-                            </Typography>
-                            <Chip
-                              label={`${(() => {
-                                const formatted = formatCompletionRate(interview.questions_answered, interview.total_questions);
-                                return formatted.percentage;
-                              })()}%`}
-                              size="small"
-                              color={(() => {
-                                const formatted = formatCompletionRate(interview.questions_answered, interview.total_questions);
-                                return formatted.percentage >= 80 ? 'success' : 'warning';
-                              })()}
-                            />
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <AccessTime sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
-                            <Typography variant="body2">
-                              {interview.start_time && interview.end_time
-                                ? `${Math.round((new Date(interview.end_time).getTime() - new Date(interview.start_time).getTime()) / 60000)}m`
-                                : 'N/A'
-                              }
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Tooltip title="View Details">
-                            <IconButton
-                              size="small"
-                              onClick={() => handleViewDetails(interview)}
-                              color="primary"
-                            >
-                              <Visibility />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Interview Details Dialog - UPDATED to show real name */}
-      <Dialog
-        open={detailsOpen}
+      {/* Details Dialog */}
+      <Dialog 
+        open={detailsOpen} 
         onClose={() => setDetailsOpen(false)}
         maxWidth="md"
         fullWidth
+        PaperProps={{
+          sx: {
+            background: '#1e293b',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backgroundImage: 'none'
+          }
+        }}
       >
-        <DialogTitle>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <QuestionAnswer sx={{ mr: 2, color: 'primary.main' }} />
-            {/* 🔥 UPDATED: Show real name in dialog title */}
-            Interview Details - {selectedInterview ? getCandidateInfo(selectedInterview).name : 'Unknown'}
-            <Typography variant="caption" sx={{ ml: 2, color: 'text.secondary' }}>
-              ({selectedInterview?.interview_id})
-            </Typography>
+        <DialogTitle sx={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <QuestionAnswer sx={{ color: 'primary.main' }} />
+            <Box>
+              <Typography variant="h6" sx={{ color: '#fff' }}>Interview Details</Typography>
+              <Typography variant="caption" color="text.secondary">
+                ID: {selectedInterview?.interview_id}
+              </Typography>
+            </Box>
           </Box>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ mt: 2 }}>
           {selectedInterview && (
             <Box>
-              {/* 🔥 UPDATED: Add candidate information section */}
-              <Box sx={{ mb: 3, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                  Candidate Information
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={4}>
-                    <Typography variant="body2" color="textSecondary">Name</Typography>
-                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                      {getCandidateInfo(selectedInterview).name}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <Typography variant="body2" color="textSecondary">Phone</Typography>
-                    <Typography variant="body1">
-                      {getCandidateInfo(selectedInterview).phone}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <Typography variant="body2" color="textSecondary">Email</Typography>
-                    <Typography variant="body1">
-                      {getCandidateInfo(selectedInterview).email}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Box>
-
-              {/* Interview Info */}
-              <Grid container spacing={2} sx={{ mb: 3 }}>
-                <Grid item xs={6}>
-                  <Typography variant="body2" color="textSecondary">Status</Typography>
-                  {getStatusChip(selectedInterview)}
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body2" color="textSecondary">Completion Rate</Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                    {(() => {
-                      const formatted = formatCompletionRate(selectedInterview.questions_answered, selectedInterview.total_questions);
-                      return `${formatted.percentage}% (${formatted.displayText})`;
-                    })()}
+              {/* Candidate Info Card */}
+              <Card sx={{ mb: 3, bgcolor: 'rgba(255, 255, 255, 0.05)', border: 'none' }}>
+                <CardContent>
+                  <Typography variant="subtitle1" sx={{ mb: 2, color: 'primary.main', fontWeight: 'bold' }}>
+                    Candidate Information
                   </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body2" color="textSecondary">Start Time</Typography>
-                  <Typography variant="body1">
-                    {selectedInterview.start_time ? formatDate(selectedInterview.start_time) : 'N/A'}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body2" color="textSecondary">End Time</Typography>
-                  <Typography variant="body1">
-                    {selectedInterview.end_time ? formatDate(selectedInterview.end_time) : 'N/A'}
-                  </Typography>
-                </Grid>
-              </Grid>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={4}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Person sx={{ color: 'text.secondary', fontSize: 20 }} />
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">Name</Typography>
+                          <Typography variant="body1" sx={{ color: '#fff' }}>{getCandidateInfo(selectedInterview).name}</Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Phone sx={{ color: 'text.secondary', fontSize: 20 }} />
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">Phone</Typography>
+                          <Typography variant="body1" sx={{ color: '#fff' }}>{getCandidateInfo(selectedInterview).phone}</Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Email sx={{ color: 'text.secondary', fontSize: 20 }} />
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">Email</Typography>
+                          <Typography variant="body1" sx={{ color: '#fff' }}>{getCandidateInfo(selectedInterview).email}</Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
 
-              <Divider sx={{ my: 2 }} />
-
-              {/* Questions and Answers */}
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+              {/* Questions */}
+              <Typography variant="h6" sx={{ mb: 2, mt: 4, fontWeight: 'bold', color: '#fff' }}>
                 Questions & Answers
               </Typography>
-
               {selectedInterview.responses.map((response, index) => (
-                <Accordion key={index} sx={{ mb: 1 }}>
-                  <AccordionSummary expandIcon={<ExpandMore />}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mr: 2 }}>
-                        Q{response.question_number}:
+                <Accordion 
+                  key={index} 
+                  sx={{ 
+                    bgcolor: 'rgba(255, 255, 255, 0.02)', 
+                    color: '#fff',
+                    mb: 1,
+                    '&:before': { display: 'none' }
+                  }}
+                >
+                  <AccordionSummary expandIcon={<ExpandMore sx={{ color: 'text.secondary' }} />}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                      <Typography sx={{ color: 'primary.main', fontWeight: 'bold', minWidth: 30 }}>
+                        Q{response.question_number}
                       </Typography>
-                      <Typography variant="body1" sx={{ flex: 1 }}>
-                        {response.question.length > 80 
-                          ? `${response.question.substring(0, 80)}...` 
-                          : response.question
-                        }
+                      <Typography sx={{ flex: 1, color: '#e2e8f0' }}>
+                        {response.question.length > 60 ? response.question.substring(0, 60) + '...' : response.question}
                       </Typography>
                       {response.duration && (
-                        <Chip label={response.duration} size="small" color="info" />
+                        <Chip label={response.duration} size="small" sx={{ bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'text.secondary' }} />
                       )}
                     </Box>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <Box>
-                      <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-                        Question:
-                      </Typography>
-                      <Typography variant="body1" sx={{ mb: 2, fontStyle: 'italic' }}>
-                        "{response.question}"
-                      </Typography>
+                    <Box sx={{ pl: 4 }}>
+                      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>Full Question:</Typography>
+                      <Typography sx={{ mb: 2, fontStyle: 'italic', color: '#cbd5e1' }}>{response.question}</Typography>
                       
-                      <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-                        Answer:
-                      </Typography>
-                      <Paper elevation={0} sx={{ p: 2, bgcolor: 'grey.50' }}>
-                        <Typography variant="body1">
-                          {response.answer}
-                        </Typography>
+                      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>Answer:</Typography>
+                      <Paper sx={{ p: 2, bgcolor: 'rgba(0, 0, 0, 0.2)', color: '#fff' }}>
+                        <Typography>{response.answer}</Typography>
                       </Paper>
-                      
-                      <Typography variant="caption" color="textSecondary" sx={{ mt: 1, display: 'block' }}>
-                        Answered at: {formatDate(response.timestamp)}
-                      </Typography>
                     </Box>
                   </AccordionDetails>
                 </Accordion>
               ))}
-
-              {/* FIXED: Replace INCOMPLETE_SILENCE with "No Response" */}
-              {selectedInterview.termination_reason && (
-                <Alert severity="warning" sx={{ mt: 2 }}>
-                  <strong>Termination Reason:</strong> {
-                    selectedInterview.termination_reason === 'INCOMPLETE_SILENCE' 
-                      ? 'No Response' 
-                      : selectedInterview.termination_reason
-                  }
-                </Alert>
-              )}
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDetailsOpen(false)} color="primary">
+        <DialogActions sx={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', p: 2 }}>
+          <Button onClick={() => setDetailsOpen(false)} sx={{ color: 'text.secondary' }}>
             Close
           </Button>
         </DialogActions>
@@ -784,4 +482,3 @@ export const CallHistory: React.FC = () => {
     </Box>
   );
 };
-

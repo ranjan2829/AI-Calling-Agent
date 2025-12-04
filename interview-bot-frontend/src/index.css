@@ -2,24 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Force light theme for the entire app */
+/* Clean Flat Dark Theme */
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #213547 !important;
-  background-color: #f8fafc !important;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
+  
+  color-scheme: dark;
 }
 
-/* Override any dark theme */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 html {
-  background-color: #f8fafc !important;
-  color: #213547 !important;
+  background-color: #0f172a;
+  color: #f8fafc;
   width: 100%;
   height: 100%;
   scroll-behavior: smooth;
@@ -28,130 +29,65 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #f8fafc !important;
-  color: #213547 !important;
+  background-color: #0f172a;
+  color: #f8fafc;
   overflow-x: hidden;
+  min-height: 100vh;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
-  overflow-x: hidden;
-  background-color: #f8fafc !important;
-  color: #213547 !important;
+  background-color: #0f172a;
 }
 
-/* Force all elements to use light theme */
-* {
-  box-sizing: border-box;
-  color-scheme: light !important;
-}
-
-a {
-  font-weight: 500;
-  color: #2f8d8c;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #319492;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-  color: #1e293b !important;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-/* Remove all dark theme media queries */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color: #213547 !important;
-    background-color: #f8fafc !important;
-  }
-  html {
-    background-color: #f8fafc !important;
-    color: #213547 !important;
-  }
-  body {
-    background-color: #f8fafc !important;
-    color: #213547 !important;
-  }
-}
-
-/* Custom animations */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.5s ease-out;
-}
-
-/* Custom scrollbar */
+/* Clean Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #0f172a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+  background: #334155;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #475569;
 }
 
-/* Smooth login card animation */
-.login-card {
-  animation: fade-in 0.8s ease-out;
-  transition: all 0.3s ease !important;
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.login-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12) !important;
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
 }
 
-/* Login page specific styles */
-.login-container {
-  max-width: 400px !important;
-  width: 100% !important;
+/* Link Styles */
+a {
+  font-weight: 500;
+  color: #3b82f6;
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
 
-/* Remove any width forcing for login card */
-.login-card {
-  max-width: 400px !important;
-  width: auto !important;
+a:hover {
+  color: #60a5fa;
+}
+
+/* Reset defaults */
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-family: inherit;
 }

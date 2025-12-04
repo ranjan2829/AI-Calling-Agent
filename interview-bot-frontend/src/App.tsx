@@ -20,7 +20,6 @@ import {
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
-  History,
   Assessment,
   GroupAdd,
   Menu,
@@ -35,7 +34,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import SignIn from './components/SignIn';
 import Dashboard from './components/Dashboard';
 import { CallDashboard } from './components/CallDashboard';
-import { CallHistory } from './components/CallHistory';
 import { InterviewDetails } from './components/InterviewDetails';
 import { InterviewResults } from './components/InterviewResults';
 import { BulkCallDashboard } from './components/BulkCallDashboard';
@@ -74,27 +72,106 @@ export const useBulkCall = () => {
   return context;
 };
 
-// Greenish blue theme
+// Modern Flat Dark Theme
 const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: '#2F8D8C',
-      light: '#4FD0D7',
-      dark: '#006B6B',
+      main: '#3b82f6', // Modern blue
+      light: '#60a5fa',
+      dark: '#2563eb',
+      contrastText: '#ffffff',
     },
     secondary: {
-      main: '#319492',
-      light: '#63E6E2',
-      dark: '#00807A',
-    },
-    info: {
-      main: '#17A2B8',
-      light: '#5BC5D3',
-      dark: '#0E7489',
+      main: '#64748b', // Slate
+      light: '#94a3b8',
+      dark: '#475569',
+      contrastText: '#ffffff',
     },
     background: {
-      default: '#f8fafc',
-      paper: '#ffffff',
+      default: '#0f172a', // Slate 900
+      paper: '#1e293b',   // Slate 800
+    },
+    text: {
+      primary: '#f8fafc', // Slate 50
+      secondary: '#94a3b8', // Slate 400
+      disabled: '#64748b', // Slate 500
+    },
+    divider: '#334155', // Slate 700
+    error: {
+      main: '#ef4444', // Red 500
+    },
+    warning: {
+      main: '#f59e0b', // Amber 500
+    },
+    info: {
+      main: '#3b82f6', // Blue 500
+    },
+    success: {
+      main: '#10b981', // Emerald 500
+    },
+  },
+  typography: {
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif",
+    h1: { fontWeight: 700 },
+    h2: { fontWeight: 600 },
+    h3: { fontWeight: 600 },
+    h4: { fontWeight: 600 },
+    h5: { fontWeight: 600 },
+    h6: { fontWeight: 600 },
+    button: { textTransform: 'none', fontWeight: 500 },
+  },
+  shape: {
+    borderRadius: 8,
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+          backgroundColor: '#1e293b',
+          border: '1px solid #334155',
+          boxShadow: 'none',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          boxShadow: 'none',
+          '&:hover': {
+            boxShadow: 'none',
+          },
+        },
+        contained: {
+          '&:hover': {
+            boxShadow: 'none',
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          boxShadow: 'none',
+          borderBottom: '1px solid #334155',
+        },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          borderRight: '1px solid #334155',
+          backgroundColor: '#0f172a',
+        },
+      },
     },
   },
 });
@@ -114,34 +191,37 @@ const TopProgressBar: React.FC = () => {
         left: 0,
         right: 0,
         zIndex: 1300,
-        backgroundColor: 'primary.main',
-        color: 'white',
-        py: 1,
-        px: 2,
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        backgroundColor: '#3b82f6',
+        color: '#ffffff',
+        py: 1.5,
+        px: 3,
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
           Bulk Calling in Progress
         </Typography>
         <Chip
           label={`${bulkCallSession.completed_calls}/${bulkCallSession.total_contacts}`}
           size="small"
-          sx={{ backgroundColor: 'white', color: 'primary.main', fontWeight: 'bold' }}
+          sx={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            color: '#ffffff',
+            fontWeight: 600,
+          }}
         />
       </Box>
       <LinearProgress
         variant="determinate"
         value={progress}
         sx={{
-          height: 4,
-          borderRadius: 2,
-          backgroundColor: 'rgba(255,255,255,0.3)',
+          height: 6,
+          borderRadius: 3,
+          backgroundColor: 'rgba(255, 255, 255, 0.3)',
           '& .MuiLinearProgress-bar': {
-            backgroundColor: 'white',
-            borderRadius: 2
-          }
+            backgroundColor: '#ffffff',
+            borderRadius: 3,
+          },
         }}
       />
     </Box>
@@ -163,7 +243,7 @@ const Sidebar: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClo
   const menuItems = [
     { text: 'Main Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Call Dashboard', icon: <Phone />, path: '/call-dashboard' },
-    { text: 'Call History', icon: <History />, path: '/history' },
+    // Call History removed as requested
     { text: 'Interview Results', icon: <Assessment />, path: '/results' },
     { text: 'Bulk Calling', icon: <GroupAdd />, path: '/bulk-call', showBadge: isCalling },
     { text: 'Bulk PDF Processor', icon: <PictureAsPdf />, path: '/bulk-pdf-processor' },
@@ -177,73 +257,62 @@ const Sidebar: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClo
       <Box
         sx={{
           p: 3,
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
+          borderBottom: '1px solid #334155',
           display: 'flex',
           alignItems: 'center',
-          minHeight: 80
+          minHeight: 80,
         }}
       >
         <Box
           component="img"
           src="/dashboard-logo.svg"
-          alt="AI Interview Bot Logo"
+          alt="Logo"
           sx={{
-            height: '40px',
+            height: '32px',
             width: 'auto',
-            marginRight: '12px'
+            marginRight: '12px',
+            filter: 'brightness(0) invert(1)',
           }}
         />
-        <Box>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 'bold', 
-              color: '#2F8D8C',
-              fontSize: '1.1rem',
-              lineHeight: 1.2
-            }}
-          >
-            AI Interview Bot
-          </Typography>
-          <Typography 
-            variant="caption" 
-            sx={{ 
-              color: '#64748b',
-              fontSize: '0.75rem'
-            }}
-          >
-            Smart Recruitment
-          </Typography>
-        </Box>
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            fontWeight: 700,
+            color: '#f8fafc',
+          }}
+        >
+          AI Interview
+        </Typography>
       </Box>
 
       {/* Navigation Menu */}
-      <Box sx={{ flex: 1, backgroundColor: '#f8fafc' }}>
-        <List sx={{ p: 2 }}>
+      <Box sx={{ flex: 1, overflow: 'auto', py: 2 }}>
+        <List>
           {menuItems.map((item) => (
-            <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
+            <ListItem key={item.path} disablePadding>
               <ListItemButton
                 component={Link}
                 to={item.path}
+                selected={isActive(item.path)}
                 onClick={isMobile ? onClose : undefined}
                 sx={{
-                  borderRadius: 2,
-                  py: 1.5,
-                  px: 2,
-                  backgroundColor: isActive(item.path) ? 'primary.main' : 'transparent',
-                  color: isActive(item.path) ? 'white' : '#64748b',
-                  '&:hover': {
-                    backgroundColor: isActive(item.path) ? 'primary.dark' : 'rgba(47, 141, 140, 0.08)',
-                    color: isActive(item.path) ? 'white' : 'primary.main',
+                  mx: 1,
+                  borderRadius: 1,
+                  '&.Mui-selected': {
+                    backgroundColor: '#3b82f6',
+                    color: '#ffffff',
+                    '&:hover': {
+                      backgroundColor: '#2563eb',
+                    },
+                    '& .MuiListItemIcon-root': {
+                      color: '#ffffff',
+                    },
                   },
-                  transition: 'all 0.2s ease-in-out',
-                  position: 'relative'
                 }}
               >
                 <ListItemIcon
                   sx={{
-                    color: isActive(item.path) ? 'white' : '#64748b',
+                    color: isActive(item.path) ? '#ffffff' : '#94a3b8',
                     minWidth: 40,
                   }}
                 >
@@ -252,143 +321,55 @@ const Sidebar: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClo
                 <ListItemText
                   primary={item.text}
                   primaryTypographyProps={{
-                    fontWeight: isActive(item.path) ? 600 : 500,
-                    fontSize: '0.95rem',
+                    fontWeight: isActive(item.path) ? 600 : 400,
+                    fontSize: '0.9rem',
                   }}
                 />
                 {item.showBadge && (
-                  <Box
+                  <Chip
+                    label="Active"
+                    size="small"
                     sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      backgroundColor: '#ef4444',
-                      animation: 'pulse 2s infinite'
+                      height: 20,
+                      fontSize: '0.7rem',
+                      backgroundColor: '#10b981',
+                      color: '#ffffff',
+                      fontWeight: 600,
                     }}
                   />
                 )}
               </ListItemButton>
             </ListItem>
           ))}
-
-          {/* Logout Button */}
-          <ListItem disablePadding sx={{ mt: 2 }}>
-            <ListItemButton
-              onClick={handleLogout}
-              sx={{
-                borderRadius: 2,
-                py: 1.5,
-                px: 2,
-                color: '#64748b',
-                '&:hover': {
-                  backgroundColor: 'rgba(239, 68, 68, 0.08)',
-                  color: 'error.main',
-                },
-                transition: 'all 0.2s ease-in-out',
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  color: '#64748b',
-                  minWidth: 40,
-                }}
-              >
-                <ExitToApp />
-              </ListItemIcon>
-              <ListItemText
-                primary="Logout"
-                primaryTypographyProps={{
-                  fontWeight: 500,
-                  fontSize: '0.95rem',
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
         </List>
-
-        {/* Bulk Call Status in Sidebar */}
-        {isCalling && bulkCallSession && (
-          <Box sx={{ p: 2 }}>
-            <Typography 
-              variant="overline" 
-              sx={{ 
-                color: 'primary.main', 
-                fontWeight: 600,
-                fontSize: '0.75rem',
-                letterSpacing: 1
-              }}
-            >
-              Live Progress
-            </Typography>
-            <Box 
-              sx={{ 
-                mt: 1,
-                p: 2,
-                backgroundColor: 'white',
-                borderRadius: 2,
-                border: '1px solid',
-                borderColor: 'primary.light'
-              }}
-            >
-              <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                Bulk Calling Active
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {bulkCallSession.completed_calls} of {bulkCallSession.total_contacts} completed
-              </Typography>
-              <LinearProgress
-                variant="determinate"
-                value={(bulkCallSession.completed_calls / bulkCallSession.total_contacts) * 100}
-                sx={{ mt: 1, height: 6, borderRadius: 3 }}
-              />
-            </Box>
-          </Box>
-        )}
       </Box>
 
-      {/* Footer */}
-      <Box
-        sx={{
-          p: 2,
-          borderTop: '1px solid #e2e8f0',
-          backgroundColor: '#ffffff',
-        }}
-      >
-        <Typography 
-          variant="caption" 
-          sx={{ 
-            color: '#94a3b8',
-            fontSize: '0.7rem',
-            textAlign: 'center',
-            display: 'block'
+      {/* Logout Button */}
+      <Box sx={{ p: 2, borderTop: '1px solid #334155' }}>
+        <ListItemButton
+          onClick={handleLogout}
+          sx={{
+            borderRadius: 1,
+            color: '#ef4444',
+            '&:hover': {
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            },
           }}
         >
-          © 2025 AI Calling Interview Bot
-        </Typography>
+          <ListItemIcon sx={{ color: '#ef4444', minWidth: 40 }}>
+            <ExitToApp />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
+        </ListItemButton>
       </Box>
     </Box>
   );
 
   return (
-    <>
-      {/* Desktop Drawer */}
-      <Drawer
-        variant="permanent"
-        sx={{
-          display: { xs: 'none', md: 'block' },
-          '& .MuiDrawer-paper': {
-            boxSizing: 'border-box',
-            width: drawerWidth,
-            border: 'none',
-            boxShadow: '0 0 15px rgba(0, 0, 0, 0.1)',
-          },
-        }}
-        open
-      >
-        {sidebarContent}
-      </Drawer>
-
-      {/* Mobile Drawer */}
+    <Box
+      component="nav"
+      sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+    >
       <Drawer
         variant="temporary"
         open={open}
@@ -404,38 +385,58 @@ const Sidebar: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClo
       >
         {sidebarContent}
       </Drawer>
-    </>
+      <Drawer
+        variant="permanent"
+        sx={{
+          display: { xs: 'none', md: 'block' },
+          '& .MuiDrawer-paper': {
+            boxSizing: 'border-box',
+            width: drawerWidth,
+          },
+        }}
+        open
+      >
+        {sidebarContent}
+      </Drawer>
+    </Box>
   );
 };
 
 const TopBar: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
-  const { isCalling } = useBulkCall();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <Box
       sx={{
-        display: { xs: 'flex', md: 'none' },
+        display: 'flex',
         alignItems: 'center',
         p: 2,
-        backgroundColor: 'white',
-        borderBottom: '1px solid #e2e8f0',
-        position: 'sticky',
-        top: isCalling ? '60px' : 0,
-        zIndex: 1100,
-        ml: { md: `${drawerWidth}px` },
+        borderBottom: '1px solid #334155',
+        backgroundColor: '#0f172a',
       }}
     >
-      <IconButton
-        color="inherit"
-        aria-label="open drawer"
-        edge="start"
-        onClick={onMenuClick}
-        sx={{ mr: 2 }}
+      {isMobile && (
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+          onClick={onMenuClick}
+          sx={{ mr: 2 }}
+        >
+          <Menu />
+        </IconButton>
+      )}
+      <Typography
+        variant="h6"
+        noWrap
+        component="div"
+        sx={{
+          fontWeight: 600,
+          color: '#f8fafc',
+        }}
       >
-        <Menu />
-      </IconButton>
-      <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-        AI Interview Bot
+        AI Interview Platform
       </Typography>
     </Box>
   );
@@ -477,25 +478,18 @@ function App() {
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                  <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0f172a' }}>
                     <TopProgressBar />
                     <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
                     <Box
                       sx={{
                         flexGrow: 1,
                         ml: { md: `${drawerWidth}px` },
-                        backgroundColor: 'background.default',
+                        backgroundColor: 'transparent',
                         minHeight: '100vh',
                         pt: isCalling ? '60px' : 0,
                       }}
                     >
-                      <Box
-                        sx={{
-                          height: '4px',
-                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
-                          width: '100%'
-                        }}
-                      />
                       <TopBar onMenuClick={handleDrawerToggle} />
                       <Box sx={{ p: { xs: 2, md: 4 } }}>
                         <Dashboard />
@@ -510,25 +504,18 @@ function App() {
               path="/call-dashboard"
               element={
                 <ProtectedRoute>
-                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                  <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0f172a' }}>
                     <TopProgressBar />
                     <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
                     <Box
                       sx={{
                         flexGrow: 1,
                         ml: { md: `${drawerWidth}px` },
-                        backgroundColor: 'background.default',
+                        backgroundColor: 'transparent',
                         minHeight: '100vh',
                         pt: isCalling ? '60px' : 0,
                       }}
                     >
-                      <Box
-                        sx={{
-                          height: '4px',
-                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
-                          width: '100%'
-                        }}
-                      />
                       <TopBar onMenuClick={handleDrawerToggle} />
                       <Box sx={{ p: { xs: 2, md: 4 } }}>
                         <CallDashboard />
@@ -540,94 +527,21 @@ function App() {
             />
 
             <Route
-              path="/history"
-              element={
-                <ProtectedRoute>
-                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-                    <TopProgressBar />
-                    <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
-                    <Box
-                      sx={{
-                        flexGrow: 1,
-                        ml: { md: `${drawerWidth}px` },
-                        backgroundColor: 'background.default',
-                        minHeight: '100vh',
-                        pt: isCalling ? '60px' : 0,
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          height: '4px',
-                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
-                          width: '100%'
-                        }}
-                      />
-                      <TopBar onMenuClick={handleDrawerToggle} />
-                      <Box sx={{ p: { xs: 2, md: 4 } }}>
-                        <CallHistory />
-                      </Box>
-                    </Box>
-                  </Box>
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/interview/:interviewId"
-              element={
-                <ProtectedRoute>
-                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-                    <TopProgressBar />
-                    <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
-                    <Box
-                      sx={{
-                        flexGrow: 1,
-                        ml: { md: `${drawerWidth}px` },
-                        backgroundColor: 'background.default',
-                        minHeight: '100vh',
-                        pt: isCalling ? '60px' : 0,
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          height: '4px',
-                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
-                          width: '100%'
-                        }}
-                      />
-                      <TopBar onMenuClick={handleDrawerToggle} />
-                      <Box sx={{ p: { xs: 2, md: 4 } }}>
-                        <InterviewDetails />
-                      </Box>
-                    </Box>
-                  </Box>
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
               path="/results"
               element={
                 <ProtectedRoute>
-                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                  <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0f172a' }}>
                     <TopProgressBar />
                     <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
                     <Box
                       sx={{
                         flexGrow: 1,
                         ml: { md: `${drawerWidth}px` },
-                        backgroundColor: 'background.default',
+                        backgroundColor: 'transparent',
                         minHeight: '100vh',
                         pt: isCalling ? '60px' : 0,
                       }}
                     >
-                      <Box
-                        sx={{
-                          height: '4px',
-                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
-                          width: '100%'
-                        }}
-                      />
                       <TopBar onMenuClick={handleDrawerToggle} />
                       <Box sx={{ p: { xs: 2, md: 4 } }}>
                         <InterviewResults />
@@ -639,28 +553,47 @@ function App() {
             />
 
             <Route
-              path="/bulk-call"
+              path="/interview/:id"
               element={
                 <ProtectedRoute>
-                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                  <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0f172a' }}>
                     <TopProgressBar />
                     <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
                     <Box
                       sx={{
                         flexGrow: 1,
                         ml: { md: `${drawerWidth}px` },
-                        backgroundColor: 'background.default',
+                        backgroundColor: 'transparent',
                         minHeight: '100vh',
                         pt: isCalling ? '60px' : 0,
                       }}
                     >
-                      <Box
-                        sx={{
-                          height: '4px',
-                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
-                          width: '100%'
-                        }}
-                      />
+                      <TopBar onMenuClick={handleDrawerToggle} />
+                      <Box sx={{ p: { xs: 2, md: 4 } }}>
+                        <InterviewDetails />
+                      </Box>
+                    </Box>
+                  </Box>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/bulk-call"
+              element={
+                <ProtectedRoute>
+                  <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0f172a' }}>
+                    <TopProgressBar />
+                    <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        ml: { md: `${drawerWidth}px` },
+                        backgroundColor: 'transparent',
+                        minHeight: '100vh',
+                        pt: isCalling ? '60px' : 0,
+                      }}
+                    >
                       <TopBar onMenuClick={handleDrawerToggle} />
                       <Box sx={{ p: { xs: 2, md: 4 } }}>
                         <BulkCallDashboard />
@@ -675,25 +608,18 @@ function App() {
               path="/bulk-pdf-processor"
               element={
                 <ProtectedRoute>
-                  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+                  <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0f172a' }}>
                     <TopProgressBar />
                     <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
                     <Box
                       sx={{
                         flexGrow: 1,
                         ml: { md: `${drawerWidth}px` },
-                        backgroundColor: 'background.default',
+                        backgroundColor: 'transparent',
                         minHeight: '100vh',
                         pt: isCalling ? '60px' : 0,
                       }}
                     >
-                      <Box
-                        sx={{
-                          height: '4px',
-                          background: 'linear-gradient(90deg, #2F8D8C 0%, #319492 50%, #17A2B8 100%)',
-                          width: '100%'
-                        }}
-                      />
                       <TopBar onMenuClick={handleDrawerToggle} />
                       <Box sx={{ p: { xs: 2, md: 4 } }}>
                         <BulkPdfProcessor />
@@ -718,7 +644,12 @@ function App() {
             pauseOnFocusLoss
             draggable
             pauseOnHover
-            theme="light"
+            theme="dark"
+            toastStyle={{
+              backgroundColor: '#1e293b',
+              color: '#f8fafc',
+              border: '1px solid #334155',
+            }}
           />
         </Router>
       </BulkCallContext.Provider>

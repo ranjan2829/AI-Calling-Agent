@@ -15,7 +15,7 @@
 13. [🐛 Troubleshooting](#-troubleshooting)
 14. [🤝 Contributing](#-contributing)
 ## Project Overview
-The **AI Calling Agent** is an intelligent interview automation platform developed by **Onelab Ventures** that conducts phone interviews, transcribes responses in real-time, and provides comprehensive candidate analysis. Built specifically for the Indian market with cultural intelligence and local optimizations.
+The **AI Calling Agent** is an intelligent interview automation platform that conducts phone interviews, transcribes responses in real-time, and provides comprehensive candidate analysis. Built specifically for the Indian market with cultural intelligence and local optimizations.
 ### 🎯 Key Capabilities
 - 📞 **Automated Phone Interviews** - AI-powered structured interviews via Twilio
 - 🎙️ **Real-time Transcription** - Live speech-to-text using AWS Transcribe
@@ -384,7 +384,7 @@ Edit `Backend/config/job_description.json`:
 ```json
 {
   "job_title": "Senior Python Developer",
-  "company": "Onelab Ventures",
+  "company": "AI Interview Platform",
   "experience_required": "3-5 years",
   
   "required_skills": [
@@ -444,9 +444,9 @@ app.add_middleware(
 
 ## 📄 License
 
-This project is developed by **Onelab Ventures**. All rights reserved.
+This project is developed for AI Interview Automation. All rights reserved.
 
 ## 📞 Support & Contact
 
-- **🏢 Company**: Onelab Ventures
-- **🌐 Website**: [onelab.ventures](https://onelab.ventures)
+- **🏢 Project**: AI Calling Agent
+- **📧 Support**: Configure your support contact details

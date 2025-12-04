@@ -88,7 +88,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           AI Calling Agent
         </Typography>
         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-          Onelab Ventures
+          AI Interview Platform
         </Typography>
       </Box>
       <List>

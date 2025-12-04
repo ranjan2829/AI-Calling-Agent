@@ -48,8 +48,9 @@ interface AssessmentDropdownProps {
   selectedAssessment?: AssessmentData | null;
 }
 
-const API_BASE_URL = 'https://api.onelabventur.us/node/api';
-const FALLBACK_API_URL = 'http://13.204.76.229:8000';
+// External API URLs - configure these in environment variables
+const API_BASE_URL = import.meta.env.VITE_ASSESSMENT_API_URL || '';
+const FALLBACK_API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 const AssessmentDropdown: React.FC<AssessmentDropdownProps> = ({ 
   onAssessmentSelect,
