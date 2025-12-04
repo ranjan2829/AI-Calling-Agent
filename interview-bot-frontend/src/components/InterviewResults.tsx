@@ -78,6 +78,8 @@ interface ProcessedInterview extends InterviewData {
   recommendation: string;
   interview_duration: string;
   completion_rate: string;
+  ai_verdict: string;
+  ai_verdict_reason: string;
 }
 
 export const InterviewResults: React.FC = () => {
@@ -327,6 +329,17 @@ export const InterviewResults: React.FC = () => {
           recommendation = 'MODERATE FIT';
         }
 
+        // AI Verdict Analysis
+        const aiVerdict = generateAIVerdict({
+          overall_score,
+          skills_percentage,
+          validation_score,
+          completion_rate: parseInt(completion_rate),
+          found_skills: found_skills.length,
+          responses: safeInterview.responses,
+          validation_results: safeInterview.validation_results
+        });
+
         return {
           ...safeInterview,
           overall_score,
@@ -334,7 +347,9 @@ export const InterviewResults: React.FC = () => {
           found_skills,
           recommendation,
           interview_duration,
-          completion_rate
+          completion_rate,
+          ai_verdict: aiVerdict.verdict,
+          ai_verdict_reason: aiVerdict.reason
         };
       });
       
@@ -526,7 +541,7 @@ export const InterviewResults: React.FC = () => {
                     <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}><strong>Score</strong></TableCell>
                     <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}><strong>Skills</strong></TableCell>
                     <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}><strong>Duration</strong></TableCell>
-                    <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}><strong>Recommendation</strong></TableCell>
+                    <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}><strong>AI Verdict</strong></TableCell>
                     <TableCell align="right" sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.8125rem', py: 1 }}><strong>Actions</strong></TableCell>
                   </TableRow>
                 </TableHead>
@@ -587,16 +602,32 @@ export const InterviewResults: React.FC = () => {
                           </TableCell>
                           <TableCell sx={{ py: 1.5 }}>
                             <Chip
-                              label={interview.recommendation}
+                              label={interview.ai_verdict || 'PENDING'}
                               size="small"
                               sx={{ 
                                 borderRadius: 1.5,
-                                height: 20,
-                                fontWeight: 'bold',
+                                height: 24,
+                                fontWeight: 600,
                                 fontSize: '0.7rem',
-                                backgroundColor: interview.overall_score >= 70 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                                color: interview.overall_score >= 70 ? '#10b981' : '#f59e0b',
-                                border: `1px solid ${interview.overall_score >= 70 ? '#10b981' : '#f59e0b'}`
+                                backgroundColor: 
+                                  interview.ai_verdict === 'STRONG HIRE' ? 'rgba(16, 185, 129, 0.15)' :
+                                  interview.ai_verdict === 'RECOMMENDED' ? 'rgba(34, 197, 94, 0.15)' :
+                                  interview.ai_verdict === 'CONSIDER' ? 'rgba(245, 158, 11, 0.15)' :
+                                  interview.ai_verdict === 'MAYBE' ? 'rgba(251, 146, 60, 0.15)' :
+                                  'rgba(239, 68, 68, 0.15)',
+                                color: 
+                                  interview.ai_verdict === 'STRONG HIRE' ? '#10b981' :
+                                  interview.ai_verdict === 'RECOMMENDED' ? '#22c55e' :
+                                  interview.ai_verdict === 'CONSIDER' ? '#f59e0b' :
+                                  interview.ai_verdict === 'MAYBE' ? '#fb923c' :
+                                  '#ef4444',
+                                border: `1px solid ${
+                                  interview.ai_verdict === 'STRONG HIRE' ? '#10b981' :
+                                  interview.ai_verdict === 'RECOMMENDED' ? '#22c55e' :
+                                  interview.ai_verdict === 'CONSIDER' ? '#f59e0b' :
+                                  interview.ai_verdict === 'MAYBE' ? '#fb923c' :
+                                  '#ef4444'
+                                }`
                               }}
                             />
                           </TableCell>
@@ -634,12 +665,25 @@ export const InterviewResults: React.FC = () => {
                         
                         {/* Expanded Details Row */}
                         <TableRow>
-                          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+                          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
                             <Collapse in={expandedRows.has(safeCallSid)} timeout="auto" unmountOnExit>
                               <Box sx={{ margin: 1, p: 1.5, backgroundColor: 'rgba(17, 17, 17, 0.5)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: 2 }}>
                                 <Typography variant="h6" gutterBottom sx={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', pb: 0.75, mb: 1.5, color: '#f5f5f5', fontSize: '0.9375rem' }}>
                                   Detailed Analysis: {safeCandidateName}
                                 </Typography>
+                                
+                                {/* AI Verdict Section */}
+                                {interview.ai_verdict && (
+                                  <Box sx={{ mb: 1.5, p: 1.25, backgroundColor: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.3)', borderRadius: 1.5 }}>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.75, color: '#f5f5f5', fontSize: '0.8125rem', display: 'flex', alignItems: 'center' }}>
+                                      <Assessment sx={{ mr: 0.75, fontSize: 18, color: '#6366f1' }} />
+                                      AI Verdict: {interview.ai_verdict}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ color: '#a3a3a3', fontSize: '0.75rem', lineHeight: 1.6 }}>
+                                      {interview.ai_verdict_reason}
+                                    </Typography>
+                                  </Box>
+                                )}
                                 
                                 <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 1.5 }}>
                                   {/* Skills Analysis */}
