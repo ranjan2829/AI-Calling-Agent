@@ -82,6 +82,85 @@ interface ProcessedInterview extends InterviewData {
   ai_verdict_reason: string;
 }
 
+// AI Verdict Generator Function
+const generateAIVerdict = (data: {
+  overall_score: number;
+  skills_percentage: number;
+  validation_score: number;
+  completion_rate: number;
+  found_skills: number;
+  responses: any[];
+  validation_results: any;
+}): { verdict: string; reason: string } => {
+  const { overall_score, skills_percentage, validation_score, completion_rate, found_skills, responses, validation_results } = data;
+  
+  // Calculate response quality
+  const avgConfidence = responses.length > 0
+    ? responses.reduce((sum: number, r: any) => sum + (r.confidence || 0.5), 0) / responses.length
+    : 0.5;
+  const responseQuality = Math.round(avgConfidence * 100);
+  
+  // Check validation results
+  const availabilityCheck = validation_results?.["0"]?.passed;
+  const skillsCheck = validation_results?.["2"]?.passed;
+  const noticeCheck = validation_results?.["3"]?.passed;
+  const salaryCheck = validation_results?.["4"]?.passed;
+  
+  // Comprehensive scoring
+  let verdictScore = 0;
+  let reasons: string[] = [];
+  
+  // Overall score weight (40%)
+  verdictScore += (overall_score / 100) * 40;
+  if (overall_score >= 80) reasons.push('High overall performance');
+  else if (overall_score < 50) reasons.push('Low overall score');
+  
+  // Skills match weight (25%)
+  verdictScore += (skills_percentage / 100) * 25;
+  if (skills_percentage >= 70) reasons.push('Strong skills match');
+  else if (skills_percentage < 40) reasons.push('Weak skills alignment');
+  
+  // Validation score weight (20%)
+  verdictScore += (validation_score / 100) * 20;
+  if (validation_score >= 80) reasons.push('Passed key validations');
+  else if (validation_score < 50) reasons.push('Failed critical checks');
+  
+  // Completion rate weight (10%)
+  verdictScore += (completion_rate / 100) * 10;
+  if (completion_rate >= 90) reasons.push('Complete interview');
+  else if (completion_rate < 60) reasons.push('Incomplete responses');
+  
+  // Response quality weight (5%)
+  verdictScore += (responseQuality / 100) * 5;
+  if (responseQuality >= 80) reasons.push('Clear communication');
+  else if (responseQuality < 60) reasons.push('Unclear responses');
+  
+  const finalScore = Math.round(verdictScore);
+  
+  // Generate verdict
+  let verdict: string;
+  let reason: string;
+  
+  if (finalScore >= 85 && availabilityCheck && skillsCheck && completion_rate >= 85) {
+    verdict = 'STRONG HIRE';
+    reason = `Exceptional candidate with ${overall_score}% score, ${skills_percentage}% skills match, and strong validation results. Highly recommended for immediate consideration.`;
+  } else if (finalScore >= 70 && availabilityCheck && skillsCheck) {
+    verdict = 'RECOMMENDED';
+    reason = `Solid candidate with ${overall_score}% score and ${skills_percentage}% skills alignment. Meets key requirements and shows good potential.`;
+  } else if (finalScore >= 55 && (availabilityCheck || skillsCheck)) {
+    verdict = 'CONSIDER';
+    reason = `Moderate fit with ${overall_score}% score. Some gaps in skills (${skills_percentage}%) or requirements. May need additional evaluation.`;
+  } else if (finalScore >= 40) {
+    verdict = 'MAYBE';
+    reason = `Below average performance (${overall_score}% score). Limited skills match (${skills_percentage}%). Consider only if no better candidates available.`;
+  } else {
+    verdict = 'NOT RECOMMENDED';
+    reason = `Low score (${overall_score}%) and weak skills alignment (${skills_percentage}%). Does not meet minimum requirements. Not recommended for this role.`;
+  }
+  
+  return { verdict, reason };
+};
+
 export const InterviewResults: React.FC = () => {
   const [interviews, setInterviews] = useState<ProcessedInterview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -330,11 +409,12 @@ export const InterviewResults: React.FC = () => {
         }
 
         // AI Verdict Analysis
+        const completionRateNum = parseInt(completion_rate.replace('%', '')) || 0;
         const aiVerdict = generateAIVerdict({
           overall_score,
           skills_percentage,
           validation_score,
-          completion_rate: parseInt(completion_rate),
+          completion_rate: completionRateNum,
           found_skills: found_skills.length,
           responses: safeInterview.responses,
           validation_results: safeInterview.validation_results
