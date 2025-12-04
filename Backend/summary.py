@@ -69,6 +69,7 @@ def get_candidate_metadata(call_sid):
 def save_unique_match_report(report, call_sid, candidate_name):
     try:
         os.makedirs("interviews", exist_ok=True)
+        # Simple naming: call_sid_JD_ANALYSIS.json (no timestamps)
         filename = f"interviews/{call_sid}_JD_ANALYSIS.json"  
         report["candidate_name"] = candidate_name
         try:
@@ -83,6 +84,7 @@ def save_unique_match_report(report, call_sid, candidate_name):
                     report["candidate_phone"] = "Not provided"
         except:
             report["candidate_phone"] = "Not provided"
+        # Remove any old analysis files for this call_sid
         existing_pattern = f"interviews/{call_sid}_*_JD_ANALYSIS.json"
         existing_files = glob.glob(existing_pattern)
         for old_file in existing_files:
@@ -103,7 +105,7 @@ def save_unique_match_report(report, call_sid, candidate_name):
 def create_bulk_call_summary():
     try:
         pattern = "interviews/*_JD_ANALYSIS.json"
-        analysis_files = glob.glob(pattern)
+        analysis_files = [f for f in glob.glob(pattern) if "archive" not in f]
         if not analysis_files:
             return {"error": "No analysis files found"}
         bulk_summary = {"total_candidates": len(analysis_files), "analysis_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "candidates": [], "statistics": {"excellent_match": 0, "strong_match": 0, "good_match": 0, "moderate_match": 0, "low_match": 0}}

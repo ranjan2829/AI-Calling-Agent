@@ -31,6 +31,6 @@ INTERVIEW_QUESTIONS = {
     5: "Tell us about your experience with APIs.",
     6: "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
     7: "Describe your experience with deployments, including the use of Docker and Kubernetes.",
-    8: "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used."
+    8: "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
 }
 

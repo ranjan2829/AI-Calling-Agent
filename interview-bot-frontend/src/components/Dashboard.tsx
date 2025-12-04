@@ -34,14 +34,13 @@ import {
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = 'http://13.204.76.229:8000';
+const API_BASE_URL = 'http://localhost:8000';
 
 interface DashboardStats {
   totalInterviews: number;
   completedInterviews: number;
   pendingInterviews: number;
   successRate: number;
-  averageScore: number;
 }
 
 const Dashboard = () => {
@@ -52,8 +51,7 @@ const Dashboard = () => {
     totalInterviews: 0,
     completedInterviews: 0,
     pendingInterviews: 0,
-    successRate: 0,
-    averageScore: 0
+    successRate: 0
   });
   const [recentInterviews, setRecentInterviews] = useState<any[]>([]);
   const [error, setError] = useState('');
@@ -72,8 +70,7 @@ const Dashboard = () => {
           totalInterviews: interviews.length,
           completedInterviews: completed.length,
           pendingInterviews: interviews.length - completed.length,
-          successRate: interviews.length > 0 ? Math.round((completed.length / interviews.length) * 100) : 0,
-          averageScore: 85 // Mock score for now
+          successRate: interviews.length > 0 ? Math.round((completed.length / interviews.length) * 100) : 0
         });
         
         setRecentInterviews(interviews.slice(0, 5));
@@ -94,71 +91,79 @@ const Dashboard = () => {
   }, []);
 
   const StatCard = ({ title, value, icon, color, subtitle }: any) => (
-    <Card sx={{ height: '100%' }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+    <Card sx={{ 
+      height: '100%', 
+      border: '1px solid rgba(255, 255, 255, 0.1)', 
+      backgroundColor: 'rgba(17, 17, 17, 0.7)',
+      backdropFilter: 'blur(20px)',
+      boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+    }}>
+      <CardContent sx={{ p: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
           <Box
-                sx={{ 
-              p: 1,
-              borderRadius: 1,
-              backgroundColor: `${color}20`,
-              color: color,
-              mr: 2,
-              display: 'flex'
+            sx={{ 
+              p: 0.75,
+              color: '#6366f1',
+              mr: 1,
+              display: 'flex',
+              borderRadius: 1.5,
+              backgroundColor: 'rgba(99, 102, 241, 0.1)',
             }}
           >
             {icon}
-            </Box>
-          <Typography variant="h6" color="text.secondary" sx={{ fontSize: '0.9rem', fontWeight: 500 }}>
+          </Box>
+          <Typography variant="h6" color="text.secondary" sx={{ fontSize: '0.75rem', fontWeight: 500 }}>
             {title}
           </Typography>
-      </Box>
-        <Typography variant="h4" sx={{ fontWeight: 700, color: '#f8fafc', mb: 1 }}>
+        </Box>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: '#f5f5f5', mb: 0.25, fontSize: '1.5rem' }}>
           {value}
-          </Typography>
+        </Typography>
         {subtitle && (
-          <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', color: '#94a3b8' }}>
-            <TrendingUp sx={{ fontSize: 16, color: theme.palette.success.main, mr: 0.5 }} />
-            <span style={{ color: theme.palette.success.main, fontWeight: 600 }}>{subtitle}</span>
+          <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', color: '#a3a3a3', fontSize: '0.7rem' }}>
+            <TrendingUp sx={{ fontSize: 12, color: '#10b981', mr: 0.5 }} />
+            <span style={{ color: '#10b981', fontWeight: 600 }}>{subtitle}</span>
             <span style={{ marginLeft: 4 }}>vs last month</span>
           </Typography>
         )}
       </CardContent>
     </Card>
-    );
+  );
 
   if (loading) {
-      return (
+    return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <CircularProgress size={40} sx={{ color: '#3b82f6' }} />
-        </Box>
-      );
-    }
+        <CircularProgress size={40} sx={{ color: '#6366f1' }} />
+      </Box>
+    );
+  }
     
     return (
     <Box className="animate-fade-in">
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: '#f8fafc', mb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#f5f5f5', mb: 0.25, fontSize: '1.125rem' }}>
             Dashboard Overview
-            </Typography>
-          <Typography variant="body1" color="text.secondary">
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
             Welcome back to your AI Interview Platform
           </Typography>
-      </Box>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1.5 }}>
           <Button
             startIcon={<Refresh />}
             onClick={fetchDashboardData}
             variant="outlined"
-                    sx={{
-              borderColor: '#334155',
-              color: '#94a3b8',
+            size="small"
+            sx={{
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+              color: '#f5f5f5',
+              py: 0.75,
+              px: 1.5,
               '&:hover': {
-                borderColor: '#3b82f6',
-                color: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.05)'
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)'
               }
             }}
           >
@@ -167,26 +172,29 @@ const Dashboard = () => {
           <Button
             startIcon={<Phone />}
             variant="contained"
+            size="small"
             onClick={() => navigate('/call-dashboard')}
             sx={{ 
-              backgroundColor: '#3b82f6',
-              '&:hover': { backgroundColor: '#2563eb' }
+              backgroundColor: '#6366f1',
+              color: '#ffffff',
+              py: 0.75,
+              px: 1.5,
+              '&:hover': { backgroundColor: '#4f46e5' }
             }}
           >
             Start New Call
           </Button>
         </Box>
-        </Box>
+      </Box>
 
       {/* Stats Grid */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid container spacing={1.5} sx={{ mb: 1.5 }}>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Total Interviews"
             value={stats.totalInterviews}
             icon={<Person />}
-            color="#3b82f6"
-            subtitle="+12%"
+            color="#000000"
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -194,8 +202,7 @@ const Dashboard = () => {
             title="Completed"
             value={stats.completedInterviews}
             icon={<CheckCircle />}
-            color="#10b981"
-            subtitle="+8%"
+            color="#2e7d32"
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -203,8 +210,7 @@ const Dashboard = () => {
             title="Pending"
             value={stats.pendingInterviews}
             icon={<Schedule />}
-            color="#f59e0b"
-            subtitle="-5%"
+            color="#ed6c02"
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
@@ -212,8 +218,7 @@ const Dashboard = () => {
             title="Success Rate"
             value={`${stats.successRate}%`}
             icon={<Assessment />}
-            color="#8b5cf6"
-            subtitle="+2%"
+            color="#000000"
           />
         </Grid>
       </Grid>
@@ -222,49 +227,56 @@ const Dashboard = () => {
       <Grid container spacing={3}>
         {/* Recent Interviews Table */}
         <Grid item xs={12} lg={8}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#f8fafc' }}>
+          <Card sx={{ 
+            height: '100%', 
+            border: '1px solid rgba(255, 255, 255, 0.1)', 
+            backgroundColor: 'rgba(17, 17, 17, 0.7)',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+          }}>
+            <CardContent sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#f5f5f5', fontSize: '1rem' }}>
                   Recent Interviews
                 </Typography>
-        <Button
+                <Button
                   endIcon={<ArrowForward />} 
                   onClick={() => navigate('/results')}
-                  sx={{ color: '#3b82f6' }}
+                  size="small"
+                  sx={{ color: '#6366f1', fontSize: '0.8125rem', '&:hover': { color: '#818cf8' } }}
                 >
                   View All
-        </Button>
-      </Box>
+                </Button>
+              </Box>
 
               <TableContainer component={Paper} sx={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                      <TableCell sx={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>Candidate</TableCell>
-                      <TableCell sx={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>Status</TableCell>
-                      <TableCell sx={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>Score</TableCell>
-                      <TableCell sx={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>Date</TableCell>
-                      <TableCell sx={{ color: '#94a3b8', borderBottom: '1px solid #334155' }} align="right">Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}>Candidate</TableCell>
+                      <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}>Status</TableCell>
+                      <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}>Score</TableCell>
+                      <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}>Date</TableCell>
+                      <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.8125rem', py: 1 }} align="right">Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
                     {recentInterviews.map((interview) => (
                       <TableRow 
                         key={interview.interview_id}
                         sx={{ 
-                          '&:hover': { backgroundColor: 'rgba(255,255,255,0.02)' },
-                          borderBottom: '1px solid #334155'
+                          '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.05)' },
+                          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
                         }}
                       >
-                        <TableCell sx={{ color: '#f8fafc', borderBottom: '1px solid #334155' }}>
+                        <TableCell sx={{ color: '#f5f5f5', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', py: 1, fontSize: '0.75rem' }}>
                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box 
                               sx={{ 
                                 width: 32, 
                                 height: 32, 
-                                borderRadius: '50%', 
-                                backgroundColor: '#2563eb', 
+                                borderRadius: 2, 
+                                backgroundColor: '#6366f1', 
                                 display: 'flex', 
                                 alignItems: 'center', 
                                 justifyContent: 'center',
@@ -276,164 +288,159 @@ const Dashboard = () => {
                             >
                               {interview.candidate_name?.charAt(0) || 'C'}
                             </Box>
-                          <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                 {interview.candidate_name || 'Unknown'}
-                            </Typography>
-                              {/* Phone number hidden as requested */}
+                              </Typography>
+                            </Box>
                           </Box>
-                        </Box>
-                      </TableCell>
-                        <TableCell sx={{ borderBottom: '1px solid #334155' }}>
+                        </TableCell>
+                        <TableCell sx={{ py: 1, fontSize: '0.75rem' }}>
                           <Chip 
                             label={interview.status} 
                             size="small"
                             sx={{ 
                               backgroundColor: interview.status === 'COMPLETED' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
                               color: interview.status === 'COMPLETED' ? '#10b981' : '#f59e0b',
-                              fontWeight: 500,
-                              borderRadius: 1
+                              fontWeight: 600,
+                              borderRadius: 1.5,
+                              height: 20,
+                              fontSize: '0.7rem',
+                              border: `1px solid ${interview.status === 'COMPLETED' ? '#10b981' : '#f59e0b'}`
                             }} 
                           />
-                      </TableCell>
-                        <TableCell sx={{ borderBottom: '1px solid #334155' }}>
-                          {interview.status === 'COMPLETED' ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <Typography variant="body2" sx={{ color: '#f8fafc', fontWeight: 600, mr: 1 }}>
-                                85%
-                              </Typography>
-                              <LinearProgress 
-                                variant="determinate" 
-                                value={85} 
-                                sx={{ 
-                                  width: 60, 
-                                  height: 4, 
-                                  borderRadius: 2,
-                                  backgroundColor: '#334155',
-                                  '& .MuiLinearProgress-bar': {
-                                    backgroundColor: '#3b82f6'
-                                  }
-                                }} 
-                              />
-                            </Box>
-                          ) : (
-                            <Typography variant="body2" color="text.secondary">-</Typography>
-                          )}
-                      </TableCell>
-                        <TableCell sx={{ color: '#94a3b8', borderBottom: '1px solid #334155' }}>
+                        </TableCell>
+                        <TableCell sx={{ py: 1, fontSize: '0.75rem' }}>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>-</Typography>
+                        </TableCell>
+                        <TableCell sx={{ color: '#a3a3a3', py: 1.5, fontSize: '0.8125rem' }}>
                           {new Date(interview.start_time).toLocaleDateString()}
-                      </TableCell>
-                        <TableCell align="right" sx={{ borderBottom: '1px solid #334155' }}>
+                        </TableCell>
+                        <TableCell align="right" sx={{ py: 1 }}>
                           <IconButton 
                             size="small"
-                            sx={{ color: '#94a3b8', '&:hover': { color: '#3b82f6' } }}
+                            sx={{ color: '#a3a3a3', '&:hover': { color: '#6366f1' }, p: 0.5 }}
                             onClick={() => navigate(`/interview/${interview.interview_id}`)}
                           >
                             <Assessment fontSize="small" />
                           </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                     {recentInterviews.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={5} align="center" sx={{ py: 4, color: '#94a3b8', borderBottom: 'none' }}>
+                        <TableCell colSpan={5} align="center" sx={{ py: 2, color: '#a3a3a3', fontSize: '0.75rem' }}>
                           No recent interviews found
                         </TableCell>
                       </TableRow>
                     )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
         </Grid>
 
         {/* Quick Actions */}
         <Grid item xs={12} lg={4}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#f8fafc', mb: 2 }}>
+              <Card sx={{ 
+                border: '1px solid rgba(255, 255, 255, 0.1)', 
+                backgroundColor: 'rgba(17, 17, 17, 0.7)',
+                backdropFilter: 'blur(20px)',
+                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+              }}>
+                <CardContent sx={{ p: 1.5 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#f5f5f5', mb: 1, fontSize: '0.875rem' }}>
                     System Status
-            </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Box sx={{ 
-                      width: 8, 
-                      height: 8, 
+                      width: 6, 
+                      height: 6, 
                       borderRadius: '50%', 
                       bgcolor: '#10b981', 
-                      mr: 2,
+                      mr: 1.5,
                     }} />
-                    <Typography color="text.secondary">API System Operational</Typography>
-          </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Typography color="text.secondary" sx={{ fontSize: '0.75rem' }}>API System Operational</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Box sx={{ 
-                      width: 8, 
-                      height: 8, 
+                      width: 6, 
+                      height: 6, 
                       borderRadius: '50%', 
                       bgcolor: '#10b981', 
-                      mr: 2,
+                      mr: 1.5,
                     }} />
-                    <Typography color="text.secondary">Twilio Voice Services</Typography>
-              </Box>
+                    <Typography color="text.secondary" sx={{ fontSize: '0.75rem' }}>Twilio Voice Services</Typography>
+                  </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Box sx={{ 
-                      width: 8, 
-                      height: 8, 
+                      width: 6, 
+                      height: 6, 
                       borderRadius: '50%', 
                       bgcolor: '#10b981', 
-                      mr: 2,
+                      mr: 1.5,
                     }} />
-                    <Typography color="text.secondary">Database Connection</Typography>
+                    <Typography color="text.secondary" sx={{ fontSize: '0.75rem' }}>Database Connection</Typography>
                   </Box>
                 </CardContent>
-            </Card>
+              </Card>
             </Grid>
 
             <Grid item xs={12}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#f8fafc', mb: 2 }}>
+              <Card sx={{ 
+                border: '1px solid rgba(255, 255, 255, 0.1)', 
+                backgroundColor: 'rgba(17, 17, 17, 0.7)',
+                backdropFilter: 'blur(20px)',
+                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+              }}>
+                <CardContent sx={{ p: 1.5 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#f5f5f5', mb: 1, fontSize: '0.875rem' }}>
                     Quick Actions
                   </Typography>
                   <Button
                     fullWidth 
                     variant="outlined" 
+                    size="small"
                     startIcon={<Person />}
                     onClick={() => navigate('/call-dashboard')}
                     sx={{ 
-                      mb: 2, 
+                      mb: 1, 
                       justifyContent: 'flex-start',
-                      borderColor: '#334155',
-                      color: '#94a3b8',
+                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                      color: '#f5f5f5',
+                      py: 0.5,
+                      fontSize: '0.75rem',
                       '&:hover': {
-                        borderColor: '#3b82f6',
-                        color: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.05)'
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)'
                       }
                     }}
                   >
                     New Interview
                   </Button>
                   <Button 
-                fullWidth
+                    fullWidth
                     variant="outlined" 
+                    size="small"
                     startIcon={<Assessment />}
                     onClick={() => navigate('/results')}
                     sx={{ 
                       justifyContent: 'flex-start',
-                      borderColor: '#334155',
-                      color: '#94a3b8',
+                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                      color: '#f5f5f5',
+                      py: 0.5,
+                      fontSize: '0.75rem',
                       '&:hover': {
-                        borderColor: '#3b82f6',
-                        color: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.05)'
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)'
                       }
                     }}
                   >
                     View Reports
-          </Button>
+                  </Button>
                 </CardContent>
               </Card>
             </Grid>

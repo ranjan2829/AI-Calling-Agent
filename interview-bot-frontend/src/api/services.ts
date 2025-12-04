@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://13.204.76.229:8000';
+const API_BASE_URL = 'http://localhost:8000';
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -182,7 +182,7 @@ export const callsApi = {
 
   getInterviewQuestions: async () => {
     try {
-      const response = await fetch('http://13.204.76.229:8000/interview-questions');
+      const response = await fetch(`${API_BASE_URL}/interview-questions`);
       const data = await response.json();
       return data;
     } catch (error) {
@@ -193,7 +193,7 @@ export const callsApi = {
 
   updateInterviewQuestions: async (questions: any[]) => {
     try {
-      const response = await fetch('http://13.204.76.229:8000/update-interview-questions', {
+      const response = await fetch(`${API_BASE_URL}/update-interview-questions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -28,9 +28,6 @@ import {
   Person,
   CheckCircle,
   Cancel,
-  Schedule,
-  LocationOn,
-  AttachMoney
 } from '@mui/icons-material';
 import { callsApi } from '../api/services';
 import { toast } from 'react-toastify';
@@ -95,11 +92,11 @@ export const InterviewResults: React.FC = () => {
   }, []);
   useEffect(() => {
     if (Object.keys(contactMappings).length > 0) {
-      console.log('🔄 Contact mappings loaded, now loading interviews...');
+      console.log('Contact mappings loaded, now loading interviews...');
       loadInterviewData();
     } else {
       const timer = setTimeout(() => {
-        console.log('⏰ Loading interviews without mappings (timeout fallback)');
+        console.log('Loading interviews without mappings (timeout fallback)');
         loadInterviewData();
       }, 3000);
       return () => clearTimeout(timer);
@@ -108,13 +105,13 @@ export const InterviewResults: React.FC = () => {
 
   const loadContactMappings = async () => {
     try {
-      console.log('🔄 Loading contact mappings from backend...');
+      console.log('Loading contact mappings from backend...');
       const response = await callsApi.getContactMappings();
-      console.log('📡 Backend response:', response);
+      console.log('Backend response:', response);
       
       if (response.success && response.mappings && Object.keys(response.mappings).length > 0) {
         setContactMappings(response.mappings);
-        console.log('✅ Contact mappings loaded successfully:', Object.keys(response.mappings).length);
+        console.log('Contact mappings loaded successfully:', Object.keys(response.mappings).length);
 
         const testCallIds = [
           'CA5f0e20a83a4524369b15adb814e96172',
@@ -127,17 +124,17 @@ export const InterviewResults: React.FC = () => {
           if (mapping) {
             const name = mapping.candidate_name || mapping.candidate_data?.name || 'No Name';
             const phone = mapping.candidate_phone || mapping.candidate_data?.phone || 'No Phone';
-            console.log(`🎯 Found mapping for ${callId}: ${name} (${phone})`);
+            console.log(`Found mapping for ${callId}: ${name} (${phone})`);
           } else {
-            console.log(`❌ No mapping found for ${callId}`);
+            console.log(`No mapping found for ${callId}`);
           }
         });
       } else {
-        console.log('⚠️ No contact mappings received from backend');
+        console.log('No contact mappings received from backend');
         setContactMappings({});
       }
     } catch (error) {
-      console.error('❌ Error loading contact mappings:', error);
+      console.error('Error loading contact mappings:', error);
       setContactMappings({});
     }
   };
@@ -162,12 +159,12 @@ export const InterviewResults: React.FC = () => {
       }
     });
     
-    return [...new Set(foundSkills)];
+    return Array.from(new Set(foundSkills));
   };
   const loadInterviewData = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Loading interview data with', Object.keys(contactMappings).length, 'contact mappings available');
+      console.log('Loading interview data with', Object.keys(contactMappings).length, 'contact mappings available');
       
       const interviewsResponse = await callsApi.getAllInterviewsDetailed();
       const allInterviews = interviewsResponse.data.interviews || [];
@@ -179,7 +176,7 @@ export const InterviewResults: React.FC = () => {
         return callId && responses.length > 0;
       });
       
-      console.log('✅ Valid interviews after filtering:', validInterviews.length);
+        console.log('Valid interviews after filtering:', validInterviews.length);
       
       const processedInterviews = validInterviews.map((interview: any) => {
         const callId = interview.call_sid || interview.interview_id || 'unknown';
@@ -197,26 +194,26 @@ export const InterviewResults: React.FC = () => {
           // Check direct fields first
           if (contactMapping.candidate_name) {
             candidateName = contactMapping.candidate_name;
-            console.log(`✅ Using candidate_name: ${candidateName}`);
+            console.log(`Using candidate_name: ${candidateName}`);
           }
           if (contactMapping.candidate_phone) {
             phoneNumber = contactMapping.candidate_phone;
-            console.log(`✅ Using candidate_phone: ${phoneNumber}`);
+            console.log(`Using candidate_phone: ${phoneNumber}`);
           }
           
           // Check nested candidate_data
           if (contactMapping.candidate_data) {
             if (contactMapping.candidate_data.name && !contactMapping.candidate_name) {
               candidateName = contactMapping.candidate_data.name;
-              console.log(`✅ Using candidate_data.name: ${candidateName}`);
+              console.log(`Using candidate_data.name: ${candidateName}`);
             }
             if (contactMapping.candidate_data.phone && !contactMapping.candidate_phone) {
               phoneNumber = contactMapping.candidate_data.phone;
-              console.log(`✅ Using candidate_data.phone: ${phoneNumber}`);
+              console.log(`Using candidate_data.phone: ${phoneNumber}`);
             }
           }
         } else {
-          console.log(`❌ No mapping found for ${callId} in contact mappings`);
+          console.log(`No mapping found for ${callId} in contact mappings`);
           
           // Priority 2: Check interview data directly
           if (interview.candidate_name && interview.candidate_name !== 'Unknown') {
@@ -232,7 +229,7 @@ export const InterviewResults: React.FC = () => {
           const responses = interview.responses || [];
           if (responses.length > 0 && candidateName === 'Unknown Candidate') {
             const introText = responses[0].answer || '';
-            // 🔥 FIX: Use proper JavaScript regex syntax instead of Python r"..." strings
+            // FIX: Use proper JavaScript regex syntax instead of Python r"..." strings
             const namePatterns = [
               /(?:my name is|i'?m|i am|this is)\s+([a-zA-Z][a-zA-Z\s]{1,25})/i,
               /^([a-zA-Z][a-zA-Z\s]{1,25}?)(?:\s+speaking|\s+here|\s*$)/i
@@ -244,7 +241,7 @@ export const InterviewResults: React.FC = () => {
                 const extractedName = match[1].trim();
                 if (extractedName.length > 2 && !extractedName.toLowerCase().includes('from')) {
                   candidateName = extractedName;
-                  console.log(`🎯 Extracted name from intro: ${candidateName}`);
+                  console.log(`Extracted name from intro: ${candidateName}`);
                   break;
                 }
               }
@@ -258,7 +255,7 @@ export const InterviewResults: React.FC = () => {
           candidateName = phoneDigits ? `Candidate_${phoneDigits}` : `ID_${callId.slice(-8)}`;
         }
         
-        console.log(`📊 FINAL for ${callId}: Name="${candidateName}" | Phone="${phoneNumber}"`);
+        console.log(`FINAL for ${callId}: Name="${candidateName}" | Phone="${phoneNumber}"`);
         
         // Build safe interview object
         const safeInterview = {
@@ -341,14 +338,14 @@ export const InterviewResults: React.FC = () => {
         };
       });
       
-      const sortedInterviews = processedInterviews.sort((a, b) => {
+      const sortedInterviews = processedInterviews.sort((a: ProcessedInterview, b: ProcessedInterview) => {
         if (a.overall_score !== b.overall_score) {
           return b.overall_score - a.overall_score;
         }
         return b.skills_percentage - a.skills_percentage;
       });
     
-      console.log('🎯 Final interviews with real names:', sortedInterviews.slice(0, 5).map(i => ({ 
+      console.log('Final interviews with real names:', sortedInterviews.slice(0, 5).map((i: ProcessedInterview) => ({ 
         name: i.candidate_name, 
         phone: i.candidate_phone, 
         id: i.call_sid 
@@ -357,7 +354,7 @@ export const InterviewResults: React.FC = () => {
       setInterviews(sortedInterviews);
     
     } catch (error) {
-      console.error('❌ Error loading interview data:', error);
+      console.error('Error loading interview data:', error);
       setInterviews([]);
     } finally {
       setLoading(false);
@@ -367,7 +364,7 @@ export const InterviewResults: React.FC = () => {
   // 🔥 UPDATE: Re-process interviews when contact mappings are loaded
   useEffect(() => {
     if (Object.keys(contactMappings).length > 0 && interviews.length > 0) {
-      console.log('🔄 Re-processing interviews with contact mappings...');
+      console.log('Re-processing interviews with contact mappings...');
       loadInterviewData();
     }
   }, [contactMappings]);
@@ -375,20 +372,20 @@ export const InterviewResults: React.FC = () => {
   const runJDAnalysis = async () => {
     try {
       setAnalyzing(true);
-      console.log('🔄 Running Interview Analysis...');
+      console.log('Running Interview Analysis...');
       const response = await callsApi.runJDAnalysis();
       
       if (response.data.error) {
         toast.error(`Analysis failed: ${response.data.error}`);
       } else {
         toast.success('Interview Analysis completed successfully!');
-        console.log('✅ Interview Analysis completed, refreshing data...');
+        console.log('Interview Analysis completed, refreshing data...');
         setTimeout(() => {
           loadInterviewData();
         }, 2000);
       }
     } catch (error: any) {
-      console.error('❌ Interview Analysis failed:', error);
+      console.error('Interview Analysis failed:', error);
       toast.error(`Analysis failed: ${error.message}`);
     } finally {
       setAnalyzing(false);
@@ -452,182 +449,163 @@ export const InterviewResults: React.FC = () => {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
-        <CircularProgress />
-        <Typography sx={{ ml: 2 }}>🔄 Loading all interview results...</Typography>
+        <CircularProgress sx={{ color: '#6366f1' }} />
+        <Typography sx={{ ml: 2, color: '#f5f5f5' }}>Loading all interview results...</Typography>
       </Box>
     );
   }
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 1 }}>
-          📋 Interview Results & Candidate Analysis
+    <Box sx={{ p: 1 }}>
+      <Box sx={{ mb: 1 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5, color: '#f5f5f5', fontSize: '1.125rem' }}>
+          Interview Results & Candidate Analysis
         </Typography>
-        <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+        <Typography variant="body2" sx={{ color: '#a3a3a3', fontSize: '0.75rem' }}>
           Comprehensive interview evaluation with detailed candidate responses and validation results
         </Typography>
       </Box>
 
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
+      <Card sx={{ 
+        mb: 1, 
+        border: '1px solid rgba(255, 255, 255, 0.1)', 
+        backgroundColor: 'rgba(17, 17, 17, 0.7)',
+        backdropFilter: 'blur(20px)',
+        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+      }}>
+        <CardContent sx={{ p: 1.5 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                📊 Interview Analysis
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.25, color: '#f5f5f5', fontSize: '0.9375rem' }}>
+                Interview Analysis
               </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              <Typography variant="body2" sx={{ color: '#a3a3a3', fontSize: '0.75rem' }}>
                 Analyze interview responses and generate comprehensive candidate reports
               </Typography>
             </Box>
             <Button
               variant="contained"
-              startIcon={analyzing ? <CircularProgress size={20} /> : <Assessment />}
+              size="small"
+              startIcon={analyzing ? <CircularProgress size={16} color="inherit" /> : <Assessment />}
               onClick={runJDAnalysis}
               disabled={analyzing}
+              sx={{
+                backgroundColor: '#6366f1',
+                color: '#ffffff',
+                py: 0.75,
+                px: 1.5,
+                '&:hover': { backgroundColor: '#4f46e5' }
+              }}
             >
-              {analyzing ? 'Analyzing...' : 'Run Interview Analysis'}
+              {analyzing ? 'Analyzing...' : 'Run Analysis'}
             </Button>
           </Box>
         </CardContent>
       </Card>
-      <Card>
-        <CardContent>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-            📞 Interview Results ({interviews.length} candidates with detailed analysis)
+      <Card sx={{ 
+        border: '1px solid rgba(255, 255, 255, 0.1)', 
+        backgroundColor: 'rgba(17, 17, 17, 0.7)',
+        backdropFilter: 'blur(20px)',
+        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+      }}>
+        <CardContent sx={{ p: 1.5 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: '#f5f5f5', fontSize: '0.9375rem' }}>
+            Candidate List ({interviews.length} total)
           </Typography>
           
           {interviews.length === 0 ? (
-            <Alert severity="info">
+            <Alert severity="info" sx={{ borderRadius: 1.5, backgroundColor: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', color: '#3b82f6' }}>
               No interview results available. Complete interviews and run analysis to see results here.
             </Alert>
           ) : (
-            <TableContainer component={Paper}>
-              <Table>
+            <TableContainer component={Paper} elevation={0} sx={{ backgroundColor: 'transparent' }}>
+              <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell><strong>Rank</strong></TableCell>
-                    <TableCell><strong>📞 Contact Info</strong></TableCell>
-                    <TableCell><strong>👤 Candidate Details</strong></TableCell>
-                    <TableCell><strong>📊 Overall Score</strong></TableCell>
-                    <TableCell><strong>🎯 Skills Match</strong></TableCell>
-                    <TableCell><strong>⏱️ Interview Info</strong></TableCell>
-                    <TableCell><strong>✅ Recommendation</strong></TableCell>
-                    <TableCell><strong>Actions</strong></TableCell>
+                    <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}><strong>Rank</strong></TableCell>
+                    <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}><strong>Candidate Details</strong></TableCell>
+                    <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}><strong>Score</strong></TableCell>
+                    <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}><strong>Skills</strong></TableCell>
+                    <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}><strong>Duration</strong></TableCell>
+                    <TableCell sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.75rem', py: 0.75 }}><strong>Recommendation</strong></TableCell>
+                    <TableCell align="right" sx={{ color: '#a3a3a3', fontWeight: 600, borderBottom: '1px solid rgba(255, 255, 255, 0.1)', fontSize: '0.8125rem', py: 1 }}><strong>Actions</strong></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {interviews.map((interview, index) => {
-                    // 🔥 UPDATED: Use the processed data directly
                     const safeCallSid = interview.call_sid || `unknown_${index}`;
                     const safeCandidateName = interview.candidate_name || 'Unknown Candidate';
-                    const safeCandidatePhone = interview.candidate_phone || interview.phone_number || 'No Phone Available';
+                    const safeCandidatePhone = (interview.candidate_phone && interview.candidate_phone !== 'No Phone Available') 
+                      ? interview.candidate_phone 
+                      : '';
                     
                     return (
                       <React.Fragment key={safeCallSid}>
-                        <TableRow>
-                          <TableCell>
-                            <Chip 
-                              label={`#${index + 1}`} 
-                              color="primary"
-                              size="small" 
-                            />
+                        <TableRow sx={{ '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.05)' }, borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                          <TableCell sx={{ color: '#f5f5f5', py: 1, fontSize: '0.75rem' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                              #{index + 1}
+                            </Typography>
                           </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ color: '#f5f5f5', py: 1, fontSize: '0.75rem' }}>
                             <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', mb: 1 }}>
-                                <Phone sx={{ fontSize: 16, mr: 0.5, color: 'primary.main' }} />
-                                {/* 🔥 Show real phone number */}
-                                {safeCandidatePhone}
-                              </Typography>
-                              <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
-                                ID: {safeCallSid.slice(-8)}
-                              </Typography>
-                              <br />
-                              <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
-                                Twilio: {interview.twilio_number || 'Unknown'}
-                              </Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 'medium', display: 'flex', alignItems: 'center', mb: 1 }}>
-                                <Person sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
-                                {/* 🔥 Show real candidate name */}
+                              <Typography variant="body2" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', mb: 0.25, fontSize: '0.8125rem' }}>
+                                <Person sx={{ fontSize: 16, mr: 0.75, color: '#6366f1' }} />
                                 {safeCandidateName}
                               </Typography>
-                              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                Status: {interview.status || 'Unknown'}
+                              {safeCandidatePhone && (
+                                <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', color: '#a3a3a3', mb: 0.25, fontSize: '0.75rem' }}>
+                                  <Phone sx={{ fontSize: 12, mr: 0.75 }} />
+                                  {safeCandidatePhone}
+                                </Typography>
+                              )}
+                              <Typography variant="caption" sx={{ fontFamily: 'monospace', color: '#a3a3a3', fontSize: '0.7rem' }}>
+                                ID: {safeCallSid.slice(-8)}
                               </Typography>
-                              <br />
-                              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                Completion: {interview.completion_rate}
+                            </Box>
+                          </TableCell>
+                          <TableCell sx={{ color: '#f5f5f5', py: 1, fontSize: '0.75rem' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.875rem' }}>
+                                {interview.overall_score}%
                               </Typography>
                             </Box>
                           </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <CircularProgress
-                                variant="determinate"
-                                value={interview.overall_score}
-                                size={40}
-                                sx={{ mr: 1 }}
-                                color={
-                                  interview.overall_score >= 70 ? 'success' :
-                                  interview.overall_score >= 50 ? 'info' : 'warning'
-                                }
-                              />
-                              <Box>
-                                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                                  {interview.overall_score}%
-                                </Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                  Overall
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <CircularProgress
-                                variant="determinate"
-                                value={interview.skills_percentage}
-                                size={30}
-                                sx={{ mr: 1 }}
-                                color={interview.skills_percentage >= 70 ? 'success' : interview.skills_percentage >= 50 ? 'info' : 'warning'}
-                              />
-                              <Box>
-                                <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                                  {Math.round(interview.skills_percentage)}%
-                                </Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                  {interview.found_skills.length} skills
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ color: '#f5f5f5', py: 1, fontSize: '0.75rem' }}>
                             <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 'medium', display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                                <Schedule sx={{ fontSize: 14, mr: 0.5 }} />
-                                {interview.interview_duration}
+                              <Typography variant="body2" sx={{ fontWeight: 'medium', fontSize: '0.8125rem' }}>
+                                {Math.round(interview.skills_percentage)}% Match
                               </Typography>
-                              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                Questions: {interview.responses?.length || 0}/7
+                              <Typography variant="caption" sx={{ color: '#a3a3a3', fontSize: '0.7rem' }}>
+                                {interview.found_skills.length} skills found
                               </Typography>
                             </Box>
                           </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ color: '#f5f5f5', py: 1, fontSize: '0.75rem' }}>
+                            <Typography variant="body2" sx={{ fontSize: '0.8125rem' }}>
+                              {interview.interview_duration}
+                            </Typography>
+                          </TableCell>
+                          <TableCell sx={{ py: 1.5 }}>
                             <Chip
                               label={interview.recommendation}
-                              color={getRecommendationColor(interview.recommendation)}
                               size="small"
+                              sx={{ 
+                                borderRadius: 1.5,
+                                height: 20,
+                                fontWeight: 'bold',
+                                fontSize: '0.7rem',
+                                backgroundColor: interview.overall_score >= 70 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                                color: interview.overall_score >= 70 ? '#10b981' : '#f59e0b',
+                                border: `1px solid ${interview.overall_score >= 70 ? '#10b981' : '#f59e0b'}`
+                              }}
                             />
                           </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', gap: 1 }}>
+                          <TableCell align="right" sx={{ py: 1 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.75 }}>
                               <IconButton
                                 size="small"
                                 onClick={() => toggleRowExpansion(safeCallSid)}
+                                sx={{ color: '#a3a3a3', p: 0.5, '&:hover': { color: '#6366f1' } }}
                               >
                                 {expandedRows.has(safeCallSid) ? <ExpandLess /> : <ExpandMore />}
                               </IconButton>
@@ -635,8 +613,20 @@ export const InterviewResults: React.FC = () => {
                                 size="small"
                                 onClick={() => downloadReport(interview)}
                                 startIcon={<CloudDownload />}
+                                sx={{ 
+                                  color: '#6366f1', 
+                                  borderColor: 'rgba(99, 102, 241, 0.3)',
+                                  fontSize: '0.75rem',
+                                  py: 0.5,
+                                  px: 1,
+                                  '&:hover': { 
+                                    borderColor: '#6366f1',
+                                    backgroundColor: 'rgba(99, 102, 241, 0.1)'
+                                  }
+                                }}
+                                variant="outlined"
                               >
-                                Download
+                                Report
                               </Button>
                             </Box>
                           </TableCell>
@@ -646,133 +636,103 @@ export const InterviewResults: React.FC = () => {
                         <TableRow>
                           <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
                             <Collapse in={expandedRows.has(safeCallSid)} timeout="auto" unmountOnExit>
-                              <Box sx={{ margin: 2, p: 2, backgroundColor: 'grey.50', borderRadius: 1 }}>
-                                <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-                                  📋 Detailed Analysis for {safeCandidateName}
+                              <Box sx={{ margin: 1, p: 1.5, backgroundColor: 'rgba(17, 17, 17, 0.5)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: 2 }}>
+                                <Typography variant="h6" gutterBottom sx={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', pb: 0.75, mb: 1.5, color: '#f5f5f5', fontSize: '0.9375rem' }}>
+                                  Detailed Analysis: {safeCandidateName}
                                 </Typography>
                                 
-                                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 3 }}>
-                                  {/* Contact Information */}
-                                  <Card variant="outlined">
-                                    <CardContent>
-                                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, display: 'flex', alignItems: 'center' }}>
-                                        <Phone sx={{ mr: 1 }} />
-                                        Contact Information
-                                      </Typography>
-                                      <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                        📞 Phone: {safeCandidatePhone}
-                                      </Typography>
-                                      <Typography variant="body2" sx={{ mb: 1 }}>
-                                        📞 Twilio: {interview.twilio_number || 'Unknown'}
-                                      </Typography>
-                                      <Typography variant="body2" sx={{ mb: 1 }}>🆔 Call ID: {safeCallSid}</Typography>
-                                      {interview.start_time && (
-                                        <Typography variant="body2" sx={{ mb: 1 }}>📅 Started: {new Date(interview.start_time).toLocaleString()}</Typography>
-                                      )}
-                                      <Typography variant="body2">⏱️ Duration: {interview.interview_duration}</Typography>
-                                    </CardContent>
-                                  </Card>
-
+                                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 1.5 }}>
                                   {/* Skills Analysis */}
-                                  <Card variant="outlined">
-                                    <CardContent>
-                                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                        🎯 Skills Analysis
-                                      </Typography>
-                                      <Typography variant="body2" sx={{ mb: 1 }}>
-                                        Skills Match: {interview.skills_percentage}%
-                                      </Typography>
-                                      <Typography variant="body2" sx={{ mb: 2 }}>
-                                        Overall Score: {interview.overall_score}%
-                                      </Typography>
-                                      <Box sx={{ mt: 1 }}>
-                                        <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
-                                          Found Skills ({interview.found_skills.length}):
-                                        </Typography>
-                                        <Box sx={{ mt: 0.5 }}>
-                                          {interview.found_skills.length > 0 ? (
-                                            interview.found_skills.map((skill, skillIndex) => (
-                                              <Chip
-                                                key={skillIndex}
-                                                label={skill}
-                                                size="small"
-                                                sx={{ mr: 0.5, mb: 0.5 }}
-                                                color="success"
-                                              />
-                                            ))
-                                          ) : (
-                                            <Chip label="No skills identified" size="small" variant="outlined" />
-                                          )}
-                                        </Box>
+                                  <Box sx={{ border: '1px solid rgba(255, 255, 255, 0.1)', p: 1.25, backgroundColor: 'rgba(17, 17, 17, 0.3)', borderRadius: 1.5 }}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, display: 'flex', alignItems: 'center', color: '#f5f5f5', fontSize: '0.875rem' }}>
+                                      <Assessment sx={{ mr: 1, fontSize: 18, color: '#6366f1' }} />
+                                      Skills & Capabilities
+                                    </Typography>
+                                    
+                                    <Box sx={{ mb: 1 }}>
+                                      <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.25, color: '#f5f5f5', fontSize: '0.75rem' }}>Found Skills:</Typography>
+                                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                        {interview.found_skills.length > 0 ? (
+                                          interview.found_skills.map((skill, skillIndex) => (
+                                            <Chip
+                                              key={skillIndex}
+                                              label={skill}
+                                              size="small"
+                                              variant="outlined"
+                                              sx={{ borderRadius: 1.5, borderColor: 'rgba(99, 102, 241, 0.3)', color: '#6366f1', fontSize: '0.7rem', height: 22 }}
+                                            />
+                                          ))
+                                        ) : (
+                                          <Typography variant="caption" sx={{ fontStyle: 'italic', color: '#a3a3a3', fontSize: '0.75rem' }}>No specific technical skills identified</Typography>
+                                        )}
                                       </Box>
-                                    </CardContent>
-                                  </Card>
+                                    </Box>
+
+                                    <Typography variant="body2" sx={{ color: '#a3a3a3', fontSize: '0.75rem' }}>
+                                      <strong style={{ color: '#f5f5f5' }}>Score Breakdown:</strong><br/>
+                                      Skills Match: {interview.skills_percentage}%<br/>
+                                      Validation Pass Rate: {interview.overall_score}%
+                                    </Typography>
+                                  </Box>
 
                                   {/* Validation Results */}
-                                  <Card variant="outlined">
-                                    <CardContent>
-                                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                        ✅ Validation Results
+                                  <Box sx={{ border: '1px solid rgba(255, 255, 255, 0.1)', p: 1.25, backgroundColor: 'rgba(17, 17, 17, 0.3)', borderRadius: 1.5 }}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, display: 'flex', alignItems: 'center', color: '#f5f5f5', fontSize: '0.875rem' }}>
+                                      <CheckCircle sx={{ mr: 1, fontSize: 18, color: '#10b981' }} />
+                                      Validation Steps
+                                    </Typography>
+                                    
+                                    {Object.entries(interview.validation_results || {}).length === 0 ? (
+                                      <Typography variant="body2" sx={{ fontStyle: 'italic', color: '#a3a3a3', fontSize: '0.8125rem' }}>
+                                        No automated validation steps recorded
                                       </Typography>
-                                      {Object.entries(interview.validation_results || {}).length === 0 ? (
-                                        <Typography variant="body2" color="text.secondary">
-                                          No validation results available
-                                        </Typography>
-                                      ) : (
-                                        Object.entries(interview.validation_results || {}).map(([key, validation]) => (
-                                          <Box key={key} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                            {getValidationIcon(validation?.passed || false)}
-                                            <Typography variant="body2" sx={{ ml: 1 }}>
-                                              Step {validation?.step || key}: {validation?.passed ? 'Passed' : 'Failed'}
+                                    ) : (
+                                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                        {Object.entries(interview.validation_results || {}).map(([key, validation]) => (
+                                          <Box key={key} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px dotted rgba(255, 255, 255, 0.1)', pb: 0.5 }}>
+                                            <Typography variant="body2" sx={{ color: '#f5f5f5', fontSize: '0.8125rem' }}>
+                                              Step {validation?.step || key}
                                             </Typography>
-                                            {validation?.match_percentage && (
-                                              <Chip 
-                                                label={`${validation.match_percentage}%`} 
-                                                size="small" 
-                                                sx={{ ml: 1 }}
-                                                color="info"
-                                              />
-                                            )}
-                                          </Box>
-                                        ))
-                                      )}
-                                    </CardContent>
-                                  </Card>
-                                  <Card variant="outlined" sx={{ gridColumn: 'span 2' }}>
-                                    <CardContent>
-                                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2 }}>
-                                        🗣️ Interview Responses ({(interview.responses || []).length} answers)
-                                      </Typography>
-                                      {(interview.responses || []).length === 0 ? (
-                                        <Typography variant="body2" color="text.secondary">
-                                          No responses recorded
-                                        </Typography>
-                                      ) : (
-                                        (interview.responses || []).map((response, responseIndex) => (
-                                          <Box key={responseIndex} sx={{ mb: 2, p: 1, backgroundColor: 'grey.100', borderRadius: 1 }}>
-                                            <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
-                                              Q{response?.question_number || responseIndex + 1}: {response?.question || 'Question not available'}
-                                            </Typography>
-                                            <Typography variant="body2" sx={{ mb: 1, fontStyle: 'italic' }}>
-                                              "{response?.answer || 'No answer provided'}"
-                                            </Typography>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                              <Chip 
-                                                label={`Confidence: ${getConfidenceLevel(response?.confidence || 0)}`}
-                                                size="small"
-                                                color={getConfidenceColor(response?.confidence || 0)}
-                                              />
-                                              {response?.timestamp && (
-                                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                                  Answered: {new Date(response.timestamp).toLocaleTimeString()}
-                                                </Typography>
-                                              )}
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                              <Typography variant="body2" sx={{ mr: 1, fontWeight: 'bold', color: validation?.passed ? '#10b981' : '#ef4444', fontSize: '0.8125rem' }}>
+                                                {validation?.passed ? 'PASS' : 'FAIL'}
+                                              </Typography>
+                                              {getValidationIcon(validation?.passed || false)}
                                             </Box>
                                           </Box>
-                                        ))
-                                      )}
-                                    </CardContent>
-                                  </Card>
+                                        ))}
+                                      </Box>
+                                    )}
+                                  </Box>
+
+                                  {/* Full Responses */}
+                                  <Box sx={{ gridColumn: '1 / -1', border: '1px solid rgba(255, 255, 255, 0.1)', p: 1.25, backgroundColor: 'rgba(17, 17, 17, 0.3)', borderRadius: 1.5 }}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, color: '#f5f5f5', fontSize: '0.875rem' }}>
+                                      Interview Transcript
+                                    </Typography>
+                                    
+                                    {(interview.responses || []).length === 0 ? (
+                                      <Typography variant="body2" sx={{ fontStyle: 'italic', color: '#a3a3a3', fontSize: '0.75rem' }}>
+                                        No transcript available
+                                      </Typography>
+                                    ) : (
+                                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                        {(interview.responses || []).map((response, responseIndex) => (
+                                          <Box key={responseIndex} sx={{ pl: 1.25, borderLeft: '2px solid #6366f1' }}>
+                                            <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#a3a3a3', textTransform: 'uppercase', fontSize: '0.65rem' }}>
+                                              Question {response?.question_number || responseIndex + 1}
+                                            </Typography>
+                                            <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.25, color: '#f5f5f5', fontSize: '0.75rem' }}>
+                                              {response?.question || 'Question not available'}
+                                            </Typography>
+                                            <Typography variant="body2" sx={{ fontStyle: 'italic', color: '#a3a3a3', fontSize: '0.75rem' }}>
+                                              "{response?.answer || 'No answer provided'}"
+                                            </Typography>
+                                          </Box>
+                                        ))}
+                                      </Box>
+                                    )}
+                                  </Box>
                                 </Box>
                               </Box>
                             </Collapse>

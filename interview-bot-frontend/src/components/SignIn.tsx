@@ -76,7 +76,7 @@ const SignIn = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        backgroundColor: '#0f172a',
+        backgroundColor: '#0a0a0a',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -94,33 +94,23 @@ const SignIn = () => {
           <Card 
             elevation={0}
             sx={{ 
-              border: '1px solid #334155',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: 2,
-              backgroundColor: '#1e293b',
-              boxShadow: 'none',
+              backgroundColor: 'rgba(17, 17, 17, 0.7)',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
             }}
           >
-            <CardContent sx={{ p: 4 }}>
+            <CardContent sx={{ p: 3 }}>
               {/* Header */}
-              <Box sx={{ textAlign: 'center', mb: 4 }}>
-                <Box
-                  component="img"
-                  src="/dashboard-logo.svg"
-                  alt="Logo"
-                  sx={{
-                    height: '40px',
-                    width: 'auto',
-                    mb: 3,
-                    filter: 'brightness(0) invert(1)'
-                  }}
-                />
-                
+              <Box sx={{ textAlign: 'center', mb: 3 }}>
                 <Typography 
                   variant="h5" 
                   sx={{ 
                     fontWeight: 600, 
-                    color: '#f8fafc', 
-                    mb: 1,
+                    color: '#f5f5f5', 
+                    mb: 0.5,
+                    fontSize: '1.5rem',
                   }}
                 >
                   Welcome Back
@@ -128,7 +118,8 @@ const SignIn = () => {
                 <Typography 
                   variant="body2" 
                   sx={{ 
-                    color: '#94a3b8',
+                    color: '#a3a3a3',
+                    fontSize: '0.8125rem',
                   }}
                 >
                   Sign in to AI Interview Platform
@@ -140,11 +131,13 @@ const SignIn = () => {
                 <Alert 
                   severity="error" 
                   sx={{ 
-                    mb: 3, 
-                    borderRadius: 1,
+                    mb: 2, 
+                    borderRadius: 1.5,
                     backgroundColor: 'rgba(239, 68, 68, 0.1)',
                     color: '#ef4444',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    backdropFilter: 'blur(10px)',
+                    fontSize: '0.8125rem',
                     '& .MuiAlert-icon': { color: '#ef4444' }
                   }}
                 >
@@ -154,7 +147,7 @@ const SignIn = () => {
 
               {/* Login Form */}
               <form onSubmit={handleSubmit}>
-                <Stack spacing={3}>
+                <Stack spacing={2}>
                   <TextField
                     fullWidth
                     name="email"
@@ -166,19 +159,21 @@ const SignIn = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <PersonOutline sx={{ color: '#64748b' }} />
+                          <PersonOutline sx={{ color: '#a3a3a3' }} />
                         </InputAdornment>
                       ),
                     }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        backgroundColor: '#0f172a',
-                        '& fieldset': { borderColor: '#334155' },
-                        '&:hover fieldset': { borderColor: '#475569' },
-                        '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
+                        backgroundColor: 'rgba(26, 26, 26, 0.5)',
+                        backdropFilter: 'blur(10px)',
+                        borderRadius: 1.5,
+                        '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.2)' },
+                        '&:hover fieldset': { borderColor: '#6366f1' },
+                        '&.Mui-focused fieldset': { borderColor: '#6366f1' }
                       },
-                      '& .MuiInputLabel-root': { color: '#94a3b8' },
-                      '& .MuiOutlinedInput-input': { color: '#f8fafc' }
+                      '& .MuiInputLabel-root': { color: '#a3a3a3', fontSize: '0.875rem' },
+                      '& .MuiOutlinedInput-input': { color: '#f5f5f5', py: 1.25, fontSize: '0.875rem' }
                     }}
                   />
 
@@ -192,7 +187,7 @@ const SignIn = () => {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <LockOutlined sx={{ color: '#64748b' }} />
+                          <LockOutlined sx={{ color: '#a3a3a3' }} />
                         </InputAdornment>
                       ),
                       endAdornment: (
@@ -201,7 +196,7 @@ const SignIn = () => {
                             onClick={() => setShowPassword(!showPassword)}
                             edge="end"
                             size="small"
-                            sx={{ color: '#64748b' }}
+                            sx={{ color: '#a3a3a3' }}
                           >
                             {showPassword ? <VisibilityOff /> : <Visibility />}
                           </IconButton>
@@ -210,13 +205,15 @@ const SignIn = () => {
                     }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        backgroundColor: '#0f172a',
-                        '& fieldset': { borderColor: '#334155' },
-                        '&:hover fieldset': { borderColor: '#475569' },
-                        '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
+                        backgroundColor: 'rgba(26, 26, 26, 0.5)',
+                        backdropFilter: 'blur(10px)',
+                        borderRadius: 1.5,
+                        '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.2)' },
+                        '&:hover fieldset': { borderColor: '#6366f1' },
+                        '&.Mui-focused fieldset': { borderColor: '#6366f1' }
                       },
-                      '& .MuiInputLabel-root': { color: '#94a3b8' },
-                      '& .MuiOutlinedInput-input': { color: '#f8fafc' }
+                      '& .MuiInputLabel-root': { color: '#a3a3a3', fontSize: '0.875rem' },
+                      '& .MuiOutlinedInput-input': { color: '#f5f5f5', py: 1.25, fontSize: '0.875rem' }
                     }}
                   />
 
@@ -227,13 +224,15 @@ const SignIn = () => {
                     size="large"
                     disabled={loading}
                     sx={{
-                      py: 1.5,
-                      fontSize: '1rem',
-                      fontWeight: 500,
+                      py: 1.25,
+                      fontSize: '0.9375rem',
+                      fontWeight: 600,
                       textTransform: 'none',
-                      backgroundColor: '#3b82f6',
-                      '&:hover': { backgroundColor: '#2563eb' },
-                      '&:disabled': { backgroundColor: '#334155', color: '#94a3b8' }
+                      letterSpacing: '0.01em',
+                      backgroundColor: '#6366f1',
+                      borderRadius: 1.5,
+                      '&:hover': { backgroundColor: '#4f46e5' },
+                      '&:disabled': { backgroundColor: 'rgba(64, 64, 64, 0.5)', color: '#525252' }
                     }}
                   >
                     {loading ? (

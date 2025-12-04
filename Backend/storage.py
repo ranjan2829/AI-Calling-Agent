@@ -6,7 +6,7 @@ from typing import Optional
 
 def ensure_directories():
     """Create necessary directories"""
-    folders = ["interviews", "live test results"]
+    folders = ["interviews", "archive/old_results"]
     for folder in folders:
         os.makedirs(folder, exist_ok=True)
 
@@ -32,7 +32,7 @@ def load_interview_session(call_sid: str) -> Optional[dict]:
         return None
 
 def save_interview(call_sid: str, interview_data: dict):
-    """Save completed interview - simple naming: just call_sid.json"""
+    """Save completed interview - simple naming: call_sid.json"""
     try:
         interview_data.update({
             "status": interview_data.get("status", "COMPLETED"),
@@ -40,7 +40,7 @@ def save_interview(call_sid: str, interview_data: dict):
             "completion_time": datetime.now().isoformat()
         })
         
-        # Simple filename - just call_sid.json
+        # Simple filename - just call_sid.json (no timestamps)
         filename = f"interviews/{call_sid}.json"
         with open(filename, 'w') as f:
             json.dump(interview_data, f, indent=2)
@@ -50,7 +50,7 @@ def save_interview(call_sid: str, interview_data: dict):
         if os.path.exists(session_file):
             os.remove(session_file)
         
-        print(f"✅ Interview saved: {filename}")
+        print(f"Interview saved: {filename}")
         return filename
     except Exception as e:
         print(f"Error saving interview: {e}")
@@ -90,7 +90,7 @@ def save_job_description(jd_data: dict):
         print(f"Error saving JD: {e}")
 
 def get_all_interviews() -> list:
-    """Get all interview files - simple pattern matching"""
+    """Get all interview files - only from interviews folder (excludes archive)"""
     interviews = []
     interview_folder = "interviews"
     
@@ -98,13 +98,14 @@ def get_all_interviews() -> list:
         return interviews
     
     import glob
-    # Only get completed interviews (not session files)
+    # Only get completed interviews (not session files) from interviews folder only
     json_files = glob.glob(f"{interview_folder}/*.json")
     
     for file_path in json_files:
         filename = os.path.basename(file_path)
         # Skip session files and analysis files - only get simple call_sid.json files
-        if "session_" in filename or "JD_ANALYSIS" in filename:
+        # Also skip any files in archive folder
+        if "session_" in filename or "JD_ANALYSIS" in filename or "archive" in file_path:
             continue
         
         try:

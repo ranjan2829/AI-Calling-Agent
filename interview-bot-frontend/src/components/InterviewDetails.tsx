@@ -157,7 +157,7 @@ export const InterviewDetails: React.FC = () => {
               candidate_metadata: report.candidate_analysis.candidate_metadata
             });
             
-            toast.success('✅ JD Analysis completed successfully!');
+            toast.success('JD Analysis completed successfully!');
           } else {
             throw new Error(reportResponse.data?.error || 'Failed to get analysis report');
           }
@@ -358,7 +358,7 @@ export const InterviewDetails: React.FC = () => {
           <CardContent>
             <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
               <WorkOutline sx={{ mr: 1 }} />
-              📊 Job Description Match Analysis
+              Job Description Match Analysis
             </Typography>
             
             <Grid container spacing={3}>
@@ -398,7 +398,7 @@ export const InterviewDetails: React.FC = () => {
               <Grid item xs={12} md={6}>
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    🎯 Skills Analysis
+                    Skills Analysis
                   </Typography>
                   {jdAnalysis.found_skills.length > 0 && (
                     <Typography variant="body2" sx={{ mb: 1 }}>

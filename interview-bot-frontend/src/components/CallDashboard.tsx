@@ -20,26 +20,15 @@ import {
   TableRow,
   Paper,
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   Divider,
   Tab,
   Tabs,
-  InputAdornment,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton
+  InputAdornment
 } from '@mui/material';
 import {
   Phone,
-  Assessment,
-  Work,
   Save,
   CheckCircle,
   People,
@@ -48,17 +37,10 @@ import {
   Error,
   CloudUpload,
   PhoneInTalk,
-  QuestionAnswer,
-  Edit,
-  Tag,
-  Refresh,
-  Search,
-  Delete
+  QuestionAnswer
 } from '@mui/icons-material';
-import { getCallStats, getJobDescription, getAllInterviews, callsApi } from '../api/services';
+import { getJobDescription, getAllInterviews, callsApi } from '../api/services';
 import { toast } from 'react-toastify';
-import { useLocation, useNavigate } from 'react-router-dom';
-import BulkPdfProcessor from './BulkPdfProcessor';
 
 interface CallStats {
   totalCalls: number;
@@ -101,27 +83,10 @@ interface BulkCallSession {
   start_time: string;
 }
 
-interface TagSummary {
-  tag_id: string;
-  tag_name: string;
-  total_candidates: number;
-  total_batches: number;
-  created_at?: string;
-  last_updated?: string;
-  folder_path?: string;
-}
-
-interface CandidateTag {
-  id: string;
-  name: string;
-  color: string;
-  description: string;
-  createdAt: string;
-}
 
 const initiateCall = async (phoneNumber: string) => {
   try {
-    const response = await fetch('http://13.204.76.229:8000/make-call', {
+    const response = await fetch('http://localhost:8000/make-call', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -132,7 +97,8 @@ const initiateCall = async (phoneNumber: string) => {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorMsg = `HTTP error! status: ${response.status}`;
+      throw new (Error as any)(errorMsg);
     }
 
     const result = await response.json();
@@ -149,11 +115,9 @@ interface InterviewQuestion {
 }
 
 export const CallDashboard: React.FC = () => {
-  const [loading, setLoading] = useState(false);
   const [savingJD, setSavingJD] = useState(false);
-  const [jdSaved, setJdSaved] = useState(false);
   // FIX: Initialize as empty array
-  const [interviews, setInterviews] = useState<any[]>([]);
+  const [, setInterviews] = useState<any[]>([]);
   const [callStats, setCallStats] = useState<CallStats>({
     totalCalls: 0,
     completedCalls: 0,
@@ -199,7 +163,7 @@ export const CallDashboard: React.FC = () => {
   const [savingQuestions, setSavingQuestions] = useState(false);
 
   // Add new state for Twilio balance
-  const [twilioBalance, setTwilioBalance] = useState<{
+  const [, setTwilioBalance] = useState<{
     balance: string;
     currency: string;
     loading: boolean;
@@ -209,28 +173,12 @@ export const CallDashboard: React.FC = () => {
     loading: false
   });
 
-  // NEW: Tag-based states
-  const [tags, setTags] = useState<TagSummary[]>([]);
-  const [selectedTagId, setSelectedTagId] = useState<string>('');
-  const [tagCandidates, setTagCandidates] = useState<Contact[]>([]);
-  const [loadingTags, setLoadingTags] = useState(false);
-  const [loadingCandidates, setLoadingCandidates] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // ✅ NEW: Add candidateTags state to match other components
-  const [candidateTags, setCandidateTags] = useState<CandidateTag[]>([]);
-
-  const location = useLocation();
-  const navigate = useNavigate();
-
   useEffect(() => {
     loadCallStats();
     loadJobDescription();
     loadInterviews();
     loadQuestions(); 
     loadTwilioBalance();
-    loadTagsSummary(); // NEW: Load tags on mount
-    loadCandidateTagsFromStorage(); // ✅ NEW: Load candidate tags from localStorage
   }, []);
 
   // ✅ FIXED: Add the missing loadCallStats function
@@ -243,7 +191,7 @@ export const CallDashboard: React.FC = () => {
       console.log('📊 CallDashboard - Raw interviews loaded:', allInterviews.length);
       
       // 🔥 Include ALL interviews (same logic as CallHistory)
-      const validInterviews = allInterviews.filter(interview => {
+      const validInterviews = allInterviews.filter((interview: any) => {
         const hasBasicData = interview.interview_id || interview.call_sid;
         
         // Don't exclude INCOMPLETE_SILENCE - keep them!
@@ -277,11 +225,11 @@ export const CallDashboard: React.FC = () => {
       
       // 🔥 Calculate comprehensive stats
       const totalCalls = validInterviews.length;
-      const completedCalls = validInterviews.filter(i => i.status === 'COMPLETED').length;
-      const incompleteSilence = validInterviews.filter(i => i.status === 'INCOMPLETE_SILENCE').length;
-      const terminated = validInterviews.filter(i => i.status === 'TERMINATED').length;
-      const inProgress = validInterviews.filter(i => i.status === 'IN_PROGRESS').length;
-      const callbackRequested = validInterviews.filter(i => i.status === 'CALLBACK_REQUESTED').length;
+      const completedCalls = validInterviews.filter((i: any) => i.status === 'COMPLETED').length;
+      const incompleteSilence = validInterviews.filter((i: any) => i.status === 'INCOMPLETE_SILENCE').length;
+      const terminated = validInterviews.filter((i: any) => i.status === 'TERMINATED').length;
+      const inProgress = validInterviews.filter((i: any) => i.status === 'IN_PROGRESS').length;
+      const callbackRequested = validInterviews.filter((i: any) => i.status === 'CALLBACK_REQUESTED').length;
       
       console.log('📊 CallDashboard - Stats breakdown:', {
         totalCalls,
@@ -353,40 +301,6 @@ export const CallDashboard: React.FC = () => {
     }
   };
 
-  // ✅ NEW: Load candidate tags from localStorage (same as other components)
-  const loadCandidateTagsFromStorage = () => {
-    const savedTags = localStorage.getItem('candidateTags');
-    if (savedTags) {
-      try {
-        const parsedTags = JSON.parse(savedTags);
-        setCandidateTags(parsedTags);
-        console.log('✅ Loaded candidate tags from localStorage:', parsedTags);
-        
-        // Convert to TagSummary format for compatibility
-        const tagSummaries: TagSummary[] = parsedTags.map((tag: CandidateTag) => ({
-          tag_id: tag.id,
-          tag_name: tag.name,
-          total_candidates: 0, // Will be updated when candidates are loaded
-          total_batches: 0,
-          created_at: tag.createdAt,
-          last_updated: tag.createdAt,
-          folder_path: `local-data/${tag.id}`
-        }));
-        
-        setTags(tagSummaries);
-        
-      } catch (error) {
-        console.error('Error parsing saved tags:', error);
-        // Don't initialize default tags - just set empty arrays
-        setCandidateTags([]);
-        setTags([]);
-      }
-    } else {
-      // No saved tags - just set empty arrays
-      setCandidateTags([]);
-      setTags([]);
-    }
-  };
 
   // Add this function
   const loadQuestions = async () => {
@@ -405,7 +319,7 @@ export const CallDashboard: React.FC = () => {
     try {
       setTwilioBalance(prev => ({ ...prev, loading: true }));
       
-      const response = await fetch('http://13.204.76.229:8000/twilio-balance', {
+      const response = await fetch('http://localhost:8000/twilio-balance', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -413,7 +327,8 @@ export const CallDashboard: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorMsg = `HTTP error! status: ${response.status}`;
+        throw new (Error as any)(errorMsg);
       }
 
       const result = await response.json();
@@ -427,7 +342,7 @@ export const CallDashboard: React.FC = () => {
       } else {
         // ✅ Fix the error handling here
         const errorMessage = typeof result.error === 'object' ? JSON.stringify(result.error) : (result.error || 'Failed to fetch balance');
-        throw new Error(errorMessage);
+        throw new (Error as any)(errorMessage);
       }
     } catch (error) {
       console.error('Error loading Twilio balance:', error);
@@ -446,8 +361,6 @@ export const CallDashboard: React.FC = () => {
       
       if (response.data.success) {
         toast.success('Job Description updated successfully!');
-        setJdSaved(true);
-        setTimeout(() => setJdSaved(false), 3000);
       } else {
         toast.error(`Failed to update JD: ${response.data.error}`);
       }
@@ -456,23 +369,6 @@ export const CallDashboard: React.FC = () => {
       toast.error(`Failed to update JD: ${error.message}`);
     } finally {
       setSavingJD(false);
-    }
-  };
-
-  const handleRunAnalysis = async () => {
-    try {
-      setLoading(true);
-      const response = await callsApi.runJDAnalysis();
-      
-      if (response.data && !response.data.error) {
-        toast.success('JD Analysis completed successfully!');
-      } else {
-        toast.error('Analysis failed: ' + (response.data?.error || 'Unknown error'));
-      }
-    } catch (error: any) {
-      toast.error('Failed to run analysis: ' + error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -498,7 +394,7 @@ export const CallDashboard: React.FC = () => {
         setCallResult(result);
         toast.success(`Call initiated successfully to ${targetPhone}`);
       } else {
-        throw new Error(result.error || 'Call failed');
+        throw new (Error as any)(result.error || 'Call failed');
       }
     } catch (error: any) {
       console.error('Call failed:', error);
@@ -520,7 +416,7 @@ export const CallDashboard: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch('http://13.204.76.229:8000/upload-csv', {
+      const response = await fetch('http://localhost:8000/upload-csv', {
         method: 'POST',
         body: formData,
       });
@@ -557,7 +453,7 @@ export const CallDashboard: React.FC = () => {
     setIsBulkCalling(true);
     
     try {
-      const response = await fetch('http://13.204.76.229:8000/bulk-call', {
+      const response = await fetch('http://localhost:8000/bulk-call', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -593,7 +489,7 @@ export const CallDashboard: React.FC = () => {
   const pollBulkCallStatus = async (bulkCallId: string) => {
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(`http://13.204.76.229:8000/bulk-call-status/${bulkCallId}`);
+        const response = await fetch(`http://localhost:8000/bulk-call-status/${bulkCallId}`);
         
         if (!response.ok) {
           console.warn(`Bulk call status endpoint returned ${response.status} for ${bulkCallId}`);
@@ -630,7 +526,7 @@ export const CallDashboard: React.FC = () => {
   const stopBulkCalling = async () => {
     if (!bulkCallSession) return;
     try {
-      const response = await fetch(`http://13.204.76.229:8000/stop-bulk-call/${bulkCallSession.bulk_call_id}`, {
+      const response = await fetch(`http://localhost:8000/stop-bulk-call/${bulkCallSession.bulk_call_id}`, {
         method: 'POST',
       });
       const result = await response.json();
@@ -660,18 +556,21 @@ export const CallDashboard: React.FC = () => {
     return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
   };
   
-  // Add this function
+  // Save questions to backend
   const saveQuestions = async () => {
     try {
       setSavingQuestions(true);
       const response = await callsApi.updateInterviewQuestions(questions);
-      if (response.success) {
-        toast.success('Questions updated successfully!');
+      if (response && response.success) {
+        toast.success('Questions saved successfully!');
+        // Reload questions to ensure sync
+        await loadQuestions();
       } else {
-        toast.error('Failed to update questions');
+        toast.error(response?.error || 'Failed to save questions');
       }
     } catch (error: any) {
-      toast.error('Failed to update questions: ' + error.message);
+      console.error('Error saving questions:', error);
+      toast.error('Failed to save questions: ' + (error.message || 'Unknown error'));
     } finally {
       setSavingQuestions(false);
     }
@@ -682,368 +581,6 @@ export const CallDashboard: React.FC = () => {
     setQuestions(prev => prev.map(q => 
       q.id === id ? { ...q, question: newText } : q
     ));
-  };
-
-  // NEW: Load tags summary from local JSON files
-  const loadTagsSummary = async () => {
-    try {
-      setLoadingTags(true);
-      console.log('🔍 Loading tags with case-sensitive matching...');
-      
-      // Load from localStorage first
-      const savedTags = localStorage.getItem('candidateTags');
-      let localTags: TagSummary[] = [];
-      
-      if (savedTags) {
-        try {
-          const parsedTags = JSON.parse(savedTags);
-          if (parsedTags && parsedTags.length > 0) {
-            localTags = parsedTags.map((tag: CandidateTag) => ({
-              tag_id: tag.id,
-              tag_name: tag.name, // Keep EXACT case
-              total_candidates: 0,
-              total_batches: 1,
-              created_at: tag.createdAt,
-              last_updated: tag.createdAt,
-              folder_path: `local-data/${tag.id}`,
-              color: tag.color,
-              description: tag.description
-            }));
-            
-            console.log('✅ Loaded case-sensitive tags from localStorage:', localTags);
-          }
-        } catch (error) {
-          console.error('Error parsing localStorage tags:', error);
-        }
-      }
-      
-      // 🔥 Get candidate counts with EXACT case-sensitive matching
-      try {
-        const response = await fetch('http://13.204.76.229:8000/local-tags-summary-exact');
-        
-        if (response.ok) {
-          const result = await response.json();
-          console.log('📊 Case-sensitive backend tags result:', result);
-          
-          if (result.success && result.tags?.length > 0) {
-            const backendTags = result.tags;
-            
-            // Update local tags with exact name matching
-            localTags = localTags.map(localTag => {
-              const backendTag = backendTags.find((bt: any) => 
-                bt.tag_name === localTag.tag_name // EXACT case-sensitive match
-              );
-              
-              if (backendTag) {
-                return {
-                  ...localTag,
-                  total_candidates: backendTag.total_candidates || 0,
-                  total_batches: backendTag.total_batches || 1,
-                  last_updated: backendTag.last_updated || localTag.last_updated
-                };
-              }
-              return localTag;
-            });
-            
-            console.log('✅ Enhanced with case-sensitive backend data:', localTags);
-          }
-        }
-      } catch (backendError) {
-        console.log('⚠️ Backend not available, using localStorage tags only');
-      }
-      
-      setTags(localTags);
-      
-      // Update candidateTags state
-      if (savedTags) {
-        try {
-          const parsedTags = JSON.parse(savedTags);
-          setCandidateTags(parsedTags);
-        } catch (error) {
-          console.error('Error setting candidate tags:', error);
-        }
-      }
-      
-      if (localTags.length === 0) {
-        toast.info('No tags found. Create some tags first using the Bulk PDF Processor.');
-      } else {
-        toast.success(`✅ Loaded ${localTags.length} case-sensitive tags successfully!`);
-      }
-      
-    } catch (error: any) {
-      console.error('❌ Error loading tags:', error);
-      toast.error('Failed to load tags');
-    } finally {
-      setLoadingTags(false);
-    }
-  };
-
-  // NEW: Load candidates from local JSON file for selected tag
-  const loadCandidatesForTag = async (tagId: string) => {
-    if (!tagId) {
-      setTagCandidates([]);
-      return;
-    }
-
-    try {
-      setLoadingCandidates(true);
-      console.log(`🔍 Loading candidates for EXACT tag: "${tagId}"`);
-      
-      // 🔥 Get the EXACT tag name from the tags array
-      const selectedTagData = tags.find(t => t.tag_id === tagId);
-      const exactTagName = selectedTagData?.tag_name || tagId;
-      
-      console.log(`🔥 Using EXACT tag name: "${exactTagName}" for search`);
-      
-      // 🔥 FIRST: Try the exact search endpoint with POST request
-      try {
-        const response = await fetch(`http://13.204.76.229:8000/search-candidates-exact`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            tag_name: exactTagName, // EXACT case-sensitive name
-            case_sensitive: true 
-          })
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          console.log(`📊 Exact search result for "${exactTagName}":`, result);
-          
-          if (result.success && result.candidates?.length > 0) {
-            const candidates = result.candidates;
-            console.log(`✅ Found ${candidates.length} candidates via EXACT search for "${exactTagName}"`);
-            
-            // 🔥 VALIDATE: Make sure all candidates actually have the exact tag
-            const exactMatchCandidates = candidates.filter(candidate => 
-              candidate.tag === exactTagName
-            );
-            
-            if (exactMatchCandidates.length > 0) {
-              const formattedCandidates = exactMatchCandidates.map((candidate: any) => ({
-                name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
-                phone: candidate.phone || '',
-                email: candidate.email || '',
-                experience: candidate.experience || candidate.skills || '',
-                skills: candidate.skills || candidate.experience || '',
-                tag: exactTagName, // Force exact tag name
-                batch_name: candidate.batch_name || candidate.fileName || 'Exact Search'
-              }));
-              
-              setTagCandidates(formattedCandidates);
-              setContacts(formattedCandidates);
-              
-              toast.success(`✅ Found ${exactMatchCandidates.length} candidates for EXACT tag "${exactTagName}"`);
-              return;
-            }
-          }
-        }
-      } catch (exactError) {
-        console.log(`⚠️ Exact search failed for "${exactTagName}":`, exactError);
-      }
-      
-      // 🔥 SECOND: Try the exact tag endpoint with encoded name
-      try {
-        const response = await fetch(`http://13.204.76.229:8000/candidates-by-tag-exact/${encodeURIComponent(exactTagName)}`);
-        
-        if (response.ok) {
-          const result = await response.json();
-          console.log(`📊 Exact tag endpoint result for "${exactTagName}":`, result);
-          
-          if (result.success && result.candidates?.length > 0) {
-            const candidates = result.candidates;
-            
-            // 🔥 DOUBLE VALIDATE: Filter to ensure EXACT tag match
-            const exactMatchCandidates = candidates.filter(candidate => 
-              candidate.tag === exactTagName
-            );
-            
-            if (exactMatchCandidates.length > 0) {
-              console.log(`✅ Found ${exactMatchCandidates.length} EXACT matches for "${exactTagName}"`);
-              
-              const formattedCandidates = exactMatchCandidates.map((candidate: any) => ({
-                name: candidate.name || `Candidate_${Math.random().toString(36).substr(2, 4)}`,
-                phone: candidate.phone || '',
-                email: candidate.email || '',
-                experience: candidate.experience || candidate.skills || '',
-                skills: candidate.skills || candidate.experience || '',
-                tag: exactTagName, // Force exact tag name
-                batch_name: candidate.batch_name || candidate.fileName || 'Exact Match'
-              }));
-              
-              setTagCandidates(formattedCandidates);
-              setContacts(formattedCandidates);
-              
-              toast.success(`✅ Loaded ${exactMatchCandidates.length} candidates for EXACT tag "${exactTagName}"`);
-              return;
-            }
-          }
-        }
-      } catch (exactTagError) {
-        console.log(`⚠️ Exact tag endpoint failed for "${exactTagName}":`, exactTagError);
-      }
-      
-      // If no exact matches found
-      console.log(`❌ No EXACT matches found for tag "${exactTagName}"`);
-      setTagCandidates([]);
-      setContacts([]);
-      toast.warning(`No candidates found for EXACT tag "${exactTagName}". Make sure you've processed PDFs with this exact tag name (case-sensitive).`);
-      
-    } catch (error: any) {
-      console.error('Error loading candidates:', error);
-      setTagCandidates([]);
-      setContacts([]);
-      toast.error(`Error loading candidates: ${error.message}`);
-    } finally {
-      setLoadingCandidates(false);
-    }
-  };
-
-  // Handle tag selection
-  const handleTagSelection = (tagId: string) => {
-    setSelectedTagId(tagId);
-    loadCandidatesForTag(tagId);
-  };
-
-  // NEW: Start bulk calling from tag candidates
-  const startBulkCallingFromTag = async () => {
-    if (tagCandidates.length === 0) {
-      toast.error('No candidates available for calling');
-      return;
-    }
-    
-    setIsBulkCalling(true);
-    
-    try {
-      // Format candidates for bulk calling API
-      const formattedContacts = tagCandidates
-        .filter(candidate => candidate.phone) // Only candidates with phone numbers
-        .map(candidate => ({
-          name: candidate.name,
-          phone: candidate.phone,
-          email: candidate.email,
-          experience: candidate.experience || '',
-          skills: candidate.skills || ''
-        }));
-
-      console.log(`🚀 Starting bulk calling for ${formattedContacts.length} candidates from tag ${selectedTagId}`);
-      
-      const response = await fetch('http://13.204.76.229:8000/bulk-call', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formattedContacts),
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        setBulkCallSession({
-          bulk_call_id: result.bulk_call_id,
-          status: 'STARTING',
-          current_index: 0,
-          total_contacts: result.total_contacts,
-          completed_calls: 0,
-          results: [],
-          start_time: new Date().toISOString()
-        });
-        
-        const selectedTag = tags.find(t => t.tag_id === selectedTagId);
-        toast.success(`Bulk calling started for ${formattedContacts.length} candidates from tag "${selectedTag?.tag_name}"`);
-        pollBulkCallStatus(result.bulk_call_id);
-      } else {
-        toast.error(result.error);
-        setIsBulkCalling(false);
-      }
-    } catch (error: any) {
-      toast.error('Failed to start bulk calling: ' + error.message);
-      setIsBulkCalling(false);
-    }
-  };
-
-  // Filter candidates based on search
-  const filteredCandidates = tagCandidates.filter(candidate => {
-    if (!searchQuery) return true;
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      candidate.name?.toLowerCase().includes(searchLower) ||
-      candidate.phone?.toLowerCase().includes(searchLower) ||
-      candidate.email?.toLowerCase().includes(searchLower) ||
-      candidate.skills?.toLowerCase().includes(searchLower)
-    );
-  });
-
-  // ✅ Add tag deletion function
-  const handleDeleteTag = async (tagId: string) => {
-    const tagToDelete = candidateTags.find(tag => tag.id === tagId);
-    if (!tagToDelete) {
-      toast.error('Tag not found');
-      return;
-    }
-
-    // Show confirmation dialog
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete the tag "${tagToDelete.name}"?\n\n` +
-      `This will:\n` +
-      `• Remove the tag from all candidates\n` +
-      `• Delete associated candidate data files\n` +
-      `• Clear this tag from call dashboard\n` +
-      `• This action cannot be undone.`
-    );
-
-    if (!confirmDelete) {
-      return;
-    }
-
-    try {
-      // 1. Delete from backend
-      try {
-        const deleteResponse = await fetch(`http://13.204.76.229:8000/delete-tag/${tagId}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            tagName: tagToDelete.name,
-            deleteAssociatedData: true
-          }),
-        });
-
-        if (deleteResponse.ok) {
-          const result = await deleteResponse.json();
-          console.log('✅ Tag deleted from backend:', result);
-          toast.success('Tag and associated data deleted from server');
-        } else {
-          console.warn('⚠️ Backend deletion failed');
-          toast.warning('Server deletion failed, deleting locally');
-        }
-      } catch (backendError) {
-        console.warn('⚠️ Backend not available:', backendError);
-        toast.warning('Server not available, deleting locally only');
-      }
-
-      // 2. Remove from localStorage
-      const updatedTags = candidateTags.filter(tag => tag.id !== tagId);
-      setCandidateTags(updatedTags);
-      localStorage.setItem('candidateTags', JSON.stringify(updatedTags));
-
-      // 3. Update tags state
-      setTags(prev => prev.filter(tag => tag.tag_id !== tagId));
-
-      // 4. Reset selected tag if it was the deleted one
-      if (selectedTagId === tagId) {
-        setSelectedTagId('');
-        setTagCandidates([]);
-        setContacts([]);
-      }
-
-      toast.success(`Tag "${tagToDelete.name}" deleted successfully`);
-      
-    } catch (error) {
-      console.error('Error deleting tag:', error);
-      toast.error('Failed to delete tag');
-    }
   };
 
   return (
@@ -1073,7 +610,7 @@ export const CallDashboard: React.FC = () => {
         </Box>
       </Box>
 
-      <Grid container spacing={2} sx={{ mb: 3 }}>
+      <Grid container spacing={1.5} sx={{ mb: 2 }}>
         <Grid item xs={6} sm={4} md={2}>
           <Card sx={{ height: '100px' }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -1150,42 +687,10 @@ export const CallDashboard: React.FC = () => {
           <Card sx={{ height: '100px' }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Tag sx={{ color: 'info.main', fontSize: 24, mr: 1 }} />
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'info.main', fontSize: '1.25rem' }}>
-                    {tags.length}
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
-                    Data Tags
-                  </Typography>
-                </Box>
-              </Box>
-              <Button 
-                size="small" 
-                variant="text"
-                onClick={loadTagsSummary}
-                disabled={loadingTags}
-                sx={{ 
-                  fontSize: '0.6rem', 
-                  minWidth: 'auto', 
-                  p: 0.5,
-                  mt: 0.5
-                }}
-              >
-                Refresh
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={6} sm={4} md={2}>
-          <Card sx={{ height: '100px' }}>
-            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <People sx={{ color: 'primary.main', fontSize: 24, mr: 1 }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main', fontSize: '1.25rem' }}>
-                    {selectedTagId ? tagCandidates.length : contacts.length}
+                    {contacts.length}
                   </Typography>
                   <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem' }}>
                     Ready to Call
@@ -1197,23 +702,22 @@ export const CallDashboard: React.FC = () => {
         </Grid>
       </Grid>
 
-      <Card sx={{ mb: 4 }}>
-        <CardContent>
-          <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
+      <Card sx={{ mb: 2 }}>
+        <CardContent sx={{ p: 2 }}>
+          <Tabs value={tabValue} onChange={(_e, newValue) => setTabValue(newValue)} sx={{ mb: 2 }}>
             <Tab label="Single Call" />
-            <Tab label="Tag-Based Bulk Calling" />
             <Tab label="CSV Upload" />
             <Tab label="Job Description" />
           </Tabs>
           {tabValue === 0 && (
             <Box>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
-                <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', py: 2 }}>
+                <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
                   AI Interview Call
                 </Typography>
                 
                 {/* Phone Number Input */}
-                <Box sx={{ mb: 3, width: '100%', maxWidth: 400 }}>
+                <Box sx={{ mb: 2, width: '100%', maxWidth: 400 }}>
                   <TextField
                     fullWidth
                     label="Phone Number"
@@ -1237,7 +741,7 @@ export const CallDashboard: React.FC = () => {
                   variant="contained"
                   size="large"
                   onClick={() => handleMakeCall()}
-                  disabled={isCallInProgress || (phoneNumber && !isValidPhoneNumber(phoneNumber))}
+                  disabled={isCallInProgress || !!(phoneNumber && !isValidPhoneNumber(phoneNumber))}
                   startIcon={isCallInProgress ? <CircularProgress size={24} /> : <Phone />}
                   sx={{ 
                     px: 4, 
@@ -1267,50 +771,106 @@ export const CallDashboard: React.FC = () => {
                 )}
               </Box>
 
-              <Divider sx={{ my: 4 }} />
+              <Divider sx={{ my: 2 }} />
 
-              {/* NEW: Interview Questions Section - Moved Here */}
+              {/* Modern Interview Questions Section */}
               <Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <QuestionAnswer sx={{ color: 'primary.main', mr: 1 }} />
-                    <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                      Configure Interview Questions
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <QuestionAnswer sx={{ color: 'primary.main', fontSize: 20 }} />
+                    <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.1rem' }}>
+                      Interview Questions
                     </Typography>
                   </Box>
                   <Button
                     variant="contained"
-                    startIcon={savingQuestions ? <CircularProgress size={20} /> : <Save />}
+                    size="small"
+                    startIcon={savingQuestions ? <CircularProgress size={16} /> : <Save sx={{ fontSize: 18 }} />}
                     onClick={saveQuestions}
                     disabled={savingQuestions}
+                    sx={{ 
+                      px: 2, 
+                      py: 0.75,
+                      fontSize: '0.875rem',
+                      borderRadius: 1.5
+                    }}
                   >
-                    {savingQuestions ? 'Saving...' : 'Save Questions'}
+                    {savingQuestions ? 'Saving...' : 'Save'}
                   </Button>
                 </Box>
 
-                <Alert severity="info" sx={{ mb: 3 }}>
-                  <Typography variant="body2">
-                    🎯 These questions will be asked during the AI interview. Question 0 is critical for availability checking.
-                  </Typography>
-                </Alert>
-
-                <Grid container spacing={2}>
+                <Grid container spacing={1}>
                   {questions.map((question) => (
                     <Grid item xs={12} key={question.id}>
-                      <Card variant="outlined" sx={{ p: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <Card sx={{ 
+                        p: 1.25, 
+                        backgroundColor: 'rgba(17, 17, 17, 0.6)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        borderRadius: 2,
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          borderColor: question.id === 0 || question.id === 3 || question.id === 4 
+                            ? 'rgba(255, 255, 255, 0.1)' 
+                            : 'rgba(99, 102, 241, 0.4)',
+                          backgroundColor: 'rgba(17, 17, 17, 0.8)',
+                        }
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, mb: 1 }}>
                           <Chip 
                             label={`Q${question.id}`} 
-                            color="primary" 
                             size="small"
-                            sx={{ mr: 2, minWidth: 45 }}
+                            sx={{ 
+                              minWidth: 36,
+                              height: 24,
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              backgroundColor: question.id === 0 
+                                ? 'rgba(255, 152, 0, 0.2)' 
+                                : question.id === 2 
+                                ? 'rgba(99, 102, 241, 0.2)' 
+                                : 'rgba(99, 102, 241, 0.15)',
+                              color: question.id === 0 
+                                ? '#ff9800' 
+                                : question.id === 2 
+                                ? '#6366f1' 
+                                : '#a3a3a3',
+                              border: '1px solid',
+                              borderColor: question.id === 0 
+                                ? 'rgba(255, 152, 0, 0.3)' 
+                                : question.id === 2 
+                                ? 'rgba(99, 102, 241, 0.3)' 
+                                : 'rgba(255, 255, 255, 0.1)',
+                            }}
                           />
-                          <Typography variant="body2" color="textSecondary">
-                            Question {question.id}
-                            {question.id === 0 && " (Availability Check - Critical)"}
-                            {question.id === 2 && " (Skills Assessment)"}
-                            {(question.id === 0 || question.id === 3 || question.id === 4) && " - Non-Editable"}
-                          </Typography>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="caption" sx={{ 
+                              color: '#a3a3a3', 
+                              fontSize: '0.7rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px',
+                              fontWeight: 500
+                            }}>
+                              {question.id === 0 && "Availability Check"}
+                              {question.id === 2 && "Skills Assessment"}
+                              {question.id === 3 && "Notice Period"}
+                              {question.id === 4 && "Salary Details"}
+                              {![0, 2, 3, 4].includes(question.id) && `Question ${question.id}`}
+                            </Typography>
+                          </Box>
+                          {(question.id === 0 || question.id === 3 || question.id === 4) && (
+                            <Chip 
+                              label="Locked" 
+                              size="small"
+                              sx={{ 
+                                height: 20,
+                                fontSize: '0.65rem',
+                                backgroundColor: 'rgba(107, 114, 128, 0.2)',
+                                color: '#9ca3af',
+                                border: '1px solid rgba(107, 114, 128, 0.3)',
+                              }}
+                            />
+                          )}
                         </Box>
                         
                         <TextField
@@ -1321,287 +881,46 @@ export const CallDashboard: React.FC = () => {
                           onChange={(e) => updateQuestion(question.id, e.target.value)}
                           variant="outlined"
                           placeholder={`Enter question ${question.id}...`}
-                          disabled={question.id === 0 || question.id === 3 || question.id === 4} // Disable editing for Q0, Q3, Q4
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                <Edit sx={{ color: (question.id === 0 || question.id === 3 || question.id === 4) ? 'text.disabled' : 'text.secondary' }} />
-                              </InputAdornment>
-                            ),
-                          }}
+                          disabled={question.id === 0 || question.id === 3 || question.id === 4}
                           sx={{
+                            '& .MuiOutlinedInput-root': {
+                              backgroundColor: 'rgba(10, 10, 10, 0.4)',
+                              fontSize: '0.875rem',
+                              '& fieldset': {
+                                borderColor: 'rgba(255, 255, 255, 0.08)',
+                                borderWidth: 1,
+                              },
+                              '&:hover fieldset': {
+                                borderColor: question.id === 0 || question.id === 3 || question.id === 4 
+                                  ? 'rgba(255, 255, 255, 0.08)' 
+                                  : 'rgba(99, 102, 241, 0.5)',
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: 'primary.main',
+                                borderWidth: 1.5,
+                              },
+                            },
+                            '& .MuiInputBase-input': {
+                              color: '#f5f5f5',
+                              py: 1.25,
+                              px: 1.5,
+                            },
                             '& .MuiInputBase-input.Mui-disabled': {
-                              WebkitTextFillColor: 'rgba(0, 0, 0, 0.6)', // Make disabled text more visible
-                              backgroundColor: 'rgba(0, 0, 0, 0.04)' // Light grey background for disabled fields
+                              WebkitTextFillColor: 'rgba(163, 163, 163, 0.5)',
+                              backgroundColor: 'rgba(0, 0, 0, 0.15)',
                             }
                           }}
                         />
-                        
-                        {question.id === 0 && (
-                          <Alert severity="warning" sx={{ mt: 2 }}>
-                            <Typography variant="body2">
-                              ⚠️ This question determines if the interview continues or not as per the candidate's availability.
-                            </Typography>
-                          </Alert>
-                        )}
-
-                        {question.id === 2 && (
-                          <Alert severity="info" sx={{ mt: 2 }}>
-                            <Typography variant="body2">
-                              🎯 This question is used for JD matching.
-                            </Typography>
-                          </Alert>
-                        )}
-                        {(question.id === 3 || question.id === 4) && (
-                          <Alert severity="info" sx={{ mt: 2 }}>
-                            <Typography variant="body2">
-                               This is a standard question and cannot be modified.
-                            </Typography>
-                          </Alert>
-                        )}
                       </Card>
                     </Grid>
                   ))}
                 </Grid>
-
-                {/* REMOVED: Interview Configuration Summary Card */}
               </Box>
             </Box>
           )}
 
-          {/* NEW: Tag-Based Bulk Calling Tab */}
-          {tabValue === 1 && (
-            <Box sx={{ minHeight: '70vh' }}>
-              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3 }}>
-                Tag-Based Bulk Calling Dashboard
-              </Typography>
-              
-              {/* Tag Selection Section */}
-              <Card sx={{ mb: 4 }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                      Select Data Tag for Bulk Calling
-                    </Typography>
-                    <Button
-                      startIcon={loadingTags ? <CircularProgress size={20} /> : <Refresh />}
-                      onClick={loadTagsSummary}
-                      disabled={loadingTags}
-                    >
-                      Refresh Tags
-                    </Button>
-                  </Box>
-
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <FormControl fullWidth>
-                        <InputLabel>Select Tag</InputLabel>
-                        <Select
-                          value={selectedTagId}
-                          label="Select Tag"
-                          onChange={(e) => handleTagSelection(e.target.value)}
-                          disabled={loadingTags || isBulkCalling}
-                        >
-                          <MenuItem value="">
-                            <em>Choose a tag...</em>
-                          </MenuItem>
-                          {/* ✅ FIX: Add null check for tags array */}
-                          {(tags || []).map((tag) => (
-                            <MenuItem key={tag.tag_id} value={tag.tag_id}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                <Tag sx={{ mr: 1, color: 'primary.main' }} />
-                                <Box sx={{ flexGrow: 1 }}>
-                                  <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-                                    {tag.tag_name}
-                                  </Typography>
-                                  <Typography variant="body2" color="textSecondary">
-                                    {tag.total_candidates} candidates • {tag.total_batches} batches
-                                  </Typography>
-                                </Box>
-                              </Box>
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-
-                    <Grid item xs={12} md={6}>
-                      {selectedTagId && (
-                        <Box sx={{ p: 2, bgcolor: 'info.50', borderRadius: 1 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-                            Selected Tag: {(tags || []).find(t => t.tag_id === selectedTagId)?.tag_name}
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            {tagCandidates.length} candidates ready for calling
-                          </Typography>
-                          {tagCandidates.length > 0 && (
-                            <Button
-                              variant="contained"
-                              size="large"
-                              startIcon={isBulkCalling ? <CircularProgress size={20} /> : <PlayArrow />}
-                              onClick={startBulkCallingFromTag}
-                              disabled={isBulkCalling || tagCandidates.length === 0}
-                              sx={{ mt: 2 }}
-                            >
-                              {isBulkCalling ? 'Calling in Progress...' : `Start Calling ${tagCandidates.length} Candidates`}
-                            </Button>
-                          )}
-                        </Box>
-                      )}
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-
-              {/* Candidates List Section */}
-              {selectedTagId && (
-                <Grid container spacing={4}>
-                  <Grid item xs={12} md={8}>
-                    <Card sx={{ height: '100%' }}>
-                      <CardContent>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                            Candidates from "{(tags || []).find(t => t.tag_id === selectedTagId)?.tag_name}" ({filteredCandidates.length})
-                          </Typography>
-                          
-                          <TextField
-                            size="small"
-                            placeholder="Search candidates..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  <Search />
-                                </InputAdornment>
-                              ),
-                            }}
-                            sx={{ width: 250 }}
-                          />
-                        </Box>
-
-                        {loadingCandidates ? (
-                          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                            <CircularProgress />
-                          </Box>
-                        ) : filteredCandidates.length === 0 ? (
-                          <Alert severity="info">
-                            <Typography variant="body1">
-                              No candidates found for this tag. Please upload PDF data using the Bulk PDF Processor.
-                            </Typography>
-                          </Alert>
-                        ) : (
-                          <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
-                            <Table stickyHeader>
-                              <TableHead>
-                                <TableRow>
-                                  <TableCell>Name</TableCell>
-                                  <TableCell>Phone</TableCell>
-                                  <TableCell>Email</TableCell>
-                                </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                {filteredCandidates.map((candidate, index) => (
-                                  <TableRow key={index}>
-                                    <TableCell>{candidate.name}</TableCell>
-                                    <TableCell>{candidate.phone}</TableCell>
-                                    <TableCell>{candidate.email || 'N/A'}</TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          </TableContainer>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </Grid>
-
-                  <Grid item xs={12} md={4}>
-                    <Card sx={{ height: '100%' }}>
-                      <CardContent>
-                        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3 }}>
-                          Bulk Calling Status
-                        </Typography>
-
-                        {isBulkCalling && bulkCallSession ? (
-                          <Box>
-                            <Alert severity="info" sx={{ mb: 3 }}>
-                              <Typography variant="body2">
-                                📞 Bulk calling in progress...
-                              </Typography>
-                            </Alert>
-                            
-                            <Box sx={{ mb: 3 }}>
-                              <Typography variant="body2" color="textSecondary">
-                                Progress: {bulkCallSession.completed_calls} / {bulkCallSession.total_contacts}
-                              </Typography>
-                              <LinearProgress 
-                                variant="determinate" 
-                                value={(bulkCallSession.completed_calls / bulkCallSession.total_contacts) * 100}
-                                sx={{ mt: 1 }}
-                              />
-                            </Box>
-
-                            <Button
-                              variant="outlined"
-                              color="warning"
-                              startIcon={<Stop />}
-                              onClick={stopBulkCalling}
-                              fullWidth
-                            >
-                              Stop Calling
-                            </Button>
-                          </Box>
-                        ) : (
-                          <Box>
-                            <Alert severity="success" sx={{ mb: 3 }}>
-                              <Typography variant="body2">
-                                🎯 Select a tag to view candidates and start bulk calling
-                              </Typography>
-                            </Alert>
-                            
-                            <Typography variant="h6" sx={{ mb: 2 }}>
-                              Available Tags: {(tags || []).length}
-                            </Typography>
-                            
-                            {/* ✅ Available tags with delete option */}
-                            <List dense>
-                              {(tags || []).slice(0, 5).map((tag) => (
-                                <ListItem key={tag.tag_id}>
-                                  <ListItemText
-                                    primary={tag.tag_name}
-                                    secondary={`${tag.total_candidates} candidates`}
-                                  />
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => handleDeleteTag(tag.tag_id)}
-                                    color="error"
-                                    title={`Delete ${tag.tag_name} tag`}
-                                  >
-                                    <Delete sx={{ fontSize: 16 }} />
-                                  </IconButton>
-                                </ListItem>
-                              ))}
-                              {(tags || []).length > 5 && (
-                                <ListItem>
-                                  <ListItemText
-                                    secondary={`... and ${(tags || []).length - 5} more tags`}
-                                  />
-                                </ListItem>
-                              )}
-                            </List>
-                          </Box>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                </Grid>
-              )}
-            </Box>
-          )}
-
           {/* CSV Upload Tab */}
-          {tabValue === 2 && (
+          {tabValue === 1 && (
             <Box sx={{ minHeight: '70vh' }}>
               <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3 }}>
                 CSV Upload Bulk Calling
@@ -1759,7 +1078,7 @@ export const CallDashboard: React.FC = () => {
           )}
 
           {/* Job Description Tab */}
-          {tabValue === 3 && (
+          {tabValue === 2 && (
             <Box>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>

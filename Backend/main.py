@@ -59,7 +59,7 @@ async def make_single_call(request: Request):
             clean_phone = f"+{phone_number}"
         elif len(phone_number) == 10:
             clean_phone = f"+91{phone_number}"
-                else:
+        else:
             clean_phone = phone_number
         
         call = client.calls.create(
@@ -113,15 +113,15 @@ async def start_bulk_calling(request: Request):
                     clean_phone = f"+{phone}"
                 elif len(phone) == 10:
                     clean_phone = f"+91{phone}"
-                    else:
+                else:
                     clean_phone = phone
                 
                 # Make call
-                    call = client.calls.create(
-                        url=f"{WEBHOOK_BASE_URL}/voice",
+                call = client.calls.create(
+                    url=f"{WEBHOOK_BASE_URL}/voice",
                     to=clean_phone,
                     from_=TWILIO_PHONE_NUMBER,
-                        record=True,
+                    record=True,
                     recording_channels="dual"
                 )
                 
@@ -139,10 +139,10 @@ async def start_bulk_calling(request: Request):
                 }
                 save_interview_session(call.sid, interview_data)
                 
-                    results.append({
-                        "name": name,
+                results.append({
+                    "name": name,
                     "phone": clean_phone,
-                        "success": True,
+                    "success": True,
                     "call_sid": call.sid
                 })
                 
@@ -186,21 +186,21 @@ async def voice_webhook(request: Request):
         # Load or create interview session
         interview_data = load_interview_session(call_sid)
         if not interview_data:
-        interview_data = {
-            "interview_id": call_sid,
-            "call_sid": call_sid,
-            "candidate_phone": from_number,
-            "phone_number": from_number,
-            "twilio_number": to_number,
+            interview_data = {
+                "interview_id": call_sid,
+                "call_sid": call_sid,
+                "candidate_phone": from_number,
+                "phone_number": from_number,
+                "twilio_number": to_number,
                 "candidate_name": f"Candidate_{call_sid[-8:]}",
-            "start_time": datetime.now().isoformat(),
-            "status": "IN_PROGRESS",
-            "current_question": 0,
-            "responses": [],
-            "silence_prompts": 0,
-            "last_activity": datetime.now().isoformat()
-        }
-        save_interview_session(call_sid, interview_data)
+                "start_time": datetime.now().isoformat(),
+                "status": "IN_PROGRESS",
+                "current_question": 0,
+                "responses": [],
+                "silence_prompts": 0,
+                "last_activity": datetime.now().isoformat()
+            }
+            save_interview_session(call_sid, interview_data)
         
         # Start interview
         resp = VoiceResponse()
@@ -392,7 +392,7 @@ async def get_interview_details(interview_id: str):
         # Check session file
         session_data = load_interview_session(interview_id)
         if session_data:
-        return {
+            return {
                 "interview_id": interview_id,
                 "call_sid": interview_id,
                 "candidate_name": session_data.get('candidate_name', f"Candidate_{interview_id[-8:]}"),
@@ -440,7 +440,7 @@ async def update_job_description_endpoint(request: Request):
         
         if isinstance(skills_text, str):
             skills_list = [skill.strip() for skill in skills_text.split(",") if skill.strip()]
-                else:
+        else:
             skills_list = skills_text
         
         jd_config = {
@@ -476,6 +476,7 @@ async def run_jd_analysis_endpoint():
 async def get_jd_report(call_id: str):
     """Get JD analysis report"""
     try:
+        # Check in interviews folder only (not archive)
         pattern = f"interviews/*{call_id}*JD_*ANALYSIS*.json"
         files = glob.glob(pattern)
         if files:
@@ -485,6 +486,64 @@ async def get_jd_report(call_id: str):
         return {"error": "JD report not found"}
     except Exception as error:
         return {"error": str(error)}
+
+# ==================== INTERVIEW QUESTIONS ====================
+
+@app.get("/interview-questions")
+async def get_interview_questions():
+    """Get interview questions"""
+    try:
+        questions = []
+        for q_id, q_text in INTERVIEW_QUESTIONS.items():
+            questions.append({
+                "id": q_id,
+                "question": q_text
+            })
+        return {"success": True, "questions": questions}
+    except Exception as error:
+        return {"success": False, "error": str(error), "questions": []}
+
+@app.post("/update-interview-questions")
+async def update_interview_questions(request: Request):
+    """Update interview questions"""
+    try:
+        data = await request.json()
+        questions = data.get("questions", [])
+        
+        # Update INTERVIEW_QUESTIONS dict
+        updated_questions = {}
+        for q in questions:
+            q_id = q.get("id")
+            q_text = q.get("question", "").strip()
+            if q_id is not None and q_text:
+                updated_questions[q_id] = q_text
+        
+        # Update config.py file
+        config_file = os.path.join(os.path.dirname(__file__), "config.py")
+        with open(config_file, 'r') as f:
+            content = f.read()
+        
+        # Replace INTERVIEW_QUESTIONS dict
+        pattern = r'INTERVIEW_QUESTIONS\s*=\s*\{[^}]*\}'
+        questions_str = "INTERVIEW_QUESTIONS = {\n"
+        for q_id, q_text in sorted(updated_questions.items()):
+            # Escape quotes in question text
+            escaped_text = q_text.replace('"', '\\"')
+            questions_str += f'    {q_id}: "{escaped_text}",\n'
+        questions_str += "}"
+        
+        content = re.sub(pattern, questions_str, content, flags=re.DOTALL)
+        
+        with open(config_file, 'w') as f:
+            f.write(content)
+        
+        # Update the global INTERVIEW_QUESTIONS
+        global INTERVIEW_QUESTIONS
+        INTERVIEW_QUESTIONS = updated_questions
+        
+        return {"success": True, "message": "Questions updated successfully"}
+    except Exception as error:
+        return {"success": False, "error": str(error)}
 
 # ==================== CSV UPLOAD ====================
 
@@ -504,7 +563,7 @@ async def upload_csv(file: UploadFile = File(...)):
             return {"success": False, "error": "No candidates found in CSV", "contacts": []}
         
         processed_contacts = []
-                        for candidate in candidates:
+        for candidate in candidates:
             name = candidate.get("name", candidate.get("Name", "")).strip()
             phone = candidate.get("phone", candidate.get("Phone", candidate.get("mobile", candidate.get("Mobile", "")))).strip()
             email = candidate.get("email", candidate.get("Email", "")).strip()
