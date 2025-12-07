@@ -67,7 +67,9 @@ async def make_single_call(request: Request):
             to=clean_phone,
             from_=TWILIO_PHONE_NUMBER,
             record=True,
-            recording_channels="dual"
+            recording_channels="dual",
+            recording_status_callback=f"{WEBHOOK_BASE_URL}/recording-status",
+            recording_status_callback_event=['completed']
         )
         
         return {
@@ -122,7 +124,9 @@ async def start_bulk_calling(request: Request):
                     to=clean_phone,
                     from_=TWILIO_PHONE_NUMBER,
                     record=True,
-                    recording_channels="dual"
+                    recording_channels="dual",
+                    recording_status_callback=f"{WEBHOOK_BASE_URL}/recording-status",
+                    recording_status_callback_event=['completed']
                 )
                 
                 # Store candidate info directly in session (no contact mapping)
@@ -307,14 +311,39 @@ async def handle_no_response_endpoint(call_sid: str):
 
 @app.post("/recording-status")
 async def recording_status_callback(request: Request):
-    """Handle recording status"""
+    """Handle recording status and upload to S3 when completed"""
     try:
         form_data = await request.form()
         call_sid = form_data.get('CallSid')
+        recording_sid = form_data.get('RecordingSid')
         recording_status = form_data.get('RecordingStatus')
-        print(f"[RECORDING] Call {call_sid}: {recording_status}")
+        
+        print(f"[RECORDING] Call {call_sid}, Recording {recording_sid}: {recording_status}")
+        
+        # When recording is completed, upload to S3
+        if recording_status == 'completed' and recording_sid:
+            from s3_storage import upload_recording_to_s3
+            s3_result = upload_recording_to_s3(call_sid, recording_sid)
+            
+            if s3_result:
+                # Update interview data with S3 URL
+                interview_data = load_interview_session(call_sid)
+                if interview_data:
+                    if 'recordings' not in interview_data:
+                        interview_data['recordings'] = []
+                    interview_data['recordings'].append({
+                        'recording_sid': recording_sid,
+                        's3_url': s3_result['s3_url'],
+                        's3_key': s3_result['s3_key'],
+                        'duration': s3_result.get('duration'),
+                        'status': 'stored_in_s3'
+                    })
+                    save_interview_session(call_sid, interview_data)
+                    print(f"✅ Recording stored in S3: {s3_result['s3_url']}")
+        
         return {"status": "received"}
     except Exception as error:
+        print(f"[RECORDING ERROR] {error}")
         return {"error": str(error)}
 
 # ==================== INTERVIEW DATA ====================
@@ -369,27 +398,38 @@ async def get_all_interviews_detailed():
 
 @app.get("/interview-details/{interview_id}")
 async def get_interview_details(interview_id: str):
-    """Get interview details"""
+    """Get interview details - optimized for faster loading"""
     try:
-        # Try to load from simple file first
+        # Try to load from simple file first (most common case)
         interview_file = f"interviews/{interview_id}.json"
         if os.path.exists(interview_file):
             with open(interview_file, 'r') as f:
                 data = json.load(f)
+            
+            # Get S3 recording URLs if available
+            recordings = data.get('recordings', [])
+            if not recordings and data.get('call_sid'):
+                # Try to fetch from S3 if not in data
+                from s3_storage import list_recordings_for_call
+                s3_recordings = list_recordings_for_call(data.get('call_sid', interview_id))
+                if s3_recordings:
+                    recordings = [{'s3_url': r['url'], 's3_key': r['key']} for r in s3_recordings]
+            
             return {
-                    "interview_id": interview_id,
-                    "call_sid": data.get('call_sid', interview_id),
-                    "candidate_name": data.get('candidate_name', f"Candidate_{interview_id[-8:]}"),
-                    "candidate_phone": data.get('candidate_phone') or data.get('phone_number', ""),
-                    "status": data.get('status', 'COMPLETED'),
-                    "start_time": data.get('start_time', ''),
-                    "end_time": data.get('end_time', ''),
-                    "responses": data.get('responses', []),
-                    "questions_answered": len(data.get('responses', [])),
-                    "total_questions": len(INTERVIEW_QUESTIONS)
-                }
+                "interview_id": interview_id,
+                "call_sid": data.get('call_sid', interview_id),
+                "candidate_name": data.get('candidate_name', f"Candidate_{interview_id[-8:]}"),
+                "candidate_phone": data.get('candidate_phone') or data.get('phone_number', ""),
+                "status": data.get('status', 'COMPLETED'),
+                "start_time": data.get('start_time', ''),
+                "end_time": data.get('end_time', ''),
+                "responses": data.get('responses', []),
+                "questions_answered": len(data.get('responses', [])),
+                "total_questions": len(INTERVIEW_QUESTIONS),
+                "recordings": recordings
+            }
         
-        # Check session file
+        # Check session file (for in-progress calls)
         session_data = load_interview_session(interview_id)
         if session_data:
             return {
@@ -401,11 +441,13 @@ async def get_interview_details(interview_id: str):
                 "start_time": session_data.get('start_time', ''),
                 "responses": session_data.get('responses', []),
                 "questions_answered": len(session_data.get('responses', [])),
-                "total_questions": len(INTERVIEW_QUESTIONS)
+                "total_questions": len(INTERVIEW_QUESTIONS),
+                "recordings": session_data.get('recordings', [])
             }
         
         return {"error": "Interview not found"}
     except Exception as error:
+        print(f"Error getting interview details: {error}")
         return {"error": str(error)}
 
 # ==================== JOB DESCRIPTION ====================

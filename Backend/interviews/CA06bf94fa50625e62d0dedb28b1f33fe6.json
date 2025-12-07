@@ -1,0 +1,80 @@
+{
+  "interview_id": "CA06bf94fa50625e62d0dedb28b1f33fe6",
+  "call_sid": "CA06bf94fa50625e62d0dedb28b1f33fe6",
+  "candidate_phone": "+17578546810",
+  "phone_number": "+17578546810",
+  "twilio_number": "+917387792437",
+  "candidate_name": "Discover Being Recorded",
+  "start_time": "2025-12-07T21:05:39.068658",
+  "status": "COMPLETED",
+  "current_question": 9,
+  "responses": [
+    {
+      "question_index": 0,
+      "question": "Is this a good time to speak for a 3-4 minute interview?",
+      "answer": "Discover being recorded",
+      "confidence": 0.48035073,
+      "timestamp": "2025-12-07T21:05:54.847151"
+    },
+    {
+      "question_index": 1,
+      "question": "Introduce yourself.",
+      "answer": "Sorry, my name is Ranjan chitran. I am current back and developed brain labs Limited which is the crypt on startup and currently working with extracted in 25000.",
+      "confidence": 0.6788432,
+      "timestamp": "2025-12-07T21:06:18.934712"
+    },
+    {
+      "question_index": 2,
+      "question": "What are your key skills for this role?",
+      "answer": "Tumhen key skills are goland Python system design rust and I can very well handle the back and system second work with doctor Cuban it is and worked with many other Technology I can scale the bacon to like 10000 users at a time right now currently working with  back and AP",
+      "confidence": 0.0,
+      "timestamp": "2025-12-07T21:06:50.427183"
+    },
+    {
+      "question_index": 3,
+      "question": "What is your current notice period?",
+      "answer": "When my current notice period is of  30 days?",
+      "confidence": 0.0,
+      "timestamp": "2025-12-07T21:07:05.277287"
+    },
+    {
+      "question_index": 4,
+      "question": "What is your current CTC and expected salary?",
+      "answer": "Well, my current city Phase 1 crore and  extract and crow.",
+      "confidence": 0.0,
+      "timestamp": "2025-12-07T21:07:21.597314"
+    },
+    {
+      "question_index": 5,
+      "question": "Tell us about your experience with APIs.",
+      "answer": "I have worked with many more appears like open a API call have worked with internal APS of a form and have worked with many different kind of API mostly fetching testing on The  Postman itself.",
+      "confidence": 0.0,
+      "timestamp": "2025-12-07T21:07:48.484958"
+    },
+    {
+      "question_index": 6,
+      "question": "What is your understanding of cloud platforms? Have you worked with AWS, Azure, or GCP?",
+      "answer": "Han yah Sahab Waqt EWS more frequently using S3 and dynamo DB services are more used to ECS also for diploma independent of a container when we have a Python back and system that we can scale up easily on individual document.",
+      "confidence": 0.7074653,
+      "timestamp": "2025-12-07T21:08:22.480343"
+    },
+    {
+      "question_index": 7,
+      "question": "Describe your experience with deployments, including the use of Docker and Kubernetes.",
+      "answer": "sofa deployment I have worked with document Humanities for orchestrating them with the help of stabilities have used in the Google  Cuban it is",
+      "confidence": 0.0,
+      "timestamp": "2025-12-07T21:08:49.505382"
+    },
+    {
+      "question_index": 8,
+      "question": "What is your experience with AI and machine learning? Mention any GenAI, deep learning technologies, or frameworks you've used.",
+      "answer": "Mohabbat last language models have worked with many different AI models and have also made few agentic apps that can help people to get the answers in the Crypto and startups.",
+      "confidence": 0.7664974,
+      "timestamp": "2025-12-07T21:09:22.696622"
+    }
+  ],
+  "silence_prompts": 0,
+  "last_activity": "2025-12-07T21:09:22.696692",
+  "end_time": "2025-12-07T21:09:22.702683",
+  "completion_time": "2025-12-07T21:09:22.702694"
+}
