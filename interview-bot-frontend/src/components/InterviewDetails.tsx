@@ -240,7 +240,7 @@ export const InterviewDetails: React.FC = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>~
+    <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <IconButton onClick={() => navigate('/history')} sx={{ mr: 2 }}>
           <ArrowBack />
@@ -249,36 +249,20 @@ export const InterviewDetails: React.FC = () => {
           <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
             📋 Interview Details
           </Typography>
-          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+          <Typography variant="body1" sx={{ color: 'text.secondary', mb: 1 }}>
             Interview ID: {interviewData.interview_id}
           </Typography>
-          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-            Interview ID: {interviewData.interview_id}
-          </Typography>
-          <Box sx={{ mt: 1, p: 1, backgroundColor: 'yellow', border: '1px solid red' }}>
-            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-              DEBUG - Phone Info:
+          {interviewData.candidate_name && (
+            <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 'medium', mb: 0.5 }}>
+              Candidate: {interviewData.candidate_name}
             </Typography>
-            <Typography variant="body2">
-              candidate_phone: {JSON.stringify(interviewData.candidate_phone)}
-            </Typography>
-            <Typography variant="body2">
-              phone_number: {JSON.stringify(interviewData.phone_number)}
-            </Typography>
-            <Typography variant="body2">
-              candidate_name: {JSON.stringify(interviewData.candidate_name)}
-            </Typography>
-          </Box>
+          )}
           {(interviewData.candidate_phone || interviewData.phone_number) ? (
             <Typography variant="body1" sx={{ color: 'primary.main', fontWeight: 'bold', display: 'flex', alignItems: 'center', mt: 0.5 }}>
               <Phone sx={{ fontSize: 16, mr: 0.5 }} />
               Phone: {interviewData.candidate_phone || interviewData.phone_number}
             </Typography>
-          ) : (
-            <Typography variant="body1" sx={{ color: 'error.main', mt: 0.5 }}>
-              ⚠️ No phone number found in interview data
-            </Typography>
-          )}
+          ) : null}
         </Box>
         {!jdAnalysis && (
           <Button
@@ -440,9 +424,10 @@ export const InterviewDetails: React.FC = () => {
               </Grid>
 
               <Grid item xs={12} md={4}>
-                <Paper sx={{ p: 2, backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    🤖 OpenAI Verdict
+                <Paper sx={{ p: 2, backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '2px solid rgba(16, 185, 129, 0.3)' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1.5, display: 'flex', alignItems: 'center' }}>
+                    <Box component="span" sx={{ mr: 1, fontSize: '1.5rem' }}>🤖</Box>
+                    AI Verdict
                   </Typography>
                   {jdAnalysis.openai_verdict && jdAnalysis.openai_verdict !== 'N/A' ? (
                     <>
@@ -451,28 +436,46 @@ export const InterviewDetails: React.FC = () => {
                         sx={{ 
                           mb: 2, 
                           fontWeight: 'bold',
+                          fontSize: '0.9rem',
+                          height: 32,
                           backgroundColor: 
-                            jdAnalysis.openai_verdict === 'STRONG HIRE' ? 'rgba(16, 185, 129, 0.2)' :
-                            jdAnalysis.openai_verdict === 'RECOMMENDED' ? 'rgba(34, 197, 94, 0.2)' :
-                            jdAnalysis.openai_verdict === 'CONSIDER' ? 'rgba(245, 158, 11, 0.2)' :
-                            'rgba(239, 68, 68, 0.2)',
+                            jdAnalysis.openai_verdict === 'STRONG HIRE' ? 'rgba(16, 185, 129, 0.3)' :
+                            jdAnalysis.openai_verdict === 'RECOMMENDED' ? 'rgba(34, 197, 94, 0.3)' :
+                            jdAnalysis.openai_verdict === 'CONSIDER' ? 'rgba(245, 158, 11, 0.3)' :
+                            jdAnalysis.openai_verdict === 'MAYBE' ? 'rgba(251, 146, 60, 0.3)' :
+                            'rgba(239, 68, 68, 0.3)',
                           color:
                             jdAnalysis.openai_verdict === 'STRONG HIRE' ? '#10b981' :
                             jdAnalysis.openai_verdict === 'RECOMMENDED' ? '#22c55e' :
                             jdAnalysis.openai_verdict === 'CONSIDER' ? '#f59e0b' :
+                            jdAnalysis.openai_verdict === 'MAYBE' ? '#fb923c' :
+                            '#ef4444',
+                          border: `2px solid ${
+                            jdAnalysis.openai_verdict === 'STRONG HIRE' ? '#10b981' :
+                            jdAnalysis.openai_verdict === 'RECOMMENDED' ? '#22c55e' :
+                            jdAnalysis.openai_verdict === 'CONSIDER' ? '#f59e0b' :
+                            jdAnalysis.openai_verdict === 'MAYBE' ? '#fb923c' :
                             '#ef4444'
+                          }`
                         }}
                       />
                       {jdAnalysis.openai_verdict_reason && (
-                        <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                          {jdAnalysis.openai_verdict_reason}
-                        </Typography>
+                        <Box sx={{ mt: 1.5, p: 1.5, backgroundColor: 'rgba(0, 0, 0, 0.2)', borderRadius: 1 }}>
+                          <Typography variant="body2" sx={{ color: 'text.primary', fontStyle: 'italic', lineHeight: 1.6 }}>
+                            "{jdAnalysis.openai_verdict_reason}"
+                          </Typography>
+                        </Box>
                       )}
                     </>
                   ) : (
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      OpenAI verdict not available
-                    </Typography>
+                    <Box sx={{ p: 2, textAlign: 'center' }}>
+                      <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+                        ⚠️ OpenAI verdict not available
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        Make sure OPENAI_API_KEY is set in backend .env file
+                      </Typography>
+                    </Box>
                   )}
                   <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 2 }}>
                     Analysis Date: {new Date(jdAnalysis.analysis_date).toLocaleString()}
@@ -483,9 +486,9 @@ export const InterviewDetails: React.FC = () => {
           </CardContent>
         </Card>
       )}
-      <Card>
+      <Card sx={{ backgroundColor: 'rgba(17, 17, 17, 0.5)' }}>
         <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>
+          <Typography variant="h6" sx={{ mb: 2, color: '#f5f5f5' }}>
             💬 Interview Questions & Responses
           </Typography>
           
@@ -496,36 +499,58 @@ export const InterviewDetails: React.FC = () => {
           ) : (
             <Box>
               {interviewData.responses.map((response, index) => (
-                <Accordion key={index} defaultExpanded={index === 0}>
-                  <AccordionSummary expandIcon={<ExpandMore />}>
+                <Accordion 
+                  key={index} 
+                  defaultExpanded={index === 0}
+                  sx={{ 
+                    backgroundColor: 'rgba(17, 17, 17, 0.3)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: 1,
+                    mb: 1,
+                    '&:before': { display: 'none' }
+                  }}
+                >
+                  <AccordionSummary 
+                    expandIcon={<ExpandMore sx={{ color: '#f5f5f5' }} />}
+                    sx={{ 
+                      '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.05)' }
+                    }}
+                  >
                     <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold', flexGrow: 1, color: '#f5f5f5' }}>
                         Question {response.question_number}: {response.question}
                       </Typography>
                       <Chip 
                         size="small" 
                         label={new Date(response.timestamp).toLocaleTimeString()}
                         variant="outlined"
+                        sx={{ 
+                          borderColor: 'rgba(255, 255, 255, 0.3)',
+                          color: '#a3a3a3'
+                        }}
                       />
                     </Box>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Box sx={{ pl: 2, borderLeft: 3, borderColor: 'primary.main' }}>
-                      <Typography variant="body1" sx={{ mb: 2 }}>
+                      <Typography variant="body1" sx={{ mb: 2, color: '#f5f5f5' }}>
                         <strong>Answer:</strong>
                       </Typography>
                       <Typography variant="body2" sx={{ 
-                        backgroundColor: 'grey.50', 
+                        backgroundColor: 'rgba(17, 17, 17, 0.6)', 
                         p: 2, 
                         borderRadius: 1,
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
                         fontStyle: response.answer ? 'normal' : 'italic',
-                        color: response.answer ? 'text.primary' : 'text.secondary'
+                        color: response.answer ? '#f5f5f5' : '#a3a3a3',
+                        lineHeight: 1.6,
+                        wordBreak: 'break-word'
                       }}>
                         {response.answer || 'No response recorded'}
                       </Typography>
                       
                       {response.duration && (
-                        <Typography variant="caption" sx={{ color: 'text.secondary', mt: 1, display: 'block' }}>
+                        <Typography variant="caption" sx={{ color: '#a3a3a3', mt: 1, display: 'block' }}>
                           Response Duration: {response.duration}
                         </Typography>
                       )}
