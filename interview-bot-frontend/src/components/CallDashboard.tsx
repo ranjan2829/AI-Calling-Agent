@@ -84,7 +84,7 @@ interface BulkCallSession {
 }
 
 
-const initiateCall = async (phoneNumber: string) => {
+const initiateCall = async (phoneNumber: string, candidateName?: string) => {
   try {
     const response = await fetch('http://localhost:8000/make-call', {
       method: 'POST',
@@ -92,7 +92,8 @@ const initiateCall = async (phoneNumber: string) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        phone_number: phoneNumber
+        phone_number: phoneNumber,
+        candidate_name: candidateName || ''
       })
     });
 
@@ -148,6 +149,7 @@ export const CallDashboard: React.FC = () => {
   
   // Single call states
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [candidateName, setCandidateName] = useState('');
   
   // Bulk calling states
   const [tabValue, setTabValue] = useState(0);
@@ -394,11 +396,16 @@ export const CallDashboard: React.FC = () => {
       return;
     }
 
+    if (!candidateName.trim()) {
+      toast.error('Please enter candidate name');
+      return;
+    }
+
     setIsCallInProgress(true);
     setCallResult(null);
 
     try {
-      const result = await initiateCall(targetPhone); // Now it's defined!
+      const result = await initiateCall(targetPhone, candidateName);
       
       if (result.success) {
         setCallResult(result);
@@ -727,6 +734,20 @@ export const CallDashboard: React.FC = () => {
                   AI Interview Call
                 </Typography>
                 
+                {/* Candidate Name Input */}
+                <Box sx={{ mb: 2, width: '100%', maxWidth: 400 }}>
+                  <TextField
+                    fullWidth
+                    label="Candidate Name"
+                    placeholder="Enter candidate name"
+                    value={candidateName}
+                    onChange={(e) => setCandidateName(e.target.value)}
+                    disabled={isCallInProgress}
+                    required
+                    helperText="Enter the candidate's full name"
+                  />
+                </Box>
+
                 {/* Phone Number Input */}
                 <Box sx={{ mb: 2, width: '100%', maxWidth: 400 }}>
                   <TextField
@@ -736,6 +757,7 @@ export const CallDashboard: React.FC = () => {
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     disabled={isCallInProgress}
+                    required
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -743,7 +765,7 @@ export const CallDashboard: React.FC = () => {
                         </InputAdornment>
                       ),
                     }}
-                    helperText="Enter phone number (e.g., +1234567890) or leave empty for default"
+                    helperText="Enter phone number (e.g., +1234567890)"
                     error={!!(phoneNumber && !isValidPhoneNumber(phoneNumber))}
                   />
                 </Box>
@@ -752,7 +774,7 @@ export const CallDashboard: React.FC = () => {
                   variant="contained"
                   size="large"
                   onClick={() => handleMakeCall()}
-                  disabled={isCallInProgress || !!(phoneNumber && !isValidPhoneNumber(phoneNumber))}
+                  disabled={isCallInProgress || !candidateName.trim() || !!(phoneNumber && !isValidPhoneNumber(phoneNumber))}
                   startIcon={isCallInProgress ? <CircularProgress size={24} /> : <Phone />}
                   sx={{ 
                     px: 4, 

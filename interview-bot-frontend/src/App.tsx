@@ -583,7 +583,7 @@ function App() {
             />
 
             <Route
-              path="/interview/:id"
+              path="/interview/:interviewId"
               element={
                 <ProtectedRoute>
                   <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#0a0a0a' }}>

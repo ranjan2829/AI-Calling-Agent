@@ -78,7 +78,8 @@ interface JDAnalysis {
   };
 }
 export const InterviewDetails: React.FC = () => {
-  const { interviewId } = useParams<{ interviewId: string }>();
+  const params = useParams<{ interviewId?: string; id?: string }>();
+  const interviewId = params.interviewId || params.id;
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(true);

@@ -248,8 +248,15 @@ export const InterviewResults: React.FC = () => {
       console.log('Loading interview data with', Object.keys(contactMappings).length, 'contact mappings available');
       
       const interviewsResponse = await callsApi.getAllInterviewsDetailed();
-      const allInterviews = interviewsResponse.data.interviews || [];
+      // Handle both direct response and nested data structure
+      const responseData = interviewsResponse?.data || interviewsResponse;
+      const allInterviews = responseData?.interviews || responseData || [];
       console.log('📋 Raw interviews loaded:', allInterviews.length, 'interviews');
+      console.log('📋 Response structure:', { 
+        hasData: !!interviewsResponse?.data, 
+        hasInterviews: !!responseData?.interviews,
+        directArray: Array.isArray(allInterviews)
+      });
 
       const validInterviews = allInterviews.filter((interview: any) => {
         const callId = interview.call_sid || interview.interview_id;

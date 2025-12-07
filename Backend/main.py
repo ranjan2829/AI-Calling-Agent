@@ -48,9 +48,13 @@ async def make_single_call(request: Request):
     try:
         data = await request.json()
         phone_number = data.get("phone_number", "").strip()
+        candidate_name = data.get("candidate_name", "").strip()
         
         if not phone_number:
             return {"success": False, "error": "Phone number is required"}
+        
+        if not candidate_name:
+            return {"success": False, "error": "Candidate name is required"}
         
         # Clean phone number
         if phone_number.startswith('+'):
@@ -72,12 +76,29 @@ async def make_single_call(request: Request):
             recording_status_callback_event=['completed']
         )
         
+        # Create interview session with name and phone
+        interview_data = {
+            "interview_id": call.sid,
+            "call_sid": call.sid,
+            "candidate_phone": clean_phone,
+            "candidate_name": candidate_name,
+            "phone_number": clean_phone,
+            "start_time": datetime.now().isoformat(),
+            "status": "IN_PROGRESS",
+            "current_question": 0,
+            "responses": [],
+            "silence_prompts": 0,
+            "last_activity": datetime.now().isoformat()
+        }
+        save_interview_session(call.sid, interview_data)
+        
         return {
             "success": True,
             "call_sid": call.sid,
             "status": call.status,
             "to": clean_phone,
-            "message": f"Call initiated to {clean_phone}"
+            "candidate_name": candidate_name,
+            "message": f"Call initiated to {candidate_name} at {clean_phone}"
         }
         
     except Exception as error:

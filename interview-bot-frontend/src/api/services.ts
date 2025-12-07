@@ -80,7 +80,7 @@ export const updateJobDescription = async (jobData: any) => {
 };
 
 export const getDetailedInterviews = async () => {
-  return apiRequest('/all-interviews');
+  return apiRequest('/interviews-detailed');
 };
 
 export const getInterviewDetails = async (interviewId: string) => {
@@ -105,7 +105,7 @@ export const getJDReport = async (callId: string) => {
 };
 
 export const getAllInterviews = async () => {
-  return apiRequest('/all-interviews'); // This matches your backend
+  return apiRequest('/interviews-detailed'); // Fixed: matches backend endpoint
 };
 
 export const testAWSServices = async () => {

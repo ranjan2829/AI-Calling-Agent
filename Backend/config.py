@@ -14,7 +14,7 @@ WEBHOOK_BASE_URL = os.getenv("WEBHOOK_BASE_URL")
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_REGION = os.getenv("AWS_REGION", "ap-south-1")
-S3_BUCKET = os.getenv("S3_BUCKET", "ai-calling-agent")
+S3_BUCKET = os.getenv("S3_BUCKET", "amzn-twillio-recordings")
 
 # Interview Settings
 TRANSCRIPTION_TIMEOUT = 10
