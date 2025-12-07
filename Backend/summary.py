@@ -407,16 +407,16 @@ def analyze_all_available_interviews():
                     "source_file": file_path
                 }
                 # Save to S3 and local
-        save_unique_match_report(report, call_sid, candidate_name)
-        try:
-            from s3_storage import save_jd_analysis_to_s3, s3_client
-            if s3_client:
-                save_jd_analysis_to_s3(call_sid, report)
-        except Exception as e:
-            print(f"⚠️ Could not save to S3: {e}")
+                save_unique_match_report(report, call_sid, candidate_name)
+                try:
+                    from s3_storage import save_jd_analysis_to_s3, s3_client
+                    if s3_client:
+                        save_jd_analysis_to_s3(call_sid, report)
+                except Exception as e:
+                    print(f"⚠️ Could not save to S3: {e}")
                 results.append(report)
             except Exception as e:
-                print(f"Error processing {file_path}: {e}")
+                print(f"Error processing {call_sid}: {e}")
                 continue
         print(f"Analysis complete. Processed {len(results)} candidates")
         return {"success": True, "analyzed": len(results), "results": results}
