@@ -98,14 +98,24 @@ const initiateCall = async (phoneNumber: string) => {
 
     if (!response.ok) {
       const errorMsg = `HTTP error! status: ${response.status}`;
-      throw new (Error as any)(errorMsg);
+      throw new Error(errorMsg);
     }
 
     const result = await response.json();
+    
+    // If backend returned an error, throw it properly
+    if (!result.success && result.error) {
+      throw new Error(result.error);
+    }
+    
     return result;
   } catch (error) {
     console.error('Error initiating call:', error);
-    throw error;
+    // Re-throw as Error if it's not already an Error instance
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(String(error));
   }
 };
 
@@ -328,7 +338,7 @@ export const CallDashboard: React.FC = () => {
 
       if (!response.ok) {
         const errorMsg = `HTTP error! status: ${response.status}`;
-        throw new (Error as any)(errorMsg);
+        throw new Error(errorMsg);
       }
 
       const result = await response.json();
@@ -342,7 +352,7 @@ export const CallDashboard: React.FC = () => {
       } else {
         // ✅ Fix the error handling here
         const errorMessage = typeof result.error === 'object' ? JSON.stringify(result.error) : (result.error || 'Failed to fetch balance');
-        throw new (Error as any)(errorMessage);
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error('Error loading Twilio balance:', error);
@@ -394,12 +404,13 @@ export const CallDashboard: React.FC = () => {
         setCallResult(result);
         toast.success(`Call initiated successfully to ${targetPhone}`);
       } else {
-        throw new (Error as any)(result.error || 'Call failed');
+        throw new Error(result.error || 'Call failed');
       }
     } catch (error: any) {
       console.error('Call failed:', error);
-      toast.error(`Call failed: ${error.message}`);
-      setCallResult({ error: error.message });
+      const errorMessage = error?.message || error?.error || String(error) || 'Unknown error occurred';
+      toast.error(`Call failed: ${errorMessage}`);
+      setCallResult({ error: errorMessage });
     } finally {
       setIsCallInProgress(false);
     }
