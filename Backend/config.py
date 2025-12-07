@@ -16,6 +16,9 @@ AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_REGION = os.getenv("AWS_REGION", "ap-south-1")
 S3_BUCKET = os.getenv("S3_BUCKET", "amzn-twillio-recordings")
 
+# OpenAI Configuration
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 # Interview Settings
 TRANSCRIPTION_TIMEOUT = 10
 SILENCE_TIMEOUT = 5

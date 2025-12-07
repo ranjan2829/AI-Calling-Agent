@@ -64,6 +64,7 @@ interface JDAnalysis {
   job_title: string;
   company: string;
   skill_match_percentage: number;
+  skills_match_percentage?: number;
   overall_score?: number;
   found_skills: string[];
   missing_skills: string[];
@@ -71,6 +72,8 @@ interface JDAnalysis {
   total_required_skills: number;
   analysis_date: string;
   experience_match_percentage?: number;
+  openai_verdict?: string;
+  openai_verdict_reason?: string;
   candidate_metadata?: {
     phone?: string;
     email?: string;
@@ -148,6 +151,7 @@ export const InterviewDetails: React.FC = () => {
               job_title: report.candidate_analysis.job_title,
               company: report.candidate_analysis.company,
               skill_match_percentage: report.candidate_analysis.skill_match_percentage || report.candidate_analysis.skills_match_percentage || 0,
+              skills_match_percentage: report.candidate_analysis.skills_match_percentage || report.candidate_analysis.skill_match_percentage || 0,
               overall_score: report.candidate_analysis.overall_score,
               found_skills: report.candidate_analysis.found_skills || report.candidate_analysis.matched_skills || [],
               missing_skills: report.candidate_analysis.missing_skills || [],
@@ -155,6 +159,8 @@ export const InterviewDetails: React.FC = () => {
               total_required_skills: (report.candidate_analysis.found_skills?.length || 0) + (report.candidate_analysis.missing_skills?.length || 0),
               analysis_date: report.analysis_created || new Date().toISOString(),
               experience_match_percentage: report.candidate_analysis.experience_match_percentage,
+              openai_verdict: report.candidate_analysis.openai_verdict,
+              openai_verdict_reason: report.candidate_analysis.openai_verdict_reason,
               candidate_metadata: report.candidate_analysis.candidate_metadata
             });
             
@@ -363,63 +369,112 @@ export const InterviewDetails: React.FC = () => {
             </Typography>
             
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <Paper sx={{ p: 2 }}>
+              <Grid item xs={12} md={4}>
+                <Paper sx={{ p: 2, backgroundColor: 'rgba(99, 102, 241, 0.1)' }}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    Overall Score: {jdAnalysis.overall_score || jdAnalysis.skill_match_percentage}%
+                    Overall Match Score
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.main' }}>
+                    {jdAnalysis.overall_score || jdAnalysis.skill_match_percentage || 0}%
                   </Typography>
                   <LinearProgress 
                     variant="determinate" 
-                    value={jdAnalysis.overall_score || jdAnalysis.skill_match_percentage}
-                    sx={{ mb: 2, height: 8, borderRadius: 4 }}
-                    color={(jdAnalysis.overall_score || jdAnalysis.skill_match_percentage) >= 70 ? 'success' : 
-                           (jdAnalysis.overall_score || jdAnalysis.skill_match_percentage) >= 50 ? 'info' : 'warning'}
+                    value={jdAnalysis.overall_score || jdAnalysis.skill_match_percentage || 0}
+                    sx={{ mb: 2, height: 10, borderRadius: 4 }}
+                    color={(jdAnalysis.overall_score || jdAnalysis.skill_match_percentage || 0) >= 70 ? 'success' : 
+                           (jdAnalysis.overall_score || jdAnalysis.skill_match_percentage || 0) >= 50 ? 'info' : 'warning'}
                   />
                   
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    Skills Match: {jdAnalysis.skill_match_percentage}%
+                    <strong>Skills Match:</strong> {jdAnalysis.skill_match_percentage || jdAnalysis.skills_match_percentage || 0}%
                   </Typography>
                   {jdAnalysis.experience_match_percentage && (
                     <Typography variant="body2" sx={{ mb: 2 }}>
-                      Experience Match: {jdAnalysis.experience_match_percentage}%
+                      <strong>Experience Match:</strong> {jdAnalysis.experience_match_percentage}%
                     </Typography>
                   )}
                   
                   <Chip
                     label={jdAnalysis.recommendation}
                     color={getRecommendationColor(jdAnalysis.recommendation)}
-                    sx={{ mb: 2 }}
+                    sx={{ mb: 2, fontWeight: 'bold' }}
                   />
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Position: {jdAnalysis.job_title} at {jdAnalysis.company}
-                  </Typography>
                 </Paper>
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={4}>
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
                     Skills Analysis
                   </Typography>
-                  {jdAnalysis.found_skills.length > 0 && (
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <CheckCircle sx={{ fontSize: 16, color: 'success.main', mr: 0.5 }} />
-                      Found Skills ({jdAnalysis.found_skills.length}): {jdAnalysis.found_skills.join(', ')}
+                  <Typography variant="body2" sx={{ mb: 1, color: 'success.main' }}>
+                    <CheckCircle sx={{ fontSize: 16, mr: 0.5 }} />
+                    <strong>Found ({jdAnalysis.found_skills.length}/{jdAnalysis.total_required_skills || jdAnalysis.found_skills.length + jdAnalysis.missing_skills.length}):</strong>
+                  </Typography>
+                  {jdAnalysis.found_skills.length > 0 ? (
+                    <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {jdAnalysis.found_skills.map((skill, idx) => (
+                        <Chip key={idx} label={skill} size="small" color="success" sx={{ fontSize: '0.7rem' }} />
+                      ))}
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      No skills matched
                     </Typography>
                   )}
+                  
                   {jdAnalysis.missing_skills.length > 0 && (
-                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                      <Cancel sx={{ fontSize: 16, color: 'error.main', mr: 0.5 }} />
-                      Missing Skills ({jdAnalysis.missing_skills.length}): {jdAnalysis.missing_skills.join(', ')}
+                    <>
+                      <Typography variant="body2" sx={{ mb: 1, color: 'error.main' }}>
+                        <Cancel sx={{ fontSize: 16, mr: 0.5 }} />
+                        <strong>Missing ({jdAnalysis.missing_skills.length}):</strong>
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {jdAnalysis.missing_skills.map((skill, idx) => (
+                          <Chip key={idx} label={skill} size="small" color="error" sx={{ fontSize: '0.7rem' }} />
+                        ))}
+                      </Box>
+                    </>
+                  )}
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <Paper sx={{ p: 2, backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    🤖 OpenAI Verdict
+                  </Typography>
+                  {jdAnalysis.openai_verdict && jdAnalysis.openai_verdict !== 'N/A' ? (
+                    <>
+                      <Chip
+                        label={jdAnalysis.openai_verdict}
+                        sx={{ 
+                          mb: 2, 
+                          fontWeight: 'bold',
+                          backgroundColor: 
+                            jdAnalysis.openai_verdict === 'STRONG HIRE' ? 'rgba(16, 185, 129, 0.2)' :
+                            jdAnalysis.openai_verdict === 'RECOMMENDED' ? 'rgba(34, 197, 94, 0.2)' :
+                            jdAnalysis.openai_verdict === 'CONSIDER' ? 'rgba(245, 158, 11, 0.2)' :
+                            'rgba(239, 68, 68, 0.2)',
+                          color:
+                            jdAnalysis.openai_verdict === 'STRONG HIRE' ? '#10b981' :
+                            jdAnalysis.openai_verdict === 'RECOMMENDED' ? '#22c55e' :
+                            jdAnalysis.openai_verdict === 'CONSIDER' ? '#f59e0b' :
+                            '#ef4444'
+                        }}
+                      />
+                      {jdAnalysis.openai_verdict_reason && (
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                          {jdAnalysis.openai_verdict_reason}
+                        </Typography>
+                      )}
+                    </>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      OpenAI verdict not available
                     </Typography>
                   )}
-                  {jdAnalysis.candidate_metadata?.phone && (
-                    <Typography variant="body2" sx={{ color: 'info.main', mt: 1 }}>
-                      <Phone sx={{ fontSize: 16, mr: 0.5 }} />
-                      Contact: {jdAnalysis.candidate_metadata.phone}
-                    </Typography>
-                  )}
-                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 2 }}>
                     Analysis Date: {new Date(jdAnalysis.analysis_date).toLocaleString()}
                   </Typography>
                 </Paper>

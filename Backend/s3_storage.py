@@ -185,3 +185,175 @@ def list_recordings_for_call(call_sid: str) -> list:
         print(f"❌ Error listing recordings: {e}")
         return []
 
+def save_interview_to_s3(call_sid: str, interview_data: dict) -> Optional[str]:
+    """
+    Save interview data to S3
+    
+    Args:
+        call_sid: Twilio call SID
+        interview_data: Interview data dictionary
+        
+    Returns:
+        S3 key if successful, None otherwise
+    """
+    if not s3_client:
+        print("⚠️ S3 client not available. Skipping upload.")
+        return None
+    
+    try:
+        import json
+        s3_key = f"interviews/{call_sid}.json"
+        
+        # Convert to JSON string
+        json_data = json.dumps(interview_data, indent=2, default=str)
+        
+        # Upload to S3
+        s3_client.put_object(
+            Bucket=S3_BUCKET,
+            Key=s3_key,
+            Body=json_data.encode('utf-8'),
+            ContentType='application/json',
+            Metadata={
+                'call_sid': call_sid,
+                'status': interview_data.get('status', 'UNKNOWN'),
+                'candidate_name': interview_data.get('candidate_name', 'Unknown')
+            }
+        )
+        
+        print(f"✅ Interview saved to S3: {s3_key}")
+        return s3_key
+        
+    except Exception as e:
+        print(f"❌ Error saving interview to S3: {e}")
+        return None
+
+def load_interview_from_s3(call_sid: str) -> Optional[dict]:
+    """
+    Load interview data from S3
+    
+    Args:
+        call_sid: Twilio call SID
+        
+    Returns:
+        Interview data dictionary or None
+    """
+    if not s3_client:
+        return None
+    
+    try:
+        import json
+        s3_key = f"interviews/{call_sid}.json"
+        
+        # Try to get object from S3
+        response = s3_client.get_object(Bucket=S3_BUCKET, Key=s3_key)
+        data = json.loads(response['Body'].read().decode('utf-8'))
+        
+        print(f"✅ Interview loaded from S3: {s3_key}")
+        return data
+        
+    except s3_client.exceptions.NoSuchKey:
+        return None
+    except Exception as e:
+        print(f"❌ Error loading interview from S3: {e}")
+        return None
+
+def list_all_interviews_from_s3() -> list:
+    """
+    List all interviews from S3
+    
+    Returns:
+        List of interview data dictionaries
+    """
+    if not s3_client:
+        return []
+    
+    try:
+        import json
+        prefix = "interviews/"
+        interviews = []
+        
+        paginator = s3_client.get_paginator('list_objects_v2')
+        pages = paginator.paginate(Bucket=S3_BUCKET, Prefix=prefix)
+        
+        for page in pages:
+            if 'Contents' in page:
+                for obj in page['Contents']:
+                    key = obj['Key']
+                    # Only get interview files, not recordings or analysis
+                    if key.endswith('.json') and 'recordings/' not in key and 'JD_ANALYSIS' not in key:
+                        try:
+                            response = s3_client.get_object(Bucket=S3_BUCKET, Key=key)
+                            data = json.loads(response['Body'].read().decode('utf-8'))
+                            interviews.append(data)
+                        except Exception as e:
+                            print(f"Error loading {key}: {e}")
+                            continue
+        
+        return interviews
+    except Exception as e:
+        print(f"❌ Error listing interviews from S3: {e}")
+        return []
+
+def save_jd_analysis_to_s3(call_sid: str, analysis_data: dict) -> Optional[str]:
+    """
+    Save JD analysis to S3
+    
+    Args:
+        call_sid: Twilio call SID
+        analysis_data: Analysis data dictionary
+        
+    Returns:
+        S3 key if successful, None otherwise
+    """
+    if not s3_client:
+        print("⚠️ S3 client not available. Skipping upload.")
+        return None
+    
+    try:
+        import json
+        s3_key = f"interviews/{call_sid}_JD_ANALYSIS.json"
+        
+        json_data = json.dumps(analysis_data, indent=2, default=str)
+        
+        s3_client.put_object(
+            Bucket=S3_BUCKET,
+            Key=s3_key,
+            Body=json_data.encode('utf-8'),
+            ContentType='application/json'
+        )
+        
+        print(f"✅ JD Analysis saved to S3: {s3_key}")
+        return s3_key
+        
+    except Exception as e:
+        print(f"❌ Error saving JD analysis to S3: {e}")
+        return None
+
+def load_jd_analysis_from_s3(call_sid: str) -> Optional[dict]:
+    """
+    Load JD analysis from S3
+    
+    Args:
+        call_sid: Twilio call SID
+        
+    Returns:
+        Analysis data dictionary or None
+    """
+    if not s3_client:
+        return None
+    
+    try:
+        import json
+        s3_key = f"interviews/{call_sid}_JD_ANALYSIS.json"
+        
+        response = s3_client.get_object(Bucket=S3_BUCKET, Key=s3_key)
+        data = json.loads(response['Body'].read().decode('utf-8'))
+        
+        return data
+        
+    except s3_client.exceptions.NoSuchKey:
+        return None
+    except Exception as e:
+        print(f"❌ Error loading JD analysis from S3: {e}")
+        return None
+

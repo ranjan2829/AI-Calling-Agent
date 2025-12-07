@@ -95,9 +95,20 @@ def save_unique_match_report(report, call_sid, candidate_name):
                 except:
                     pass
         report["analysis_created"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Save locally
         with open(filename, 'w') as f:
             json.dump(report, f, indent=2)
-        print(f"Saved report: {filename}")
+        print(f"Saved report locally: {filename}")
+        
+        # Also save to S3
+        try:
+            from s3_storage import save_jd_analysis_to_s3, s3_client
+            if s3_client:
+                save_jd_analysis_to_s3(call_sid, report)
+        except Exception as e:
+            print(f"⚠️ Could not save to S3: {e}")
+        
         return filename
     except Exception as e:
         print(f"Error saving report: {e}")
@@ -150,6 +161,15 @@ def analyze_candidate_responses(responses, call_id="unknown"):
     experience_data = extract_experience_level(full_transcript)
     scores = calculate_match_score(matched_skills, len(jd_required_skills), experience_data, jd_experience)
     overall_score = scores["overall_score"]
+    
+    # Get OpenAI verdict
+    try:
+        from openai_verdict import get_openai_verdict
+        openai_verdict = get_openai_verdict(responses, jd_data, matched_skills, overall_score)
+    except Exception as e:
+        print(f"⚠️ OpenAI verdict error: {e}")
+        openai_verdict = {"verdict": "N/A", "reason": "OpenAI not available"}
+    
     if overall_score >= 80:
         recommendation = "EXCELLENT MATCH"
         priority = 5
@@ -174,11 +194,14 @@ def analyze_candidate_responses(responses, call_id="unknown"):
         "matched_skills": matched_skills,
         "missing_skills": missing_skills,
         "skills_match_percentage": scores["skills_match_percent"],
+        "skill_match_percentage": scores["skills_match_percent"],  # Alias for frontend
         "experience_match_percentage": scores["experience_match_percent"],
         "overall_score": overall_score,
         "comprehensive_score": overall_score,  
         "priority_score": priority,
         "recommendation": recommendation,
+        "openai_verdict": openai_verdict.get("verdict", "N/A"),
+        "openai_verdict_reason": openai_verdict.get("reason", ""),
         "analysis_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "skill_mentions": skill_mentions,
         "experience_data": experience_data,
@@ -190,28 +213,34 @@ def analyze_candidate_responses(responses, call_id="unknown"):
     }
 def get_phone_from_interview_data(call_sid):
     try:
+        # Try S3 first
+        try:
+            from s3_storage import load_interview_from_s3, s3_client
+            if s3_client:
+                # Try session first
+                session_data = load_interview_from_s3(f"session_{call_sid}")
+                if session_data:
+                    return session_data.get("phone_number") or session_data.get("candidate_phone")
+                # Try completed interview
+                interview_data = load_interview_from_s3(call_sid)
+                if interview_data:
+                    return interview_data.get("phone_number") or interview_data.get("candidate_phone")
+        except:
+            pass
+        
+        # Fallback to local
         session_file = f"interviews/session_{call_sid}.json"
         if os.path.exists(session_file):
             with open(session_file, 'r') as f:
                 session_data = json.load(f)
-                return session_data.get("phone_number")
-        pattern = f"interviews/{call_sid}_COMPLETED_*.json"
-        files = glob.glob(pattern)
-        if files:
-            with open(files[0], 'r') as f:
+                return session_data.get("phone_number") or session_data.get("candidate_phone")
+        
+        interview_file = f"interviews/{call_sid}.json"
+        if os.path.exists(interview_file):
+            with open(interview_file, 'r') as f:
                 interview_data = json.load(f)
-                return interview_data.get("phone_number")
-        pattern = f"interviews/interview_{call_sid}.json"
-        if os.path.exists(pattern):
-            with open(pattern, 'r') as f:
-                interview_data = json.load(f)
-                return interview_data.get("phone_number")
-        mapping_file = "call_phone_mapping.json"
-        if os.path.exists(mapping_file):
-            with open(mapping_file, 'r') as f:
-                mappings = json.load(f)
-                if call_sid in mappings:
-                    return mappings[call_sid].get("phone_number")
+                return interview_data.get("phone_number") or interview_data.get("candidate_phone")
+        
         return None
     except Exception as e:
         print(f"Error getting phone from interview data: {e}")
@@ -265,43 +294,56 @@ def calculate_match_score(matched_skills, total_required_skills, experience_data
     return {"skills_match_percent": round(skills_match_percent, 1), "experience_match_percent": round(experience_match, 1), "overall_score": round(overall_score, 1)}
 def analyze_all_available_interviews():
     try:
-        all_patterns = [
-            "interviews/*_COMPLETED_*.json",     
-            "interviews/interview_*.json",       
-            "interviews/session_*.json",          
-            "interviews/*_transcript_*.json",     
-            "interviews/call_*.json"          
-        ]
+        # Try to get interviews from S3 first
         all_interview_files = []
         processed_call_sids = set()
-        for pattern in all_patterns:
-            files = glob.glob(pattern)
-            for file_path in files:
-                filename = os.path.basename(file_path)
-                call_sid = None
-                if "_COMPLETED_" in filename:
-                    call_sid = filename.split("_COMPLETED_")[0]
-                elif "interview_" in filename:
-                    call_sid = filename.replace("interview_", "").replace(".json", "")
-                elif "session_" in filename:
-                    call_sid = filename.replace("session_", "").replace(".json", "")
-                elif "_transcript_" in filename:
-                    call_sid = filename.split("_transcript_")[0]
-                elif "call_" in filename:
-                    call_sid = filename.replace("call_", "").replace(".json", "")
-                
-                if call_sid and call_sid not in processed_call_sids:
-                    all_interview_files.append((file_path, call_sid))
-                    processed_call_sids.add(call_sid)
+        
+        try:
+            from s3_storage import list_all_interviews_from_s3, s3_client
+            if s3_client:
+                s3_interviews = list_all_interviews_from_s3()
+                for interview_data in s3_interviews:
+                    call_sid = interview_data.get('call_sid') or interview_data.get('interview_id', '')
+                    if call_sid and call_sid not in processed_call_sids and not call_sid.startswith('session_'):
+                        all_interview_files.append((None, call_sid, interview_data))
+                        processed_call_sids.add(call_sid)
+                if all_interview_files:
+                    print(f"✅ Found {len(all_interview_files)} interviews from S3")
+        except Exception as e:
+            print(f"⚠️ Error loading from S3: {e}")
+        
+        # Fallback to local files
+        if not all_interview_files:
+            all_patterns = [
+                "interviews/*.json"  # Get all JSON files
+            ]
+            for pattern in all_patterns:
+                files = glob.glob(pattern)
+                for file_path in files:
+                    filename = os.path.basename(file_path)
+                    # Skip session and analysis files
+                    if "session_" in filename or "JD_ANALYSIS" in filename or "archive" in file_path:
+                        continue
+                    
+                    call_sid = filename.replace(".json", "")
+                    if call_sid and call_sid not in processed_call_sids:
+                        all_interview_files.append((file_path, call_sid, None))
+                        processed_call_sids.add(call_sid)
+        
         if not all_interview_files:
             return {"error": "No interview files found"}
         print(f"Found {len(all_interview_files)} unique interview files to analyze")
         results = []
-        for file_path, call_sid in all_interview_files:
+        for file_path, call_sid, s3_data in all_interview_files:
             try:
-                interview_data = load_interview_data(file_path)
+                # Use S3 data if available, otherwise load from file
+                if s3_data:
+                    interview_data = s3_data
+                else:
+                    interview_data = load_interview_data(file_path)
+                
                 if not interview_data:
-                    print(f"Could not load data from {file_path}")
+                    print(f"Could not load data for {call_sid}")
                     continue
                 if not call_sid:
                     call_sid = interview_data.get("interview_id") or interview_data.get("call_sid") or interview_data.get("call_id") or "unknown"
@@ -324,17 +366,30 @@ def analyze_all_available_interviews():
                 if not responses:
                     print(f"Skipping {file_path}: No responses found")
                     continue
-                existing_file = f"interviews/{call_sid}_JD_ANALYSIS.json"
-                if os.path.exists(existing_file):
-                    try:
-                        with open(existing_file, 'r') as f:
-                            existing_report = json.load(f)
-                            results.append(existing_report)
-                            print(f"Loaded existing analysis for {call_sid}")
-                    except:
-                        pass
+                # Check if analysis exists in S3 or local
+                existing_report = None
+                try:
+                    from s3_storage import load_jd_analysis_from_s3, s3_client
+                    if s3_client:
+                        existing_report = load_jd_analysis_from_s3(call_sid)
+                except:
+                    pass
+                
+                if not existing_report:
+                    existing_file = f"interviews/{call_sid}_JD_ANALYSIS.json"
+                    if os.path.exists(existing_file):
+                        try:
+                            with open(existing_file, 'r') as f:
+                                existing_report = json.load(f)
+                        except:
+                            pass
+                
+                if existing_report:
+                    results.append(existing_report)
+                    print(f"Loaded existing analysis for {call_sid}")
                     continue
-                print(f"Creating new analysis for {call_sid} from {file_path}")
+                
+                print(f"Creating new analysis for {call_sid}")
                 candidate_name = extract_candidate_name(responses, call_sid)
                 analysis = analyze_candidate_responses(responses, call_sid)
                 if "error" in analysis:
@@ -351,7 +406,14 @@ def analyze_all_available_interviews():
                     },
                     "source_file": file_path
                 }
-                save_unique_match_report(report, call_sid, candidate_name)
+                # Save to S3 and local
+        save_unique_match_report(report, call_sid, candidate_name)
+        try:
+            from s3_storage import save_jd_analysis_to_s3, s3_client
+            if s3_client:
+                save_jd_analysis_to_s3(call_sid, report)
+        except Exception as e:
+            print(f"⚠️ Could not save to S3: {e}")
                 results.append(report)
             except Exception as e:
                 print(f"Error processing {file_path}: {e}")

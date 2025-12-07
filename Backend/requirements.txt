@@ -7,3 +7,4 @@ boto3==1.35.0
 requests==2.31.0
 PyPDF2==3.0.1
 pdfplumber==0.11.0
+openai==1.12.0

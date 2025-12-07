@@ -415,7 +415,12 @@ export const InterviewResults: React.FC = () => {
           recommendation = 'MODERATE FIT';
         }
 
-        // AI Verdict Analysis
+        // AI Verdict Analysis - Check for JD analysis first, then generate
+        let ai_verdict = 'PENDING';
+        let ai_verdict_reason = '';
+        
+        // Try to get from JD analysis if available (will be loaded separately)
+        // For now, generate based on scores
         const completionRateNum = parseInt(completion_rate.replace('%', '')) || 0;
         const aiVerdict = generateAIVerdict({
           overall_score,
@@ -426,6 +431,9 @@ export const InterviewResults: React.FC = () => {
           responses: safeInterview.responses,
           validation_results: safeInterview.validation_results
         });
+        
+        ai_verdict = aiVerdict.verdict;
+        ai_verdict_reason = aiVerdict.reason;
 
         return {
           ...safeInterview,
@@ -435,8 +443,9 @@ export const InterviewResults: React.FC = () => {
           recommendation,
           interview_duration,
           completion_rate,
-          ai_verdict: aiVerdict.verdict,
-          ai_verdict_reason: aiVerdict.reason
+          ai_verdict,
+          ai_verdict_reason,
+          openai_verdict: safeInterview.openai_verdict || ai_verdict  // Use JD analysis verdict if available
         };
       });
       
@@ -674,11 +683,11 @@ export const InterviewResults: React.FC = () => {
                           </TableCell>
                           <TableCell sx={{ color: '#f5f5f5', py: 1, fontSize: '0.75rem' }}>
                             <Box>
-                              <Typography variant="body2" sx={{ fontWeight: 'medium', fontSize: '0.8125rem' }}>
-                                {Math.round(interview.skills_percentage)}% Match
+                              <Typography variant="body2" sx={{ fontWeight: 'bold', fontSize: '0.875rem', color: '#6366f1' }}>
+                                {Math.round(interview.skills_percentage || 0)}% JD Match
                               </Typography>
                               <Typography variant="caption" sx={{ color: '#a3a3a3', fontSize: '0.7rem' }}>
-                                {interview.found_skills.length} skills found
+                                {interview.found_skills?.length || 0} skills matched
                               </Typography>
                             </Box>
                           </TableCell>

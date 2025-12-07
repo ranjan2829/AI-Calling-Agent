@@ -18,6 +18,13 @@ from config import (
     TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER,
     WEBHOOK_BASE_URL, INTERVIEW_QUESTIONS
 )
+
+# Check if S3 is available
+try:
+    from s3_storage import s3_client
+    USE_S3 = s3_client is not None
+except:
+    USE_S3 = False
 from storage import (
     ensure_directories, save_interview_session, load_interview_session,
     load_job_description, save_job_description, get_all_interviews, save_interview
@@ -421,11 +428,20 @@ async def get_all_interviews_detailed():
 async def get_interview_details(interview_id: str):
     """Get interview details - optimized for faster loading"""
     try:
-        # Try to load from simple file first (most common case)
-        interview_file = f"interviews/{interview_id}.json"
-        if os.path.exists(interview_file):
-            with open(interview_file, 'r') as f:
-                data = json.load(f)
+        # Try to load from S3 first, then local
+        data = None
+        if USE_S3:
+            from s3_storage import load_interview_from_s3
+            data = load_interview_from_s3(interview_id)
+        
+        # Fallback to local file
+        if not data:
+            interview_file = f"interviews/{interview_id}.json"
+            if os.path.exists(interview_file):
+                with open(interview_file, 'r') as f:
+                    data = json.load(f)
+        
+        if data:
             
             # Get S3 recording URLs if available
             recordings = data.get('recordings', [])
@@ -537,9 +553,16 @@ async def run_jd_analysis_endpoint():
 
 @app.get("/jd-report/{call_id}")
 async def get_jd_report(call_id: str):
-    """Get JD analysis report"""
+    """Get JD analysis report - from S3 or local"""
     try:
-        # Check in interviews folder only (not archive)
+        # Try S3 first
+        if USE_S3:
+            from s3_storage import load_jd_analysis_from_s3
+            s3_data = load_jd_analysis_from_s3(call_id)
+            if s3_data:
+                return s3_data
+        
+        # Fallback to local
         pattern = f"interviews/*{call_id}*JD_*ANALYSIS*.json"
         files = glob.glob(pattern)
         if files:
