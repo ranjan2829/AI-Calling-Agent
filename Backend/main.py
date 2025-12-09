@@ -208,12 +208,24 @@ async def start_bulk_calling(request: Request):
 async def voice_webhook(request: Request):
     """Handle incoming Twilio calls"""
     try:
+        print(f"[VOICE] ========== INCOMING CALL ==========")
+        print(f"[VOICE] WEBHOOK_BASE_URL: {WEBHOOK_BASE_URL}")
+        
         form_data = await request.form()
         call_sid = form_data.get('CallSid')
         from_number = form_data.get('From')
         to_number = form_data.get('To')
+        call_status = form_data.get('CallStatus')
         
-        print(f"[VOICE] Call {call_sid} from {from_number}")
+        print(f"[VOICE] Call SID: {call_sid}")
+        print(f"[VOICE] From: {from_number}")
+        print(f"[VOICE] To: {to_number}")
+        print(f"[VOICE] Call Status: {call_status}")
+        print(f"[VOICE] All form data keys: {list(form_data.keys())}")
+        
+        if not WEBHOOK_BASE_URL:
+            print(f"[VOICE ERROR] WEBHOOK_BASE_URL is None or empty!")
+            raise ValueError("WEBHOOK_BASE_URL not configured")
         
         # Load or create interview session
         interview_data = load_interview_session(call_sid)
@@ -235,7 +247,22 @@ async def voice_webhook(request: Request):
             save_interview_session(call_sid, interview_data)
         
         # Start interview
+        print(f"[VOICE] Creating TwiML response...")
+        
+        # Validate INTERVIEW_QUESTIONS
+        if not INTERVIEW_QUESTIONS or len(INTERVIEW_QUESTIONS) == 0:
+            print(f"[VOICE ERROR] INTERVIEW_QUESTIONS is empty!")
+            raise ValueError("No interview questions configured")
+        
         resp = VoiceResponse()
+        
+        speech_action_url = f'{WEBHOOK_BASE_URL}/voice/speech/{call_sid}'
+        no_response_url = f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}'
+        
+        print(f"[VOICE] Speech action URL: {speech_action_url}")
+        print(f"[VOICE] No response URL: {no_response_url}")
+        print(f"[VOICE] First question: {INTERVIEW_QUESTIONS[0][:100]}...")
+        
         resp.say("Hello! This is an AI assistant. Thank you for your interest in our position.", 
                 voice='Polly.Aditi', rate='medium')
         resp.pause(length=0.5)
@@ -243,7 +270,7 @@ async def voice_webhook(request: Request):
         
         resp.gather(
             input='speech',
-            action=f'{WEBHOOK_BASE_URL}/voice/speech/{call_sid}',
+            action=speech_action_url,
             method='POST',
             speechTimeout='auto',
             timeout='6',
@@ -253,11 +280,19 @@ async def voice_webhook(request: Request):
             speechModel='phone_calls'
         )
         
-        resp.redirect(f'{WEBHOOK_BASE_URL}/voice/no-response/{call_sid}')
-        return Response(content=str(resp), media_type="application/xml")
+        resp.redirect(no_response_url)
+        
+        twiml_response = str(resp)
+        print(f"[VOICE] TwiML Response:\n{twiml_response}")
+        print(f"[VOICE] ========== RESPONSE SENT ==========")
+        
+        return Response(content=twiml_response, media_type="application/xml")
         
     except Exception as error:
+        import traceback
+        error_trace = traceback.format_exc()
         print(f"[VOICE ERROR] {error}")
+        print(f"[VOICE ERROR TRACEBACK]\n{error_trace}")
         resp = VoiceResponse()
         resp.say("Sorry, there was a technical error. Please try again later.", voice='Polly.Aditi')
         resp.hangup()
@@ -326,7 +361,10 @@ async def handle_speech_response(call_sid: str, request: Request):
         return Response(content=ask_next_question(call_sid, next_question_index), media_type="application/xml")
         
     except Exception as error:
+        import traceback
+        error_trace = traceback.format_exc()
         print(f"[SPEECH ERROR] {error}")
+        print(f"[SPEECH ERROR TRACEBACK]\n{error_trace}")
         return Response(content=handle_error("Sorry, there was an error processing your response."), media_type="application/xml")
 
 @app.post("/voice/no-response/{call_sid}")
@@ -334,7 +372,11 @@ async def handle_no_response_endpoint(call_sid: str):
     """Handle no response"""
     try:
         return Response(content=handle_no_response(call_sid), media_type="application/xml")
-    except Exception:
+    except Exception as error:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"[NO RESPONSE ERROR] {error}")
+        print(f"[NO RESPONSE ERROR TRACEBACK]\n{error_trace}")
         return Response(content=handle_error("Technical difficulty occurred."), media_type="application/xml")
 
 @app.post("/recording-status")

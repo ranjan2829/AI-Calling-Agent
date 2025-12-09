@@ -1,0 +1,14 @@
+{
+  "interview_id": "test123",
+  "call_sid": "test123",
+  "candidate_phone": "+1234567890",
+  "phone_number": "+1234567890",
+  "twilio_number": "+1234567890",
+  "candidate_name": "Candidate_test123",
+  "start_time": "2025-12-09T23:15:04.095020",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "silence_prompts": 0,
+  "last_activity": "2025-12-09T23:15:04.095047"
+}

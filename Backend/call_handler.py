@@ -39,7 +39,10 @@ def ask_next_question(call_sid: str, question_index: int) -> str:
         return str(resp)
         
     except Exception as e:
-        print(f"Error asking question {question_index}: {e}")
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"[ASK QUESTION ERROR] Question {question_index}: {e}")
+        print(f"[ASK QUESTION ERROR TRACEBACK]\n{error_trace}")
         return handle_error("Sorry, there was an error with the question.")
 
 def handle_no_response(call_sid: str) -> str:
@@ -87,6 +90,10 @@ def handle_no_response(call_sid: str) -> str:
         return str(resp)
         
     except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"[NO RESPONSE HANDLER ERROR] {e}")
+        print(f"[NO RESPONSE HANDLER ERROR TRACEBACK]\n{error_trace}")
         return handle_error("Technical difficulty occurred.")
 
 def complete_interview(call_sid: str) -> str:
@@ -131,7 +138,10 @@ def complete_interview(call_sid: str) -> str:
         return str(resp)
         
     except Exception as e:
-        print(f"Error completing interview: {e}")
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"[COMPLETE INTERVIEW ERROR] {e}")
+        print(f"[COMPLETE INTERVIEW ERROR TRACEBACK]\n{error_trace}")
         resp = VoiceResponse()
         resp.say("Thank you for your time! We'll be in touch soon. Have a great day!", voice='Polly.Aditi')
         resp.hangup()

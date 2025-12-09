@@ -1,0 +1,14 @@
+{
+  "interview_id": "test",
+  "call_sid": "test",
+  "candidate_phone": null,
+  "phone_number": null,
+  "twilio_number": null,
+  "candidate_name": "Candidate_test",
+  "start_time": "2025-12-09T23:17:46.507526",
+  "status": "IN_PROGRESS",
+  "current_question": 0,
+  "responses": [],
+  "silence_prompts": 0,
+  "last_activity": "2025-12-09T23:17:46.507554"
+}

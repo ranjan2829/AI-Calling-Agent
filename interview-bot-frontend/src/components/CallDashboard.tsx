@@ -113,10 +113,10 @@ const initiateCall = async (phoneNumber: string, candidateName?: string) => {
   } catch (error) {
     console.error('Error initiating call:', error);
     // Re-throw as Error if it's not already an Error instance
-    if (error instanceof Error) {
-      throw error;
+    if (error && typeof error === 'object' && 'message' in error) {
+      throw error as Error;
     }
-    throw new Error(String(error));
+    throw new Error(String(error || 'Unknown error occurred'));
   }
 };
 

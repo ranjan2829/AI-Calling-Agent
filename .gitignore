@@ -265,3 +265,9 @@ build/Release
 .yarn/install-state.gz
 .pnp.*Backend/.env
 __pycache__/
+
+# Environment files and backups
+Backend/.env.bak
+Backend/.env
+*.env.bak
+*.bak
