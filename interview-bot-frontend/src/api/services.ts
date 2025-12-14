@@ -1,6 +1,11 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000';
+// Use environment variable or default to relative path for production
+// In development: http://localhost:8000
+// In production (EC2 with nginx): /api (proxied to backend)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (import.meta.env.PROD ? '/api' : 'http://localhost:8000');
+
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
