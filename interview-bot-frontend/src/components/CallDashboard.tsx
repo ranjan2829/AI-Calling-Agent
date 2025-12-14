@@ -39,7 +39,7 @@ import {
   PhoneInTalk,
   QuestionAnswer
 } from '@mui/icons-material';
-import { getJobDescription, getAllInterviews, callsApi } from '../api/services';
+import { getJobDescription, getAllInterviews, callsApi, API_BASE_URL } from '../api/services';
 import { toast } from 'react-toastify';
 
 interface CallStats {
@@ -86,7 +86,7 @@ interface BulkCallSession {
 
 const initiateCall = async (phoneNumber: string, candidateName?: string) => {
   try {
-    const response = await fetch('http://localhost:8000/make-call', {
+    const response = await fetch(`${API_BASE_URL}/make-call`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -331,7 +331,7 @@ export const CallDashboard: React.FC = () => {
     try {
       setTwilioBalance(prev => ({ ...prev, loading: true }));
       
-      const response = await fetch('http://localhost:8000/twilio-balance', {
+      const response = await fetch(`${API_BASE_URL}/twilio-balance`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -434,7 +434,7 @@ export const CallDashboard: React.FC = () => {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch('http://localhost:8000/upload-csv', {
+      const response = await fetch(`${API_BASE_URL}/upload-csv`, {
         method: 'POST',
         body: formData,
       });
@@ -471,7 +471,7 @@ export const CallDashboard: React.FC = () => {
     setIsBulkCalling(true);
     
     try {
-      const response = await fetch('http://localhost:8000/bulk-call', {
+      const response = await fetch(`${API_BASE_URL}/bulk-call`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -507,7 +507,7 @@ export const CallDashboard: React.FC = () => {
   const pollBulkCallStatus = async (bulkCallId: string) => {
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(`http://localhost:8000/bulk-call-status/${bulkCallId}`);
+        const response = await fetch(`${API_BASE_URL}/bulk-call-status/${bulkCallId}`);
         
         if (!response.ok) {
           console.warn(`Bulk call status endpoint returned ${response.status} for ${bulkCallId}`);
@@ -544,7 +544,7 @@ export const CallDashboard: React.FC = () => {
   const stopBulkCalling = async () => {
     if (!bulkCallSession) return;
     try {
-      const response = await fetch(`http://localhost:8000/stop-bulk-call/${bulkCallSession.bulk_call_id}`, {
+      const response = await fetch(`${API_BASE_URL}/stop-bulk-call/${bulkCallSession.bulk_call_id}`, {
         method: 'POST',
       });
       const result = await response.json();

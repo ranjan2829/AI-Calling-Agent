@@ -227,6 +227,11 @@ async def voice_webhook(request: Request):
             print(f"[VOICE ERROR] WEBHOOK_BASE_URL is None or empty!")
             raise ValueError("WEBHOOK_BASE_URL not configured")
         
+        # Validate required call data
+        if not call_sid:
+            print(f"[VOICE ERROR] CallSid is missing from request!")
+            raise ValueError("CallSid is required")
+        
         # Load or create interview session
         interview_data = load_interview_session(call_sid)
         if not interview_data:
@@ -236,7 +241,7 @@ async def voice_webhook(request: Request):
                 "candidate_phone": from_number,
                 "phone_number": from_number,
                 "twilio_number": to_number,
-                "candidate_name": f"Candidate_{call_sid[-8:]}",
+                "candidate_name": f"Candidate_{call_sid[-8:]}" if call_sid else "Unknown",
                 "start_time": datetime.now().isoformat(),
                 "status": "IN_PROGRESS",
                 "current_question": 0,
