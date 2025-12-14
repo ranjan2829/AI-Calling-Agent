@@ -34,7 +34,7 @@ import {
   People,
   PlayArrow,
   Stop,
-  Error,
+  Error as ErrorIcon,
   CloudUpload,
   PhoneInTalk,
   QuestionAnswer
@@ -565,7 +565,7 @@ export const CallDashboard: React.FC = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'SUCCESS': return <CheckCircle />;
-      case 'FAILED': return <Error />;
+      case 'FAILED': return <ErrorIcon />;
       default: return <CircularProgress size={16} />;
     }
   };
@@ -687,7 +687,7 @@ export const CallDashboard: React.FC = () => {
           <Card sx={{ height: '100px' }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Error sx={{ color: 'error.main', fontSize: 24, mr: 1 }} />
+                <ErrorIcon sx={{ color: 'error.main', fontSize: 24, mr: 1 }} />
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'error.main', fontSize: '1.25rem' }}>
                     {callStats.terminated || 0}
