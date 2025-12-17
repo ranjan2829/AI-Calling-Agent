@@ -49,6 +49,23 @@ ensure_directories()
 
 # ==================== CALLING ====================
 
+@app.get("/twilio-balance")
+async def get_twilio_balance():
+    """Get Twilio account balance"""
+    try:
+        if not client:
+            return {"success": False, "error": "Twilio client not initialized"}
+        
+        balance = client.balance.fetch()
+        return {
+            "success": True,
+            "balance": str(balance.balance),
+            "currency": balance.currency
+        }
+    except Exception as error:
+        print(f"[BALANCE ERROR] {error}")
+        return {"success": False, "error": str(error)}
+
 @app.post("/make-call")
 async def make_single_call(request: Request):
     """Make a single interview call"""
@@ -278,7 +295,7 @@ async def voice_webhook(request: Request):
             action=speech_action_url,
             method='POST',
             speechTimeout='auto',
-            timeout='6',
+            timeout='12',
             language='en-IN',
             enhanced=True,
             profanityFilter=False,
@@ -425,24 +442,51 @@ async def recording_status_callback(request: Request):
 
 @app.get("/interviews-detailed")
 async def get_all_interviews_detailed():
-    """Get all interviews"""
+    """Get all interviews - from S3 only, filtered for completed only, no duplicates"""
     try:
+        if not USE_S3:
+            return {"error": "S3 storage is required", "interviews": []}
+        
         interviews = get_all_interviews()
         
-        # Include active sessions
-        session_files = glob.glob("interviews/session_*.json")
-        for session_file in session_files:
-            try:
-                call_sid = os.path.basename(session_file).replace("session_", "").replace(".json", "")
-                session_data = load_interview_session(call_sid)
-                if session_data:
-                    interviews.append(session_data)
-            except Exception:
-                    continue
+        # Process and deduplicate interviews
+        # Use a dict to track by call_sid, preferring COMPLETED over IN_PROGRESS
+        interview_dict = {}
         
-        # Process interviews
-        processed = []
         for interview in interviews:
+            call_sid = interview.get("call_sid") or interview.get("interview_id", "unknown")
+            if call_sid == "unknown":
+                continue
+            
+            status = interview.get("status", "COMPLETED")
+            
+            # Only include COMPLETED interviews
+            if status != "COMPLETED":
+                continue
+            
+            # Check if we have enough responses (at least 3 questions answered)
+            responses = interview.get("responses", [])
+            if len(responses) < 3:
+                continue
+            
+            # If we already have this call_sid, prefer the one with more responses or later end_time
+            if call_sid in interview_dict:
+                existing = interview_dict[call_sid]
+                existing_responses = existing.get("responses", [])
+                existing_end = existing.get("end_time", "")
+                current_end = interview.get("end_time", "")
+                
+                # Prefer the one with more responses, or later end_time if equal
+                if len(responses) > len(existing_responses):
+                    interview_dict[call_sid] = interview
+                elif len(responses) == len(existing_responses) and current_end > existing_end:
+                    interview_dict[call_sid] = interview
+            else:
+                interview_dict[call_sid] = interview
+        
+        # Convert to list and process
+        processed = []
+        for interview in interview_dict.values():
             call_sid = interview.get("call_sid") or interview.get("interview_id", "unknown")
             processed.append({
                 "call_sid": call_sid,
@@ -458,13 +502,16 @@ async def get_all_interviews_detailed():
                 "total_questions": len(INTERVIEW_QUESTIONS)
             })
         
+        # Sort by start_time descending (most recent first)
         processed.sort(key=lambda x: x.get("start_time", ""), reverse=True)
-        completed_count = len([i for i in processed if i.get("status") == "COMPLETED"])
+        
+        # All interviews are COMPLETED at this point
+        completed_count = len(processed)
         
         return {
             "success": True,
             "interviews": processed,
-            "total_count": len(processed),
+            "total_count": completed_count,
             "completed_count": completed_count
         }
     except Exception as error:
@@ -473,23 +520,21 @@ async def get_all_interviews_detailed():
 
 @app.get("/interview-details/{interview_id}")
 async def get_interview_details(interview_id: str):
-    """Get interview details - optimized for faster loading"""
+    """Get interview details - from S3 only"""
     try:
-        # Try to load from S3 first, then local
-        data = None
-        if USE_S3:
-            from s3_storage import load_interview_from_s3
-            data = load_interview_from_s3(interview_id)
+        if not USE_S3:
+            return {"error": "S3 storage is required"}
         
-        # Fallback to local file
+        from s3_storage import load_interview_from_s3
+        
+        # Try to load completed interview from S3
+        data = load_interview_from_s3(interview_id)
+        
+        # If not found, try session file
         if not data:
-            interview_file = f"interviews/{interview_id}.json"
-            if os.path.exists(interview_file):
-                with open(interview_file, 'r') as f:
-                    data = json.load(f)
+            data = load_interview_from_s3(f"session_{interview_id}")
         
         if data:
-            
             # Get S3 recording URLs if available
             recordings = data.get('recordings', [])
             if not recordings and data.get('call_sid'):
@@ -513,23 +558,7 @@ async def get_interview_details(interview_id: str):
                 "recordings": recordings
             }
         
-        # Check session file (for in-progress calls)
-        session_data = load_interview_session(interview_id)
-        if session_data:
-            return {
-                "interview_id": interview_id,
-                "call_sid": interview_id,
-                "candidate_name": session_data.get('candidate_name', f"Candidate_{interview_id[-8:]}"),
-                "candidate_phone": session_data.get('candidate_phone', ""),
-                "status": session_data.get('status', 'IN_PROGRESS'),
-                "start_time": session_data.get('start_time', ''),
-                "responses": session_data.get('responses', []),
-                "questions_answered": len(session_data.get('responses', [])),
-                "total_questions": len(INTERVIEW_QUESTIONS),
-                "recordings": session_data.get('recordings', [])
-            }
-        
-        return {"error": "Interview not found"}
+        return {"error": "Interview not found in S3"}
     except Exception as error:
         print(f"Error getting interview details: {error}")
         return {"error": str(error)}
@@ -600,23 +629,17 @@ async def run_jd_analysis_endpoint():
 
 @app.get("/jd-report/{call_id}")
 async def get_jd_report(call_id: str):
-    """Get JD analysis report - from S3 or local"""
+    """Get JD analysis report - from S3 only"""
     try:
-        # Try S3 first
-        if USE_S3:
-            from s3_storage import load_jd_analysis_from_s3
-            s3_data = load_jd_analysis_from_s3(call_id)
-            if s3_data:
-                return s3_data
+        if not USE_S3:
+            return {"error": "S3 storage is required"}
         
-        # Fallback to local
-        pattern = f"interviews/*{call_id}*JD_*ANALYSIS*.json"
-        files = glob.glob(pattern)
-        if files:
-            latest_file = max(files, key=os.path.getmtime)
-            with open(latest_file, 'r') as f:
-                return json.load(f)
-        return {"error": "JD report not found"}
+        from s3_storage import load_jd_analysis_from_s3
+        s3_data = load_jd_analysis_from_s3(call_id)
+        if s3_data:
+            return s3_data
+        
+        return {"error": "JD report not found in S3"}
     except Exception as error:
         return {"error": str(error)}
 

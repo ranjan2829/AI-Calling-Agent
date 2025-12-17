@@ -62,13 +62,15 @@ const Dashboard = () => {
 
       if (data.success) {
         const interviews = data.interviews || [];
-        const completed = interviews.filter((i: any) => i.status === 'COMPLETED');
+        // Use backend counts for consistency (all interviews are COMPLETED now)
+        const totalCount = data.total_count || interviews.length;
+        const completedCount = data.completed_count || interviews.length;
         
         setStats({
-          totalInterviews: interviews.length,
-          completedInterviews: completed.length,
-          pendingInterviews: interviews.length - completed.length,
-          successRate: interviews.length > 0 ? Math.round((completed.length / interviews.length) * 100) : 0
+          totalInterviews: totalCount,
+          completedInterviews: completedCount,
+          pendingInterviews: totalCount - completedCount,
+          successRate: totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0
         });
         
         setRecentInterviews(interviews.slice(0, 5));

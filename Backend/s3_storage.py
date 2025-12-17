@@ -83,12 +83,13 @@ def upload_recording_to_s3(call_sid: str, recording_sid: str) -> Optional[Dict[s
         s3_key = f"recordings/{call_sid}/{recording_sid}{file_ext}"
         
         # Upload to S3
+        content_type = getattr(recording, 'content_type', None) or 'audio/wav'
         s3_client.upload_fileobj(
             response.raw,
             S3_BUCKET,
             s3_key,
             ExtraArgs={
-                'ContentType': recording.content_type or 'audio/wav',
+                'ContentType': content_type,
                 'Metadata': {
                     'call_sid': call_sid,
                     'recording_sid': recording_sid,
@@ -108,8 +109,8 @@ def upload_recording_to_s3(call_sid: str, recording_sid: str) -> Optional[Dict[s
             's3_key': s3_key,
             'recording_sid': recording_sid,
             'duration': recording.duration,
-            'file_size': recording.size,
-            'content_type': recording.content_type
+            'file_size': getattr(recording, 'size', None),
+            'content_type': content_type
         }
         
     except Exception as e:
@@ -229,11 +230,11 @@ def save_interview_to_s3(call_sid: str, interview_data: dict) -> Optional[str]:
 
 def load_interview_from_s3(call_sid: str) -> Optional[dict]:
     """
-    Load interview data from S3
+    Load interview data from S3 (supports both regular and session files)
     
     Args:
-        call_sid: Twilio call SID
-        
+        call_sid: Twilio call SID (can be prefixed with "session_" or not)
+    
     Returns:
         Interview data dictionary or None
     """
@@ -242,24 +243,35 @@ def load_interview_from_s3(call_sid: str) -> Optional[dict]:
     
     try:
         import json
+        
+        # Try regular interview file first
         s3_key = f"interviews/{call_sid}.json"
+        try:
+            response = s3_client.get_object(Bucket=S3_BUCKET, Key=s3_key)
+            data = json.loads(response['Body'].read().decode('utf-8'))
+            print(f"✅ Interview loaded from S3: {s3_key}")
+            return data
+        except s3_client.exceptions.NoSuchKey:
+            # Try session file if regular file not found
+            if not call_sid.startswith('session_'):
+                session_key = f"interviews/session_{call_sid}.json"
+                try:
+                    response = s3_client.get_object(Bucket=S3_BUCKET, Key=session_key)
+                    data = json.loads(response['Body'].read().decode('utf-8'))
+                    print(f"✅ Session loaded from S3: {session_key}")
+                    return data
+                except s3_client.exceptions.NoSuchKey:
+                    pass
         
-        # Try to get object from S3
-        response = s3_client.get_object(Bucket=S3_BUCKET, Key=s3_key)
-        data = json.loads(response['Body'].read().decode('utf-8'))
-        
-        print(f"✅ Interview loaded from S3: {s3_key}")
-        return data
-        
-    except s3_client.exceptions.NoSuchKey:
         return None
+        
     except Exception as e:
         print(f"❌ Error loading interview from S3: {e}")
         return None
 
 def list_all_interviews_from_s3() -> list:
     """
-    List all interviews from S3
+    List all interviews from S3 (includes both completed and session files)
     
     Returns:
         List of interview data dictionaries
@@ -279,11 +291,20 @@ def list_all_interviews_from_s3() -> list:
             if 'Contents' in page:
                 for obj in page['Contents']:
                     key = obj['Key']
-                    # Only get interview files, not recordings or analysis
+                    # Get interview files (including sessions), but not recordings or analysis
                     if key.endswith('.json') and 'recordings/' not in key and 'JD_ANALYSIS' not in key:
                         try:
                             response = s3_client.get_object(Bucket=S3_BUCKET, Key=key)
                             data = json.loads(response['Body'].read().decode('utf-8'))
+                            # Extract call_sid from key if not in data
+                            if 'call_sid' not in data and 'interview_id' not in data:
+                                # Extract from key: interviews/session_XXX.json or interviews/XXX.json
+                                if 'session_' in key:
+                                    call_sid = key.replace('interviews/session_', '').replace('.json', '')
+                                else:
+                                    call_sid = key.replace('interviews/', '').replace('.json', '')
+                                data['call_sid'] = call_sid
+                                data['interview_id'] = call_sid
                             interviews.append(data)
                         except Exception as e:
                             print(f"Error loading {key}: {e}")
