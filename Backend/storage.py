@@ -1,4 +1,4 @@
-"""File storage and data persistence - S3 and local fallback"""
+"""File storage and data persistence - S3 only"""
 import os
 import json
 from datetime import datetime
@@ -11,53 +11,50 @@ try:
         save_jd_analysis_to_s3, load_jd_analysis_from_s3, s3_client
     )
     USE_S3 = s3_client is not None
-except:
+    if not USE_S3:
+        raise ValueError("S3 client not initialized")
+except Exception as e:
     USE_S3 = False
-    print("⚠️ S3 storage not available, using local storage")
+    print(f"❌ S3 storage not available: {e}")
+    raise RuntimeError("S3 storage is required. Please configure AWS credentials.")
 
 def ensure_directories():
-    """Create necessary directories (for local fallback)"""
+    """Create necessary directories (for compatibility)"""
     folders = ["interviews", "archive/old_results"]
     for folder in folders:
         os.makedirs(folder, exist_ok=True)
 
 def save_interview_session(call_sid: str, data: dict):
-    """Save interview session (in-progress) - S3 or local"""
+    """Save interview session (in-progress) - S3 only"""
+    if not USE_S3:
+        raise RuntimeError("S3 storage is required")
+    
     try:
-        # Try S3 first
-        if USE_S3:
-            session_data = data.copy()
-            session_data['is_session'] = True
-            save_interview_to_s3(f"session_{call_sid}", session_data)
-        
-        # Also save locally as backup
-        filename = f"interviews/session_{call_sid}.json"
-        with open(filename, 'w') as f:
-            json.dump(data, f, indent=2)
+        session_data = data.copy()
+        session_data['is_session'] = True
+        save_interview_to_s3(f"session_{call_sid}", session_data)
+        print(f"✅ Session saved to S3: session_{call_sid}")
     except Exception as e:
-        print(f"Error saving session {call_sid}: {e}")
+        print(f"❌ Error saving session {call_sid}: {e}")
+        raise
 
 def load_interview_session(call_sid: str) -> Optional[dict]:
-    """Load interview session - S3 or local"""
-    try:
-        # Try S3 first
-        if USE_S3:
-            data = load_interview_from_s3(f"session_{call_sid}")
-            if data:
-                return data
-        
-        # Fallback to local
-        filename = f"interviews/session_{call_sid}.json"
-        if os.path.exists(filename):
-            with open(filename, 'r') as f:
-                return json.load(f)
+    """Load interview session - S3 only"""
+    if not USE_S3:
         return None
+    
+    try:
+        data = load_interview_from_s3(f"session_{call_sid}")
+        return data
     except Exception as e:
-        print(f"Error loading session {call_sid}: {e}")
+        print(f"❌ Error loading session {call_sid}: {e}")
         return None
 
 def save_interview(call_sid: str, interview_data: dict):
-    """Save completed interview - S3 and local"""
+    """Save completed interview - S3 only"""
+    if not USE_S3:
+        raise RuntimeError("S3 storage is required")
+    
     try:
         interview_data.update({
             "status": interview_data.get("status", "COMPLETED"),
@@ -66,26 +63,15 @@ def save_interview(call_sid: str, interview_data: dict):
         })
         
         # Save to S3
-        if USE_S3:
-            s3_key = save_interview_to_s3(call_sid, interview_data)
-            if s3_key:
-                print(f"✅ Interview saved to S3: {s3_key}")
-        
-        # Also save locally as backup
-        filename = f"interviews/{call_sid}.json"
-        with open(filename, 'w') as f:
-            json.dump(interview_data, f, indent=2)
-        
-        # Remove session file if exists
-        session_file = f"interviews/session_{call_sid}.json"
-        if os.path.exists(session_file):
-            os.remove(session_file)
-        
-        print(f"Interview saved: {filename}")
-        return filename
+        s3_key = save_interview_to_s3(call_sid, interview_data)
+        if s3_key:
+            print(f"✅ Interview saved to S3: {s3_key}")
+            return s3_key
+        else:
+            raise RuntimeError("Failed to save interview to S3")
     except Exception as e:
-        print(f"Error saving interview: {e}")
-        return None
+        print(f"❌ Error saving interview: {e}")
+        raise
 
 def load_job_description() -> dict:
     """Load job description"""
@@ -121,44 +107,28 @@ def save_job_description(jd_data: dict):
         print(f"Error saving JD: {e}")
 
 def get_all_interviews() -> list:
-    """Get all interview files - from S3 or local"""
+    """Get all interview files - from S3 only"""
+    if not USE_S3:
+        print("❌ S3 storage is required")
+        return []
+    
     interviews = []
-    
-    # Try S3 first
-    if USE_S3:
-        try:
-            s3_interviews = list_all_interviews_from_s3()
-            # Filter out session files and analysis files
-            for interview in s3_interviews:
-                call_sid = interview.get('call_sid') or interview.get('interview_id', '')
-                if call_sid and not call_sid.startswith('session_') and 'JD_ANALYSIS' not in str(interview):
-                    interviews.append(interview)
-            if interviews:
-                print(f"✅ Loaded {len(interviews)} interviews from S3")
-                return interviews
-        except Exception as e:
-            print(f"⚠️ Error loading from S3, falling back to local: {e}")
-    
-    # Fallback to local
-    interview_folder = "interviews"
-    if not os.path.exists(interview_folder):
-        return interviews
-    
-    import glob
-    json_files = glob.glob(f"{interview_folder}/*.json")
-    
-    for file_path in json_files:
-        filename = os.path.basename(file_path)
-        # Skip session files and analysis files
-        if "session_" in filename or "JD_ANALYSIS" in filename or "archive" in file_path:
-            continue
+    try:
+        s3_interviews = list_all_interviews_from_s3()
+        # Filter out session files and analysis files
+        for interview in s3_interviews:
+            call_sid = interview.get('call_sid') or interview.get('interview_id', '')
+            # Handle session files - load them but mark as sessions
+            if call_sid and call_sid.startswith('session_'):
+                # Extract actual call_sid from session key
+                actual_call_sid = call_sid.replace('session_', '')
+                interview['call_sid'] = actual_call_sid
+                interview['interview_id'] = actual_call_sid
+            if call_sid and 'JD_ANALYSIS' not in str(interview):
+                interviews.append(interview)
         
-        try:
-            with open(file_path, 'r') as f:
-                data = json.load(f)
-                interviews.append(data)
-        except Exception as e:
-            print(f"Error reading {file_path}: {e}")
-            continue
-    
-    return interviews
+        print(f"✅ Loaded {len(interviews)} interviews from S3")
+        return interviews
+    except Exception as e:
+        print(f"❌ Error loading from S3: {e}")
+        return []
